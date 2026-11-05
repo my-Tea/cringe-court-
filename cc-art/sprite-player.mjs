@@ -210,33 +210,33 @@ export function hairFront(style, col) {
       const x = 128 + Math.cos(a) * 50, y = 84 + Math.sin(a) * 34;
       s.ellipse(x, y, 17, 20, i % 2 ? col : dk);
     }
-    fringe(5, 92, 16, 12);
+    fringe(5, 80, 13, 12);
   } else if (style === 'messy') {
     s.ellipse(128, 78, 58, 36, col);
-    fringe(7, 92, 18, 11);
+    fringe(7, 82, 14, 11);
     s.ellipse(150, 46, 11, 16, dk);        // cowlick
     s.ellipse(158, 34, 7, 11, dk);
     s.ellipse(96, 52, 12, 14, dk);
   } else if (style === 'afro') {
     s.ellipse(128, 72, 64, 44, col);
     s.ellipse(128, 78, 60, 38, dk);
-    fringe(4, 96, 14, 13);
+    fringe(4, 84, 12, 13);
   } else if (style === 'buns') {
     s.ellipse(128, 80, 56, 34, col);
-    fringe(5, 94, 16, 12);
+    fringe(5, 82, 13, 12);
     s.ellipse(76, 74, 24, 24, dk); s.ellipse(180, 74, 24, 24, dk);
   } else if (style === 'ponytail') {
     s.ellipse(128, 80, 56, 34, col);
-    fringe(6, 94, 17, 12);
+    fringe(6, 82, 13, 12);
     s.ellipse(96, 62, 20, 16, lt);
   } else if (style === 'long') {
     s.ellipse(128, 78, 58, 36, col);
-    fringe(6, 94, 18, 12);
+    fringe(6, 82, 14, 12);
     s.ellipse(74, 150, 14, 46, col, { rot: -0.1 });   // face-framing locks
     s.ellipse(182, 150, 14, 46, col, { rot: 0.1 });
   } else {
     s.ellipse(128, 80, 54, 32, col);
-    fringe(5, 94, 16, 13);
+    fringe(5, 82, 13, 13);
   }
   return s;
 }

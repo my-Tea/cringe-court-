@@ -88,8 +88,10 @@ function eye(s, sx, { style = 'round', iris = P.iris, irisL2 = P.irisL, lash = I
     s.ellipse(cx + sx * 1, cy + 2, 5, 7, P.pupil);
     s.ellipse(cx - sx * 3, cy - 4, 4, 4.4, P.white);
     s.ellipse(cx + sx * 4, cy + 5, 2.2, 2.2, P.white);
-    // upper lash
-    s.line(cx - 16 * sx, cy - 9, cx + 15 * sx, cy - 12, lash, 4.6);
+    // upper lash — MUST be level. It sits at the top of the eye and a slope here
+    // reads as a furrowed angry brow. Verified by rendering the eye layer alone:
+    // a 1px rise across 31px is enough to look angry.
+    s.line(cx - 16 * sx, cy - 11, cx + 15 * sx, cy - 11, lash, 3.6);
     // lower lid accent
     s.line(cx - 10 * sx, cy + 13, cx + 8 * sx, cy + 14, lash, 1.6);
   }
@@ -97,13 +99,13 @@ function eye(s, sx, { style = 'round', iris = P.iris, irisL2 = P.irisL, lash = I
 }
 
 function brow(s, sx, tilt = 0, col = P.brownD) {
-  // Level brow with a slight arch = neutral/friendly.
-  // Geometry check (sx=-1, left eye at x=104): cx-13*sx = 117 (INNER, near nose),
-  // cx+13*sx = 91 (OUTER). Getting this backwards slants the brow into a scowl —
-  // which is exactly what made every character look angry for three attempts.
-  const cx = 128 + sx * A.eyeDx, cy = A.eyeY - 24;
-  const innerX = cx - 13 * sx, outerX = cx + 13 * sx;
-  s.curve(innerX, cy + tilt, cx, cy - 4, outerX, cy - tilt, col, 3.6);
+  // NEUTRAL = both ends level, arch in the middle.
+  // Angry is when the INNER end sits LOWER than the outer. I had that backwards
+  // three times: for sx=-1 the inner end is cx-12*sx (=116, near the nose), and
+  // it must sit at the SAME height as the outer end, not below it.
+  const cx = 128 + sx * A.eyeDx, cy = A.eyeY - 26;
+  const innerX = cx - 12 * sx, outerX = cx + 12 * sx;
+  s.curve(innerX, cy + tilt, cx, cy - 3, outerX, cy - tilt, col, 2.8);
   return s;
 }
 

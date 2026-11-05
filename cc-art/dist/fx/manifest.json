@@ -1,0 +1,15 @@
+{
+  "note": "FX overlays, additively blended. impact_0..3 is a 4-frame burst at 12fps.",
+  "assets": [
+    "impact_0",
+    "impact_1",
+    "impact_2",
+    "impact_3",
+    "flash",
+    "sweat",
+    "tear",
+    "blush",
+    "sparkle",
+    "shake"
+  ]
+}
