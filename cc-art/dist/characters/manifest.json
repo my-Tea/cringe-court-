@@ -1,9 +1,12 @@
 {
   "canvas": {
-    "w": 256,
-    "h": 320
+    "master": [
+      300,
+      420
+    ]
   },
-  "note": "Procedurally drawn 2D sprites. Source of truth: cc-art/chars-v4.mjs. Each character has 8 expressions and 10 poses.",
+  "proportions": "4.5-5.0 heads tall (realistic, NOT chibi)",
+  "note": "Voxel characters. Source of truth: cc-art/vox-chars.mjs. Head is ~23% of total height.",
   "expressions": [
     "neutral",
     "happy",
@@ -29,51 +32,51 @@
   "characters": [
     {
       "id": "judge",
+      "label": "Judge Gavel.exe",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     },
     {
       "id": "prosecutor",
+      "label": "Miss Ratio",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     },
     {
       "id": "defense",
+      "label": "Counsel Chaos",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     },
     {
       "id": "bailiff",
+      "label": "Bailiff",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     },
     {
       "id": "clerk",
+      "label": "Clerk",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     },
     {
       "id": "ai-narrator",
+      "label": "AI Narrator (0G)",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     },
     {
       "id": "juror",
+      "label": "Juror / Voter",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     },
     {
       "id": "creator",
+      "label": "Creator / Defendant",
       "expressions": 8,
-      "poses": 10,
-      "boxes": "procedural"
+      "poses": 10
     }
   ]
 }

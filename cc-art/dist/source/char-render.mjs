@@ -70,7 +70,11 @@ export function renderCharacter(boxes, opts = {}) {
       const nz1 = n[0] * syw + n[2] * cyw;
       const ny = n[1] * cp - nz1 * sp;
       const nz = n[1] * sp + nz1 * cp;
-      if (nz >= -0.02) continue;                       // backface cull
+      // Backface cull. NOTE: eyes/iris/highlights are stacked boxes only 0.2–1
+      // unit deep, so a strict epsilon here can cull the iris and leave a blank
+      // white sclera. 0.02 is tight enough to cull real backfaces without
+      // eating thin face detail.
+      if (nz >= -0.02) continue;
       const pts = idx.map((i) => project(V[i]));
       const kd = Math.max(0, nx * KEY[0] + ny * KEY[1] + (nz) * KEY[2]);
       const fd = Math.max(0, nx * FILL[0] + ny * FILL[1] + nz * FILL[2]);
