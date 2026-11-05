@@ -1,0 +1,146 @@
+{
+  "canvas": {
+    "w": 420,
+    "h": 540,
+    "ss": 2
+  },
+  "note": "Voxel chibi characters. Authoritative geometry is the box list in ../source/chibi-chars.mjs; PNGs are reference renders.",
+  "characters": [
+    {
+      "id": "judge",
+      "label": "Judge Gavel.exe",
+      "boxes": 110,
+      "size": [
+        53,
+        83,
+        32
+      ],
+      "height": 83,
+      "materialCount": 21,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    },
+    {
+      "id": "prosecutor",
+      "label": "Miss Ratio",
+      "boxes": 95,
+      "size": [
+        55,
+        84,
+        32
+      ],
+      "height": 84,
+      "materialCount": 20,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    },
+    {
+      "id": "defense",
+      "label": "Counsel Chaos",
+      "boxes": 95,
+      "size": [
+        48,
+        91,
+        32
+      ],
+      "height": 91,
+      "materialCount": 20,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    },
+    {
+      "id": "bailiff",
+      "label": "Bailiff",
+      "boxes": 69,
+      "size": [
+        48,
+        87,
+        33
+      ],
+      "height": 87,
+      "materialCount": 16,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    },
+    {
+      "id": "clerk",
+      "label": "Clerk",
+      "boxes": 83,
+      "size": [
+        48,
+        90,
+        34
+      ],
+      "height": 90,
+      "materialCount": 19,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    },
+    {
+      "id": "ai-narrator",
+      "label": "AI Narrator (0G)",
+      "boxes": 25,
+      "size": [
+        37,
+        43,
+        25
+      ],
+      "height": 43,
+      "materialCount": 10,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    },
+    {
+      "id": "juror",
+      "label": "Juror / Voter",
+      "boxes": 90,
+      "size": [
+        48,
+        86,
+        32
+      ],
+      "height": 86,
+      "materialCount": 22,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    },
+    {
+      "id": "creator",
+      "label": "Creator / Defendant",
+      "boxes": 76,
+      "size": [
+        48,
+        90,
+        32
+      ],
+      "height": 90,
+      "materialCount": 15,
+      "files": {
+        "front": "front.png",
+        "threeQuarter": "threeq.png",
+        "side": "side.png"
+      }
+    }
+  ]
+}
