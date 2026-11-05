@@ -1,0 +1,121 @@
+{
+  "canvas": {
+    "w": 256,
+    "h": 256
+  },
+  "anchors": {
+    "head": [
+      128,
+      66
+    ],
+    "eye": 69,
+    "neck": [
+      128,
+      116
+    ],
+    "shoulderL": [
+      84,
+      125
+    ],
+    "shoulderR": [
+      172,
+      125
+    ],
+    "hip": [
+      128,
+      186
+    ],
+    "foot": 235
+  },
+  "layerOrder": [
+    "hairBack",
+    "base",
+    "face",
+    "eyes",
+    "expression",
+    "clothing",
+    "hairFront",
+    "accessory"
+  ],
+  "library": {
+    "gender": [
+      "masculine",
+      "feminine",
+      "androgynous"
+    ],
+    "skin": [
+      "#F5D5BE",
+      "#E8C4A8",
+      "#C49A7A",
+      "#A87B5C",
+      "#7C5842",
+      "#5A3D2E"
+    ],
+    "face": [
+      "round",
+      "angular",
+      "long"
+    ],
+    "eyes": [
+      "round",
+      "sharp",
+      "sleepy",
+      "sparkle"
+    ],
+    "hairstyle": [
+      "short",
+      "long",
+      "ponytail",
+      "buns",
+      "messy",
+      "buzz",
+      "afro",
+      "spiky"
+    ],
+    "hairColor": [
+      "#1A1A1A",
+      "#6B4226",
+      "#E6D08A",
+      "#FF9AC6",
+      "#9B6BE0",
+      "#6BD6D6",
+      "#DCDCDC"
+    ],
+    "clothing": [
+      "tee",
+      "hoodie",
+      "shirt",
+      "suit",
+      "jacket",
+      "robe",
+      "meme"
+    ],
+    "clothingColor": [
+      "#5C1A26",
+      "#2E5F73",
+      "#4A3A32",
+      "#9B6BE0",
+      "#D9A046",
+      "#FFF9ED"
+    ],
+    "accessory": [
+      "glasses",
+      "headphones",
+      "cap",
+      "chain",
+      "earrings",
+      "mask",
+      "shades"
+    ],
+    "expression": [
+      "neutral",
+      "happy",
+      "angry",
+      "shocked",
+      "laughing",
+      "crying",
+      "confused",
+      "smug"
+    ]
+  }
+}
