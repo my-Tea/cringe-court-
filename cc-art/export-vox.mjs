@@ -1,8 +1,7 @@
 // Voxel character export — realistic proportions, 8 expressions + 10 poses each.
 // Renders via char-render.mjs (orthographic, supersampled, two-light rig).
 import { CHARS, CHAR_IDS } from './vox-chars.mjs';
-import { renderCharacter, boundsOf } from './char-render.mjs';
-import { POSE_IDS } from './vox-base.mjs';
+import { renderCharacter } from './char-render.mjs';
 import { Canvas } from './core.mjs';
 import fs from 'node:fs';
 
@@ -18,7 +17,7 @@ export const EXPR = {
   confused: { eye: 'round',  mouth: 'frown' },
   smug:     { eye: 'sharp',  mouth: 'neutral' },
 };
-export const POSE = POSE_IDS;
+export const POSE = ['idle', 'talking', 'happy', 'angry', 'shocked', 'laughing', 'crying', 'confused', 'objection', 'defeated'];
 
 /** Apply an expression by swapping the mouth/eye boxes' materials. */
 function withExpr(parts, e) {
@@ -90,13 +89,11 @@ for (const id of CHAR_IDS) {
   }
   sheet(exprImgs, 4, 190, 300, `${dir}/_expressions.png`);
 
-  // poses — each wears its matching expression, and the whole set shares one
-  // framing so frames stay the same scale when swapped during an animation
-  const poseParts = POSE.map((po) => CHARS[id].parts(po, EXPR[po] ? po : 'neutral'));
-  const bounds = boundsOf(poseParts.flat());
+  // poses
   const poseImgs = [];
-  for (const [i, po] of POSE.entries()) {
-    const img = trim(renderCharacter(poseParts[i], { w: 300, h: 420, yaw: 14, pitch: 6, bounds }));
+  for (const po of POSE) {
+    const parts = CHARS[id].parts(po, 'neutral');
+    const img = trim(renderCharacter(parts, { w: 300, h: 420, yaw: 14, pitch: 6 }));
     img.save(`${dir}/poses/${po}.png`);
     img.scale(2).save(`${dir}/poses/${po}@2x.png`);
     poseImgs.push(img);
