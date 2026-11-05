@@ -193,8 +193,8 @@ one atlas = 1 draw call for body, 1 for the face layer.
 
 - Preload a character's atlas when they **first enter a scene**.
 - Preload `idle` + `neutral` only at startup (one small image per character).
-- The player avatar is **composed at runtime** — no preload, but cache by a hash
-  of the layer config so repeat looks don't recompose.
+- The player avatar is **not built yet** (see CHARACTER-SPEC.md §6). When it is,
+  it uses the same box-list pipeline as the cast — the same preload rules apply.
 
 ---
 
@@ -215,7 +215,7 @@ one atlas = 1 draw call for body, 1 for the face layer.
 ## 10. Known gaps
 
 1. **No FX sprites yet.** `shake`/`flash`/`impact`/`sweat`/`tears` are named in
-   the timeline but `player/fx/` is empty. UI-layer work.
+   the timeline but no sprite exists for them. UI-layer work.
 2. **No sound files.** `sound` keys are labels.
 3. **Callouts are text**, not art. The reference shows "ORDER!" in a comic
    burst — that bubble is a UI asset, not yet built.

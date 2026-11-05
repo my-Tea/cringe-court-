@@ -189,103 +189,50 @@ Full-body, arms/legs included. The spec requires exactly these:
 
 ---
 
-## 6. Player avatar — modular system
+## 6. Player avatar — voxel parts
 
-**Highest priority.** The Creator/Defendant is **fully customizable** — there is
-no fixed player character.
+**Status: not built.** The earlier 2D layered-sprite prototype was rejected — it
+looked crude beside the voxel cast — and its code and renders have been **deleted**.
+`cc-art/player.mjs` no longer exists; nothing should reference it.
 
-### 6.1 Layer stack (draw order, bottom → top)
+The player must be built the **same way as the other 8 characters**: as box
+lists in `cc-art/chibi-chars.mjs`, sharing `chibi-base.mjs` proportions.
 
-| # | Layer | Folder | Notes |
-|---|---|---|---|
-| 0 | **Base body** | `player/base/` | Nude-shape body, neutral pose, includes hands |
-| 1 | **Face** | `player/faces/` | Face shape + mouth; eyes drawn on top |
-| 2 | **Expression** | `player/expressions/` | Brow/mouth overlay per emotion |
-| 3 | **Eyes** | `player/eyes/` | Iris style + colour |
-| **0** | **Hair back** | `player/hairstyles/<id>/back.png` | **Must paint FIRST** — full head-sized mass |
-| 5 | **Clothing** | `player/clothing/<id>.png` | Body cover |
-| 6 | **Hair front** | `player/hairstyles/<id>/front.png` | Over the face/head |
-| 7 | **Accessory** | `player/accessories/<id>.png` | Glasses, hats, chains, masks |
-| 8 | **FX** | `player/fx/` | Optional: sweat drop, tears, blush |
+### 6.1 Why voxel, not layers
 
-> ⚠️ **Draw order corrected after building the prototype.** `hairBack` moved to
-> **slot 0** (before the body). Painted later it buries the whole face — every
-> expression disappears. Verified order:
-> `hairBack → base → face → eyes → expression → clothing → hairFront → accessory`
-> This is what `LAYER_ORDER` in `cc-art/player.mjs` implements, and it renders
-> correctly for all 8 hairstyles × 8 expressions.
+The cast is 3D voxel. A 2D layered sprite in that room reads as a sticker pasted
+on — wrong lighting, wrong shadow, wrong silhouette. Box lists also give
+consistency for free: change a parameter and every pose updates.
 
-**Why hair is split front/back:** this is the detail that makes hairstyles
-composable. Without it, every hairstyle needs a matching body crop. With it, a
-single `back.png` + `front.png` pair works on every body.
+### 6.2 Parts model
 
-### 6.2 Categories and counts
+The player is one body assembled from swappable **part groups**, each a box list:
 
-| Category | Options | Variants |
+| Slot | Options | Notes |
 |---|---|---|
-| **Gender presentation** | masculine, feminine, androgynous | 3 base bodies |
-| **Skin tone** | — | 6 (tint layer over base, not 6 separate bodies) |
-| **Face shape** | round, angular, long | 3 |
-| **Eye style** | round, sharp, sleepy, sparkle | 4 |
-| **Hairstyle** | short, long, ponytail, buns, messy, buzz, afro-curly, spiky | 8 |
-| **Hair colour** | black, brown, blonde, pink, purple, cyan, silver | 7 (tint, not redraw) |
-| **Clothing** | casual tee, hoodie, shirt, suit, oversized jacket, courtroom robe, meme outfit | 7 |
-| **Clothing colour** | per item | 4–6 |
-| **Accessories** | glasses, headphones, cap, chain, earrings, mask, pixel-shades | 7 |
+| `body` | masculine, feminine, androgynous | Torso+limb proportions via the same `H` constants |
+| `head` | round, angular, long | Replaces the skull block set |
+| `eyes` | round, sharp, sleepy, sparkle | Face-layer boxes |
+| `hair` | short, long, ponytail, buns, messy, buzz, afro, spiky | 8–20 masses each, same as the cast |
+| `clothing` | tee, hoodie, shirt, suit, jacket, robe, meme | Torso+arm coverage |
+| `accessory` | glasses, headphones, cap, chain, earrings, mask, shades | Sits over head/neck |
 
-Combinatorics: `3 × 6 × 3 × 4 × 8 × 7 × 7 × 7` ≈ **2.4 million** looks from roughly
-**90 PNGs**. That ratio is the entire point of layering — do not pre-render
-combinations.
+**Colours are tints, not separate parts.** Skin and hair take a hex at build
+time — 6 skin tones × 7 hair colours come free from one geometry set.
 
-### 6.3 Skin and hair colour are tints
+### 6.3 Combination
 
-Skin tone and hair colour are applied as **runtime tints** (HSV shift or a
-multiply layer) over a single greyscale-tinted base, **not** as separate art. This
-keeps the file count sane and guarantees every shade is available for every
-style.
+`buildPlayer({ body, head, eyes, hair, clothing, accessory, skin, hairColor, clothingColor })`
+concatenates the box lists and returns one array — identical shape to
+`CHARACTERS[id].parts()`, so the same renderer and the same in-game loader work.
 
-Exception: if a tint looks muddy on a specific hue (greyscale → pink often does),
-ship **3 tinted bases** and interpolate. Don't ship 7.
+Rough count: **~90 configurations × ~100 boxes** — no pre-rendered grid, ever.
 
-### 6.4 Anchors — non-negotiable
+### 6.4 Preview UI
 
-Every layer must align pixel-perfectly on these anchor coordinates (in the
-2x canvas, 512 × 512):
-
-```
-canvas      512 × 512
-head centre (256, 132)
-eye line    y = 138
-neck base   (256, 232)
-shoulder L  (168, 250)
-shoulder R  (344, 250)
-hip centre  (256, 372)
-foot line   y = 470
-```
-
-A part that doesn't hit these anchors will drift when combined. **Validate anchor
-alignment before accepting any part** — a 2px drift on the eye line is instantly
-visible.
-
-### 6.5 Customization UI requirements
-
-The player must preview while changing options:
-
-1. Gender presentation selector (3)
-2. Skin tone swatches (6)
-3. Face shape (3)
-4. Eye style (4)
-5. Hairstyle (8) + hair colour (7)
-6. Clothing (7) + colour (4–6)
-7. Accessories (7, multi-select with z-order)
-8. Expression (8)
-9. **Live preview** — composite in the order of §6.1
-10. **Save/load** — serialise to a config object (§8)
-
-The saved avatar must keep the **same identity** across profile, courtroom, case
-cards, and animations. That means: serialise the layer IDs, never a baked image.
-
----
+Compose on change, re-render at `yaw: 18, pitch: 9` (the `threeq` view — it is
+the most flattering and the most readable). Save the config object, never a
+baked image.
 
 ## 7. Animation system
 
@@ -533,29 +480,36 @@ Honest status, so nobody plans against art that doesn't exist.
 | `CHARACTER-SPEC.md` (this file) | ✅ Complete |
 | `ANIMATION-GUIDE.md` | ✅ Complete |
 | `animation/animations.json` | ✅ 8 characters, 54 animations, 10 system, validated |
-| **Player layer system + compositor** | ✅ **Working** — `source/player.mjs` |
-| Player parts (46 PNGs) | ✅ Exported — **placeholder art, not final** |
-| Fixed character art | ⬜ **None.** Spec only |
-| Expressions for fixed cast | ⬜ None |
-| Poses for fixed cast | ⬜ None |
+| **Player avatar** | ❌ Not built — voxel parts plan in §6 |
+| **Characters (8)** | ✅ **Shipped** — 643 boxes total, 3 views each, see `characters/` |
+| Expressions for the cast | ⬜ None — neutral render only |
+
+| Animation poses | ⬜ None — timeline data exists, poses do not |
 | FX sprites | ⬜ None |
 | Callout bubbles ("ORDER!") | ⬜ None |
 
-### What the player prototype proves
+### What the character build proves
 
-`source/player.mjs` is the reference implementation. It renders all 8 hairstyles ×
-8 expressions × 7 clothing × 7 accessories × 3 genders correctly from one
-compositor, which validates:
+`source/chibi-chars.mjs` defines all 8 characters as box lists. It validates:
 
-- the **anchor contract** (§6.4) — parts line up with no drift
-- the **layer order** — `hairBack → base → face → eyes → expression → clothing →
-  hairFront → accessory`
-- the **tint approach** — 6 skin tones and 7 hair colours from one base
+- **Chibi proportions** — head is 34 of 80 units (42%), matching the reference sheet
+- **Consistent framing** — every character renders at the same scale from the
+  same anchors, so a lineup reads as one cast
+- **Hair as stacked masses** — 8–20 overlapping blocks per character, which is
+  what stops them looking like blobs
 
-**Treat it as scaffolding.** The shapes are crude on purpose; it exists so the
-pipeline is proven before real art is drawn. When you generate the final player
-art, replace layer by layer and the compositor keeps working unchanged.
+Two renderer bugs were found and fixed while building these, both documented in
+`char-render.mjs`: an inverted painter sort (every character rendered as the
+back of their head) and a backwards yaw sign. If you rewrite the renderer,
+check those two first — both present as "the character has no face".
 
+```bash
+cd cc-art
+node export-chars.mjs   # rebuild all character PNGs + manifest
+```
+
+To add a character, append an entry to `CHARACTERS` in `chibi-chars.mjs` and
+re-run `export-chars.mjs`.
 ### The Judge conflict, restated
 
 The existing voxel `GavelExe.bbmodel` (in `models/`) has **gold wire glasses**.

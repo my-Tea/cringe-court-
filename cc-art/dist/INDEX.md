@@ -16,7 +16,7 @@ Start here. Four guides, in the order a coding agent should read them.
 | `scene/courtroom.boxes.json` | **1606 boxes** in world space — the whole room, ready to mesh |
 | `scene/courtroom.layout.json` | Room dims, 55 prop instances, 8 camera presets |
 | `animation/animations.json` | 8 characters, 54 animations, 10 system animations, state machine |
-| `characters/player/player-library.json` | Canvas, anchors, layer order, every category option |
+| `characters/manifest.json` | Per-character boxes, sizes, materials, files |
 | `sprites/props/manifest.json` | Per-prop bounds, footprints, heights |
 | `models/CringeCourt_Props.bbmodel` | 41 props, editable in Blockbench |
 
@@ -27,7 +27,7 @@ Start here. Four guides, in the order a coding agent should read them.
 | `scene/pov_*.png` | 6 first-person angles + iso + cutaway |
 | `preview_blocks.png` | 13 block textures, tiled 2×2 to show seams |
 | `preview_props@4x.png` | All 41 props, isometric |
-| `characters/player/_preview_all.png` | Layer stack: every category in one sheet |
+| `characters/_previews/lineup.png` | All 8 characters, equal scale |
 
 ## Quick start
 
@@ -49,15 +49,15 @@ const anim = (await fetch('animation/animations.json').then(r => r.json()))
 | Courtroom | ✅ 1606 boxes, 8 camera presets, validated |
 | Props | ✅ 41 props / 995 boxes, manifest + bbmodel |
 | Block textures | ✅ 13 tileable 16×16 |
-| Player layer system | ✅ Working compositor + 46 parts (placeholder art) |
+| Characters | ✅ 8 voxel characters, 643 boxes, 3 views each |
 | Animation data | ✅ 54 animations, validated, timed |
-| Fixed characters | ⬜ Not generated — spec written, art pending |
+| Expressions / poses | ⬜ Neutral render only |
 
 ## Three things to know before you start
 
 1. **The courtroom is 1606 boxes in world space.** No assembly step. Merge by
    material and you're done.
-2. **Player = layered sprites, never pre-rendered combinations.** ~90 PNGs give
-   ~2.4M looks. `LAYER_ORDER` in `player.mjs` is the verified draw order.
+2. **Characters are voxel box lists**, not drawn sprites — same system as the
+   courtroom, so they match. Rebuild poses from the same parameters.
 3. **Pose/expression snap, transform lerps.** Cross-fading poses kills the
    hand-drawn feel.
