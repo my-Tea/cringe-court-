@@ -20,7 +20,7 @@ Verified against the filesystem.
 | **Player parts** | **58** + default, voxel | ✅ Matches cast proportions (4.5 heads) |
 | **UI kit** | **34** assets (47 with @2x icons) | ✅ |
 | **FX sprites** | **10** | ✅ |
-| **Props** | 82 (41 props @1x + @4x) | ✅ |
+| **Props** | 94 (47 props @1x + @4x) | ✅ |
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
 | **3D models** | `.bbmodel` (995 elements) | ✅ |
@@ -90,6 +90,16 @@ and pointing hands all follow the pose. Verified that all 10 differ per characte
 | `receipt_card.png` | 300×260 | Settlement layout |
 
 The pixel font is a **built-in 5×7 bitmap** in `ui-kit.mjs` — no font file to ship.
+
+---
+
+## Trial-moment props (`sprites/props/`)
+
+`ballot_paper`, `ballot_envelope`, `case_stamp`, `settlement_receipt`,
+`podium_mic`, `potted_plant` — the art bible part 3 props that were missing.
+Defined in `props.mjs`, exported by `node export.mjs` (writes `out/props/`; copy to
+`dist/sprites/props/`). **Not yet in `models/CringeCourt_Props.bbmodel`**: that file
+was built through Blockbench and nothing in `cc-art/` regenerates it.
 
 ---
 
