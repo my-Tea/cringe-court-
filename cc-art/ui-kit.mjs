@@ -101,6 +101,8 @@ function drawText(p, text, cx, cy, size, col, { bold = true, shadow = null } = {
     '(': ['00010', '00100', '01000', '01000', '01000', '00100', '00010'],
     ')': ['01000', '00100', '00010', '00010', '00010', '00100', '01000'],
     ',': ['00000', '00000', '00000', '00000', '00000', '00100', '01000'],
+    '%': ['11001', '11010', '00010', '00100', '01000', '01011', '10011'],
+    '=': ['00000', '00000', '11111', '00000', '11111', '00000', '00000'],
   };
   const chars = [...text.toUpperCase()];
   const gw = 5, gh = 7, gap = 1;
@@ -122,6 +124,14 @@ function drawText(p, text, cx, cy, size, col, { bold = true, shadow = null } = {
   });
   return totalW * s;
 }
+
+/** Rendered width of a string in the 5x7 font at a given pixel size. */
+const textW = (text, size) => ([...text].length * 6 - 1) * size;
+/** Largest pixel size (up to max) at which the text fits the width. */
+const fitSize = (text, width, max) => Math.max(1, Math.min(max, Math.floor(width / ([...text].length * 6 - 1))));
+/** Left- or right-aligned text, for receipt columns. */
+const textAt = (p, text, x, cy, size, col, align = 'left') =>
+  drawText(p, text, align === 'left' ? x + textW(text, size) / 2 : x - textW(text, size) / 2, cy, size, col);
 
 /* ───────────────────────────────── assets ───────────────────────────────── */
 function build() {
@@ -187,13 +197,15 @@ function build() {
     ['stamp_not_cooked', 'NOT COOKED', P.green],
     ['stamp_no_verdict', 'NO VERDICT', P.inkSoft],
     ['stamp_charges_filed', 'CHARGES FILED', P.burg],
+    ['stamp_case_number', 'CASE #0069', P.burg],
   ];
   for (const [name, text, col] of stamps) {
     const w = 360, h = 110;
     const p = new Pen(w, h);
     p.poly([[0, 18], [18, 0], [w, 0], [w, h - 18], [w - 18, h], [0, h]], [col, col]);
     p.poly([[10, 22], [24, 10], [w - 10, 10], [w - 10, h - 22], [w - 24, h - 10], [10, h - 10]], ['#00000000', '#00000000']);
-    drawText(p, text, w / 2, h / 2, 5, '#FFF8EC', { shadow: col });
+    // the frame is hollow, so the text must carry the ink colour itself
+    drawText(p, text, w / 2, h / 2, fitSize(text, w - 48, 5), col, { shadow: shade(col, 0.7) });
     p.done().save(`${OUT}/${name}.png`);
     made.push(name);
   }
@@ -202,19 +214,21 @@ function build() {
     ['callout_order', 'ORDER!', P.burg],
     ['callout_objection', 'OBJECTION!', P.red],
     ['callout_counter', 'COUNTER!', P.purple],
+    ['callout_let_bro_cook', 'LET BRO COOK', P.gold, 520],
   ];
-  for (const [name, text, col] of callouts) {
-    const w = 420, h = 150;
+  for (const [name, text, col, w = 420] of callouts) {
+    const h = 150, rx = w * 0.357, sx = rx / 88;
     const p = new Pen(w, h);
     // comic burst
     for (let i = 0; i < 16; i++) {
       const a = (i / 16) * Math.PI * 2;
       const r = i % 2 ? 62 : 78;
-      const x = w / 2 + Math.cos(a) * r * 1.7, y = h / 2 + Math.sin(a) * r;
-      p.poly([[w / 2, h / 2], [x, y], [w / 2 + Math.cos(a + 0.2) * r * 1.7, h / 2 + Math.sin(a + 0.2) * r]], col);
+      const x = w / 2 + Math.cos(a) * r * sx, y = h / 2 + Math.sin(a) * r;
+      p.poly([[w / 2, h / 2], [x, y], [w / 2 + Math.cos(a + 0.2) * r * sx, h / 2 + Math.sin(a + 0.2) * r]], col);
     }
-    p.ellipse(w / 2, h / 2, 150, 62, [col, col, col, col, col]);
-    drawText(p, text, w / 2, h / 2, 5, '#FFF8EC', { shadow: shade(col, 0.7) });
+    p.ellipse(w / 2, h / 2, rx, 62, [col, col, col, col, col]);
+    // keep the word inside the ellipse, where it is ~80% of its full width
+    drawText(p, text, w / 2, h / 2, fitSize(text, rx * 1.6, 5), '#FFF8EC', { shadow: shade(col, 0.6) });
     p.done().save(`${OUT}/${name}.png`);
     made.push(name);
   }
@@ -277,14 +291,64 @@ function build() {
     p.roundRect(2, 2, 296, 256, 10, [P.paperLow, P.paperMid, P.paper, P.paper, P.paper]);
     p.roundRect(2, 2, 296, 6, 3, R.burg);
     drawText(p, 'SETTLEMENT', 150, 34, 3, P.burg);
-    for (let i = 0; i < 5; i++) {
-      p.stroke(20, 60 + i * 26, 280, 60 + i * 26, P.paperLow, 1.6);
-      drawText(p, i % 2 ? 'REWARD' : 'BOND', 60, 54 + i * 26, 2, P.inkSoft);
+    // template: one labelled line per money flow (idea md 5), values left blank
+    for (const [i, label] of ['BOND RETURNED', 'REWARD', 'CREATOR REFUND', 'FORFEITED', 'FEES'].entries()) {
+      p.stroke(20, 76 + i * 24, 280, 76 + i * 24, P.paperLow, 1.6);
+      textAt(p, label, 22, 66 + i * 24, 2, P.inkSoft);
     }
     p.stroke(20, 200, 280, 200, P.burg, 2);
-    drawText(p, 'TOTAL', 60, 220, 3, P.burg);
+    textAt(p, 'TOTAL', 22, 220, 3, P.burg);
+    textAt(p, 'USDC', 278, 220, 2, P.inkSoft, 'right');
     p.done().save(`${OUT}/receipt_card.png`);
     made.push('receipt_card');
+  }
+  // filled settlement receipt: the 3-0 / 2-1 timely-juror branch from idea md 9
+  {
+    const p = new Pen(300, 260);
+    p.roundRect(2, 2, 296, 256, 10, [P.paperLow, P.paperMid, P.paper, P.paper, P.paper]);
+    p.roundRect(2, 2, 296, 6, 3, R.burg);
+    drawText(p, 'SETTLEMENT', 150, 34, 3, P.burg);
+    const rows = [['BOND RETURNED', '0.40'], ['REWARD (75%)', '+0.30'], ['FORFEITED', '0.00']];
+    rows.forEach(([label, val], i) => {
+      p.stroke(20, 76 + i * 24, 280, 76 + i * 24, P.paperLow, 1.6);
+      textAt(p, label, 22, 66 + i * 24, 2, P.inkSoft);
+      textAt(p, val, 278, 66 + i * 24, 2, P.ink, 'right');
+    });
+    textAt(p, 'THE 0.40 WAS YOURS.', 22, 152, 2, P.inkSoft);
+    textAt(p, 'ONLY THE 0.30 IS NEW.', 22, 172, 2, P.inkSoft);
+    p.stroke(20, 200, 280, 200, P.burg, 2);
+    textAt(p, 'TOTAL', 22, 220, 3, P.burg);
+    textAt(p, '0.70 USDC', 278, 220, 2, P.ink, 'right');
+    p.done().save(`${OUT}/receipt_juror_example.png`);
+    made.push('receipt_juror_example');
+  }
+  // JURY DUTY ACCEPTED: stake + exact deadlines, shown when the bond commits
+  {
+    const w = 320, h = 230;
+    const p = new Pen(w, h);
+    p.roundRect(2, 2, w - 4, h - 4, 10, [P.paperLow, P.paperMid, P.paper, P.paper, P.paper]);
+    p.roundRect(2, 2, w - 4, 34, 10, [P.burgDk, P.burg, P.burgLt, P.burgLt, P.burgLt]);
+    drawText(p, 'JURY DUTY ACCEPTED', w / 2, 20, 2, R.gold[4]);
+    const rows = [['BOND', '0.40 USDC'], ['COMMIT VOTE BY', '20:00'], ['REVEAL VOTE BY', '20:10'], ['MISS A STEP', 'BOND FORFEIT']];
+    rows.forEach(([label, val], i) => {
+      p.stroke(18, 70 + i * 30, w - 18, 70 + i * 30, P.paperLow, 1.6);
+      textAt(p, label, 20, 58 + i * 30, 2, P.inkSoft);
+      textAt(p, val, w - 20, 58 + i * 30, 2, i === 3 ? P.red : P.ink, 'right');
+    });
+    drawText(p, 'BOTH STEPS = DUTY DONE', w / 2, 202, 2, P.burg);
+    p.done().save(`${OUT}/receipt_jury_duty.png`);
+    made.push('receipt_jury_duty');
+  }
+  // MISTRIAL: the NO VERDICT outcome still gets a payoff screen (idea md 13)
+  {
+    const col = P.purple;
+    const p = panel(360, 200, { r: 16 });
+    p.roundRect(10, 10, 340, 120, 12, [col, col, col, col, col]);
+    drawText(p, 'MISTRIAL', 180, 56, 6, '#FFF8EC', { shadow: shade(col, 0.6) });
+    drawText(p, 'FULL CASE REFUND', 180, 100, 3, '#FFF8EC');
+    drawText(p, 'CRINGECOURT', 180, 164, 3, P.burg);
+    p.done().save(`${OUT}/card_mistrial.png`);
+    made.push('card_mistrial');
   }
   return made;
 }
@@ -292,6 +356,6 @@ function build() {
 const made = build();
 console.log('UI assets:', made.length);
 fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
-  note: '9-slice panels, buttons at 240x64, icons at 48x48, stamps, callouts, verdict cards.',
+  note: '9-slice panels, buttons at 240x64 (normal/hover/pressed), icons at 48x48, stamps, callouts, verdict cards, receipts. Receipt amounts/deadlines are illustrative demo values from the V4 brief.',
   assets: made,
 }, null, 2));
