@@ -88,20 +88,8 @@ and pointing hands all follow the pose. Verified that all 10 differ per characte
 | 13 × `icon_*.png` + `badge_verified.png` | 48×48 (+@2x) | Journal, board, accuse, commit, reveal, bond, refund, slashed… |
 | `timer_widget.png` | 320×96 | Sunset gradient + deadline bar |
 | `receipt_card.png` | 300×260 | Settlement layout |
-| `button_{primary,secondary,danger}_{hover,pressed}.png` | 240×64 | Interaction states (disabled has none) |
-| `button_swear{,_hover,_pressed}.png` | 400×64 | "I SWEAR TO SHOW UP (0.40 USDC)" jury-seat oath |
-| `callout_let_bro_cook.png` | 520×150 | Defense impact text |
-| `stamp_case_number.png` | 360×110 | "CASE #0069" entry stamp |
-| `card_mistrial.png` | 360×200 | NO VERDICT payoff screen: "MISTRIAL / FULL CASE REFUND" |
-| `receipt_jury_duty.png` | 320×230 | JURY DUTY ACCEPTED: bond, commit + reveal deadlines, loss condition |
-| `receipt_juror_example.png` | 300×260 | Filled settlement: 0.40 returned + 0.30 reward = 0.70 |
-
-Amounts and deadlines on the receipts are illustrative values from the V4 brief,
-not live data; the game should draw real values over `receipt_card.png`.
 
 The pixel font is a **built-in 5×7 bitmap** in `ui-kit.mjs` — no font file to ship.
-It covers A–Z, 0–9 and `! ? . : - ' # / + ( ) , % =` (digits were missing until
-`feat/ui-trial-moments`, so the timer used to read `??:??`).
 
 ---
 
