@@ -9,20 +9,6 @@ export { head };
  *  geometry is rebuilt per expression instead of recoloured. */
 const FACE_MATS = new Set(['#FFFFFF', '#3B2A28', '#241A22', '#5A4234', '#8E3B42', '#7A3340', '#D2686E', '#E8C4A8', '#D2A98C', '#B48A6C']);
 
-/** Brand gavel: handle + head + gold band + end caps. Shared with fp-hands.mjs.
- *  The Judge's second end cap is mirrored about the ORIGIN (not gx) — kept as-is
- *  so the Judge render stays byte-identical. fp-hands passes mirrorCapAboutGx. */
-export function gavelBoxes(gx, gy, gz = 0, { mirrorCapAboutGx = false } = {}) {
-  const cap = pair([gx - 7, gy + 24, gz - 3], [gx - 5.6, gy + 32, gz + 3], C.goldLt);
-  if (mirrorCapAboutGx) cap[1] = b([gx + 5.6, gy + 24, gz - 3], [gx + 7, gy + 32, gz + 3], C.goldLt);
-  return [
-    b([gx - 1.4, gy, gz - 1.4], [gx + 1.4, gy + 26, gz + 1.4], C.hairBr),
-    b([gx - 6, gy + 24, gz - 3], [gx + 6, gy + 32, gz + 3], C.hairBrLt),
-    b([gx - 6.6, gy + 26, gz - 3.4], [gx + 6.6, gy + 29, gz + 3.4], C.gold),
-    ...cap,
-  ];
-}
-
 /* ══════════════════════════════════ JUDGE ══════════════════════════════════ */
 export const JUDGE = {
   id: 'judge', label: 'Judge Gavel.exe',
@@ -83,7 +69,10 @@ export const JUDGE = {
 
     // ── gavel, held right — oversized ───────────────────────────────
     const gx = H.torsoW + H.armW * 2 + 4, gy = H.armBot + lift + 4;
-    out.push(...gavelBoxes(gx, gy));
+    out.push(b([gx - 1.4, gy, -1.4], [gx + 1.4, gy + 26, 1.4], C.hairBr));
+    out.push(b([gx - 6, gy + 24, -3], [gx + 6, gy + 32, 3], C.hairBrLt));
+    out.push(b([gx - 6.6, gy + 26, -3.4], [gx + 6.6, gy + 29, 3.4], C.gold));
+    out.push(...pair([gx - 7, gy + 24, -3], [gx - 5.6, gy + 32, 3], C.goldLt));
 
     return out;
   },

@@ -452,9 +452,7 @@ courtroom was built around). Scale the 512px sprite accordingly.
 
 **First-person caveat.** The player is first-person, so the avatar is mostly seen
 in profile/menus/case cards. Prioritise the **face layer quality** over full-body
-detail for the player — that's what actually gets seen. First-person hand sprites
-(gavel, point, phone, evidence, relaxed) live in `characters/player/hands/`; see
-ASSET-COMPLETE.md.
+detail for the player — that's what actually gets seen.
 
 **Asset loading.** Characters are independent of the scene — load them
 per-scene, not at startup (§7.4).

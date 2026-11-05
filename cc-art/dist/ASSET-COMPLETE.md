@@ -63,6 +63,19 @@ brows above the shades. Say the word and I'll do (b) — it's a 10-line change.
 
 ---
 
+## Portraits
+
+```
+characters/<id>/portraits/{neutral,smug,shocked,defeated}{,_32,@2x}.png   # 64 / 32 / 128 px
+characters/_previews/portraits.png                                       # contact sheet
+characters/portraits.json                                                # index
+```
+
+Head-and-shoulders busts on dialogue-box plum, cropped from the voxel render
+(`export-portraits.mjs`). `defeated` uses the crying face. Expression contrast is
+only as good as the face rig; re-run after the face rig (`feat/voxel-expressions`)
+lands for much stronger differences.
+
 ## Poses
 
 ```
@@ -123,34 +136,6 @@ match the cast. That is the highest-value remaining polish item.
 
 ---
 
-## First-person hands (`characters/player/hands/`)
-
-Art bible Part 2 #6: hands and forearms only, no body. Voxel box lists
-(`source/fp-hands.mjs`, exporter `source/export-fp-hands.mjs`, run from `cc-art/`),
-rendered with the cast's orthographic two-light rig, transparent bg, 256x256
-frames (@1x) / 512x512 (@2x). Every frame shares one framing, so poses swap in
-place; the forearm runs off the bottom edge, pin the frame to the bottom of the screen.
-
-| Pose | Side | Use |
-|---|---|---|
-| `relaxed` | both | idle / walking, empty hands |
-| `gavel_hold` / `gavel_raised` / `gavel_strike` | right | gavel (same geometry as the Judge's, `gavelBoxes()`) |
-| `point` | right | OBJECTION / accuse |
-| `phone_hold` | right | phone, screen toward the player |
-| `evidence_hold` | right | evidence sheet toward the player |
-
-One-handed poses also have an x-mirrored `left/` set. `skin/<hex>/` holds every
-pose in all 6 player skin tones, `_skin-sheet.png` is the contact sheet, and
-`hands-manifest.json` has size, side and wrist anchor per pose. Sleeve colour is
-the player's default clothing colour (parameter in `buildHands`).
-
-**Honest notes:** gavel raised/strike are translations of the same grip, not a
-rotated swing (boxes are axis-aligned, so the gavel stays upright); animate with
-a transform tween. Fingers read as stacked rows, closer to a chunky voxel fist
-than detailed anatomy. Not yet tried in-engine.
-
----
-
 ## Tooling (`source/`)
 
 | File | Role |
@@ -172,6 +157,7 @@ cd cc-art
 node export-all.mjs   # characters
 node ui-kit.mjs       # UI
 node fx-kit.mjs       # FX
+node export-portraits.mjs   # dialogue portraits
 ```
 
 ---
