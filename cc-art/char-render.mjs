@@ -13,7 +13,11 @@ export function renderCharacter(boxes, opts = {}) {
     w = 480, h = 620, ss = 2,
     yaw = 18, pitch = 10,          // degrees: slight 3/4 + looking down a touch
     pad = 0.06, bg = [22, 18, 24, 255],
+    // Optional, default-off: fixed framing (so frames of one asset align) and a
+    // transparent bg (alpha = supersample coverage). Existing callers unaffected.
+    fixedScale = null, center = null,
   } = opts;
+  const transparent = bg[3] === 0;
   const W = w * ss, H = h * ss;
   const c = new Canvas(W, H);
   c.fill(bg);
@@ -23,9 +27,11 @@ export function renderCharacter(boxes, opts = {}) {
   for (const b of boxes) for (let i = 0; i < 3; i++) {
     mn[i] = Math.min(mn[i], b.f[i]); mx[i] = Math.max(mx[i], b.t[i]);
   }
-  const cx = (mn[0] + mx[0]) / 2, cy = (mn[1] + mx[1]) / 2, cz = (mn[2] + mx[2]) / 2;
+  const cx = center ? center[0] : (mn[0] + mx[0]) / 2;
+  const cy = center ? center[1] : (mn[1] + mx[1]) / 2;
+  const cz = center ? center[2] : (mn[2] + mx[2]) / 2;
   const spanY = mx[1] - mn[1], spanX = mx[0] - mn[0];
-  const scale = Math.min(H * (1 - pad * 2) / spanY, W * (1 - pad * 2) / Math.max(spanX, spanY * 0.62));
+  const scale = fixedScale ? fixedScale * ss : Math.min(H * (1 - pad * 2) / spanY, W * (1 - pad * 2) / Math.max(spanX, spanY * 0.62));
 
   const ry = (yaw * Math.PI) / 180, rp = (pitch * Math.PI) / 180;
   const cyw = Math.cos(ry), syw = Math.sin(ry), cp = Math.cos(rp), sp = Math.sin(rp);
@@ -113,10 +119,15 @@ export function renderCharacter(boxes, opts = {}) {
   if (ss > 1) {
     const out = new Canvas(w, h);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      let r = 0, g = 0, b2 = 0;
+      let r = 0, g = 0, b2 = 0, cov = 0;
       for (let dy = 0; dy < ss; dy++) for (let dx = 0; dx < ss; dx++) {
         const p = c.get(x * ss + dx, y * ss + dy);
+        if (transparent) { if (p[3] === 0) continue; cov++; }
         r += p[0]; g += p[1]; b2 += p[2];
+      }
+      if (transparent) {
+        if (cov) out.set(x, y, [r / cov | 0, g / cov | 0, b2 / cov | 0, Math.round(255 * cov / (ss * ss))]);
+        continue;
       }
       const n = ss * ss;
       out.set(x, y, [r / n | 0, g / n | 0, b2 / n | 0, 255]);
