@@ -396,6 +396,174 @@
             }
           ],
           "character": "judge"
+        },
+        {
+          "id": "idle_a",
+          "character": "judge",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.4,
+          "duration": 2.4,
+          "note": "adjusts shades",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "judge",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "taps gavel",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "judge",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.25,
+          "duration": 2.4,
+          "note": "strokes beard",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
         }
       ]
     },
@@ -794,6 +962,174 @@
             }
           ],
           "character": "prosecutor"
+        },
+        {
+          "id": "idle_a",
+          "character": "prosecutor",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.4,
+          "duration": 2.4,
+          "note": "arms crossed",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "prosecutor",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "foot-tap lean",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "prosecutor",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.25,
+          "duration": 2.4,
+          "note": "flips hair",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
         }
       ]
     },
@@ -1192,6 +1528,174 @@
             }
           ],
           "character": "defense"
+        },
+        {
+          "id": "idle_a",
+          "character": "defense",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.4,
+          "duration": 2.4,
+          "note": "shrug-lean",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "defense",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "adjusts tie",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "defense",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.25,
+          "duration": 2.4,
+          "note": "reads paper",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
         }
       ]
     },
@@ -1590,6 +2094,174 @@
             }
           ],
           "character": "bailiff"
+        },
+        {
+          "id": "idle_a",
+          "character": "bailiff",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "adjusts cap",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "bailiff",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.4,
+          "duration": 2.4,
+          "note": "shifts weight",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "bailiff",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.25,
+          "duration": 2.4,
+          "note": "checks watch",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
         }
       ]
     },
@@ -1988,6 +2660,174 @@
             }
           ],
           "character": "clerk"
+        },
+        {
+          "id": "idle_a",
+          "character": "clerk",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.4,
+          "duration": 2.4,
+          "note": "flips papers",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "clerk",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "pushes glasses up",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "clerk",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.25,
+          "duration": 2.4,
+          "note": "glances up",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
         }
       ]
     },
@@ -2386,6 +3226,740 @@
             }
           ],
           "character": "juror"
+        },
+        {
+          "id": "idle_a",
+          "character": "juror",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.4,
+          "duration": 2.4,
+          "note": "munches popcorn",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "juror",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "leans back",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "juror",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.25,
+          "duration": 2.4,
+          "note": "leans in, engrossed",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "creator": {
+      "id": "creator",
+      "fixed": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "creator"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "creator"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "creator"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "creator"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "creator"
+        },
+        {
+          "id": "objection",
+          "loop": false,
+          "duration": 1.4,
+          "interrupt": "talk",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              },
+              "fx": "tears"
+            },
+            {
+              "t": 0.55,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "creator",
+          "callout": "IT WAS A JOKE BRO!"
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "creator"
+        },
+        {
+          "id": "idle_a",
+          "character": "creator",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.4,
+          "duration": 2.4,
+          "note": "hands in hoodie",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "creator",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.3,
+          "duration": 2.4,
+          "note": "scratches head",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "creator",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.3,
+          "duration": 2.4,
+          "note": "nervous sway",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
         }
       ]
     },
@@ -2441,6 +4015,174 @@
             "narration"
           ],
           "note": "Sprite-state animator, not pose-based. Frame-swap the screen face."
+        },
+        {
+          "id": "idle_a",
+          "character": "ai-narrator",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "hover bob, tilt right",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_a",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_b",
+          "character": "ai-narrator",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.3,
+          "duration": 2.4,
+          "note": "leans in",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_b",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "idle_c",
+          "character": "ai-narrator",
+          "variantOf": "idle",
+          "loop": false,
+          "interruptible": true,
+          "weight": 0.35,
+          "duration": 2.4,
+          "note": "hover bob, tilt left",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.4,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.8,
+              "pose": "idle_c",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ]
         }
       ]
     },
@@ -2996,6 +4738,22 @@
       "idle",
       "talk"
     ],
+    "idleVariants": {
+      "base": "idle",
+      "variants": [
+        "idle_a",
+        "idle_b",
+        "idle_c"
+      ],
+      "selection": "weighted-random",
+      "baseLoopsBeforeVariant": [
+        2,
+        4
+      ],
+      "noImmediateRepeat": true,
+      "afterVariant": "idle",
+      "perCharacter": "animations[].weight (variantOf: \"idle\") gives each character its own weights"
+    },
     "oneShot": [
       "react_happy",
       "react_angry",
@@ -3008,6 +4766,8 @@
       "A one-shot interrupts any loop and blocks new triggers until it ends.",
       "objection may interrupt talk; other one-shots may not.",
       "Never leave a character mid-one-shot across a scene transition — snap to idle.",
+      "Idle variants (idle_a/b/c) are NOT one-shots for blocking purposes: any trigger, talk, or reaction interrupts them immediately and snaps to the new state.",
+      "Idle variants only start from base idle, never from talk or after a reaction without at least one fresh base-idle loop.",
       "While dialogue streams, alternate talk <-> idle on a 1.2-2.4s random interval."
     ]
   }
