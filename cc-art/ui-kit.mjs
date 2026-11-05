@@ -28,7 +28,7 @@ function panel(w, h, { fill = P.paper, border = P.burg, inner = P.gold, r = 10 }
 }
 
 /* ───────────────────────────────── buttons ───────────────────────────────── */
-function button(label, w, h, variant) {
+function button(label, w, h, variant, state = 'normal') {
   const p = new Pen(w, h);
   const V = {
     primary: { bg: [P.burgDk, P.burg, P.burgLt, P.burgLt, P.burgLt], ed: P.gold, tx: '#FFF6E4', sh: P.burgDk },
@@ -36,14 +36,17 @@ function button(label, w, h, variant) {
     danger: { bg: ['#7A1D14', P.red, P.redLt, P.redLt, P.redLt], ed: P.goldLt, tx: '#FFF6E4', sh: '#7A1D14' },
     dis: { bg: ['#C9BFAE', '#D8CFC0', '#E2DACC', '#E2DACC', '#E2DACC'], ed: '#A89C88', tx: '#8A7E6C', sh: '#C9BFAE' },
   }[variant || 'primary'];
+  // hover lifts the face colour; pressed drops the face onto its shadow
+  const bg = state === 'hover' ? V.bg.map((c) => mix(c, '#FFFFFF', 0.14)) : V.bg;
+  const dy = state === 'pressed' ? 3 : 0;
   // drop shadow
   p.roundRect(2, 5, w - 4, h - 5, 10, [V.sh, V.sh, V.sh, V.sh, V.sh]);
-  p.roundRect(2, 2, w - 4, h - 7, 10, V.bg, { vertical: true });
-  p.roundRect(4, 4, w - 8, h - 11, 8, ['#00000000', '#00000000', '#FFFFFF18', '#FFFFFF20', '#FFFFFF20']);
+  p.roundRect(2, 2 + dy, w - 4, h - 7, 10, bg, { vertical: true });
+  p.roundRect(4, 4 + dy, w - 8, h - 11, 8, ['#00000000', '#00000000', '#FFFFFF18', '#FFFFFF20', '#FFFFFF20']);
   // border
-  p.roundRect(2, 2, w - 4, h - 7, 10, [V.ed, V.ed]);
-  p.roundRect(4, 4, w - 8, h - 11, 8, V.bg, { vertical: true });
-  return { p, V };
+  p.roundRect(2, 2 + dy, w - 4, h - 7, 10, [V.ed, V.ed]);
+  p.roundRect(4, 4 + dy, w - 8, h - 11, 8, bg, { vertical: true });
+  return { p, V, dy };
 }
 
 function drawText(p, text, cx, cy, size, col, { bold = true, shadow = null } = {}) {
@@ -145,12 +148,25 @@ function build() {
   }
   // buttons
   for (const v of ['primary', 'secondary', 'danger', 'disabled']) {
-    const w = 240, h = 64;
-    const { p } = button(v, w, h, v === 'disabled' ? 'dis' : v);
-    const V = { primary: '#FFF6E4', secondary: P.burg, danger: '#FFF6E4', disabled: '#8A7E6C' }[v];
-    drawText(p, v === 'disabled' ? 'DISABLED' : v.toUpperCase(), w / 2, h / 2 + 1, 3, V);
-    p.done().save(`${OUT}/button_${v}.png`);
-    made.push(`button_${v}`);
+    // disabled has no interaction states
+    for (const st of v === 'disabled' ? ['normal'] : ['normal', 'hover', 'pressed']) {
+      const w = 240, h = 64;
+      const { p, dy } = button(v, w, h, v === 'disabled' ? 'dis' : v, st);
+      const V = { primary: '#FFF6E4', secondary: P.burg, danger: '#FFF6E4', disabled: '#8A7E6C' }[v];
+      drawText(p, v === 'disabled' ? 'DISABLED' : v.toUpperCase(), w / 2, h / 2 + 1 + dy, 3, V);
+      const name = st === 'normal' ? `button_${v}` : `button_${v}_${st}`;
+      p.done().save(`${OUT}/${name}.png`);
+      made.push(name);
+    }
+  }
+  // the jury-duty oath button (idea md 13): the stake is on the button itself
+  for (const st of ['normal', 'hover', 'pressed']) {
+    const w = 400, h = 64;
+    const { p, dy } = button('', w, h, 'primary', st);
+    drawText(p, 'I SWEAR TO SHOW UP (0.40 USDC)', w / 2, h / 2 + 1 + dy, 2, '#FFF6E4');
+    const name = st === 'normal' ? 'button_swear' : `button_swear_${st}`;
+    p.done().save(`${OUT}/${name}.png`);
+    made.push(name);
   }
   // panels
   for (const [name, w, h] of [['panel_journal', 480, 560], ['panel_notebook', 420, 480], ['panel_board', 560, 400]]) {
