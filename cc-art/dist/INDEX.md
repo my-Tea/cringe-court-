@@ -7,7 +7,7 @@ Start here. Five guides, in the order a coding agent should read them.
 | 1 | **`SCENE-GUIDE.md`** | What the courtroom is, where everything sits, how to load it |
 | 2 | **`ASSET-GUIDE.md`** | All 41 props, 13 block textures, palette, placement conventions |
 | 3 | **`CHARACTER-SPEC.md`** | Every character, the layer system, customization, manifests |
-| 4 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 85 character animations |
+| 4 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 54 animations |
 | 5 | **`ASSET-COMPLETE.md`** | Final inventory + what remains (optional polish only) |
 | 6 | `GAP-ANALYSIS.md` | Historical: what the gaps were before they were filled |
 
@@ -17,7 +17,7 @@ Start here. Five guides, in the order a coding agent should read them.
 |---|---|
 | `scene/courtroom.boxes.json` | **1606 boxes** in world space — the whole room, ready to mesh |
 | `scene/courtroom.layout.json` | Room dims, 55 prop instances, 8 camera presets |
-| `animation/animations.json` | 9 characters, 85 animations (incl. idle variants), 10 system animations, state machine |
+| `animation/animations.json` | 8 characters, 54 animations, 10 system animations, state machine |
 | `characters/manifest.json` | Per-character boxes, sizes, materials, files |
 | `sprites/props/manifest.json` | Per-prop bounds, footprints, heights |
 | `models/CringeCourt_Props.bbmodel` | 41 props, editable in Blockbench |
@@ -52,7 +52,7 @@ const anim = (await fetch('animation/animations.json').then(r => r.json()))
 | Props | ✅ 41 props / 995 boxes, manifest + bbmodel |
 | Block textures | ✅ 13 tileable 16×16 |
 | Characters | ✅ 8 voxel characters, 643 boxes, 3 views each |
-| Animation data | ✅ 85 animations, validated, timed |
+| Animation data | ✅ 54 animations, validated, timed |
 | Expressions | ✅ **64** (8 per character) |
 | Poses | ✅ **80** (10 per character) |
 | UI kit | ✅ **34** assets |

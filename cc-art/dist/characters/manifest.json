@@ -29,67 +29,54 @@
     "objection",
     "defeated"
   ],
-  "idleVariants": [
-    "idle_a",
-    "idle_b",
-    "idle_c"
-  ],
   "characters": [
     {
       "id": "judge",
       "label": "Judge Gavel.exe",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     },
     {
       "id": "prosecutor",
       "label": "Miss Ratio",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     },
     {
       "id": "defense",
       "label": "Counsel Chaos",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     },
     {
       "id": "bailiff",
       "label": "Bailiff",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     },
     {
       "id": "clerk",
       "label": "Clerk",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     },
     {
       "id": "ai-narrator",
       "label": "AI Narrator (0G)",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     },
     {
       "id": "juror",
       "label": "Juror / Voter",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     },
     {
       "id": "creator",
       "label": "Creator / Defendant",
       "expressions": 8,
-      "poses": 10,
-      "idleVariants": 3
+      "poses": 10
     }
   ]
 }

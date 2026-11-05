@@ -8,44 +8,21 @@ function shade(hex, mul) {
   return [Math.min(255, r * mul) | 0, Math.min(255, g * mul) | 0, Math.min(255, b * mul) | 0, 255];
 }
 
-/** The 8 corners of a box, run through its optional affine transform `M`
- *  (row-major 3x4: [r00 r01 r02 tx, r10 r11 r12 ty, r20 r21 r22 tz]). */
-function corners(bx) {
-  const [x0, y0, z0] = bx.f, [x1, y1, z1] = bx.t;
-  const V = [
-    [x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0],
-    [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1],
-  ];
-  const M = bx.M;
-  if (!M) return V;
-  return V.map(([x, y, z]) => [
-    M[0] * x + M[1] * y + M[2] * z + M[3],
-    M[4] * x + M[5] * y + M[6] * z + M[7],
-    M[8] * x + M[9] * y + M[10] * z + M[11],
-  ]);
-}
-
-/** World-space bounds of a box list, honouring per-box transforms. */
-export function boundsOf(boxes) {
-  const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
-  for (const bx of boxes) for (const v of corners(bx)) for (let i = 0; i < 3; i++) {
-    mn[i] = Math.min(mn[i], v[i]); mx[i] = Math.max(mx[i], v[i]);
-  }
-  return { mn, mx };
-}
-
 export function renderCharacter(boxes, opts = {}) {
   const {
     w = 480, h = 620, ss = 2,
     yaw = 18, pitch = 10,          // degrees: slight 3/4 + looking down a touch
     pad = 0.06, bg = [22, 18, 24, 255],
-    bounds = null,                 // fixed framing, so a pose set shares one scale
   } = opts;
   const W = w * ss, H = h * ss;
   const c = new Canvas(W, H);
   c.fill(bg);
 
-  const { mn, mx } = bounds || boundsOf(boxes);
+  // bounds
+  let mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
+  for (const b of boxes) for (let i = 0; i < 3; i++) {
+    mn[i] = Math.min(mn[i], b.f[i]); mx[i] = Math.max(mx[i], b.t[i]);
+  }
   const cx = (mn[0] + mx[0]) / 2, cy = (mn[1] + mx[1]) / 2, cz = (mn[2] + mx[2]) / 2;
   const spanY = mx[1] - mn[1], spanX = mx[0] - mn[0];
   const scale = Math.min(H * (1 - pad * 2) / spanY, W * (1 - pad * 2) / Math.max(spanX, spanY * 0.62));
@@ -74,8 +51,11 @@ export function renderCharacter(boxes, opts = {}) {
 
   const faces = [];
   for (const bx of boxes) {
-    const V = corners(bx);
-    const M = bx.M;
+    const [x0, y0, z0] = bx.f, [x1, y1, z1] = bx.t;
+    const V = [
+      [x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0],
+      [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1],
+    ];
     const F = [
       [[0, 1, 2, 3], [0, 0, -1]],
       [[5, 4, 7, 6], [0, 0, 1]],
@@ -84,12 +64,7 @@ export function renderCharacter(boxes, opts = {}) {
       [[4, 5, 1, 0], [0, -1, 0]],
       [[3, 2, 6, 7], [0, 1, 0]],
     ];
-    for (const [idx, n0] of F) {
-      const n = M ? [
-        M[0] * n0[0] + M[1] * n0[1] + M[2] * n0[2],
-        M[4] * n0[0] + M[5] * n0[1] + M[6] * n0[2],
-        M[8] * n0[0] + M[9] * n0[1] + M[10] * n0[2],
-      ] : n0;
+    for (const [idx, n] of F) {
       // rotate normal into view space for shading + culling
       const nx = n[0] * cyw - n[2] * syw;
       const nz1 = n[0] * syw + n[2] * cyw;
