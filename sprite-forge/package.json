@@ -1,0 +1,13 @@
+{
+  "name": "sprite-forge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic pixel-art sprite and tile generator for a Minecraft-style first-person game",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "pngjs": "^7.0.0"
+  }
+}
