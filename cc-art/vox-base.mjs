@@ -104,7 +104,7 @@ function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral
     out.push(b([-1.8, H.mouthY, fz], [1.8, H.mouthY + 1.2, fz + 1], C.mouth));
   }
   if (faceHair) out.push(...faceHair);
-  return out;
+  return tag('head', out);
 }
 
 /** Torso with garment. `trim` adds gold/contrast detail. */
@@ -166,6 +166,7 @@ function arms({ col, colSh, cuff = null, hand = C.skin, lift = 0, o = C.outline 
     if (cuff) out.push(b([lo, yBot, -aw - 0.4], [hi, yBot + 3, aw + 0.4], cuff));
     // hand
     out.push(b([lo + 0.5, yBot - 5, -aw + 0.5], [hi - 0.5, yBot, aw - 0.5], hand));
+    tag(sx > 0 ? 'armR' : 'armL', out.filter((bx) => !bx.g));
   }
   return out;
 }
@@ -190,4 +191,79 @@ function shadeHex(hex, f) {
   return `#${((r << 16) | (g << 8) | bl).toString(16).padStart(6, '0')}`;
 }
 
-export { b, pair, head, torso, arms, legs, shadeHex };
+/* ───────────────────────────────── posing ───────────────────────────────── */
+
+/** Mark boxes as belonging to a rig group: 'head' | 'armL' | 'armR'.
+ *  Untagged boxes are 'body'. Held props are tagged with the arm holding them. */
+function tag(g, boxes) {
+  for (const bx of boxes) bx.g = g;
+  return boxes;
+}
+
+/** Pose table, degrees. Arms: `out` swings away from the body, `fwd` swings
+ *  toward the camera. Head: `nod` (+ = chin down), `tilt` (sideways).
+ *  Body (whole character, pivot at the feet): `lean` (+ = toward camera),
+ *  `sway` (sideways), `dy` (units up). armR is the +x arm (the gavel hand). */
+export const POSES = {
+  idle:      {},
+  talking:   { armR: { fwd: 50, out: 15 }, head: { tilt: 5 }, lean: 2, sway: -3 },
+  happy:     { armR: { out: 150 }, armL: { out: 150 }, head: { nod: -8 }, dy: 3 },
+  angry:     { armR: { out: 22, fwd: 12 }, armL: { out: 22, fwd: 12 }, head: { nod: 8 }, lean: 8 },
+  shocked:   { armR: { out: 65 }, armL: { out: 65 }, head: { nod: -10 }, lean: -6, dy: 2 },
+  laughing:  { armR: { fwd: 28, out: -10 }, armL: { fwd: 28, out: -10 }, head: { nod: -16 }, lean: -10 },
+  crying:    { armR: { fwd: 140, out: -25 }, head: { nod: 14 }, lean: 4, sway: 3 },
+  confused:  { armR: { out: 140, fwd: 20 }, head: { tilt: -12 }, sway: 8 },
+  objection: { armR: { fwd: 60, out: 55 }, armL: { out: 10, fwd: -10 }, head: { nod: -4 }, lean: 6, sway: -5 },
+  defeated:  { armR: { out: 3, fwd: -4 }, armL: { out: 3, fwd: -4 }, head: { nod: 18 }, lean: 10, dy: -2 },
+};
+export const POSE_IDS = Object.keys(POSES);
+
+/** Idle variants: small, readable deltas from the base idle, one table per
+ *  character (see IDLE in vox-chars.mjs). They live outside POSES on purpose:
+ *  POSE_IDS stays the 10 core poses, and IDLE_IDS lists the extras. */
+export const IDLE_IDS = ['idle_a', 'idle_b', 'idle_c'];
+
+const D2R = Math.PI / 180;
+const IDENT = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+const rotX = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0]; };
+const rotY = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0]; };
+const rotZ = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0]; };
+const move = (x, y, z) => [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z];
+
+/** A∘B for 3x4 affine matrices (apply B first). */
+function mul(A, B) {
+  const o = new Array(12);
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) o[r * 4 + c] = A[r * 4] * B[c] + A[r * 4 + 1] * B[4 + c] + A[r * 4 + 2] * B[8 + c];
+    o[r * 4 + 3] = A[r * 4] * B[3] + A[r * 4 + 1] * B[7] + A[r * 4 + 2] * B[11] + A[r * 4 + 3];
+  }
+  return o;
+}
+const about = (p, R) => mul(move(p[0], p[1], p[2]), mul(R, move(-p[0], -p[1], -p[2])));
+const isIdent = (M) => M.every((v, i) => Math.abs(v - IDENT[i]) < 1e-9);
+
+/** Apply a pose to tagged boxes. Zero-angle groups are left untouched, so
+ *  `idle` renders exactly like the unposed model. `over` patches the table
+ *  per character (e.g. the Judge raises the gavel instead of pointing). */
+export function posed(boxes, pose = 'idle', over = {}) {
+  const P = { ...(POSES[pose] || POSES.idle), ...(over[pose] || {}) };  // idle_a/b/c come in via `over`
+  // pitch is negated: +X rotation tips the top of a part away from the camera
+  const body = mul(move(0, P.dy || 0, 0), mul(rotZ(-(P.sway || 0)), rotX(-(P.lean || 0))));
+  const neck = [0, H.neck, 0];
+  const hd = P.head || {};
+  const group = {
+    body,
+    head: mul(body, about(neck, mul(rotZ(-(hd.tilt || 0)), rotX(-(hd.nod || 0))))),
+  };
+  for (const [g, sx] of [['armR', 1], ['armL', -1]]) {
+    const a = P[g] || {};
+    const shoulder = [sx * (H.torsoW + H.armW * 1.5), H.armTop - 2, 0];
+    group[g] = mul(body, about(shoulder, mul(rotZ(sx * (a.out || 0)), mul(rotY(sx * (a.across || 0)), rotX(a.fwd || 0)))));
+  }
+  return boxes.map((bx) => {
+    const M = group[bx.g || 'body'];
+    return isIdent(M) ? bx : { ...bx, M };
+  });
+}
+
+export { b, pair, head, torso, arms, legs, shadeHex, tag };

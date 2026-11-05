@@ -1,7 +1,8 @@
 // Voxel character export — realistic proportions, 8 expressions + 10 poses each.
 // Renders via char-render.mjs (orthographic, supersampled, two-light rig).
 import { CHARS, CHAR_IDS } from './vox-chars.mjs';
-import { renderCharacter } from './char-render.mjs';
+import { renderCharacter, boundsOf } from './char-render.mjs';
+import { POSE_IDS, IDLE_IDS } from './vox-base.mjs';
 import { Canvas } from './core.mjs';
 import fs from 'node:fs';
 
@@ -17,7 +18,7 @@ export const EXPR = {
   confused: { eye: 'round',  mouth: 'frown' },
   smug:     { eye: 'sharp',  mouth: 'neutral' },
 };
-export const POSE = ['idle', 'talking', 'happy', 'angry', 'shocked', 'laughing', 'crying', 'confused', 'objection', 'defeated'];
+export const POSE = POSE_IDS;
 
 /** Apply an expression by swapping the mouth/eye boxes' materials. */
 function withExpr(parts, e) {
@@ -65,6 +66,7 @@ function sheet(imgs, cols, cw, ch, outFile) {
 }
 
 let count = 0;
+const idleRows = [];   // per character: idle, idle_a, idle_b, idle_c
 const report = [];
 
 for (const id of CHAR_IDS) {
@@ -89,11 +91,13 @@ for (const id of CHAR_IDS) {
   }
   sheet(exprImgs, 4, 190, 300, `${dir}/_expressions.png`);
 
-  // poses
+  // poses — each wears its matching expression, and the whole set shares one
+  // framing so frames stay the same scale when swapped during an animation
+  const poseParts = POSE.map((po) => CHARS[id].parts(po, EXPR[po] ? po : 'neutral'));
+  const bounds = boundsOf(poseParts.flat());
   const poseImgs = [];
-  for (const po of POSE) {
-    const parts = CHARS[id].parts(po, 'neutral');
-    const img = trim(renderCharacter(parts, { w: 300, h: 420, yaw: 14, pitch: 6 }));
+  for (const [i, po] of POSE.entries()) {
+    const img = trim(renderCharacter(poseParts[i], { w: 300, h: 420, yaw: 14, pitch: 6, bounds }));
     img.save(`${dir}/poses/${po}.png`);
     img.scale(2).save(`${dir}/poses/${po}@2x.png`);
     poseImgs.push(img);
@@ -101,7 +105,18 @@ for (const id of CHAR_IDS) {
   }
   sheet(poseImgs, 5, 170, 300, `${dir}/_poses.png`);
 
-  report.push({ id, label: CHARS[id].label, expressions: 8, poses: 10 });
+  // idle variants — same framing as the poses so they swap in without a size pop
+  const idleRow = [poseImgs[0]];
+  for (const v of IDLE_IDS) {
+    const img = trim(renderCharacter(CHARS[id].parts(v, 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6, bounds }));
+    img.save(`${dir}/poses/${v}.png`);
+    img.scale(2).save(`${dir}/poses/${v}@2x.png`);
+    idleRow.push(img);
+    count++;
+  }
+  idleRows.push(...idleRow);
+
+  report.push({ id, label: CHARS[id].label, expressions: 8, poses: 10, idleVariants: IDLE_IDS.length });
   console.log(`${id}: done`);
 }
 
@@ -109,12 +124,16 @@ for (const id of CHAR_IDS) {
 const lineup = CHAR_IDS.map((id) => trim(renderCharacter(CHARS[id].parts('idle', 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6 })));
 sheet(lineup, 4, 300, 420, `${OUT}/_previews/lineup.png`);
 
+// idle-variant preview: one row per character, columns = idle + variants
+sheet(idleRows, IDLE_IDS.length + 1, 170, 300, `${OUT}/_previews/idle-variants.png`);
+
 fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
   canvas: { master: [300, 420] },
   proportions: '4.5-5.0 heads tall (realistic, NOT chibi)',
   note: 'Voxel characters. Source of truth: cc-art/vox-chars.mjs. Head is ~23% of total height.',
   expressions: Object.keys(EXPR),
   poses: POSE,
+  idleVariants: IDLE_IDS,
   characters: report,
 }, null, 2));
 
