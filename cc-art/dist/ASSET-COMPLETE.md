@@ -24,7 +24,7 @@ Verified against the filesystem.
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
 | **3D models** | `.bbmodel` (995 elements) | ✅ |
-| **Animation data** | 54 char + 10 system | ✅ |
+| **Animation data** | 85 char (incl. 3 idle variants x 8 characters) + 10 system | ✅ |
 
 ### What closed the previous gaps
 
@@ -67,7 +67,12 @@ brows above the shades. Say the word and I'll do (b) — it's a 10-line change.
 
 ```
 characters/<id>/poses/{idle,talking,happy,angry,shocked,laughing,crying,confused,objection,defeated}.png
+characters/<id>/poses/{idle_a,idle_b,idle_c}.png    (idle variants, + @2x of each)
 ```
+
+Idle variants are per-character rig deltas (`IDLE` in `vox-chars.mjs`; `across` in the
+rig swings a raised hand to the midline). Preview: `characters/_previews/idle-variants.png`
+(rows: character; columns: idle, a, b, c). Picking rules are in ANIMATION-GUIDE.md.
 
 Data-driven: `POSES` in `vox-base.mjs` gives each pose per-arm swing (`out`/`fwd`),
 head `nod`/`tilt`, and body `lean`/`sway`/`dy`. Boxes are tagged into rig groups
@@ -171,7 +176,7 @@ node fx-kit.mjs              # FX
 |---|---|
 | Rebuild player on `pen3` | Biggest quality win, but the existing parts function |
 | Judge expression separation | Faithful as-is; a taste call |
-| 2–3 idle variants per char | Repetition only shows in long sessions |
+| Animated (multi-frame) idle gestures | Idle variants exist as held poses; continuous motion is polish |
 | Wordmark, share card | Marketing, not gameplay |
 | GLB export of the `.bbmodel` | Needs a GUI click in Blockbench |
 
