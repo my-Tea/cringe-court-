@@ -73,7 +73,9 @@ export const JUDGE = {
       b([gx - 1.4, gy, -1.4], [gx + 1.4, gy + 26, 1.4], C.hairBr),
       b([gx - 6, gy + 24, -3], [gx + 6, gy + 32, 3], C.hairBrLt),
       b([gx - 6.6, gy + 26, -3.4], [gx + 6.6, gy + 29, 3.4], C.gold),
-      ...pair([gx - 7, gy + 24, -3], [gx - 5.6, gy + 32, 3], C.goldLt),
+      // end caps on both faces of the head (pair() would mirror one onto the left hand)
+      b([gx - 7, gy + 24, -3], [gx - 5.6, gy + 32, 3], C.goldLt),
+      b([gx + 5.6, gy + 24, -3], [gx + 7, gy + 32, 3], C.goldLt),
     ]));
 
     // the Judge never points — he raises the gavel
