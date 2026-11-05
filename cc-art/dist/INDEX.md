@@ -1,6 +1,6 @@
 # CringeCourt — Asset Bundle Index
 
-Start here. Four guides, in the order a coding agent should read them.
+Start here. Five guides, in the order a coding agent should read them.
 
 | Order | File | Answers |
 |---|---|---|
@@ -8,6 +8,8 @@ Start here. Four guides, in the order a coding agent should read them.
 | 2 | **`ASSET-GUIDE.md`** | All 41 props, 13 block textures, palette, placement conventions |
 | 3 | **`CHARACTER-SPEC.md`** | Every character, the layer system, customization, manifests |
 | 4 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 54 animations |
+| 5 | **`ASSET-COMPLETE.md`** | Final inventory + what remains (optional polish only) |
+| 6 | `GAP-ANALYSIS.md` | Historical: what the gaps were before they were filled |
 
 ## Machine-readable data
 
@@ -51,7 +53,11 @@ const anim = (await fetch('animation/animations.json').then(r => r.json()))
 | Block textures | ✅ 13 tileable 16×16 |
 | Characters | ✅ 8 voxel characters, 643 boxes, 3 views each |
 | Animation data | ✅ 54 animations, validated, timed |
-| Expressions / poses | ⬜ Neutral render only |
+| Expressions | ✅ **64** (8 per character) |
+| Poses | ✅ **80** (10 per character) |
+| UI kit | ✅ **34** assets |
+| FX | ✅ **10** |
+| Player parts | ✅ **60** |
 
 ## Three things to know before you start
 
