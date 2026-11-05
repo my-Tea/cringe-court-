@@ -1,0 +1,3014 @@
+{
+  "schemaVersion": 1,
+  "characters": {
+    "judge": {
+      "id": "judge",
+      "fixed": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "judge"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "judge"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "judge"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "judge"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "judge"
+        },
+        {
+          "id": "objection",
+          "loop": false,
+          "duration": 1.4,
+          "interrupt": "talk",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.55,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "judge",
+          "callout": "ORDER!"
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "judge"
+        }
+      ]
+    },
+    "prosecutor": {
+      "id": "prosecutor",
+      "fixed": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "prosecutor"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "prosecutor"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "prosecutor"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "prosecutor"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "prosecutor"
+        },
+        {
+          "id": "objection",
+          "loop": false,
+          "duration": 1.4,
+          "interrupt": "talk",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.55,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "prosecutor",
+          "callout": "OBJECTION!"
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "prosecutor"
+        }
+      ]
+    },
+    "defense": {
+      "id": "defense",
+      "fixed": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "defense"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "defense"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "defense"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "defense"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "defense"
+        },
+        {
+          "id": "objection",
+          "loop": false,
+          "duration": 1.4,
+          "interrupt": "talk",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "objection",
+              "expression": "confused",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              },
+              "fx": "flash"
+            },
+            {
+              "t": 0.55,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "defense",
+          "callout": "COUNTER!"
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "defense"
+        }
+      ]
+    },
+    "bailiff": {
+      "id": "bailiff",
+      "fixed": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "bailiff"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "bailiff"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "bailiff"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "bailiff"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "bailiff"
+        },
+        {
+          "id": "objection",
+          "loop": false,
+          "duration": 1.4,
+          "interrupt": "talk",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.55,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "bailiff",
+          "callout": "ORDER!"
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "bailiff"
+        }
+      ]
+    },
+    "clerk": {
+      "id": "clerk",
+      "fixed": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "clerk"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "clerk"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "clerk"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "clerk"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "clerk"
+        },
+        {
+          "id": "objection",
+          "loop": false,
+          "duration": 1.4,
+          "interrupt": "talk",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "objection",
+              "expression": "confused",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              },
+              "fx": "sweat"
+            },
+            {
+              "t": 0.55,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "clerk",
+          "callout": ""
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "clerk"
+        }
+      ]
+    },
+    "juror": {
+      "id": "juror",
+      "fixed": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "juror"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "juror"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "juror"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "juror"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "juror"
+        },
+        {
+          "id": "objection",
+          "loop": false,
+          "duration": 1.4,
+          "interrupt": "talk",
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "objection",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              },
+              "fx": "sweat"
+            },
+            {
+              "t": 0.55,
+              "pose": "objection",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -6,
+                "scale": 1.06,
+                "rot": -2
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.4,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "juror",
+          "callout": "..."
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "juror"
+        }
+      ]
+    },
+    "ai-narrator": {
+      "id": "ai-narrator",
+      "fixed": true,
+      "humanoid": false,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "states": [
+            "idle"
+          ],
+          "note": "Sprite-state animator, not pose-based. Frame-swap the screen face."
+        },
+        {
+          "id": "loading",
+          "loop": true,
+          "states": [
+            "loading"
+          ],
+          "note": "Sprite-state animator, not pose-based. Frame-swap the screen face."
+        },
+        {
+          "id": "processing",
+          "loop": true,
+          "states": [
+            "processing"
+          ],
+          "note": "Sprite-state animator, not pose-based. Frame-swap the screen face."
+        },
+        {
+          "id": "success",
+          "loop": false,
+          "states": [
+            "success"
+          ],
+          "note": "Sprite-state animator, not pose-based. Frame-swap the screen face."
+        },
+        {
+          "id": "failure",
+          "loop": false,
+          "states": [
+            "failure"
+          ],
+          "note": "Sprite-state animator, not pose-based. Frame-swap the screen face."
+        },
+        {
+          "id": "narration",
+          "loop": false,
+          "states": [
+            "narration"
+          ],
+          "note": "Sprite-state animator, not pose-based. Frame-swap the screen face."
+        }
+      ]
+    },
+    "player": {
+      "id": "player",
+      "fixed": false,
+      "layered": true,
+      "animations": [
+        {
+          "id": "idle",
+          "loop": true,
+          "duration": 2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": -2,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 2,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "player"
+        },
+        {
+          "id": "talk",
+          "loop": true,
+          "duration": 1.2,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "talking",
+              "expression": "smug",
+              "transform": {
+                "x": 0,
+                "y": -1,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "talking",
+              "expression": "happy",
+              "transform": {
+                "x": 1,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "talking",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "player"
+        },
+        {
+          "id": "react_happy",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.15,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -8,
+                "scale": 1.05,
+                "rot": 2
+              }
+            },
+            {
+              "t": 0.6,
+              "pose": "happy",
+              "expression": "happy",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.02,
+                "rot": 1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "player"
+        },
+        {
+          "id": "react_angry",
+          "loop": false,
+          "duration": 0.9,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 0,
+                "y": -4,
+                "scale": 1.04,
+                "rot": -2
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.4,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": 2,
+                "y": -3,
+                "scale": 1.03,
+                "rot": 1
+              },
+              "fx": "shake"
+            },
+            {
+              "t": 0.7,
+              "pose": "angry",
+              "expression": "angry",
+              "transform": {
+                "x": -2,
+                "y": -2,
+                "scale": 1.02,
+                "rot": -1
+              }
+            },
+            {
+              "t": 0.9,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "player"
+        },
+        {
+          "id": "react_shocked",
+          "loop": false,
+          "duration": 0.8,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.1,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -10,
+                "scale": 1.08,
+                "rot": 0
+              },
+              "fx": "impact"
+            },
+            {
+              "t": 0.5,
+              "pose": "shocked",
+              "expression": "shocked",
+              "transform": {
+                "x": 0,
+                "y": -7,
+                "scale": 1.05,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.8,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "player"
+        },
+        {
+          "id": "defeated",
+          "loop": false,
+          "duration": 1.6,
+          "tracks": [
+            {
+              "t": 0,
+              "pose": "idle",
+              "expression": "neutral",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "scale": 1,
+                "rot": 0
+              }
+            },
+            {
+              "t": 0.3,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 14,
+                "scale": 0.94,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.2,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            },
+            {
+              "t": 1.6,
+              "pose": "defeated",
+              "expression": "crying",
+              "transform": {
+                "x": 0,
+                "y": 16,
+                "scale": 0.93,
+                "rot": 0
+              }
+            }
+          ],
+          "character": "player"
+        }
+      ]
+    }
+  },
+  "system": {
+    "enter_court": {
+      "id": "enter_court",
+      "duration": 2.4,
+      "steps": [
+        {
+          "t": 0,
+          "action": "doors_open",
+          "sound": "door_creak"
+        },
+        {
+          "t": 0.5,
+          "action": "spotlight_on"
+        },
+        {
+          "t": 1.2,
+          "action": "case_number_stamp",
+          "sound": "stamp"
+        },
+        {
+          "t": 2.4,
+          "action": "idle"
+        }
+      ]
+    },
+    "case_accepted": {
+      "id": "case_accepted",
+      "duration": 1.6,
+      "steps": [
+        {
+          "t": 0,
+          "action": "portrait_pop"
+        },
+        {
+          "t": 0.4,
+          "action": "stamp_charges_filed",
+          "sound": "stamp"
+        },
+        {
+          "t": 1.6,
+          "action": "idle"
+        }
+      ]
+    },
+    "jury_seated": {
+      "id": "jury_seated",
+      "duration": 2,
+      "steps": [
+        {
+          "t": 0,
+          "action": "seat_1"
+        },
+        {
+          "t": 0.5,
+          "action": "seat_2"
+        },
+        {
+          "t": 1,
+          "action": "seat_3"
+        },
+        {
+          "t": 1.5,
+          "action": "badges_glow"
+        },
+        {
+          "t": 2,
+          "action": "idle"
+        }
+      ]
+    },
+    "bond_committed": {
+      "id": "bond_committed",
+      "duration": 1.4,
+      "steps": [
+        {
+          "t": 0,
+          "action": "receipt_in",
+          "sound": "coin"
+        },
+        {
+          "t": 1.4,
+          "action": "idle"
+        }
+      ]
+    },
+    "ballot_commit": {
+      "id": "ballot_commit",
+      "duration": 1.6,
+      "steps": [
+        {
+          "t": 0,
+          "action": "ballot_rise"
+        },
+        {
+          "t": 0.5,
+          "action": "ballot_drop",
+          "sound": "paper"
+        },
+        {
+          "t": 1,
+          "action": "sealed_box_shut"
+        },
+        {
+          "t": 1.6,
+          "action": "idle"
+        }
+      ]
+    },
+    "ballot_reveal": {
+      "id": "ballot_reveal",
+      "duration": 1.8,
+      "steps": [
+        {
+          "t": 0,
+          "action": "seals_unlock",
+          "sound": "unlock"
+        },
+        {
+          "t": 0.8,
+          "action": "ballots_reveal"
+        },
+        {
+          "t": 1.8,
+          "action": "idle"
+        }
+      ]
+    },
+    "verdict_guilty": {
+      "id": "verdict_guilty",
+      "duration": 2.2,
+      "steps": [
+        {
+          "t": 0,
+          "action": "gavel_strike",
+          "sound": "gavel"
+        },
+        {
+          "t": 0.3,
+          "action": "lighting_shift_red",
+          "fx": "flash"
+        },
+        {
+          "t": 0.6,
+          "action": "card_guilty",
+          "fx": "impact"
+        },
+        {
+          "t": 2.2,
+          "action": "idle"
+        }
+      ]
+    },
+    "verdict_not_cooked": {
+      "id": "verdict_not_cooked",
+      "duration": 2.2,
+      "steps": [
+        {
+          "t": 0,
+          "action": "gavel_strike",
+          "sound": "gavel"
+        },
+        {
+          "t": 0.3,
+          "action": "lighting_shift_green",
+          "fx": "flash"
+        },
+        {
+          "t": 0.6,
+          "action": "card_not_cooked",
+          "fx": "impact"
+        },
+        {
+          "t": 2.2,
+          "action": "idle"
+        }
+      ]
+    },
+    "verdict_none": {
+      "id": "verdict_none",
+      "duration": 2,
+      "steps": [
+        {
+          "t": 0,
+          "action": "card_no_verdict"
+        },
+        {
+          "t": 2,
+          "action": "idle"
+        }
+      ]
+    },
+    "settlement": {
+      "id": "settlement",
+      "duration": 1.2,
+      "steps": [
+        {
+          "t": 0,
+          "action": "receipt_slide_in",
+          "sound": "paper"
+        },
+        {
+          "t": 1.2,
+          "action": "idle"
+        }
+      ]
+    }
+  },
+  "stateMachine": {
+    "states": [
+      "idle",
+      "talk",
+      "action",
+      "react"
+    ],
+    "looping": [
+      "idle",
+      "talk"
+    ],
+    "oneShot": [
+      "react_happy",
+      "react_angry",
+      "react_shocked",
+      "objection",
+      "defeated"
+    ],
+    "rules": [
+      "idle and talk loop; everything else is one-shot.",
+      "A one-shot interrupts any loop and blocks new triggers until it ends.",
+      "objection may interrupt talk; other one-shots may not.",
+      "Never leave a character mid-one-shot across a scene transition — snap to idle.",
+      "While dialogue streams, alternate talk <-> idle on a 1.2-2.4s random interval."
+    ]
+  }
+}
