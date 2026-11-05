@@ -1,0 +1,98 @@
+{
+  "style": "voxel, 4.5-5 heads tall (same proportions as the cast)",
+  "canvas": {
+    "w": 220,
+    "h": 320
+  },
+  "default": {
+    "body": "androgynous",
+    "skin": "#E8C4A8",
+    "eyes": "round",
+    "hair": "short",
+    "hairColor": "#6B4226",
+    "clothing": "tee",
+    "clothingColor": "#6E1B2A",
+    "accessory": "none",
+    "expression": "neutral"
+  },
+  "options": {
+    "body": [
+      "masculine",
+      "feminine",
+      "androgynous"
+    ],
+    "skin": [
+      "#FBE0C8",
+      "#F5D2B4",
+      "#E8C4A8",
+      "#C49A7A",
+      "#A87B5C",
+      "#7C5842"
+    ],
+    "eyes": [
+      "round",
+      "sharp",
+      "sleepy",
+      "sparkle"
+    ],
+    "hair": [
+      "short",
+      "long",
+      "ponytail",
+      "buns",
+      "messy",
+      "buzz",
+      "afro",
+      "spiky"
+    ],
+    "hairColor": [
+      "#1A1A1A",
+      "#6B4226",
+      "#E6D08A",
+      "#E87DB4",
+      "#9B6BE0",
+      "#5FD3E0",
+      "#DCD9D3"
+    ],
+    "clothing": [
+      "tee",
+      "hoodie",
+      "shirt",
+      "suit",
+      "jacket",
+      "robe",
+      "meme"
+    ],
+    "clothingColor": [
+      "#6E1B2A",
+      "#232A44",
+      "#6B4226",
+      "#9B6BE0",
+      "#D9A046",
+      "#FFF6E4",
+      "#3F6FB5"
+    ],
+    "accessory": [
+      "none",
+      "glasses",
+      "shades",
+      "cap",
+      "headphones",
+      "chain",
+      "earrings",
+      "mask"
+    ],
+    "expression": [
+      "neutral",
+      "happy",
+      "angry",
+      "shocked",
+      "laughing",
+      "crying",
+      "confused",
+      "smug"
+    ]
+  },
+  "build": "buildPlayer({ body, skin, eyes, hair, hairColor, clothing, clothingColor, accessory, expression })",
+  "note": "Parts are composable box lists — not pre-rendered combinations."
+}

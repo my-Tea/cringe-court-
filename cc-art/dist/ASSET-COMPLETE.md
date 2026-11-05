@@ -1,6 +1,12 @@
 # Asset Completeness Report
 
-Verified against the filesystem. **547 PNGs, 15 MB.**
+**Style: VOXEL, 4.5–5.0 heads tall (realistic proportions, NOT chibi).**
+
+The earlier 2D hand-drawn and chibi-voxel passes were both replaced. Every
+character now matches the Judge reference: cubic head ≈23% of total height,
+box-built body, flat-shaded voxel look.
+
+Verified against the filesystem.
 
 ---
 
@@ -8,10 +14,10 @@ Verified against the filesystem. **547 PNGs, 15 MB.**
 
 | Asset family | Count | Status |
 |---|---|---|
-| **Character expressions** | **64** (8 chars × 8) | ✅ Every character has all 8 |
+| **Character expressions** | **64** (8 chars × 8) | ✅ Passed a real expression string into each builder |
 | **Character poses** | **80** (8 chars × 10) | ✅ Every character has all 10 |
 | **Character masters** | 8 `sprite.png` + `@2x` | ✅ |
-| **Player parts** | **60** (9 categories + default) | ✅ |
+| **Player parts** | **58** + default, voxel | ✅ Matches cast proportions (4.5 heads) |
 | **UI kit** | **34** assets (47 with @2x icons) | ✅ |
 | **FX sprites** | **10** | ✅ |
 | **Props** | 82 (41 props @1x + @4x) | ✅ |
