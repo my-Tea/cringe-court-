@@ -1,0 +1,904 @@
+[
+  {
+    "name": "judge_bench",
+    "label": "Judge bench + high back",
+    "boxes": 40,
+    "size": [
+      38,
+      47,
+      24
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 38,
+      "d": 24
+    },
+    "height": 47,
+    "image": "judge_bench.png",
+    "image4x": "judge_bench@4x.png"
+  },
+  {
+    "name": "gavel",
+    "label": "Judge gavel (held prop)",
+    "boxes": 17,
+    "size": [
+      16,
+      23,
+      6.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 16,
+      "d": 6.8
+    },
+    "height": 22,
+    "image": "gavel.png",
+    "image4x": "gavel@4x.png"
+  },
+  {
+    "name": "gavel_block",
+    "label": "Gavel sound block",
+    "boxes": 12,
+    "size": [
+      10.8,
+      4,
+      10.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 10.8,
+      "d": 10.8
+    },
+    "height": 4,
+    "image": "gavel_block.png",
+    "image4x": "gavel_block@4x.png"
+  },
+  {
+    "name": "prosecutor_desk",
+    "label": "Prosecution lectern desk",
+    "boxes": 22,
+    "size": [
+      24.8,
+      27,
+      15.100000000000001
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 24.8,
+      "d": 15.100000000000001
+    },
+    "height": 27,
+    "image": "prosecutor_desk.png",
+    "image4x": "prosecutor_desk@4x.png"
+  },
+  {
+    "name": "defense_desk",
+    "label": "Defence desk (mirror of prosecution)",
+    "boxes": 22,
+    "size": [
+      24.8,
+      27,
+      15.100000000000001
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 24.8,
+      "d": 15.100000000000001
+    },
+    "height": 27,
+    "image": "defense_desk.png",
+    "image4x": "defense_desk@4x.png"
+  },
+  {
+    "name": "witness_stand",
+    "label": "Witness stand with rail",
+    "boxes": 22,
+    "size": [
+      21.2,
+      19,
+      17.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 21.2,
+      "d": 17.2
+    },
+    "height": 19,
+    "image": "witness_stand.png",
+    "image4x": "witness_stand@4x.png"
+  },
+  {
+    "name": "jury_box",
+    "label": "Jury box (3 seats)",
+    "boxes": 35,
+    "size": [
+      45.2,
+      15,
+      17.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 45.2,
+      "d": 17.2
+    },
+    "height": 15,
+    "image": "jury_box.png",
+    "image4x": "jury_box@4x.png"
+  },
+  {
+    "name": "evidence_screen",
+    "label": "Evidence wall screen",
+    "boxes": 23,
+    "size": [
+      33.2,
+      26.6,
+      5.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 33.2,
+      "d": 5.6
+    },
+    "height": 26,
+    "image": "evidence_screen.png",
+    "image4x": "evidence_screen@4x.png"
+  },
+  {
+    "name": "sealed_ballot_box",
+    "label": "Sealed ballot box (locked)",
+    "boxes": 23,
+    "size": [
+      20,
+      25,
+      17.3
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 20,
+      "d": 17.3
+    },
+    "height": 25,
+    "image": "sealed_ballot_box.png",
+    "image4x": "sealed_ballot_box@4x.png"
+  },
+  {
+    "name": "ballot_box_open",
+    "label": "Ballot box (open / unlocked)",
+    "boxes": 19,
+    "size": [
+      20,
+      30.2,
+      17
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 20,
+      "d": 17
+    },
+    "height": 30.2,
+    "image": "ballot_box_open.png",
+    "image4x": "ballot_box_open@4x.png"
+  },
+  {
+    "name": "court_seal",
+    "label": "CringeCourt wall seal",
+    "boxes": 22,
+    "size": [
+      29.6,
+      22.6,
+      5.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 29.6,
+      "d": 5.6
+    },
+    "height": 22,
+    "image": "court_seal.png",
+    "image4x": "court_seal@4x.png"
+  },
+  {
+    "name": "courtroom_door",
+    "label": "Double courtroom doors",
+    "boxes": 28,
+    "size": [
+      29.2,
+      38,
+      5.4
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 29.2,
+      "d": 5.4
+    },
+    "height": 38,
+    "image": "courtroom_door.png",
+    "image4x": "courtroom_door@4x.png"
+  },
+  {
+    "name": "gallery_bench",
+    "label": "Gallery bench row",
+    "boxes": 25,
+    "size": [
+      33.2,
+      12,
+      13.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 33.2,
+      "d": 13.2
+    },
+    "height": 12,
+    "image": "gallery_bench.png",
+    "image4x": "gallery_bench@4x.png"
+  },
+  {
+    "name": "railing",
+    "label": "Bar railing (separation)",
+    "boxes": 27,
+    "size": [
+      37,
+      17,
+      3.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 37,
+      "d": 3.6
+    },
+    "height": 17,
+    "image": "railing.png",
+    "image4x": "railing@4x.png"
+  },
+  {
+    "name": "spotlight_rig",
+    "label": "Overhead spotlight housing",
+    "boxes": 16,
+    "size": [
+      10.8,
+      11.4,
+      10.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 10.8,
+      "d": 10.8
+    },
+    "height": 10.4,
+    "image": "spotlight_rig.png",
+    "image4x": "spotlight_rig@4x.png"
+  },
+  {
+    "name": "ceiling_ring",
+    "label": "Circular ceiling halo",
+    "boxes": 40,
+    "size": [
+      34,
+      3,
+      34
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 34,
+      "d": 34
+    },
+    "height": 2.4,
+    "image": "ceiling_ring.png",
+    "image4x": "ceiling_ring@4x.png"
+  },
+  {
+    "name": "column",
+    "label": "Marble column (tall)",
+    "boxes": 22,
+    "size": [
+      15.2,
+      38,
+      15.5
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 15.2,
+      "d": 15.5
+    },
+    "height": 38,
+    "image": "column.png",
+    "image4x": "column@4x.png"
+  },
+  {
+    "name": "arch_window",
+    "label": "Gothic arch window (lit)",
+    "boxes": 22,
+    "size": [
+      18.8,
+      28,
+      4.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 18.8,
+      "d": 4.2
+    },
+    "height": 28,
+    "image": "arch_window.png",
+    "image4x": "arch_window@4x.png"
+  },
+  {
+    "name": "dais_step",
+    "label": "Raised dais step",
+    "boxes": 23,
+    "size": [
+      49.2,
+      4,
+      25.4
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 49.2,
+      "d": 25.4
+    },
+    "height": 4,
+    "image": "dais_step.png",
+    "image4x": "dais_step@4x.png"
+  },
+  {
+    "name": "wall_panel",
+    "label": "Dark wall panel (modular)",
+    "boxes": 22,
+    "size": [
+      33.2,
+      26,
+      3.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 33.2,
+      "d": 3.2
+    },
+    "height": 26,
+    "image": "wall_panel.png",
+    "image4x": "wall_panel@4x.png"
+  },
+  {
+    "name": "sconce",
+    "label": "Wall sconce (warm light)",
+    "boxes": 13,
+    "size": [
+      10.8,
+      18,
+      6.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 10.8,
+      "d": 6.8
+    },
+    "height": 18,
+    "image": "sconce.png",
+    "image4x": "sconce@4x.png"
+  },
+  {
+    "name": "neon_sign",
+    "label": "\"ON TRIAL\" neon sign",
+    "boxes": 15,
+    "size": [
+      38,
+      12.6,
+      3.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 38,
+      "d": 3.2
+    },
+    "height": 12,
+    "image": "neon_sign.png",
+    "image4x": "neon_sign@4x.png"
+  },
+  {
+    "name": "banner_scales",
+    "label": "Hanging scales banner",
+    "boxes": 26,
+    "size": [
+      12.8,
+      28.799999999999997,
+      1.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 12.8,
+      "d": 1.6
+    },
+    "height": 26.4,
+    "image": "banner_scales.png",
+    "image4x": "banner_scales@4x.png"
+  },
+  {
+    "name": "stair_block",
+    "label": "Wide stair block",
+    "boxes": 29,
+    "size": [
+      41.2,
+      9.4,
+      21.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 41.2,
+      "d": 21.2
+    },
+    "height": 9.4,
+    "image": "stair_block.png",
+    "image4x": "stair_block@4x.png"
+  },
+  {
+    "name": "fountain",
+    "label": "Two-tier stone fountain",
+    "boxes": 34,
+    "size": [
+      29.2,
+      21,
+      29.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 29.2,
+      "d": 29.2
+    },
+    "height": 21,
+    "image": "fountain.png",
+    "image4x": "fountain@4x.png"
+  },
+  {
+    "name": "lamp_post",
+    "label": "Street lamp post (lit)",
+    "boxes": 20,
+    "size": [
+      9.2,
+      36,
+      9.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 9.2,
+      "d": 9.2
+    },
+    "height": 36,
+    "image": "lamp_post.png",
+    "image4x": "lamp_post@4x.png"
+  },
+  {
+    "name": "bench",
+    "label": "Park bench",
+    "boxes": 30,
+    "size": [
+      29.2,
+      13,
+      11.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 29.2,
+      "d": 11.2
+    },
+    "height": 13,
+    "image": "bench.png",
+    "image4x": "bench@4x.png"
+  },
+  {
+    "name": "barrel",
+    "label": "Wooden barrel",
+    "boxes": 12,
+    "size": [
+      11.6,
+      14,
+      11.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 11.6,
+      "d": 11.6
+    },
+    "height": 14,
+    "image": "barrel.png",
+    "image4x": "barrel@4x.png"
+  },
+  {
+    "name": "crate",
+    "label": "Wooden crate",
+    "boxes": 15,
+    "size": [
+      11.2,
+      10.6,
+      11.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 11.2,
+      "d": 11.6
+    },
+    "height": 10.6,
+    "image": "crate.png",
+    "image4x": "crate@4x.png"
+  },
+  {
+    "name": "bookshelf",
+    "label": "Bookshelf (court library)",
+    "boxes": 44,
+    "size": [
+      21.2,
+      27.6,
+      9.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 21.2,
+      "d": 9.2
+    },
+    "height": 27.6,
+    "image": "bookshelf.png",
+    "image4x": "bookshelf@4x.png"
+  },
+  {
+    "name": "throne_chair",
+    "label": "Red velvet armchair / throne",
+    "boxes": 29,
+    "size": [
+      20.8,
+      36,
+      17.4
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 20.8,
+      "d": 17.4
+    },
+    "height": 36,
+    "image": "throne_chair.png",
+    "image4x": "throne_chair@4x.png"
+  },
+  {
+    "name": "judge_desk",
+    "label": "Wood desk with papers + scales",
+    "boxes": 23,
+    "size": [
+      30.8,
+      13,
+      18.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 30.8,
+      "d": 18.8
+    },
+    "height": 13,
+    "image": "judge_desk.png",
+    "image4x": "judge_desk@4x.png"
+  },
+  {
+    "name": "trunk",
+    "label": "Treasure trunk / chest",
+    "boxes": 22,
+    "size": [
+      17.6,
+      14,
+      14.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 17.6,
+      "d": 14.2
+    },
+    "height": 14,
+    "image": "trunk.png",
+    "image4x": "trunk@4x.png"
+  },
+  {
+    "name": "tree_round",
+    "label": "Round leafy tree",
+    "boxes": 17,
+    "size": [
+      19.6,
+      31.4,
+      19.4
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 19.6,
+      "d": 19.4
+    },
+    "height": 31.4,
+    "image": "tree_round.png",
+    "image4x": "tree_round@4x.png"
+  },
+  {
+    "name": "tree_pine",
+    "label": "Pine tree",
+    "boxes": 14,
+    "size": [
+      16,
+      28.4,
+      16
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 16,
+      "d": 16
+    },
+    "height": 28.4,
+    "image": "tree_pine.png",
+    "image4x": "tree_pine@4x.png"
+  },
+  {
+    "name": "bush",
+    "label": "Shrub / hedge",
+    "boxes": 8,
+    "size": [
+      12.8,
+      9.2,
+      11
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 12.8,
+      "d": 11
+    },
+    "height": 9.2,
+    "image": "bush.png",
+    "image4x": "bush@4x.png"
+  },
+  {
+    "name": "flower_bed",
+    "label": "Flower bed with stone edging",
+    "boxes": 27,
+    "size": [
+      21.2,
+      5.4,
+      15.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 21.2,
+      "d": 15.2
+    },
+    "height": 5.4,
+    "image": "flower_bed.png",
+    "image4x": "flower_bed@4x.png"
+  },
+  {
+    "name": "signpost",
+    "label": "Wooden signpost",
+    "boxes": 14,
+    "size": [
+      15.2,
+      19.6,
+      3.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 15.2,
+      "d": 3.2
+    },
+    "height": 19.6,
+    "image": "signpost.png",
+    "image4x": "signpost@4x.png"
+  },
+  {
+    "name": "market_stall",
+    "label": "Market stall with striped awning",
+    "boxes": 53,
+    "size": [
+      27.2,
+      20.4,
+      19.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 27.2,
+      "d": 19.2
+    },
+    "height": 20.4,
+    "image": "market_stall.png",
+    "image4x": "market_stall@4x.png"
+  },
+  {
+    "name": "bunting",
+    "label": "Pennant bunting string",
+    "boxes": 38,
+    "size": [
+      43,
+      6.6,
+      1
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 43,
+      "d": 1
+    },
+    "height": 14.6,
+    "image": "bunting.png",
+    "image4x": "bunting@4x.png"
+  },
+  {
+    "name": "cart",
+    "label": "Two-wheel cart",
+    "boxes": 30,
+    "size": [
+      21.2,
+      14,
+      17.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 21.2,
+      "d": 17.6
+    },
+    "height": 14,
+    "image": "cart.png",
+    "image4x": "cart@4x.png"
+  }
+]
