@@ -1,0 +1,9 @@
+{
+  "image": "break_strip.png",
+  "frames": 10,
+  "cell": {
+    "w": 16,
+    "h": 16
+  },
+  "order": "single row, left to right, stage 0 (fresh) → 9 (about to break)"
+}

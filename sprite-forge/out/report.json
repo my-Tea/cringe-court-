@@ -1,0 +1,72 @@
+{
+  "generated": "2026-11-01T06:19:00.857Z",
+  "stats": [
+    {
+      "asset": "grass_top",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 6
+    },
+    {
+      "asset": "grass_side",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 8
+    },
+    {
+      "asset": "dirt",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 5
+    },
+    {
+      "asset": "stone",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 6
+    },
+    {
+      "asset": "cobblestone",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 4
+    },
+    {
+      "asset": "oak_planks",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 4
+    },
+    {
+      "asset": "sand",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 4
+    },
+    {
+      "asset": "crystal",
+      "kind": "tile",
+      "size": "16x16",
+      "colours": 6
+    },
+    {
+      "asset": "iron_pickaxe",
+      "kind": "item",
+      "size": "16x16",
+      "colours": 6
+    },
+    {
+      "asset": "iron_sword",
+      "kind": "item",
+      "size": "16x16",
+      "colours": 5
+    },
+    {
+      "asset": "crystal_pickaxe",
+      "kind": "item",
+      "size": "16x16",
+      "colours": 6
+    }
+  ],
+  "problems": []
+}
