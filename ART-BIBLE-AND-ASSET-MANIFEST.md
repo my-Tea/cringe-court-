@@ -103,7 +103,7 @@ Count: **5 hero/story characters + 1 player avatar + background NPC cast.**
 | 7 | **Juror** ×3 seats | Three distinguishable silhouettes; seated pose. They fill one-by-one (md §5) |
 | 8 | **Gallery / audience** | 6–10 repeating NPCs, back-of-head + 3/4 view |
 | 9 | **Court clerk / bailiff** | Optional; handy for "receipt" moments |
-| 10 | **Bystander villagers** (village scenes) — *cut, see `cc-art/dist/VILLAGE-DECISION.md`* | If you keep village scenes: Mara, Vera, Gus, Clem, Agnes, Milo from your journal shot |
+| 10 | **Bystander villagers** (village scenes) | If you keep village scenes: Mara, Vera, Gus, Clem, Agnes, Milo from your journal shot |
 
 > **Note on the female characters:** both your hero women (Miss Ratio, and the
 > magenta-haired prosecutor) exist only as *one* design in the refs. You need a
@@ -158,10 +158,6 @@ Count: **5 hero/story characters + 1 player avatar + background NPC cast.**
 
 ## Village props (only if village scenes ship)
 
-> **Status: cut (2026-11-02).** See `cc-art/dist/VILLAGE-DECISION.md`. The 17
-> courtyard props already built stay (5 furnish the courtroom, 12 form an
-> exterior kit); nothing below is built.
-
 Cobblestone plaza tile + circular medallion, dirt path, grass, water, sand,
 plank pier, **market stall** ×3 (red/white, blue/white, yellow/white awning),
 stall counter + crates + sacks, **covered well**, **lamp post** (emissive),
@@ -206,7 +202,6 @@ Don't build 120 assets before proving one frame. Sequence:
 5. **UI kit + 5 portraits** — needed for a playable vertical slice.
 6. **Props, one at a time**, only as a scene needs them.
 7. **Village set last** (or cut it — see the style note at the top).
-   **→ Cut.** Rationale in `cc-art/dist/VILLAGE-DECISION.md`.
 
 ---
 
