@@ -2,8 +2,8 @@ import { MODES, type ModeId } from '@cringe-court/core';
 import { stagePose } from '@/art/art';
 import { paths } from '@/app/routes';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
+import { webModes } from '@/modes/registry';
 import { Alert, Button, ButtonLink, Card, CardBody, CardHeader, CardTitle, Icon, PhaseStepper, Tooltip } from '@/ds';
-import { modeStart } from '@/modes/registry';
 import { MODE_PRESENTATION } from './modeContent';
 import { ModeFacts } from './ModeFacts';
 import styles from './pages.module.css';
@@ -11,7 +11,7 @@ import styles from './pages.module.css';
 export function ModePage({ id }: { id: ModeId }) {
   const mode = MODES[id];
   const m = MODE_PRESENTATION[id];
-  const start = modeStart(id);
+  const cta = webModes.get(id)?.cta;
   useDocumentTitle(mode.name);
 
   return (
@@ -26,17 +26,10 @@ export function ModePage({ id }: { id: ModeId }) {
             <p className={styles.modeHeadline}>{m.headline}</p>
             <p className={styles.heroLede}>{m.pitch}</p>
             <div className={styles.heroActions}>
-              {start ? (
-                <>
-                  <ButtonLink to={start.to} size="lg" iconStart={<Icon name="gavel" />}>
-                    {start.label}
-                  </ButtonLink>
-                  {start.secondary && (
-                    <ButtonLink to={start.secondary.to} size="lg" variant="secondary">
-                      {start.secondary.label}
-                    </ButtonLink>
-                  )}
-                </>
+              {cta ? (
+                <ButtonLink to={cta.to} size="lg" iconEnd={<Icon name="arrow-right" />}>
+                  {cta.label}
+                </ButtonLink>
               ) : (
                 <Tooltip content="Filing opens when the contracts and AI counsel phases land.">
                   <Button size="lg" disabled iconStart={<Icon name="lock" />}>
@@ -107,16 +100,11 @@ export function ModePage({ id }: { id: ModeId }) {
           </CardBody>
         </Card>
 
-        {start ? (
-          <Alert tone="info" title="Playable on the demo court" className={styles.modeAlert}>
-            This court runs on this browser with test USDC on a memory twin of the Arc testnet contract, offline AI counsel and a mock
-            World ID verifier. Open the invite in a second tab to play the other side. Nothing here touches real money.
-          </Alert>
-        ) : (
-          <Alert tone="warning" title="You are looking at the app shell" className={styles.modeAlert}>
-            This build has the courts, design system and rules, but no filing yet. Contracts on Arc testnet, AI counsel on 0G and
-            World ID juror screening arrive in the next phases. Nothing here touches money.
-          </Alert>
+        {!cta && (
+        <Alert tone="warning" title="You are looking at the app shell" className={styles.modeAlert}>
+          This build has the courts, design system and rules, but no filing yet. Contracts on Arc testnet, AI counsel on 0G and
+          World ID juror screening arrive in the next phases. Nothing here touches money.
+        </Alert>
         )}
       </div>
     </>
