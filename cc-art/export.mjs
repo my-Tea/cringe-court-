@@ -8,7 +8,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const manifest = [];
 for (const name of PROP_NAMES) {
   const p = PROPS[name];
-  const c = renderProp(p.parts, 2, { keepOrder: !!p.keepOrder });
+  const c = renderProp(p.parts, 2);
   c.save(`${OUT}/${name}.png`);
   c.scale(4).save(`${OUT}/${name}@4x.png`);
   // bounds, so the engine can place a collider / footprint
@@ -27,8 +27,6 @@ for (const name of PROP_NAMES) {
     pivot: [0, 0, 0],
     footprint: { w: max[0] - min[0], d: max[2] - min[2] },
     height: max[1],
-    // character-held props: grip point (prop space) + the hand/offset they are baked at
-    ...(p.hold && { holdAnchor: p.hold.anchor, heldBy: { character: p.hold.character, hand: p.hold.hand, handOffset: p.hold.offset } }),
     image: `${name}.png`,
     image4x: `${name}@4x.png`,
   });

@@ -11,9 +11,9 @@ disk on 2026-11-01.
 |---|---|---|---|
 | Courtroom scene | **1606 boxes** in world space | `scene/courtroom.boxes.json` | ✅ Complete |
 | Scene renders | 11 (6 POV + iso + cutaway) | `scene/*.png` | ✅ Complete |
-| Props | **53** (1138 boxes) | `sprites/props/` | ✅ Complete |
+| Props | **41** (995 boxes) | `sprites/props/` | ✅ Complete |
 | Block textures | **13** tileable 16×16 | `textures/blocks/` | ✅ Complete |
-| Prop model | `.bbmodel`, 1138 elements, 53 groups | `models/` | ✅ Complete |
+| Prop model | `.bbmodel`, 995 elements, 41 groups | `models/` | ✅ Complete |
 | Animation data | **54 char anims + 10 system** | `animation/animations.json` | ✅ Data complete, **no art** |
 | Voxel characters | **8** (643 boxes total) | `characters/<id>/` | ⚠️ Only front/¾/side renders |
 | Player parts | **58 PNGs** across 9 categories | `characters/player/` | ⚠️ Works, but art is rough |
@@ -47,8 +47,8 @@ disk on 2026-11-01.
 | 9 | Wordmark "CringeCourt" | 0 / 1 |
 | 10 | Share card frame | 0 / 1 |
 | 11 | Case-card template | 0 / 1 |
-| 12 | ~~Character-specific props as separate sprites~~ | ✅ Done: `judge_gavel` (+ `_raised`, `_strike`), `exhibit_a_paper`, `popcorn_bucket`, `papers_stack` in `sprites/props/` with `holdAnchor`. Bailiff has no baked held item |
-| 13 | Idle animation variants | ✅ 3 per char (`idle_a/b/c`) as held poses; multi-frame idle gestures still open |
+| 12 | Character-specific props as separate sprites | gavel, EXHIBIT A paper, popcorn, papers stack |
+| 13 | Idle animation variants | 1 per char instead of 2–3 (avoids visible repetition) |
 
 ---
 

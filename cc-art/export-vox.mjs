@@ -1,8 +1,7 @@
 // Voxel character export — realistic proportions, 8 expressions + 10 poses each.
 // Renders via char-render.mjs (orthographic, supersampled, two-light rig).
-import { CHARS, CHAR_IDS, JUROR_VARIANTS } from './vox-chars.mjs';
-import { renderCharacter, boundsOf } from './char-render.mjs';
-import { POSE_IDS, EXTRA_POSES, IDLE_IDS } from './vox-base.mjs';
+import { CHARS, CHAR_IDS } from './vox-chars.mjs';
+import { renderCharacter } from './char-render.mjs';
 import { Canvas } from './core.mjs';
 import fs from 'node:fs';
 
@@ -18,7 +17,7 @@ export const EXPR = {
   confused: { eye: 'round',  mouth: 'frown' },
   smug:     { eye: 'sharp',  mouth: 'neutral' },
 };
-export const POSE = POSE_IDS;
+export const POSE = ['idle', 'talking', 'happy', 'angry', 'shocked', 'laughing', 'crying', 'confused', 'objection', 'defeated'];
 
 /** Apply an expression by swapping the mouth/eye boxes' materials. */
 function withExpr(parts, e) {
@@ -66,7 +65,6 @@ function sheet(imgs, cols, cw, ch, outFile) {
 }
 
 let count = 0;
-const idleRows = [];   // per character: idle, idle_a, idle_b, idle_c
 const report = [];
 
 for (const id of CHAR_IDS) {
@@ -91,13 +89,11 @@ for (const id of CHAR_IDS) {
   }
   sheet(exprImgs, 4, 190, 300, `${dir}/_expressions.png`);
 
-  // poses — each wears its matching expression, and the whole set shares one
-  // framing so frames stay the same scale when swapped during an animation
-  const poseParts = POSE.map((po) => CHARS[id].parts(po, EXPR[po] ? po : 'neutral'));
-  const bounds = boundsOf(poseParts.flat());
+  // poses
   const poseImgs = [];
-  for (const [i, po] of POSE.entries()) {
-    const img = trim(renderCharacter(poseParts[i], { w: 300, h: 420, yaw: 14, pitch: 6, bounds }));
+  for (const po of POSE) {
+    const parts = CHARS[id].parts(po, 'neutral');
+    const img = trim(renderCharacter(parts, { w: 300, h: 420, yaw: 14, pitch: 6 }));
     img.save(`${dir}/poses/${po}.png`);
     img.scale(2).save(`${dir}/poses/${po}@2x.png`);
     poseImgs.push(img);
@@ -105,55 +101,13 @@ for (const id of CHAR_IDS) {
   }
   sheet(poseImgs, 5, 170, 300, `${dir}/_poses.png`);
 
-  // seated: rig-ready legs only exist on characters that build for it (juror).
-  // Same framing as the 10-pose set so the scale matches; pitched higher (24 deg)
-  // so the horizontal thighs read from the front.
-  if (id === 'juror') {
-    const seat = CHARS[id].parts('seated', 'neutral');
-    for (const [suffix, yaw] of [['', 14], ['_threeq', 40]]) {
-      const img = trim(renderCharacter(seat, { w: 300, h: 420, yaw, pitch: 24, bounds }));
-      img.save(`${dir}/poses/seated${suffix}.png`);
-      img.scale(2).save(`${dir}/poses/seated${suffix}@2x.png`);
-      count++;
-    }
-  }
-
-  // idle variants — same framing as the poses so they swap in without a size pop
-  const idleRow = [poseImgs[0]];
-  for (const v of IDLE_IDS) {
-    const img = trim(renderCharacter(CHARS[id].parts(v, 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6, bounds }));
-    img.save(`${dir}/poses/${v}.png`);
-    img.scale(2).save(`${dir}/poses/${v}@2x.png`);
-    idleRow.push(img);
-    count++;
-  }
-  idleRows.push(...idleRow);
-
-  report.push({ id, label: CHARS[id].label, expressions: 8, poses: 10, idleVariants: IDLE_IDS.length });
+  report.push({ id, label: CHARS[id].label, expressions: 8, poses: 10 });
   console.log(`${id}: done`);
 }
-
-// juror variants — background cast, so a master sprite each plus a sheet
-const variantDir = `${OUT}/juror/variants`;
-fs.mkdirSync(variantDir, { recursive: true });
-const variants = [];
-const variantImgs = [CHARS.juror, ...Object.values(JUROR_VARIANTS)].map((v) =>
-  trim(renderCharacter(v.parts('idle', 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6 })));
-Object.keys(JUROR_VARIANTS).forEach((k, i) => {
-  const img = variantImgs[i + 1];
-  img.save(`${variantDir}/${k}.png`);
-  img.scale(2).save(`${variantDir}/${k}@2x.png`);
-  variants.push({ id: k, label: JUROR_VARIANTS[k].label });
-});
-sheet(variantImgs, 7, 190, 300, `${OUT}/juror/_variants.png`);
-console.log(`juror variants: ${variants.length}`);
 
 // lineup
 const lineup = CHAR_IDS.map((id) => trim(renderCharacter(CHARS[id].parts('idle', 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6 })));
 sheet(lineup, 4, 300, 420, `${OUT}/_previews/lineup.png`);
-
-// idle-variant preview: one row per character, columns = idle + variants
-sheet(idleRows, IDLE_IDS.length + 1, 170, 300, `${OUT}/_previews/idle-variants.png`);
 
 fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
   canvas: { master: [300, 420] },
@@ -161,14 +115,7 @@ fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
   note: 'Voxel characters. Source of truth: cc-art/vox-chars.mjs. Head is ~23% of total height.',
   expressions: Object.keys(EXPR),
   poses: POSE,
-  extraPoses: {
-    note: 'Rig-ready poses outside the shared 10. Only the listed characters build geometry for them.',
-    seated: { characters: ['juror'], files: ['poses/seated.png', 'poses/seated_threeq.png'], definedIn: 'vox-base.mjs EXTRA_POSES', params: EXTRA_POSES.seated },
-  },
-  gallery: 'gallery/manifest.json  (seated background NPCs, cc-art/gallery-npcs.mjs)',
-  idleVariants: IDLE_IDS,
   characters: report,
-  jurorVariants: variants.map((v) => ({ ...v, file: `juror/variants/${v.id}.png` })),
 }, null, 2));
 
 console.log(`\nTOTAL: ${count} sprites`);

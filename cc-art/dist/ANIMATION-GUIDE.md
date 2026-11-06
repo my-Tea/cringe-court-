@@ -3,9 +3,8 @@
 How to wire character animation. Companion to `CHARACTER-SPEC.md` (what the
 assets are) — this file is **how they move**.
 
-Machine-readable source: `animation/animations.json` — 11 characters (9 posed humanoids,
-the AI Narrator and the layered player), **106 character animations** (shared set, 3 idle
-variants per posed character and the narrator, juror `seated_idle`), **10 system animations**.
+Machine-readable source: `animation/animations.json` — 8 characters,
+**54 character animations**, **10 system animations**.
 
 ---
 
@@ -49,10 +48,7 @@ smooth transforms keep micro-motion from looking stuttery.
 | `expression` | Filename stem in `expressions/` — snapped |
 | `transform` | Pixel offset + scale + degrees. **Interpolated.** |
 | `fx` | `shake` \| `flash` \| `impact` \| `sweat` \| `tears` |
-| `loop` | `true` for `idle` / `talk` only (idle variants are one-shot) |
-| `variantOf` | `"idle"` on `idle_a`/`idle_b`/`idle_c` — marks an idle variant |
-| `weight` | Idle variants only: pick probability for that character (sums to 1) |
-| `interruptible` | Idle variants only: any trigger cuts them off immediately |
+| `loop` | `true` for `idle` / `talk` only |
 | `interrupt` | This animation may interrupt the named loop |
 | `callout` | Text to flash (rendered by the UI layer, not the sprite) |
 
@@ -119,33 +115,6 @@ Rules, enforced in `animations.json → stateMachine.rules`:
    `idle`. A character frozen mid-objection during a verdict card looks broken.
 5. While dialogue streams, alternate `talk` ↔ `idle` on a **1.2–2.4 s random**
    interval. Fixed intervals read robotic.
-
-### Idle variants
-
-Every character in `animations.json` except the player (the cast, Creator, Side A /
-Side B and the AI Narrator) has three variants of `idle`: `idle_a`, `idle_b`, `idle_c`. Each is a small
-rig delta from base idle (judge: adjusts shades / taps gavel / strokes beard;
-juror: munches popcorn / leans back / leans in; AI Narrator: hover bob left, lean in,
-hover bob right, and so on). Art: `characters/<id>/poses/idle_{a,b,c}[@2x].png`, same
-framing as the other poses. Data: `animations[]` entries with `variantOf: "idle"`,
-a `note` naming the action, and a per-character `weight`. Policy:
-`stateMachine.idleVariants`.
-
-How a runtime picks one:
-
-```js
-// in base idle only; loopsLeft = randInt(2, 4) when idle (re)starts
-onIdleLoopEnd() {
-  if (--loopsLeft > 0) return;                         // keep looping base idle
-  const v = idle.variants.filter(a => a.id !== lastVariant);   // noImmediateRepeat
-  const pick = weightedRandom(v, a => a.weight);       // weights are per character
-  lastVariant = pick.id;
-  play(pick);                                          // one-shot: idle -> idle_x -> idle
-}                                                      // onEnd: back to base idle, loopsLeft re-rolled
-```
-
-Any `talk` or reaction interrupts a variant at once and snaps to the new state; do not
-start a variant straight out of a reaction without one fresh base-idle loop.
 
 ---
 
@@ -240,10 +209,8 @@ one atlas = 1 draw call for body, 1 for the face layer.
    cd cc-art
    node -e "import('./animations.mjs').then(m=>console.log(m.writeAnimationLibrary('./dist/animation/animations.json')))"
    ```
-5. Validate: `writeAnimationLibrary` now runs `validateAnimationLibrary`, which
-   throws if a keyframe names a pose that is not a core pose or `idle_a/b/c`, if a
-   `characters/<id>/poses/<pose>.png` is missing (run `export-vox.mjs` first),
-   or if idle variant weights do not sum to 1. Expressions are not yet checked.
+5. Validate: every `pose` and `expression` named must exist as a file in that
+   character's folder.
 
 ## 10. Known gaps
 
@@ -252,6 +219,5 @@ one atlas = 1 draw call for body, 1 for the face layer.
 2. **No sound files.** `sound` keys are labels.
 3. **Callouts are text**, not art. The reference shows "ORDER!" in a comic
    burst — that bubble is a UI asset, not yet built.
-4. **Idle variants are static poses held ~1.4 s**, not multi-frame gestures (no
-   continuous munching or foot tapping). Held-prop variants (popcorn, papers) move
-   rigidly with the hand. The player avatar has no idle variants yet.
+4. **No idle variation.** One idle loop per character; real games want 2–3 to
+   avoid visible repetition during long dialogue.

@@ -149,7 +149,6 @@ export function buildPlayer(cfg = {}) {
     skin,
     eyeStyle: eyes === 'sharp' ? 'sharp' : 'round',
     mouth: EXPR_MOUTH[expression] || 'neutral',
-    expr: expression,
     hair: hairColor,
   }));
 
