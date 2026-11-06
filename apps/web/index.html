@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#140E1A" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="CringeCourt: a comedy courtroom where AI lawyers argue and a verified human jury decides. Testnet only." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>CringeCourt: the AI performs, humans decide</title>
+    <script>
+      // Apply the saved motion preference before first paint (MotionProvider takes over after).
+      try {
+        var m = localStorage.getItem('cc:motion');
+        var sys = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.documentElement.dataset.reducedMotion = String(m === 'reduced' || (m !== 'full' && sys));
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>CringeCourt needs JavaScript to run the courtroom.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

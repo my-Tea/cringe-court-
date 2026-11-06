@@ -1,0 +1,76 @@
+/* Settlement receipt (ui/receipt_card.png): a torn-edge paper slip. */
+.receipt {
+  position: relative;
+  max-width: 24rem;
+  padding: var(--cc-space-5) var(--cc-space-5) var(--cc-space-6);
+  background: var(--cc-color-canvas);
+  color: var(--cc-color-text);
+  box-shadow: var(--cc-shadow-3);
+  /* Zig-zag tear along the bottom edge. */
+  --_tooth: 8px;
+  mask:
+    conic-gradient(from -45deg at bottom, transparent, var(--cc-neutral-900) 1deg 89deg, transparent 90deg) 50% / calc(var(--_tooth) * 2) 100%;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--cc-space-3);
+  padding-bottom: var(--cc-space-3);
+  border-bottom: 2px dashed var(--cc-color-border-strong);
+}
+
+.title {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-lg);
+  letter-spacing: var(--cc-tracking-wide);
+  text-transform: uppercase;
+  color: var(--cc-color-accent-text);
+}
+
+.case {
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-xs);
+  color: var(--cc-color-text-muted);
+}
+
+.lines {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--cc-space-2) var(--cc-space-4);
+  margin: var(--cc-space-4) 0;
+}
+
+.lines dt {
+  font-size: var(--cc-text-sm);
+}
+
+.lines dd {
+  margin: 0;
+  text-align: right;
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: var(--cc-space-3);
+  border-top: 2px solid var(--cc-color-text);
+  font-weight: var(--cc-weight-bold);
+}
+
+.note {
+  margin-top: var(--cc-space-3);
+  font-size: var(--cc-text-xs);
+  color: var(--cc-color-text-muted);
+}
+
+.tx {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+  margin-top: var(--cc-space-2);
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-xs);
+}

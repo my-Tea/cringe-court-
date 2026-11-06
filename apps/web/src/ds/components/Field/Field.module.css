@@ -1,0 +1,376 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--cc-space-3);
+}
+
+.label {
+  font-size: var(--cc-text-sm);
+  font-weight: var(--cc-weight-semibold);
+  color: var(--cc-color-text);
+}
+
+.required {
+  margin-left: var(--cc-space-1);
+  color: var(--cc-color-accent-text);
+}
+
+.optional {
+  margin-left: var(--cc-space-1);
+  font-weight: var(--cc-weight-regular);
+  color: var(--cc-color-text-subtle);
+}
+
+.hint {
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-subtle);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cc-space-1_5);
+  font-size: var(--cc-text-sm);
+  font-weight: var(--cc-weight-medium);
+  color: var(--cc-color-danger-text);
+}
+
+.error svg {
+  margin-top: 0.2em;
+  flex-shrink: 0;
+}
+
+.counter {
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--cc-color-text-subtle);
+}
+
+.counterOver {
+  color: var(--cc-color-danger-text);
+  font-weight: var(--cc-weight-bold);
+}
+
+/* ── Text controls ───────────────────────────────────────────────── */
+
+.control {
+  width: 100%;
+  min-height: var(--cc-control-md);
+  padding: var(--cc-space-2) var(--cc-space-3);
+  border: 1.5px solid var(--cc-color-border-strong);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-surface-sunken);
+  color: var(--cc-color-text);
+  font-size: var(--cc-text-md);
+  line-height: var(--cc-leading-normal);
+  transition:
+    border-color var(--cc-duration-fast) var(--cc-ease-standard),
+    box-shadow var(--cc-duration-fast) var(--cc-ease-standard),
+    background-color var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.control::placeholder {
+  color: var(--cc-color-text-subtle);
+  opacity: 1;
+}
+
+.control:hover:not(:disabled) {
+  border-color: var(--cc-color-text-subtle);
+}
+
+.control:focus-visible {
+  outline: none;
+  border-color: var(--cc-color-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc-color-focus) 35%, transparent);
+}
+
+.control[aria-invalid='true'] {
+  border-color: var(--cc-color-danger-text);
+}
+
+.control[aria-invalid='true']:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc-color-danger-text) 35%, transparent);
+}
+
+.control:disabled {
+  border-style: dashed;
+  background: var(--cc-color-disabled-surface);
+  color: var(--cc-color-disabled-text);
+  cursor: not-allowed;
+}
+
+.textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  padding-right: var(--cc-space-10);
+  cursor: pointer;
+}
+
+.selectIcon {
+  position: absolute;
+  top: 50%;
+  right: var(--cc-space-3);
+  translate: 0 -50%;
+  pointer-events: none;
+  color: var(--cc-color-text-muted);
+}
+
+/* ── Choice controls ─────────────────────────────────────────────── */
+
+.choice {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--cc-space-3);
+  cursor: pointer;
+}
+
+.choiceText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-0_5);
+  padding-top: 1px;
+}
+
+.choiceLabel {
+  font-size: var(--cc-text-md);
+  font-weight: var(--cc-weight-medium);
+}
+
+.choiceDisabled {
+  cursor: not-allowed;
+  color: var(--cc-color-disabled-text);
+}
+
+.checkbox {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: 0;
+  border: 2px solid var(--cc-color-border-strong);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-color-surface-sunken);
+  cursor: inherit;
+  transition:
+    background-color var(--cc-duration-fast) var(--cc-ease-standard),
+    border-color var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.checkbox::after {
+  content: '';
+  width: 0.75rem;
+  height: 0.75rem;
+  background: var(--cc-color-on-accent);
+  /* The pixel check glyph, as a mask. */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' shape-rendering='crispEdges'%3E%3Cpath d='M10 2h2v1h-2zM9 3h3v1H9zM8 4h3v1H8zM1 5h2v1H1zM7 5h3v1H7zM1 6h3v1H1zM6 6h3v1H6zM2 7h6v1H2zM3 8h4v1H3zM4 9h2v1H4z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  scale: 0;
+  transition: scale var(--cc-duration-fast) var(--cc-ease-stamp);
+}
+
+.checkbox:checked {
+  border-color: var(--cc-color-accent);
+  background: var(--cc-color-accent);
+}
+
+.checkbox:checked::after {
+  scale: 1;
+}
+
+.checkbox:hover:not(:disabled) {
+  border-color: var(--cc-color-accent);
+}
+
+.checkbox:disabled {
+  border-style: dashed;
+  background: var(--cc-color-disabled-surface);
+}
+
+.checkbox[aria-invalid='true'] {
+  border-color: var(--cc-color-danger-text);
+}
+
+/* Switch: a button with role="switch" (track + pixel knob). */
+.switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 2px solid var(--cc-color-border-strong);
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-color-surface-sunken);
+  cursor: inherit;
+  transition:
+    background-color var(--cc-duration-base) var(--cc-ease-standard),
+    border-color var(--cc-duration-base) var(--cc-ease-standard);
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-color-text-muted);
+  transition:
+    translate var(--cc-duration-base) var(--cc-ease-emphasized),
+    background-color var(--cc-duration-base) var(--cc-ease-standard);
+}
+
+.switch[aria-checked='true'] {
+  border-color: var(--cc-color-accent);
+  background: var(--cc-color-accent);
+}
+
+.switch[aria-checked='true']::after {
+  translate: 1.25rem 0;
+  background: var(--cc-color-on-accent);
+}
+
+.switch:disabled {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+/* Radio cards: big, tappable choices (ballots, modes, angles). */
+.radioGroup {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+/* Flex lives on an inner wrapper: flex on <fieldset> itself sizes wrongly in Chrome. */
+.radioGroupBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--cc-space-3);
+  font-size: var(--cc-text-sm);
+  font-weight: var(--cc-weight-semibold);
+}
+
+.radioGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--cc-space-3);
+}
+
+.radioCard {
+  --_tone: var(--cc-color-accent);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-4);
+  border: 2px solid var(--cc-color-border);
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-color-surface);
+  cursor: pointer;
+  transition:
+    border-color var(--cc-duration-fast) var(--cc-ease-standard),
+    background-color var(--cc-duration-fast) var(--cc-ease-standard),
+    box-shadow var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.radioCard:hover {
+  border-color: var(--cc-color-border-strong);
+}
+
+.radioCard:has(input:checked) {
+  border-color: var(--_tone);
+  background: color-mix(in srgb, var(--_tone) 12%, var(--cc-color-surface));
+  box-shadow: 0 0 0 1px var(--_tone), 0 0 20px color-mix(in srgb, var(--_tone) 25%, transparent);
+}
+
+.radioCard:has(input:focus-visible) {
+  outline: 2px solid var(--cc-color-focus);
+  outline-offset: 3px;
+}
+
+.radioCard:has(input:disabled) {
+  cursor: not-allowed;
+  border-style: dashed;
+  color: var(--cc-color-disabled-text);
+}
+
+.radio {
+  appearance: none;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.1rem 0 0;
+  border: 2px solid var(--cc-color-border-strong);
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-color-surface-sunken);
+  cursor: inherit;
+}
+
+.radio:focus-visible {
+  outline: none;
+}
+
+.radio::after {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 1px;
+  background: var(--_tone);
+  scale: 0;
+  transition: scale var(--cc-duration-fast) var(--cc-ease-stamp);
+}
+
+.radio:checked {
+  border-color: var(--_tone);
+}
+
+.radio:checked::after {
+  scale: 1;
+}
+
+.toneGuilty {
+  --_tone: var(--cc-color-guilty);
+}
+
+.toneNotCooked {
+  --_tone: var(--cc-color-not-cooked);
+}
+
+.toneSideA {
+  --_tone: var(--cc-color-side-a);
+}
+
+.toneSideB {
+  --_tone: var(--cc-color-side-b);
+}
+
+.toneHighlight {
+  --_tone: var(--cc-color-highlight);
+}

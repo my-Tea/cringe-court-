@@ -1,0 +1,37 @@
+.amount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  font-family: var(--cc-font-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-weight: var(--cc-weight-bold);
+  white-space: nowrap;
+}
+
+.unit {
+  font-size: 0.7em;
+  font-weight: var(--cc-weight-medium);
+  letter-spacing: var(--cc-tracking-wide);
+  color: var(--cc-color-text-muted);
+}
+
+.sm {
+  font-size: var(--cc-text-sm);
+}
+
+.lg {
+  font-size: var(--cc-text-2xl);
+}
+
+.xl {
+  font-size: var(--cc-text-4xl);
+  letter-spacing: -0.02em;
+}
+
+.credit {
+  color: var(--cc-color-success-text);
+}
+
+.debit {
+  color: var(--cc-color-danger-text);
+}

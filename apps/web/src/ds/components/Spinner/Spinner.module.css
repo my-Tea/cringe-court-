@@ -1,0 +1,63 @@
+/* A ring of four pixel blocks that light in turn: on-brand, and it still reads
+   as "busy" when motion is reduced (the blocks just stop cycling). */
+.spinner {
+  --_size: 1.25rem;
+  display: inline-grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18%;
+  width: var(--_size);
+  height: var(--_size);
+  color: currentColor;
+  flex-shrink: 0;
+}
+
+.sm {
+  --_size: 1rem;
+}
+
+.lg {
+  --_size: 2rem;
+}
+
+.block {
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.25;
+  animation: cycle 800ms steps(1, end) infinite;
+}
+
+/* Clockwise order: top-left, top-right, bottom-right, bottom-left. */
+.block:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.block:nth-child(2) {
+  animation-delay: 200ms;
+}
+
+.block:nth-child(4) {
+  animation-delay: 400ms;
+}
+
+.block:nth-child(3) {
+  animation-delay: 600ms;
+}
+
+@keyframes cycle {
+  0% {
+    opacity: 1;
+  }
+
+  25% {
+    opacity: 0.25;
+  }
+}
+
+:global(:root[data-reduced-motion='true']) .block {
+  animation: none;
+  opacity: 0.7;
+}
+
+:global(:root[data-reduced-motion='true']) .block:nth-child(1) {
+  opacity: 1;
+}
