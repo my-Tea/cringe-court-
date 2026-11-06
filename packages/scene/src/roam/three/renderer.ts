@@ -9,6 +9,8 @@ import type { LightingMood } from '@cringe-court/core';
 import * as THREE from 'three';
 import type { CastFile } from '../cast';
 import type { RoamController } from '../controller';
+import { ISO_RAKE, cameraMode, isoRig, type PerspectiveChoice } from '../perspective';
+import { BODY } from '../physics';
 import { QUALITY, type QualityLevel, type QualityPreset } from '../quality';
 import { ROOM_SCALE } from '../scale';
 import type { PlayerState } from '../types';
@@ -51,6 +53,10 @@ export interface RoamRendererOptions {
 export class RoamRenderer {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(58, 16 / 9, 0.6, 1400);
+  readonly #isoCam = new THREE.OrthographicCamera(-120, 120, 120, -120, 0.6, 4000);
+  /** Cuts the roof off in the indoor isometric view. Constant is the clip height. */
+  readonly #clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
+  #cutY: number | null = null;
   readonly #controller: RoamController;
   readonly #cast: CastFile;
   readonly #world: WorldMeshes;
@@ -71,7 +77,11 @@ export class RoamRenderer {
   #lastFocus: string | null = null;
   #frame = 0;
   #openSky = false;
+  #perspective: PerspectiveChoice = 'first';
+  #viewW = 16;
+  #viewH = 9;
   readonly #sky = buildPlazaSky();
+  readonly #player: VoxelAvatar | null;
   readonly #unsub: () => void;
   preset: QualityPreset;
 
@@ -83,6 +93,12 @@ export class RoamRenderer {
     this.scene.background = new THREE.Color(C.neutral900);
     this.scene.fog = this.#fog;
     this.scene.add(this.#sky);
+    const model = options.controller.avatar.model;
+    this.#player = options.cast.models[model] ? new VoxelAvatar(options.cast, model, false, 'you') : null;
+    if (this.#player) {
+      this.#player.object.visible = false;
+      this.scene.add(this.#player.object);
+    }
     this.#world = buildWorldMeshes(options.boxes);
     this.scene.add(this.#world.group);
 
@@ -154,17 +170,55 @@ export class RoamRenderer {
     this.camera.updateProjectionMatrix();
   }
 
+  /** `auto` is the isometric third person. First person keeps the eye camera. */
+  setPerspective(choice: PerspectiveChoice): void {
+    this.#perspective = choice;
+    this.#fitIso();
+  }
+
+  /** The camera render() will use. */
+  get viewCamera(): THREE.Camera {
+    return cameraMode(this.#perspective) === 'iso' ? this.#isoCam : this.camera;
+  }
+
   setViewport(width: number, height: number): void {
+    this.#viewW = width;
+    this.#viewH = height;
     this.camera.aspect = width / Math.max(1, height);
     this.camera.updateProjectionMatrix();
+    this.#fitIso();
+  }
+
+  #fitIso(): void {
+    const aspect = this.#viewW / Math.max(1, this.#viewH);
+    const outside = this.#controller.zone === 'outside';
+    const f = isoRig(outside).frustum;
+    this.#isoCam.left = -f * aspect;
+    this.#isoCam.right = f * aspect;
+    this.#isoCam.top = f;
+    this.#isoCam.bottom = -f;
+    this.#isoCam.updateProjectionMatrix();
   }
 
   update(dt: number): void {
     const c = this.#controller;
     this.#frame++;
     const view = c.view();
-    this.camera.position.set(...view.eye);
-    this.camera.rotation.set(view.pitch + view.shakePitch, view.yaw + view.shakeYaw, 0, 'YXZ');
+    const iso = cameraMode(this.#perspective) === 'iso';
+    if (iso) this.#placeIso(view.eye, c.zone === 'outside');
+    else {
+      this.#setCutaway(null);
+      this.camera.position.set(...view.eye);
+      this.camera.rotation.set(view.pitch + view.shakePitch, view.yaw + view.shakeYaw, 0, 'YXZ');
+    }
+    if (this.#player) {
+      const show = iso && !c.seat;
+      this.#player.object.visible = show;
+      if (show) {
+        this.#player.place(view.eye[0], view.eye[1] - BODY.eye, view.eye[2], view.yaw);
+        this.#player.update(dt, { pose: 'stand', headYaw: 0, headPitch: 0, talking: false, speed: c.playerState().speed }, c.reducedMotion);
+      }
+    }
 
     // Mood blend and the gavel flash: only while something is changing (a settled room
     // re-applied nine colours and allocated sixteen THREE.Colors every frame).
@@ -211,7 +265,80 @@ export class RoamRenderer {
     if (this.#focus.visible) (this.#focus.material as THREE.LineBasicMaterial).opacity = reducedMotion ? 0.9 : 0.65 + Math.sin(performance.now() / 260) * 0.25;
 
     this.#applyOutside(c.zone);
-    if (this.#sky.visible) this.#sky.position.copy(this.camera.position);
+    if (this.#sky.visible) this.#sky.position.copy(this.viewCamera.position);
+  }
+
+  /**
+   * Fixed rake behind the player. Indoors the roof slab is clipped off and the
+   * camera sits above the room. Collision solids are extruded to the ceiling
+   * and would pin the camera on every lamp, so only a point that actually sits
+   * inside a visible box is walked forward.
+   */
+  #placeIso(eye: readonly [number, number, number], outside: boolean): void {
+    const rig = isoRig(outside);
+    const tx = eye[0];
+    const ty = eye[1] - BODY.eye + rig.lookY;
+    const tz = eye[2];
+    const dist = rig.distance;
+    let cx = tx + Math.sin(ISO_RAKE.yaw) * Math.cos(ISO_RAKE.pitch) * dist;
+    let cy = ty + Math.sin(ISO_RAKE.pitch) * dist;
+    let cz = tz + Math.cos(ISO_RAKE.yaw) * Math.cos(ISO_RAKE.pitch) * dist;
+    cy = Math.min(cy, rig.ceiling);
+    const room = this.#roomAt(tx, tz);
+    if (room) {
+      const b = room.bounds;
+      const m = 14;
+      if (b.min[0] + m < b.max[0] - m) cx = Math.min(Math.max(cx, b.min[0] + m), b.max[0] - m);
+      if (b.min[2] + m < b.max[2] - m) cz = Math.min(Math.max(cz, b.min[2] + m), b.max[2] - m);
+      this.#setCutaway(room.id === 'outside' ? null : b.max[1] - 8);
+    } else this.#setCutaway(null);
+    const cleared = this.#clearOfBoxes(tx, ty, tz, cx, cy, cz);
+    this.#isoCam.position.set(cleared[0], cleared[1], cleared[2]);
+    this.#isoCam.lookAt(tx, ty, tz);
+    this.#fitIso();
+  }
+
+  /** Hide the roof slab so the isometric view looks into the room. */
+  #setCutaway(y: number | null): void {
+    if (y === this.#cutY) return;
+    this.#cutY = y;
+    if (y != null) this.#clip.constant = y;
+    const planes = y == null ? null : [this.#clip];
+    this.scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh || mesh === this.#sky) return;
+      const mats = mesh.material;
+      if (!mats) return;
+      for (const m of Array.isArray(mats) ? mats : [mats]) m.clippingPlanes = planes;
+    });
+  }
+
+  #roomAt(x: number, z: number) {
+    return this.#controller.world.rooms.find((r) => x >= r.bounds.min[0] && x <= r.bounds.max[0] && z >= r.bounds.min[2] && z <= r.bounds.max[2]);
+  }
+
+  /** Step the camera toward the player until it is not buried in a visible box. */
+  #clearOfBoxes(ox: number, oy: number, oz: number, cx: number, cy: number, cz: number): [number, number, number] {
+    const boxes = this.#controller.world.boxes;
+    const pad = 2;
+    const inside = (x: number, y: number, z: number) => {
+      for (const b of boxes) {
+        if (y < b.f[1] - pad || y > b.t[1] + pad) continue;
+        if (x < b.f[0] - pad || x > b.t[0] + pad) continue;
+        if (z < b.f[2] - pad || z > b.t[2] + pad) continue;
+        return true;
+      }
+      return false;
+    };
+    if (!inside(cx, cy, cz)) return [cx, cy, cz];
+    for (let i = 1; i <= 16; i++) {
+      const k = i / 16;
+      const x = cx + (ox - cx) * k;
+      const y = cy + (oy - cy) * k;
+      const z = cz + (oz - cz) * k;
+      if (!inside(x, y, z)) return [x, y, z];
+    }
+    return [ox + (cx - ox) * 0.2, oy + (cy - oy) * 0.2, oz + (cz - oz) * 0.2];
   }
 
   /** The gavel's white pop. */
@@ -289,7 +416,9 @@ export class RoamRenderer {
       gl.shadowMap.enabled = true;
       gl.shadowMap.type = THREE.PCFShadowMap;
     }
-    gl.render(this.scene, this.camera);
+    const clip = this.#cutY != null;
+    if (gl.localClippingEnabled !== clip) gl.localClippingEnabled = clip;
+    gl.render(this.scene, this.viewCamera);
   }
 
   dispose(): void {
