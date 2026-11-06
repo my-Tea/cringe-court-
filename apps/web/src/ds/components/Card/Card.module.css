@@ -1,106 +1,76 @@
-/*
- * Cards are cut paper sheets (STYLE-GUIDE §9):
- *   ::before  the paper edge: a chamfered outline in the frame colour
- *   ::after   the sheet itself, inset by the edge width, with grain + a fold facet
- * The drop shadow sits on the (unclipped) card so the focus ring stays visible.
- */
 .card {
-  --_c: var(--cc-paper-cut-md);
-  --_edge: color-mix(in srgb, var(--cc-color-frame) 45%, var(--cc-color-border));
-  --_edge-w: 2px;
-  --_fill: var(--cc-color-surface);
-  --_drop: var(--cc-paper-drop-1);
-  --_poly: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
-  --_poly-in: polygon(calc(var(--_c) - 1px) 0, calc(100% - var(--_c) + 1px) 0, 100% calc(var(--_c) - 1px), 100% calc(100% - var(--_c) + 1px), calc(100% - var(--_c) + 1px) 100%, calc(var(--_c) - 1px) 100%, 0 calc(100% - var(--_c) + 1px), 0 calc(var(--_c) - 1px));
-
   position: relative;
-  isolation: isolate;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border-radius: var(--cc-radius-xs);
-  background: none;
+  border: 2px solid color-mix(in srgb, var(--cc-color-frame) 45%, var(--cc-color-border));
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-color-surface);
+  box-shadow: var(--cc-shadow-bevel), var(--cc-shadow-1);
   color: var(--cc-color-text);
-  filter: var(--_drop);
-}
-
-.card::before,
-.card::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  clip-path: var(--_poly);
-}
-
-.card::before {
-  inset: 0;
-  z-index: -2;
-  background: var(--_edge);
-}
-
-.card::after {
-  inset: var(--_edge-w);
-  background-color: var(--_fill);
-  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
-  clip-path: var(--_poly-in);
 }
 
 .raised {
-  --_edge: color-mix(in srgb, var(--cc-color-frame) 75%, var(--cc-color-border));
-  --_fill: var(--cc-color-surface-raised);
-  --_drop: var(--cc-paper-drop-2);
+  border-color: color-mix(in srgb, var(--cc-color-frame) 75%, var(--cc-color-border));
+  background: var(--cc-color-surface-raised);
+  box-shadow: var(--cc-shadow-bevel), var(--cc-shadow-2);
 }
 
-/* The ornate frame: gold band, a hairline inner rule, chamfered corners under gold photo-corners. */
+/* The ornate frame (style guide): gold band, dark-gold outer line, hairline
+   inner rule, pixel knots on the corners (rendered by Card.tsx). */
 .ornate,
 .parchment {
-  --_c: var(--cc-paper-cut-lg);
-  --_edge: var(--cc-color-frame);
-  --_edge-w: 3px;
-  --_fill: var(--cc-color-surface-raised);
-  --_drop: var(--cc-paper-drop-2);
+  border: 3px solid var(--cc-color-frame);
+  border-radius: var(--cc-radius-xl);
+  background: var(--cc-color-surface-raised);
+  box-shadow:
+    0 0 0 1px var(--cc-color-frame-dark),
+    var(--cc-shadow-bevel),
+    var(--cc-shadow-2);
 }
 
-.ornate::after,
-.parchment::after {
-  outline: 1px solid color-mix(in srgb, var(--cc-color-frame) 70%, transparent);
-  outline-offset: -5px;
+.ornate::before,
+.parchment::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid color-mix(in srgb, var(--cc-color-frame) 70%, transparent);
+  border-radius: calc(var(--cc-radius-xl) - 6px);
+  pointer-events: none;
 }
 
-/* Parchment: the in-world document (receipts, filings): a maroon fold along the top edge. */
+/* Parchment: the in-world document (receipts, filings). The frame plus a
+   maroon top rule like the banner rods in the style guide. */
 .parchment {
-  --_fill: var(--cc-color-surface);
-}
-
-.parchment::after {
-  background-image:
-    linear-gradient(180deg, var(--cc-color-accent) 0 5px, transparent 5px),
+  background:
     linear-gradient(180deg, color-mix(in srgb, var(--cc-color-frame-light) 16%, transparent), transparent 5rem),
-    var(--cc-paper-grain),
-    var(--cc-paper-facets-panel);
+    var(--cc-color-surface);
+  box-shadow:
+    0 0 0 1px var(--cc-color-frame-dark),
+    inset 0 5px 0 var(--cc-color-accent),
+    var(--cc-shadow-bevel),
+    var(--cc-shadow-2);
 }
 
 .sunken {
-  --_fill: var(--cc-color-surface-sunken);
-  --_drop: none;
-}
-
-.sunken::after {
-  background-image: var(--cc-paper-grain);
-  box-shadow: inset 0 2px 4px color-mix(in srgb, var(--cc-neutral-900) 14%, transparent);
+  background: var(--cc-color-surface-sunken);
+  box-shadow: none;
 }
 
 .interactive {
   transition:
     transform var(--cc-duration-base) var(--cc-ease-standard),
-    filter var(--cc-duration-base) var(--cc-ease-standard);
+    border-color var(--cc-duration-base) var(--cc-ease-standard),
+    box-shadow var(--cc-duration-base) var(--cc-ease-standard);
 }
 
 .interactive:hover,
 .interactive:focus-within {
-  --_edge: var(--cc-color-frame);
-  --_drop: var(--cc-paper-drop-3);
+  border-color: var(--cc-color-frame);
+  box-shadow:
+    0 0 0 1px var(--cc-color-frame-dark),
+    var(--cc-shadow-bevel),
+    var(--cc-shadow-3);
   transform: translateY(-3px);
 }
 
@@ -109,6 +79,7 @@
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: inherit;
 }
 
 .interactive :global(a[data-card-link]):focus-visible {

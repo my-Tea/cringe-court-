@@ -8,10 +8,13 @@
   "exports": {
     ".": "./src/index.ts",
     "./react": "./src/react/index.ts",
-    "./assets/*": "./assets/*"
+    "./assets/*": "./assets/*",
+    "./roam": "./src/roam/index.ts",
+    "./roam/react": "./src/roam/react/index.ts"
   },
   "scripts": {
-    "atlas": "tsx scripts/gen-atlas.ts"
+    "atlas": "tsx scripts/gen-atlas.ts",
+    "cast": "tsx scripts/gen-roam-cast.ts"
   },
   "dependencies": {
     "@cringe-court/core": "*",

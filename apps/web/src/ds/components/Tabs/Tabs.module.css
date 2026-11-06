@@ -1,15 +1,8 @@
-/*
- * Paper tabs (STYLE-GUIDE §9): index-card tabs with trimmed top corners and a
- * gold outline. The active tab is filled and sits on the rule; the inactive
- * ones are slimmer outlines. Edges live on pseudo-elements so the focus ring
- * on the trigger is never clipped.
- */
 .list {
   position: relative;
   display: flex;
   gap: var(--cc-space-1);
-  padding-top: 3px;
-  border-bottom: 2px solid var(--cc-color-frame);
+  border-bottom: 1px solid var(--cc-color-border);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -19,66 +12,50 @@
 }
 
 .trigger {
-  --_c: var(--cc-paper-cut-md);
-  --_edge: color-mix(in srgb, var(--cc-color-frame) 70%, transparent);
-  --_fill: var(--cc-color-surface);
-  --_poly: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% 100%, 0 100%, 0 var(--_c));
   position: relative;
-  isolation: isolate;
   display: inline-flex;
   align-items: center;
   gap: var(--cc-space-2);
   min-height: var(--cc-control-md);
   padding: 0 var(--cc-space-4);
   border: 0;
-  border-radius: 0;
-  background: none;
+  border-radius: var(--cc-radius-sm) var(--cc-radius-sm) 0 0;
+  background: transparent;
   color: var(--cc-color-text-muted);
   font-weight: var(--cc-weight-semibold);
   white-space: nowrap;
-  cursor: pointer;
-  transition: color var(--cc-duration-fast) var(--cc-ease-standard);
+  transition:
+    color var(--cc-duration-fast) var(--cc-ease-standard),
+    background-color var(--cc-duration-fast) var(--cc-ease-standard);
 }
 
-.trigger::before,
 .trigger::after {
   content: '';
   position: absolute;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background: var(--_edge);
-  clip-path: var(--_poly);
-  transition: background-color var(--cc-duration-fast) var(--cc-ease-standard);
-}
-
-.trigger::after {
-  inset: 2px 2px 0;
-  z-index: -1;
-  background-color: var(--_fill);
-  background-image: var(--cc-paper-grain);
+  left: var(--cc-space-2);
+  right: var(--cc-space-2);
+  bottom: -1px;
+  height: 3px;
+  border-radius: 1px 1px 0 0;
+  background: var(--cc-color-accent);
+  scale: 0 1;
+  transition: scale var(--cc-duration-base) var(--cc-ease-emphasized);
 }
 
 .trigger:hover {
-  --_edge: var(--cc-color-frame);
   color: var(--cc-color-text);
+  background: color-mix(in srgb, var(--cc-color-text) 6%, transparent);
 }
 
 .trigger[data-state='active'] {
-  --_edge: var(--cc-color-frame);
-  --_fill: var(--cc-color-surface-raised);
-  padding-top: 3px;
   color: var(--cc-color-text);
-  filter: drop-shadow(0 -1px 2px color-mix(in srgb, var(--cc-neutral-900) 18%, transparent));
 }
 
 .trigger[data-state='active']::after {
-  background-image: linear-gradient(180deg, var(--cc-color-accent) 0 4px, transparent 4px), var(--cc-paper-grain), linear-gradient(176deg, color-mix(in srgb, var(--cc-neutral-100) 22%, transparent) 0 46%, transparent calc(46% + 1px));
-  inset: 2px 2px 0;
+  scale: 1 1;
 }
 
 .trigger[data-disabled] {
-  --_edge: color-mix(in srgb, var(--cc-color-frame) 30%, transparent);
   color: var(--cc-color-disabled-text);
   cursor: not-allowed;
 }
@@ -87,58 +64,30 @@
   outline-offset: -2px;
 }
 
-/* Pills: a strip of small cut chips for compact filters; the active chip is filled. */
+/* Pills: segmented control look for compact filters. */
 .pills {
-  --_c: var(--cc-paper-cut-md);
-  position: relative;
-  isolation: isolate;
   display: inline-flex;
   padding: var(--cc-space-1);
   gap: var(--cc-space-1);
-  background: none;
-  filter: var(--cc-paper-drop-1);
-}
-
-.pills::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-color: var(--cc-color-surface-sunken);
-  background-image: var(--cc-paper-grain);
-  box-shadow: inset 0 0 0 1px var(--cc-color-frame);
-  clip-path: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
+  border: 1px solid var(--cc-color-border);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-surface-sunken);
 }
 
 .pills .trigger {
-  --_c: var(--cc-paper-cut-sm);
-  --_edge: transparent;
-  --_fill: transparent;
-  --_poly: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
   min-height: var(--cc-control-sm);
   padding: 0 var(--cc-space-3);
+  border-radius: var(--cc-radius-sm);
   font-size: var(--cc-text-sm);
 }
 
 .pills .trigger::after {
-  inset: 0;
-  background-image: none;
-}
-
-.pills .trigger:hover:not([data-state='active']) {
-  --_fill: color-mix(in srgb, var(--cc-color-text) 8%, transparent);
+  display: none;
 }
 
 .pills .trigger[data-state='active'] {
-  --_fill: var(--cc-color-accent);
-  padding-top: 0;
-  filter: none;
+  background: var(--cc-color-accent);
   color: var(--cc-color-on-accent);
-}
-
-.pills .trigger[data-state='active']::after {
-  inset: 0;
-  background-image: var(--cc-paper-grain), var(--cc-paper-facets-plate);
 }
 
 .panel {

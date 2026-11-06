@@ -1,38 +1,30 @@
-/* A blank sheet of paper waiting to be written on: grain, trimmed corners, a light sweep. */
 .skeleton {
   display: block;
-  clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+  border-radius: var(--cc-radius-sm);
   background:
     linear-gradient(
-      100deg,
+      90deg,
       transparent 0%,
-      color-mix(in srgb, var(--cc-neutral-100) 38%, transparent) 50%,
+      color-mix(in srgb, var(--cc-color-text) 8%, transparent) 50%,
       transparent 100%
     )
     0 0 / 200% 100% no-repeat,
-    var(--cc-paper-grain),
     color-mix(in srgb, var(--cc-color-text) 9%, var(--cc-color-surface));
   animation: shimmer 1.4s linear infinite;
 }
 
 @keyframes shimmer {
   from {
-    background-position: 150% 0, 0 0, 0 0;
+    background-position: 150% 0, 0 0;
   }
 
   to {
-    background-position: -50% 0, 0 0, 0 0;
+    background-position: -50% 0, 0 0;
   }
 }
 
 :global(:root[data-reduced-motion='true']) .skeleton {
   animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :global(:root:not([data-reduced-motion])) .skeleton {
-    animation: none;
-  }
 }
 
 .text {
@@ -41,7 +33,7 @@
 }
 
 .circle {
-  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+  border-radius: var(--cc-radius-pill);
 }
 
 .lines {

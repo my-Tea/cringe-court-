@@ -1,18 +1,7 @@
-/* The kraft paper board every app page sits on (same stock as the landing). */
 .shell {
-  position: relative;
-  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: var(--cc-space-4);
   min-height: 100dvh;
-  padding: var(--cc-space-3) clamp(var(--cc-space-3), 2vw, var(--cc-space-8)) var(--cc-space-4);
-  background-color: var(--cc-paper-cream-shade);
-  background-image:
-    var(--cc-paper-grain),
-    var(--cc-paper-mottle),
-    linear-gradient(135deg, color-mix(in srgb, var(--cc-royal-300) 16%, transparent), transparent 60%),
-    linear-gradient(315deg, color-mix(in srgb, var(--cc-gold-700) 18%, transparent), transparent 55%);
 }
 
 .skip {
@@ -21,6 +10,7 @@
   left: var(--cc-space-3);
   z-index: var(--cc-z-tooltip);
   padding: var(--cc-space-3) var(--cc-space-4);
+  border-radius: var(--cc-radius-md);
   background: var(--cc-color-highlight);
   color: var(--cc-color-on-highlight);
   font-weight: var(--cc-weight-bold);
@@ -34,57 +24,113 @@
   color: var(--cc-color-on-highlight);
 }
 
-.corner {
-  position: absolute;
-  z-index: 0;
-  top: 0;
-  width: clamp(2rem, 3.5vw, 3.25rem);
-  aspect-ratio: 1;
-  filter: var(--cc-paper-drop-2);
-  pointer-events: none;
-}
-
-.corner[data-corner='tl'] {
-  left: 0;
-  clip-path: polygon(0 0, 100% 0, 0 100%);
-  background: linear-gradient(135deg, var(--cc-gold-300) 0 50%, var(--cc-gold-500) calc(50% + 1px));
-}
-
-.corner[data-corner='tr'] {
-  right: 0;
-  clip-path: polygon(0 0, 100% 0, 100% 100%);
-  background: linear-gradient(225deg, var(--cc-gold-300) 0 50%, var(--cc-gold-700) calc(50% + 1px));
-}
-
 .header {
   position: sticky;
-  top: var(--cc-space-2);
+  top: 0;
   z-index: var(--cc-z-sticky);
-  width: 100%;
-  max-width: var(--cc-content-max);
-  margin-inline: auto;
+  /* Parchment bar on a gold double rule, like the frame of the style-guide sheet. */
+  border-bottom: 3px solid var(--cc-color-frame);
+  background: color-mix(in srgb, var(--cc-color-surface) 92%, transparent);
+  box-shadow:
+    0 1px 0 var(--cc-color-frame-dark),
+    0 4px 14px color-mix(in srgb, var(--cc-gold-900) 14%, transparent);
+  backdrop-filter: blur(10px);
 }
 
-.bar {
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-4);
+  max-width: var(--cc-content-max);
   min-height: 4rem;
+  margin-inline: auto;
+  padding-inline: var(--cc-gutter);
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
+  gap: var(--cc-space-2);
   border-radius: var(--cc-radius-sm);
-  line-height: 0;
+  color: var(--cc-royal-900);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-2xl);
+  font-weight: 900;
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-decoration: none;
+  text-shadow: 1px 2px 0 var(--cc-gold-500);
 }
 
-.brandWide {
-  width: 9.5rem;
-  height: auto;
+.brand:hover {
+  color: var(--cc-royal-700);
 }
 
 .brandMark {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--cc-gold-700);
+  filter: drop-shadow(1px 1px 0 var(--cc-gold-900));
+}
+
+.nav {
   display: none;
-  width: 2.5rem;
-  height: auto;
+  margin-left: var(--cc-space-4);
+}
+
+.navList {
+  display: flex;
+  gap: var(--cc-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 var(--cc-space-3);
+  border-radius: var(--cc-radius-sm);
+  color: var(--cc-color-text-muted);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-md);
+  font-weight: var(--cc-weight-bold);
+  font-variation-settings: 'SOFT' 100;
+  text-decoration: none;
+  transition:
+    color var(--cc-duration-fast) var(--cc-ease-standard),
+    background-color var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.navLink:hover {
+  color: var(--cc-color-text);
+  background: color-mix(in srgb, var(--cc-color-text) 6%, transparent);
+}
+
+.navLink[aria-current='page'] {
+  color: var(--cc-color-accent-text);
+}
+
+.navLink[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: var(--cc-space-3);
+  right: var(--cc-space-3);
+  bottom: 0.2rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--cc-color-accent);
+  box-shadow: 0 1px 0 var(--cc-color-frame);
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  margin-left: auto;
 }
 
 .badgeButton {
@@ -96,46 +142,31 @@
   cursor: help;
 }
 
-.menuButton {
+.desktopOnly {
   display: none;
 }
 
-.menuLink,
-.footerList a {
-  text-decoration: none;
+.menuButton {
+  display: inline-flex;
 }
 
-.menuLink {
-  display: flex;
-  align-items: center;
-  gap: var(--cc-space-3);
-  min-height: 3rem;
-  padding: 0 var(--cc-space-3);
-  color: var(--cc-color-text);
-  font-family: var(--cc-font-display);
-  font-size: var(--cc-text-lg);
-  font-weight: var(--cc-weight-bold);
+@media (min-width: 900px) {
+  .nav,
+  .badgeButton {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  border-radius: var(--cc-radius-sm);
+  background: none;
+  cursor: help;
 }
 
-.menuLink:hover {
-  background: color-mix(in srgb, var(--cc-gold-300) 30%, transparent);
-}
-
-.menuLink[aria-current='page'] {
-  background: color-mix(in srgb, var(--cc-gold-300) 55%, transparent);
-  color: var(--cc-royal-900);
-}
-
-@media (max-width: 40rem) {
-  .brandWide,
-  .badgeButton,
-  .cta {
-    display: none;
+.desktopOnly {
+    display: flex;
   }
 
-  .brandMark,
   .menuButton {
-    display: inline-flex;
+    display: none;
   }
 }
 
@@ -148,18 +179,24 @@
   list-style: none;
 }
 
-.sheetHeading {
-  margin: var(--cc-space-5) 0 var(--cc-space-2);
-  font-size: var(--cc-text-sm);
-  letter-spacing: var(--cc-tracking-caps);
-  text-transform: uppercase;
-  color: var(--cc-color-text-subtle);
+.mobileNav .navLink {
+  width: 100%;
+  min-height: 3rem;
+  font-size: var(--cc-text-lg);
+}
+
+.mobileNav .navLink[aria-current='page']::after {
+  left: 0;
+  right: auto;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  width: 3px;
+  height: auto;
 }
 
 .sheetSection {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: var(--cc-space-4);
   margin-top: var(--cc-space-6);
   padding-top: var(--cc-space-6);
@@ -167,72 +204,89 @@
 }
 
 .main {
-  position: relative;
-  z-index: 1;
   flex: 1;
   width: 100%;
-  min-width: 0;
 }
 
 .main:focus {
   outline: none;
 }
 
-/* Maroon paper footer, a gold sheet peeking out beneath. */
+/* Wood footer: the one deep band on the page, capped by the gold double rule. */
 .footer {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: var(--cc-content-max);
-  margin: var(--cc-space-12) auto 0;
+  margin-top: var(--cc-space-20);
+  border-top: 3px solid var(--cc-color-frame);
+  background:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--cc-royal-900) 22%, transparent) 0 3px, transparent 3px 22px),
+    var(--cc-color-canvas);
+  box-shadow: 0 -1px 0 var(--cc-color-frame-dark), inset 0 4px 0 color-mix(in srgb, var(--cc-gold-900) 50%, transparent);
 }
 
 .footerInner {
   display: grid;
-  gap: var(--cc-space-6);
-  color: var(--cc-color-text);
+  gap: var(--cc-space-8);
+  max-width: var(--cc-content-max);
+  margin-inline: auto;
+  padding: var(--cc-space-12) var(--cc-gutter) var(--cc-space-10);
 }
 
 @media (min-width: 768px) {
   .footerInner {
-    grid-template-columns: 1.6fr 1fr 1fr;
+    grid-template-columns: 1.4fr 1fr 1fr;
   }
 }
 
 .footerBrand {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--cc-space-2);
+  gap: var(--cc-space-3);
   max-width: 24rem;
+  color: var(--cc-color-text-muted);
   font-size: var(--cc-text-sm);
 }
 
-.footerBrand p {
-  margin: 0;
-}
-
-.footerMark {
-  width: 3.25rem;
-  height: auto;
-}
-
 .footerWordmark {
-  color: var(--cc-gold-100);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  color: var(--cc-gold-300);
   font-family: var(--cc-font-display);
   font-size: var(--cc-text-2xl);
   font-weight: 900;
   font-variation-settings: 'SOFT' 100, 'WONK' 1;
   line-height: 1;
+  text-shadow: 1px 2px 0 var(--cc-royal-900);
+}
+
+/* "TESTNET ONLY ◆ CRINGECOURT ——— YOUR HONOR, BRO IS COOKED." (style-guide footer line) */
+.signature {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-3);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xs);
+  font-weight: var(--cc-weight-bold);
+  letter-spacing: var(--cc-tracking-caps);
+  text-transform: uppercase;
+  color: var(--cc-color-accent-text);
+}
+
+.signatureRule {
+  flex: 1;
+  min-width: 2rem;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cc-color-frame), color-mix(in srgb, var(--cc-color-frame) 30%, transparent));
 }
 
 .footerHeading {
   margin-bottom: var(--cc-space-3);
-  font-family: var(--cc-font-display);
+  font-family: var(--cc-font-pixel);
   font-size: var(--cc-text-sm);
   letter-spacing: var(--cc-tracking-caps);
   text-transform: uppercase;
-  color: var(--cc-gold-100);
+  color: var(--cc-color-accent-text);
 }
 
 .footerList {
@@ -245,46 +299,30 @@
   font-size: var(--cc-text-sm);
 }
 
+.footerList .navLink {
+  min-height: 0;
+  padding: var(--cc-space-1) 0;
+}
+
+.footerList .navLink[aria-current='page']::after {
+  display: none;
+}
+
 .footerList a {
-  color: var(--cc-color-text);
+  color: var(--cc-color-text-muted);
+  text-decoration: none;
 }
 
 .footerList a:hover {
+  color: var(--cc-color-text);
   text-decoration: underline;
-}
-
-.footerMotion {
-  margin-top: var(--cc-space-4);
 }
 
 .legal {
   grid-column: 1 / -1;
-  margin: 0;
-  padding-top: var(--cc-space-4);
-  border-top: 1px dashed color-mix(in srgb, var(--cc-gold-300) 55%, transparent);
+  padding-top: var(--cc-space-6);
+  border-top: 1px solid var(--cc-color-border);
   line-height: var(--cc-leading-relaxed);
   font-size: var(--cc-text-xs);
-  color: var(--cc-color-text-muted);
-}
-
-.signature {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--cc-space-3);
-  margin: 0;
-  font-family: var(--cc-font-display);
-  font-size: var(--cc-text-xs);
-  font-weight: var(--cc-weight-bold);
-  letter-spacing: var(--cc-tracking-caps);
-  text-transform: uppercase;
-  color: var(--cc-gold-100);
-}
-
-.signatureRule {
-  flex: 1;
-  min-width: 2rem;
-  height: 2px;
-  background: linear-gradient(90deg, var(--cc-gold-300), color-mix(in srgb, var(--cc-gold-300) 20%, transparent));
+  color: var(--cc-color-text-subtle);
 }
