@@ -231,7 +231,9 @@
   --cc-courtroom-max: calc(52dvh * 1.6);
 
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--cc-space-3);
+  min-width: 0;
 }
 
 .courtTitle {

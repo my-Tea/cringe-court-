@@ -26,6 +26,7 @@
   overflow: hidden;
   aspect-ratio: 16 / 10;
   /* A page can cap the stage, so the dialogue under it stays on screen. */
+  width: 100%;
   max-width: var(--cc-courtroom-max, none);
   margin-inline: auto;
   border-radius: var(--cc-radius-lg);
