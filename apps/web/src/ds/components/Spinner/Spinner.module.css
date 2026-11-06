@@ -4,7 +4,7 @@
   --_size: 1.25rem;
   display: inline-grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 18%;
+  gap: 16%;
   width: var(--_size);
   height: var(--_size);
   color: currentColor;
@@ -19,8 +19,9 @@
   --_size: 2rem;
 }
 
+/* Four paper squares with a cut corner. */
 .block {
-  border-radius: 1px;
+  clip-path: polygon(0 0, calc(100% - 25%) 0, 100% 25%, 100% 100%, 25% 100%, 0 calc(100% - 25%));
   background: currentColor;
   opacity: 0.25;
   animation: cycle 800ms steps(1, end) infinite;
@@ -60,4 +61,15 @@
 
 :global(:root[data-reduced-motion='true']) .block:nth-child(1) {
   opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(:root:not([data-reduced-motion])) .block {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  :global(:root:not([data-reduced-motion])) .block:nth-child(1) {
+    opacity: 1;
+  }
 }

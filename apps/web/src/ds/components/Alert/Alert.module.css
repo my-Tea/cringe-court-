@@ -1,16 +1,43 @@
+/* An alert is a tinted slip pinned to the page: chamfered, with a darker folded tab down the left edge. */
 .alert {
   --_tone: var(--cc-color-info-text);
   --_bg: var(--cc-color-info-surface);
+  --_c: var(--cc-paper-cut-md);
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: start;
   gap: var(--cc-space-3);
-  padding: var(--cc-space-4);
-  border: 1px solid color-mix(in srgb, var(--_tone) 45%, transparent);
-  border-left-width: 4px;
-  border-radius: var(--cc-radius-md);
-  background: var(--_bg);
+  padding: var(--cc-space-4) var(--cc-space-4) var(--cc-space-4) calc(var(--cc-space-4) + 6px);
+  border-radius: var(--cc-radius-xs);
+  background: none;
   color: var(--cc-color-text);
+  filter: var(--cc-paper-drop-1);
+}
+
+.alert::before,
+.alert::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  clip-path: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
+}
+
+.alert::before {
+  background-color: var(--_bg);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--_tone) 40%, transparent);
+}
+
+/* The folded side tab, in the tone colour. */
+.alert::after {
+  right: auto;
+  width: 6px;
+  background: var(--_tone);
+  background-image: linear-gradient(90deg, color-mix(in srgb, var(--cc-neutral-100) 25%, transparent), color-mix(in srgb, var(--cc-neutral-900) 18%, transparent));
 }
 
 .icon {

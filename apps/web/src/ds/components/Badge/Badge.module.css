@@ -5,9 +5,15 @@
   gap: var(--cc-space-1_5);
   min-height: 1.5rem;
   padding: 0 var(--cc-space-2);
-  border: 1px solid color-mix(in srgb, var(--_tone) 55%, transparent);
-  border-radius: var(--cc-radius-sm);
-  background: color-mix(in srgb, var(--_tone) 14%, transparent);
+  --_notch: 0.4rem;
+  border: 0;
+  border-radius: 0;
+  /* A notched paper label: both ends clipped to a point, a hairline rim, a fold facet. */
+  clip-path: polygon(var(--_notch) 0, calc(100% - var(--_notch)) 0, 100% 50%, calc(100% - var(--_notch)) 100%, var(--_notch) 100%, 0 50%);
+  padding: 0 calc(var(--_notch) + var(--cc-space-1_5));
+  background-color: color-mix(in srgb, var(--_tone) 14%, var(--cc-color-surface));
+  background-image: var(--cc-paper-grain), linear-gradient(176deg, color-mix(in srgb, var(--cc-neutral-100) 22%, transparent) 0 46%, transparent calc(46% + 1px));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--_tone) 55%, transparent);
   color: var(--_tone);
   font-family: var(--cc-font-pixel);
   font-size: var(--cc-text-xs);
@@ -19,8 +25,8 @@
 }
 
 .solid {
-  background: var(--_tone);
-  border-color: var(--_tone);
+  background-color: var(--_tone);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--cc-neutral-900) 22%, transparent);
   color: var(--cc-color-canvas);
 }
 
@@ -28,12 +34,17 @@
   content: '';
   width: 6px;
   height: 6px;
-  border-radius: 1px;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   background: currentColor;
 }
 
 .pulse::before {
   animation: pulse 1.6s var(--cc-ease-standard) infinite;
+}
+
+/* Tags pop open when they appear. */
+.badge {
+  animation: cc-paper-pop var(--cc-duration-base) var(--cc-ease-stamp) both;
 }
 
 @keyframes pulse {
@@ -42,8 +53,16 @@
   }
 }
 
+:global(:root[data-reduced-motion='true']) .badge,
 :global(:root[data-reduced-motion='true']) .pulse::before {
   animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(:root:not([data-reduced-motion])) .badge,
+  :global(:root:not([data-reduced-motion])) .pulse::before {
+    animation: none;
+  }
 }
 
 .neutral {
@@ -81,14 +100,12 @@
 /* Side colours are mark colours (3:1); solid labels need 4.5:1, so they sit
    on the deeper teal / maroon roles instead. */
 .sideA.solid {
-  background: var(--cc-color-secondary);
-  border-color: var(--cc-color-secondary);
+  background-color: var(--cc-color-secondary);
   color: var(--cc-color-canvas);
 }
 
 .sideB.solid {
-  background: var(--cc-color-danger);
-  border-color: var(--cc-color-danger);
+  background-color: var(--cc-color-danger);
   color: var(--cc-color-on-danger);
 }
 
@@ -96,11 +113,11 @@
    type, so it never reads as decoration. */
 .testnet {
   --_tone: var(--cc-color-on-highlight);
-  border: 1px solid var(--cc-gold-900);
-  background:
+  background-color: var(--cc-gold-300);
+  background-image:
     repeating-linear-gradient(-45deg, var(--cc-gold-500) 0 5px, transparent 5px 10px),
-    var(--cc-gold-300);
-  box-shadow: 0 2px 0 var(--cc-gold-900);
+    var(--cc-paper-grain);
+  box-shadow: inset 0 0 0 1px var(--cc-gold-900), inset 0 -2px 0 var(--cc-gold-700);
   color: var(--cc-royal-900);
   font-weight: var(--cc-weight-bold);
   text-shadow:
