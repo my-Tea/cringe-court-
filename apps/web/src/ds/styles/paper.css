@@ -89,7 +89,7 @@
 
 .cc-slide-in {
   animation: cc-paper-slide-in var(--cc-duration-slow) var(--cc-ease-enter) both;
-  animation-delay: calc(var(--cc-stagger, 0) * 70ms);
+  animation-delay: calc(var(--cc-stagger, 0) * var(--cc-stagger-base));
 }
 
 .cc-pop {
@@ -102,7 +102,7 @@
 
 .cc-sway {
   transform-origin: 50% 0;
-  animation: cc-paper-sway 6s ease-in-out infinite;
+  animation: cc-paper-sway var(--cc-loop-sway) var(--cc-ease-sway) infinite;
 }
 
 /*
