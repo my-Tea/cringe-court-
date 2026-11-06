@@ -10,7 +10,7 @@ describe('movement math', () => {
   it('accelerates to walk speed along the view direction (yaw 0 = −Z) and stops with friction', () => {
     const idx = new SolidIndex([floor]);
     const b = fresh();
-    for (let i = 0; i < 60; i++) stepBody(b, { forward: 1, strafe: 0, sprint: false, jump: false }, 0, idx, [room]);
+    for (let i = 0; i < 30; i++) stepBody(b, { forward: 1, strafe: 0, sprint: false, jump: false }, 0, idx, [room]);
     expect(b.vel[2]).toBeCloseTo(-BODY.walk, 3);
     expect(b.pos[0]).toBeCloseTo(0, 6);
     expect(b.pos[2]).toBeLessThan(-40);
@@ -21,16 +21,16 @@ describe('movement math', () => {
   it('strafes right to +X at yaw 0, normalises diagonals, sprints only forward', () => {
     const idx = new SolidIndex([floor]);
     const s = fresh();
-    for (let i = 0; i < 60; i++) stepBody(s, { forward: 0, strafe: 1, sprint: false, jump: false }, 0, idx, [room]);
+    for (let i = 0; i < 30; i++) stepBody(s, { forward: 0, strafe: 1, sprint: false, jump: false }, 0, idx, [room]);
     expect(s.vel[0]).toBeCloseTo(BODY.walk, 3);
     const d = fresh();
-    for (let i = 0; i < 60; i++) stepBody(d, { forward: 1, strafe: 1, sprint: false, jump: false }, 0, idx, [room]);
+    for (let i = 0; i < 30; i++) stepBody(d, { forward: 1, strafe: 1, sprint: false, jump: false }, 0, idx, [room]);
     expect(Math.hypot(d.vel[0], d.vel[2])).toBeCloseTo(BODY.walk, 3);
     const r = fresh();
-    for (let i = 0; i < 60; i++) stepBody(r, { forward: 1, strafe: 0, sprint: true, jump: false }, 0, idx, [room]);
+    for (let i = 0; i < 30; i++) stepBody(r, { forward: 1, strafe: 0, sprint: true, jump: false }, 0, idx, [room]);
     expect(-r.vel[2]).toBeCloseTo(BODY.sprint, 3);
     const back = fresh();
-    for (let i = 0; i < 60; i++) stepBody(back, { forward: -1, strafe: 0, sprint: true, jump: false }, 0, idx, [room]);
+    for (let i = 0; i < 30; i++) stepBody(back, { forward: -1, strafe: 0, sprint: true, jump: false }, 0, idx, [room]);
     expect(back.vel[2]).toBeCloseTo(BODY.walk, 3);
   });
 
@@ -45,7 +45,7 @@ describe('movement math', () => {
   it('steps up a ledge below the step height but not a taller one', () => {
     const low: Aabb = { min: [-50, 0, -90], max: [50, BODY.step - 1, -10] };
     const b = fresh();
-    for (let i = 0; i < 60; i++) stepBody(b, { forward: 1, strafe: 0, sprint: false, jump: false }, 0, new SolidIndex([floor, low]), [room]);
+    for (let i = 0; i < 30; i++) stepBody(b, { forward: 1, strafe: 0, sprint: false, jump: false }, 0, new SolidIndex([floor, low]), [room]);
     expect(b.pos[1]).toBeCloseTo(BODY.step - 1, 4);
     const high: Aabb = { min: [-50, 0, -90], max: [50, BODY.step + 2, -10] };
     const c = fresh();

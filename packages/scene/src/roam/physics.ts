@@ -13,10 +13,10 @@ export const BODY = {
   eye: 44,
   /** Highest ledge walked up without jumping (the dais is 7.6 above the carpet). */
   step: 9,
-  walk: 58,
-  sprint: 96,
-  accel: 520,
-  friction: 640,
+  walk: 116,
+  sprint: 192,
+  accel: 1040,
+  friction: 1280,
   airControl: 0.35,
   gravity: 420,
   /** Hop height ≈ v²/2g ≈ 9.6 units: a hop, never flight. */
