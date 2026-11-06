@@ -1,4 +1,5 @@
 import type { VersusCase, Viewer } from '@cringe-court/modes-versus';
+import { t } from '@/i18n';
 import { EmptyState, PaperButtonLink } from '@/ds';
 import { versusPaths } from '../mode';
 import { BriefPanel } from './BriefPanel';
@@ -17,8 +18,8 @@ export function StagePanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
       if (viewer === 'a') return <InvitePanel c={c} />;
       if (viewer === 'invitee')
         return (
-          <EmptyState title="You have been invited to this case" character="side-a" expression="smug" actions={<PaperButtonLink to={versusPaths.joinCode(c.code)}>Read the invite</PaperButtonLink>}>
-            Read what you are agreeing to, then accept or decline.
+          <EmptyState title={t('versus.stage.invited.title')} character="side-a" expression="smug" actions={<PaperButtonLink to={versusPaths.joinCode(c.code)}>{t('versus.stage.invited.action')}</PaperButtonLink>}>
+            {t('versus.stage.invited.body')}
           </EmptyState>
         );
       return <PrivateCase />;
@@ -45,8 +46,8 @@ export function StagePanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
 
 function PrivateCase() {
   return (
-    <EmptyState title="This case is still private" character="bailiff" expression="neutral">
-      Versus cases stay between the two sides until both have paid. The jury and the public see it once the court calls a jury.
+    <EmptyState title={t('versus.stage.private.title')} character="bailiff" expression="neutral">
+      {t('versus.stage.private.body')}
     </EmptyState>
   );
 }

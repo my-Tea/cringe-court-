@@ -39,7 +39,7 @@
 }
 
 .pulse::before {
-  animation: pulse 1.6s var(--cc-ease-standard) infinite;
+  animation: pulse var(--cc-loop-pulse) var(--cc-ease-sway) infinite;
 }
 
 /* Tags pop open when they appear. */

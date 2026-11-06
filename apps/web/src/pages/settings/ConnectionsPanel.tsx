@@ -1,12 +1,16 @@
-import { formatUsdc } from '@cringe-court/core';
-import { useEffect, useState } from 'react';
+import { formatAmount } from '@/i18n/domain';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, Badge, Icon, PaperPanel, Spinner } from '@/ds';
+import { t, tRich } from '@/i18n';
 import { platformConfig, type PlatformConfig } from '@/platform/config';
 import { identityInfo } from '@/platform/identity/createIdentity';
 import type { ModeProbe } from '@/platform/ledger';
+import { COURT_LABEL_KEY } from '../modeText';
 import styles from './Settings.module.css';
 
 type Probe = readonly ModeProbe[];
+
+const code = { c: (chunk: ReactNode) => <code>{chunk}</code> };
 
 type ProbeState = { status: 'loading' } | { status: 'ready'; rows: Probe } | { status: 'error'; message: string };
 
@@ -26,8 +30,6 @@ function useLedgerProbe(config: PlatformConfig): ProbeState {
   return state;
 }
 
-const MODE_LABEL: Record<string, string> = { solo: 'Solo', versus: 'Versus', 'grand-jury': 'Grand Jury' };
-
 /** Which adapters sit behind the court: ledger, identity and AI counsel, plus a live terms check. */
 export function ConnectionsPanel({ config = platformConfig }: { config?: PlatformConfig }) {
   const identity = identityInfo(config);
@@ -36,14 +38,11 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
 
   return (
     <div>
-      <p className={styles.body}>
-        Every court talks to three services through the same ports. This build uses the ones below; the demo stand-ins follow the
-        real contract&apos;s rules exactly, so nothing changes for players when a real service is switched on.
-      </p>
+      <p className={styles.body}>{t('shell.connections.intro')}</p>
 
       {config.warnings.map((w) => (
-        <Alert key={w} tone="warning" title="A service fell back to its demo stand-in">
-          {w}
+        <Alert key={w.key} tone="warning" title={t('shell.connections.warning.title')}>
+          {t(w.key, w.params)}
         </Alert>
       ))}
 
@@ -51,29 +50,26 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
         <PaperPanel as="li" tone="cream" edge="cut" elevation={1} padding="md">
           <div className={styles.service}>
             <div className={styles.serviceHead}>
-              <h3 className={styles.serviceName}>Ledger</h3>
-              <Badge tone={arc ? 'success' : 'info'}>{arc ? 'Arc testnet' : 'Demo twin'}</Badge>
+              <h3 className={styles.serviceName}>{t('shell.connections.ledger')}</h3>
+              <Badge tone={arc ? 'success' : 'info'}>{arc ? t('shell.connections.ledger.arc') : t('shell.connections.ledger.demo')}</Badge>
             </div>
             {arc ? (
               <dl className={styles.rows}>
                 <div className={styles.row}>
-                  <dt>Chain</dt>
-                  <dd>Arc testnet · {arc.chainId}</dd>
+                  <dt>{t('shell.connections.chain')}</dt>
+                  <dd>{t('shell.connections.chainValue', { id: String(arc.chainId) })}</dd>
                 </div>
                 <div className={styles.row}>
-                  <dt>Court contract</dt>
+                  <dt>{t('shell.connections.contract')}</dt>
                   <dd className={styles.mono}>{arc.court}</dd>
                 </div>
                 <div className={styles.row}>
-                  <dt>RPC</dt>
+                  <dt>{t('shell.connections.rpc')}</dt>
                   <dd className={styles.mono}>{arc.rpcUrl}</dd>
                 </div>
               </dl>
             ) : (
-              <p className={styles.serviceDetail}>
-                An in-browser twin of the CringeCourt contract holds free test USDC. Same deadlines, bonds, commit–reveal and
-                settlement maths as the Arc testnet contract.
-              </p>
+              <p className={styles.serviceDetail}>{t('shell.connections.ledger.demoBody')}</p>
             )}
           </div>
         </PaperPanel>
@@ -81,13 +77,11 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
         <PaperPanel as="li" tone="cream" edge="cut" elevation={1} padding="md">
           <div className={styles.service}>
             <div className={styles.serviceHead}>
-              <h3 className={styles.serviceName}>Juror screening</h3>
+              <h3 className={styles.serviceName}>{t('shell.connections.screening')}</h3>
               <Badge tone={identity.kind === 'world-idkit' ? 'success' : 'info'}>{identity.label}</Badge>
             </div>
             <p className={styles.serviceDetail}>
-              {identity.kind === 'world-idkit'
-                ? `${identity.detail}. Jurors need an Orb-level proof; case parties can never sit on their own jury.`
-                : 'Demo personas stand in for World ID, under the real rules: jurors need the Orb level, and parties are excluded from their own jury.'}
+              {identity.kind === 'world-idkit' ? t('shell.connections.screening.world', { detail: identity.detail }) : t('shell.connections.screening.demo')}
             </p>
           </div>
         </PaperPanel>
@@ -95,75 +89,77 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
         <PaperPanel as="li" tone="cream" edge="cut" elevation={1} padding="md">
           <div className={styles.service}>
             <div className={styles.serviceHead}>
-              <h3 className={styles.serviceName}>AI counsel</h3>
-              <Badge tone="info">Scripted demo</Badge>
+              <h3 className={styles.serviceName}>{t('shell.connections.ai')}</h3>
+              <Badge tone="info">{t('shell.connections.ai.badge')}</Badge>
             </div>
-            <p className={styles.serviceDetail}>
-              Scripted counsel stands in for 0G Compute. Each bench still only sees its own client&apos;s private notes, and the
-              transcript is frozen and fingerprinted before anyone votes.
-            </p>
+            <p className={styles.serviceDetail}>{t('shell.connections.ai.body')}</p>
           </div>
         </PaperPanel>
       </ul>
 
       {probe.status === 'loading' && (
         <p className={styles.serviceDetail} role="status">
-          <Spinner size="sm" label={null} /> Reading the court&apos;s terms from the ledger…
+          <Spinner size="sm" label={null} /> {t('shell.connections.probe.loading')}
         </p>
       )}
       {probe.status === 'error' && (
-        <Alert tone="warning" title="Could not read the ledger" live="polite">
+        <Alert tone="warning" title={t('shell.connections.probe.error')} live="polite">
           {probe.message}
         </Alert>
       )}
       {probe.status === 'ready' && (
-        <table className={styles.termsTable}>
-          <caption>Terms on the ledger vs. what the app shows you</caption>
-          <thead>
-            <tr>
-              <th scope="col">Court</th>
-              <th scope="col" data-num>Case charge</th>
-              <th scope="col" data-num>Juror bond</th>
-              <th scope="col" data-num>Jurors</th>
-              <th scope="col">Check</th>
-            </tr>
-          </thead>
-          <tbody>
-            {probe.rows.map((r) => (
-              <tr key={r.mode}>
-                <th scope="row">{MODE_LABEL[r.mode] ?? r.mode}</th>
-                <td data-num>{formatUsdc(r.price)}</td>
-                <td data-num>{formatUsdc(r.jurorBond)}</td>
-                <td data-num>{r.seats}</td>
-                <td>
-                  {r.matches ? (
-                    <span className={styles.match}>
-                      <Icon name="check" /> Matches
-                    </span>
-                  ) : (
-                    <span className={styles.mismatch} title={r.diffs.join('; ')}>
-                      <Icon name="alert" /> {r.diffs.join('; ')}
-                    </span>
-                  )}
-                </td>
+        // A wide table scrolls inside its own region on phones instead of pushing the page sideways;
+        // the region takes focus so keyboard users can scroll it (WCAG 2.1.1).
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        <div className={styles.termsScroll} role="region" aria-labelledby="terms-caption" tabIndex={0}>
+          <table className={styles.termsTable}>
+            <caption id="terms-caption">{t('shell.connections.terms.caption')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('shell.connections.terms.court')}</th>
+                <th scope="col" data-num>
+                  {t('shell.connections.terms.charge')}
+                </th>
+                <th scope="col" data-num>
+                  {t('shell.connections.terms.bond')}
+                </th>
+                <th scope="col" data-num>
+                  {t('shell.connections.terms.jurors')}
+                </th>
+                <th scope="col">{t('shell.connections.terms.check')}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {probe.rows.map((r) => (
+                <tr key={r.mode}>
+                  <th scope="row">{t(COURT_LABEL_KEY[r.mode])}</th>
+                  <td data-num>{formatAmount(r.price)}</td>
+                  <td data-num>{formatAmount(r.jurorBond)}</td>
+                  <td data-num>{r.seats}</td>
+                  <td>
+                    {r.matches ? (
+                      <span className={styles.match}>
+                        <Icon name="check" /> {t('shell.connections.terms.matches')}
+                      </span>
+                    ) : (
+                      <span className={styles.mismatch} title={r.diffs.join('; ')}>
+                        <Icon name="alert" /> {r.diffs.join('; ')}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <details className={styles.body}>
-        <summary>Connecting real services (for deployers)</summary>
+        <summary>{t('shell.connections.deployers')}</summary>
         <ul className={styles.envList}>
-          <li>
-            <code>VITE_LEDGER=arc-testnet</code> with <code>VITE_ARC_COURT</code>, <code>VITE_ARC_USDC</code>,{' '}
-            <code>VITE_ARC_REGISTRY</code> (and optionally <code>VITE_ARC_RPC_URL</code>).
-          </li>
-          <li>
-            <code>VITE_IDENTITY=world-idkit</code> with <code>VITE_WORLD_APP_ID</code> and <code>VITE_WORLD_BACKEND_URL</code> (the
-            verifier that serves <code>/rp-context</code> and <code>/verify</code>).
-          </li>
-          <li>Testnet only: there is no mainnet setting in this build.</li>
+          <li>{tRich('shell.connections.env.ledger', code)}</li>
+          <li>{tRich('shell.connections.env.identity', code)}</li>
+          <li>{t('shell.connections.env.testnetOnly')}</li>
         </ul>
       </details>
     </div>

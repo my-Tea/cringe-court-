@@ -1,14 +1,7 @@
 import type { IdentityAction, IdentityPort, ProofRequest, ProofResult, ScreeningResult, VerificationLevel, VerifyContext, WorldIdProof } from '@cringe-court/core';
 import { MockIdentity } from '@cringe-court/core/testing';
-import {
-  IdentityLevel,
-  JUROR_MIN_LEVEL,
-  PARTY_MIN_LEVEL,
-  checkJurorEligibility,
-  type IneligibleReason,
-  type VerificationResult,
-} from '@cringe-court/world-id/client';
-import { JUROR_SCREENING_COPY } from './screeningCopy';
+import { IdentityLevel, JUROR_MIN_LEVEL, PARTY_MIN_LEVEL, checkJurorEligibility, type IneligibleReason, type VerificationResult } from '@cringe-court/world-id/client';
+import { screeningCopy, type ScreeningCopyKey } from '@/i18n/domain';
 
 export const MOCK_APP_ID = 'app_staging_cringecourt_demo';
 
@@ -40,7 +33,7 @@ export function mockLevelFor(human: string): IdentityLevel {
   return IdentityLevel.ORB;
 }
 
-const REASON_TO_RESULT: Record<IneligibleReason, { reason: Extract<ScreeningResult, { ok: false }>['reason']; copy: keyof typeof JUROR_SCREENING_COPY }> = {
+const REASON_TO_RESULT: Record<IneligibleReason, { reason: Extract<ScreeningResult, { ok: false }>['reason']; copy: ScreeningCopyKey }> = {
   not_verified: { reason: 'not-verified', copy: 'not_verified' },
   ineligible_level: { reason: 'not-verified', copy: 'ineligible_level' },
   is_party: { reason: 'conflicted', copy: 'is_party' },
@@ -81,18 +74,15 @@ export class PolicyMockIdentity extends MockIdentity {
     if (!juror) {
       // Filing or joining a case needs only the party level (unless the request asks for more).
       const floor = request.minLevel === 'orb' ? JUROR_MIN_LEVEL : PARTY_MIN_LEVEL;
-      if (level < floor) return { ok: false, reason: 'not-verified', message: JUROR_SCREENING_COPY.not_verified };
+      if (level < floor) return { ok: false, reason: 'not-verified', message: screeningCopy('not_verified') };
       return super.verify(proof, request, context);
     }
     const scope = `${request.action}:${request.signal}:${proof.nullifierHash.toLowerCase()}`;
     const result: VerificationResult = { ok: true, humanId: proof.nullifierHash, level, action: request.action, verifiedAt: 0 };
-    const verdict = checkJurorEligibility(result, {
-      partyHumanIds: [...(context.exclude ?? [])],
-      seatedHumanIds: this.#seated.has(scope) ? [proof.nullifierHash] : [],
-    });
+    const verdict = checkJurorEligibility(result, { partyHumanIds: [...(context.exclude ?? [])], seatedHumanIds: this.#seated.has(scope) ? [proof.nullifierHash] : [] });
     if (!verdict.eligible) {
       const m = REASON_TO_RESULT[verdict.reason];
-      return { ok: false, reason: m.reason, message: JUROR_SCREENING_COPY[m.copy] };
+      return { ok: false, reason: m.reason, message: screeningCopy(m.copy) };
     }
     this.#seated.add(scope);
     return { ok: true, nullifier: proof.nullifierHash };

@@ -1,8 +1,10 @@
-import { addUsdc, formatCaseNumber, subUsdc, type CaseNumber, type ReceiptKind, type ReceiptLine, type Usdc } from '@cringe-court/core';
+import { addUsdc, subUsdc, type CaseNumber, type ReceiptKind, type ReceiptLine, type Usdc } from '@cringe-court/core';
+import { t } from '@/i18n';
 import { cx } from '../../lib/cx';
 import { Amount } from '../Amount/Amount';
 import { Icon } from '../Icon/Icon';
 import styles from './Receipt.module.css';
+import { formatCaseNo } from '@/i18n/domain';
 
 const CREDIT: ReadonlySet<ReceiptKind> = new Set(['bond-returned', 'reward', 'refund', 'stipend']);
 
@@ -25,13 +27,13 @@ function net(lines: readonly ReceiptLine[]): { value: Usdc; direction: 'credit' 
 }
 
 /** Settlement receipt: every money movement, labelled honestly (V4 §5, §13). */
-export function Receipt({ caseNumber, title = 'Settlement receipt', lines, explorerUrl, note, className }: ReceiptProps) {
+export function Receipt({ caseNumber, title = t('ds.receipt.title'), lines, explorerUrl, note, className }: ReceiptProps) {
   const total = net(lines);
   return (
-    <section className={cx(styles.receipt, className)} data-surface="parchment" aria-label={`${title}, ${formatCaseNumber(caseNumber)}`}>
+    <section className={cx(styles.receipt, className)} data-surface="parchment" aria-label={`${title}, ${formatCaseNo(caseNumber)}`}>
       <div className={styles.head}>
         <h3 className={styles.title}>{title}</h3>
-        <span className={styles.case}>{formatCaseNumber(caseNumber)}</span>
+        <span className={styles.case}>{formatCaseNo(caseNumber)}</span>
       </div>
       <dl className={styles.lines}>
         {lines.map((line, i) => (
@@ -44,15 +46,15 @@ export function Receipt({ caseNumber, title = 'Settlement receipt', lines, explo
         ))}
       </dl>
       <div className={styles.total}>
-        <span>Net</span>
+        <span>{t('ds.receipt.net')}</span>
         <Amount value={total.value} direction={total.direction} />
       </div>
       {note && <p className={styles.note}>{note}</p>}
       {explorerUrl && (
         <a className={styles.tx} href={explorerUrl} target="_blank" rel="noreferrer">
-          View on Arc testnet explorer
+          {t('ds.receipt.explorer')}
           <Icon name="external" />
-          <span className="cc-visually-hidden">(opens in a new tab)</span>
+          <span className="cc-visually-hidden">{t('ds.receipt.newTab')}</span>
         </a>
       )}
     </section>

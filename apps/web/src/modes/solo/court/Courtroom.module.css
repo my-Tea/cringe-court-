@@ -60,10 +60,10 @@
 }
 
 .camera[data-fx='shake'] {
-  animation: shake 420ms steps(6, end);
+  animation: shake var(--cc-duration-slower) var(--cc-ease-shake);
 }
 .camera[data-fx='impact'] {
-  animation: impact 300ms var(--cc-ease-stamp);
+  animation: impact var(--cc-duration-slow) var(--cc-ease-stamp);
 }
 
 @keyframes shake {
@@ -173,7 +173,7 @@
   inset: 0;
   background: var(--cc-neutral-100);
   opacity: 0;
-  animation: flash 360ms var(--cc-ease-exit);
+  animation: flash var(--cc-duration-slow) var(--cc-ease-exit);
   pointer-events: none;
 }
 

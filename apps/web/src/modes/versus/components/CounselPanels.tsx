@@ -1,6 +1,9 @@
-import { formatUsdc, usdc, type SideId } from '@cringe-court/core';
+import { usdc, type SideId } from '@cringe-court/core';
+import { formatAmount } from '@/i18n/domain';
 import { otherSide, sideCharges, sideStatus, type VersusCase } from '@cringe-court/modes-versus';
+import { t } from '@/i18n';
 import { Alert, Amount, Badge, Button, Dialog, DialogClose, DialogContent, DialogTrigger, Icon, PaperButton, Portrait, Spinner, TestnetBadge } from '@/ds';
+import { agentName, letter } from '../copy';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
 import { WithdrawButton } from './BriefPanel';
@@ -16,16 +19,16 @@ export function DraftingPanel({ c }: { c: VersusCase }) {
     <PaperSection as="section" padding="lg" tone="maroon" aria-labelledby="drafting-title" bodyClassName={styles.drafting}>
       <div className={styles.draftingStage} aria-hidden>
         <Portrait character="side-a" expression="smug" size="xl" ring="side-a" alt="" />
-        <span className={styles.vs}>VS</span>
+        <span className={styles.vs}>{t('versus.draft.vs')}</span>
         <Portrait character="side-b" expression="smug" size="xl" ring="side-b" alt="" />
       </div>
       <h2 id="drafting-title" className={styles.panelTitle}>
-        {redraft === null ? 'The agents are drafting the trial' : `Agent ${redraft === 0 ? 'A' : 'B'} is redrafting`}
+        {redraft === null ? t('versus.draft.title') : t('versus.draft.redrafting', { agent: agentName(redraft === 0 ? 'a' : 'b') })}
       </h2>
       <p role="status" className={styles.draftingStatus}>
-        <Spinner size="sm" label={null} /> Attempt {attempt}: same model, same token budget for both sides. A balance check runs before you see it.
+        <Spinner size="sm" label={null} /> {t('versus.draft.attempt', { attempt })}
       </p>
-      <p className={styles.fine}>Each agent sees its own side’s notes and only the other side’s public story (D1).</p>
+      <p className={styles.fine}>{t('versus.draft.note')}</p>
     </PaperSection>
   );
 }
@@ -34,12 +37,12 @@ function BalanceMeter({ scores, ok }: { scores: readonly [number, number]; ok: b
   return (
     <div className={styles.balance}>
       <p className={styles.balanceTitle}>
-        Balance check <Badge tone={ok ? 'success' : 'danger'}>{ok ? 'Fair fight' : 'Lopsided'}</Badge>
+        {t('versus.balance.title')} <Badge tone={ok ? 'success' : 'danger'}>{ok ? t('versus.balance.fair') : t('versus.balance.lopsided')}</Badge>
       </p>
       {(['a', 'b'] as const).map((side, i) => (
         <div key={side} className={styles.balanceRow} data-side={side}>
-          <span>Agent {side.toUpperCase()}</span>
-          <meter min={0} max={1} low={0.6} optimum={1} value={scores[i]} aria-label={`Agent ${side.toUpperCase()} argument strength`}>
+          <span>{agentName(side)}</span>
+          <meter min={0} max={1} low={0.6} optimum={1} value={scores[i]} aria-label={t('versus.balance.strength', { agent: agentName(side) })}>
             {Math.round(scores[i]! * 100)}%
           </meter>
           <span className={styles.mono}>{Math.round(scores[i]! * 100)}%</span>
@@ -59,50 +62,58 @@ export function DraftReviewPanel({ c, side }: { c: VersusCase; side: SideId }) {
   const themStatus = sideStatus(c, them);
   return (
     <div className={styles.stack}>
-      <PaperSection as="section" padding="md" ribbon="The draft" aria-label="Draft trial">
-        <TrialView lines={s.draft.lines} exhibits={s.exhibits} filing={s.filing} banner="Draft · frozen once both sides approve" />
+      <PaperSection as="section" padding="md" ribbon={t('versus.review.ribbon')} aria-label={t('versus.review.aria')}>
+        <TrialView lines={s.draft.lines} exhibits={s.exhibits} filing={s.filing} banner={t('versus.review.banner')} />
       </PaperSection>
       <section className={styles.reviewBar} aria-labelledby="approve-title">
         <div>
           <h2 id="approve-title" className={styles.panelSubtitle}>
-            Happy with how Agent {side.toUpperCase()} argued?
+            {t('versus.review.question', { agent: agentName(side) })}
           </h2>
           <p className={styles.muted}>
-            After both of you approve, the transcript is frozen and fingerprinted; nothing changes after payment. {themStatus.approvedDraft ? `Side ${them.toUpperCase()} has approved.` : `Side ${them.toUpperCase()} has not approved yet.`}
+            {t('versus.review.frozen', {
+              status: themStatus.approvedDraft ? t('versus.review.themApproved', { side: letter(them) }) : t('versus.review.themPending', { side: letter(them) }),
+            })}
           </p>
           {s.balance && <BalanceMeter scores={s.balance.scores} ok={s.balance.ok} />}
         </div>
         <div className={styles.reviewBarActions}>
           {me.approvedDraft ? (
             <Badge tone="success" dot>
-              You approved the draft
+              {t('versus.review.approved')}
             </Badge>
           ) : (
             <>
               <Dialog>
                 <DialogTrigger asChild>
                   <PaperButton variant="maroon" disabled={me.redraftsLeft === 0} iconStart={<Icon name="refresh" />}>
-                    {me.redraftsLeft === 0 ? 'Redraft used' : 'Redraft my agent (1 left)'}
+                    {me.redraftsLeft === 0 ? t('versus.redraft.used') : t('versus.redraft.mine')}
                   </PaperButton>
                 </DialogTrigger>
                 <DialogContent
-                  title={`Redraft Agent ${side.toUpperCase()}?`}
-                  description={`Your agent writes its lines again. Agent ${them.toUpperCase()}’s lines stay word for word. You get one redraft per case (D2).`}
+                  title={t('versus.redraft.title', { agent: agentName(side) })}
+                  description={t('versus.redraft.description', { other: agentName(them) })}
                   size="sm"
                   footer={
                     <>
                       <DialogClose asChild>
-                        <PaperButton variant="ghost">Keep this draft</PaperButton>
+                        <PaperButton variant="ghost">{t('versus.redraft.keep')}</PaperButton>
                       </DialogClose>
                       <DialogClose asChild>
-                        <PaperButton onClick={() => void run(() => desk.requestRedraft(c.trialId, side), { success: `Agent ${side.toUpperCase()} is redrafting` })}>Redraft</PaperButton>
+                        <PaperButton onClick={() => void run(() => desk.requestRedraft(c.trialId, side), { success: t('versus.draft.redrafting', { agent: agentName(side) }) })}>
+                          {t('versus.redraft.confirm')}
+                        </PaperButton>
                       </DialogClose>
                     </>
                   }
                 />
               </Dialog>
-              <PaperButton size="lg" iconStart={<Icon name="check" />} onClick={() => void run(() => desk.approveDraft(c.trialId, side), { success: 'Draft approved' })}>
-                Approve the draft
+              <PaperButton
+                size="lg"
+                iconStart={<Icon name="check" />}
+                onClick={() => void run(() => desk.approveDraft(c.trialId, side), { success: t('versus.review.approveSuccess') })}
+              >
+                {t('versus.review.approve')}
               </PaperButton>
             </>
           )}
@@ -125,14 +136,14 @@ export function FundingPanel({ c, side }: { c: VersusCase; side: SideId }) {
   const themStatus = sideStatus(c, them);
   const short = balance < mine.total;
   return (
-    <PaperSection as="section" padding="lg" ribbon="Pay your half" aria-labelledby="fund-title">
+    <PaperSection as="section" padding="lg" ribbon={t('versus.fund.ribbon')} aria-labelledby="fund-title">
       <div className={styles.fundGrid}>
         <div>
           <h2 id="fund-title" className={styles.panelTitle}>
-            The transcript is frozen. Time to pay.
+            {t('versus.fund.title')}
           </h2>
           <p className={styles.muted}>
-            Your half goes into the case escrow on Arc testnet. When both halves are in, three random verified jurors are called. <TestnetBadge />
+            {t('versus.fund.body')} <TestnetBadge />
           </p>
           <dl className={styles.breakdown}>
             {mine.parts.map((p) => (
@@ -144,7 +155,7 @@ export function FundingPanel({ c, side }: { c: VersusCase; side: SideId }) {
               </div>
             ))}
             <div className={styles.breakdownTotal}>
-              <dt>You pay</dt>
+              <dt>{t('versus.fund.youPay')}</dt>
               <dd>
                 <Amount value={mine.total} size="lg" direction="debit" />
               </dd>
@@ -158,11 +169,11 @@ export function FundingPanel({ c, side }: { c: VersusCase; side: SideId }) {
               <div key={x} className={styles.fundSide} data-side={x} data-paid={st.paid || undefined}>
                 <Portrait character={x === 'a' ? 'side-a' : 'side-b'} size="sm" ring={x === 'a' ? 'side-a' : 'side-b'} alt="" />
                 <span>
-                  Side {x.toUpperCase()}
-                  {x === side && ' (you)'}
+                  {t('versus.exhibits.sideBadge', { side: letter(x) })}
+                  {x === side && t('versus.fund.you')}
                 </span>
                 <Badge tone={st.paid ? 'success' : 'neutral'} dot={!st.paid ? 'pulse' : true}>
-                  {st.paid ? 'Paid' : 'Waiting'}
+                  {st.paid ? t('versus.rail.chip.paid') : t('versus.fund.waiting')}
                 </Badge>
               </div>
             );
@@ -171,25 +182,31 @@ export function FundingPanel({ c, side }: { c: VersusCase; side: SideId }) {
       </div>
 
       {me.paid ? (
-        <Alert tone="success" title="Your half is in escrow">
-          {themStatus.paid ? 'Both halves are in.' : `Waiting for Side ${them.toUpperCase()}. If they don’t pay before the deadline, your ${formatUsdc(mine.total)} is refunded in full.`}
+        <Alert tone="success" title={t('versus.fund.escrow')}>
+          {themStatus.paid ? t('versus.fund.bothIn') : t('versus.fund.waitingFor', { side: letter(them), amount: formatAmount(mine.total) })}
         </Alert>
       ) : (
         <div className={styles.payRow}>
           <p className={styles.balanceLine}>
-            Demo wallet: <Amount value={balance} size="sm" />
+            {t('versus.fund.wallet')} <Amount value={balance} size="sm" />
           </p>
           {short && (
-            <PaperButton variant="maroon" iconStart={<Icon name="plus" />} onClick={() => void run(() => desk.faucet(usdc('5.00')), { success: 'Added 5.00 test USDC' })}>
-              Get test USDC
+            <PaperButton variant="maroon" iconStart={<Icon name="plus" />} onClick={() => void run(() => desk.faucet(usdc('5.00')), { success: t('versus.fund.faucetSuccess') })}>
+              {t('versus.fund.faucet')}
             </PaperButton>
           )}
-          <Button size="lg" variant="swear" disabled={short} iconStart={<Icon name="scales" />} onClick={() => void run(() => desk.fund(c.trialId), { success: `Paid ${formatUsdc(mine.total)} (test USDC)` })}>
-            Pay {formatUsdc(mine.total)}
+          <Button
+            size="lg"
+            variant="swear"
+            disabled={short}
+            iconStart={<Icon name="scales" />}
+            onClick={() => void run(() => desk.fund(c.trialId), { success: t('versus.fund.paid', { amount: formatAmount(mine.total) }) })}
+          >
+            {t('versus.fund.pay', { amount: formatAmount(mine.total) })}
           </Button>
         </div>
       )}
-      <p className={styles.fine}>No wager: the winner gets bragging rights and a share card, never the other side’s money. On NO VERDICT or any failure you get your own half back.</p>
+      <p className={styles.fine}>{t('versus.fund.fine')}</p>
       <div className={styles.panelFooter}>
         <WithdrawButton c={c} side={side} paid={me.paid} />
       </div>

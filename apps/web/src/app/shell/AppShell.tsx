@@ -1,19 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  Icon,
-  IconButton,
-  Logo,
-  PaperNavBar,
-  PaperPanel,
-  PaperTab,
-  RoundIconLink,
-  TestnetBadge,
-  Tooltip,
-} from '@/ds';
+import { Dialog, DialogContent, DialogTrigger, Icon, IconButton, Logo, PaperNavBar, PaperPanel, PaperTab, RoundIconLink, TestnetBadge, Tooltip, usePageEnter } from '@/ds';
+import { t } from '@/i18n';
 import { COURT_LINKS, NAV_ITEMS, paths } from '../routes';
 import styles from './AppShell.module.css';
 import { MotionToggle } from './MotionToggle';
@@ -37,68 +25,67 @@ function useFocusMainOnNavigate() {
 export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const mainRef = useFocusMainOnNavigate();
+  const { pathname: enterKey } = useLocation();
+  // Each new page settles in (tokens: --cc-duration-slow, --cc-ease-enter; instant under reduced motion).
+  usePageEnter(mainRef, enterKey);
   const { pathname } = useLocation();
   const close = () => setMenuOpen(false);
 
   return (
     <div className={styles.shell}>
       <a className={styles.skip} href="#main">
-        Skip to content
+        {t('shell.skip')}
       </a>
       <span className={styles.corner} data-corner="tl" aria-hidden />
       <span className={styles.corner} data-corner="tr" aria-hidden />
 
       <header className={styles.header}>
         <PaperNavBar
-          label="Main"
+          label={t('shell.nav.label')}
           className={styles.bar}
           start={
-            <Link to={paths.home} className={styles.brand} aria-label="CringeCourt home">
+            <Link to={paths.home} className={styles.brand}>
+              {/* Name from hidden text, not aria-label: the wordmark's drawn letters would not match a label (WCAG 2.5.3). */}
+              <span className="cc-visually-hidden">{t('shell.brand.home', { app: t('common.app.name') })}</span>
               <Logo layout="inline" title={null} className={styles.brandWide} />
               <Logo layout="mark" title={null} className={styles.brandMark} />
             </Link>
           }
           end={
             <>
-              <Tooltip content="Arc testnet only. Every amount is test USDC: no real money, ever, in this build.">
+              <Tooltip content={t('shell.testnet.tooltip')}>
                 <button type="button" className={styles.badgeButton}>
                   <TestnetBadge />
                 </button>
               </Tooltip>
               <SoundButton className={styles.sound} />
-              <Tooltip content="Settings">
-                <RoundIconLink to={paths.settings} label="Settings" icon="gear" className={styles.gear} />
+              <Tooltip content={t('shell.nav.settings')}>
+                <RoundIconLink to={paths.settings} label={t('shell.nav.settings')} icon="gear" className={styles.gear} />
               </Tooltip>
               <Dialog open={menuOpen} onOpenChange={setMenuOpen}>
                 <DialogTrigger asChild>
-                  <IconButton label="Open menu" icon={<Icon name="menu" />} className={styles.menuButton} />
+                  <IconButton label={t('shell.menu.open')} icon={<Icon name="menu" />} className={styles.menuButton} />
                 </DialogTrigger>
-                <DialogContent variant="sheet" title="Menu">
+                <DialogContent variant="sheet" title={t('shell.menu.title')}>
                   <ul className={styles.mobileNav} role="list">
                     {NAV_ITEMS.map((item) => {
                       const current = item.activeFor ? item.activeFor(pathname) : false;
                       return (
                         <li key={item.to}>
-                          <NavLink
-                            to={item.to}
-                            end={item.to === paths.home}
-                            className={styles.menuLink}
-                            onClick={close}
-                            {...(current ? { 'aria-current': 'page' as const } : {})}
-                          >
+                          <NavLink to={item.to} end={item.to === paths.home} className={styles.menuLink} onClick={close} {...(current ? { 'aria-current': 'page' as const } : {})}>
                             <Icon name={item.icon} />
-                            {item.label}
+                            {t(item.labelKey)}
                           </NavLink>
                         </li>
                       );
                     })}
                   </ul>
-                  <h2 className={styles.sheetHeading}>Courts</h2>
+                  <h2 className={styles.sheetHeading}>{t('shell.nav.courts')}</h2>
                   <ul className={styles.mobileNav} role="list">
                     {COURT_LINKS.map((c) => (
                       <li key={c.to}>
                         <NavLink to={c.to} className={styles.menuLink} onClick={close}>
-                          {c.label}
+                          {t(c.labelKey)}
                         </NavLink>
                       </li>
                     ))}
@@ -107,7 +94,7 @@ export function AppShell() {
                     <li>
                       <NavLink to={paths.settings} className={styles.menuLink} onClick={close}>
                         <Icon name="gear" />
-                        Settings
+                        {t('shell.nav.settings')}
                       </NavLink>
                     </li>
                   </ul>
@@ -123,7 +110,7 @@ export function AppShell() {
         >
           {NAV_ITEMS.map((item) => (
             <PaperTab key={item.to} to={item.to} icon={item.icon} end={item.to === paths.home} {...(item.activeFor ? { activeFor: item.activeFor } : {})}>
-              {item.label}
+              {t(item.labelKey)}
             </PaperTab>
           ))}
         </PaperNavBar>
@@ -137,49 +124,46 @@ export function AppShell() {
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
             <Logo layout="mark" title={null} className={styles.footerMark} />
-            <p className={styles.footerWordmark}>CringeCourt</p>
-            <p>The AI performs. Humans decide. A comedy courtroom with real, verified juries and money flows you can check.</p>
+            <p className={styles.footerWordmark}>{t('common.app.name')}</p>
+            <p>{t('shell.footer.blurb')}</p>
           </div>
           <div>
-            <h2 className={styles.footerHeading}>Courts</h2>
+            <h2 className={styles.footerHeading}>{t('shell.nav.courts')}</h2>
             <ul className={styles.footerList} role="list">
               {COURT_LINKS.map((c) => (
                 <li key={c.to}>
-                  <Link to={c.to}>{c.label}</Link>
+                  <Link to={c.to}>{t(c.labelKey)}</Link>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <h2 className={styles.footerHeading}>More</h2>
+            <h2 className={styles.footerHeading}>{t('shell.footer.more')}</h2>
             <ul className={styles.footerList} role="list">
               <li>
-                <Link to={paths.howToPlay}>How to play</Link>
+                <Link to={paths.howToPlay}>{t('shell.nav.howToPlay')}</Link>
               </li>
               <li>
-                <Link to={paths.leaderboard}>Leaderboard</Link>
+                <Link to={paths.leaderboard}>{t('shell.nav.leaderboard')}</Link>
               </li>
               <li>
-                <Link to={paths.settings}>Settings</Link>
+                <Link to={paths.settings}>{t('shell.nav.settings')}</Link>
               </li>
               <li>
-                <Link to={paths.gallery}>Design gallery</Link>
+                <Link to={paths.gallery}>{t('shell.nav.gallery')}</Link>
               </li>
             </ul>
             <div className={styles.footerMotion}>
               <MotionToggle />
             </div>
           </div>
-          <p className={styles.legal}>
-            Testnet only: every amount is test USDC on Arc testnet. Entertainment, not legal advice; verdicts are a jury&apos;s
-            opinion, not facts. Jurors are World-verified humans.
-          </p>
+          <p className={styles.legal}>{t('shell.footer.legal')}</p>
           <p className={styles.signature}>
-            <span>Testnet only</span>
+            <span>{t('shell.footer.testnetOnly')}</span>
             <span className="cc-diamond" aria-hidden />
-            <span>CringeCourt</span>
+            <span>{t('common.app.name')}</span>
             <span className={styles.signatureRule} aria-hidden />
-            <span>Your Honor, Bro Is Cooked.</span>
+            <span>{t('common.app.tagline')}</span>
           </p>
         </div>
       </PaperPanel>

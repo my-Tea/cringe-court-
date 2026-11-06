@@ -1,9 +1,11 @@
 import { MODES, caseCharge, jurySize, verdictThreshold, type ModeId } from '@cringe-court/core';
 import { Amount } from '@/ds';
+import { t } from '@/i18n';
 import styles from './pages.module.css';
+import { ballotLabel } from '@/i18n/domain';
 
-const minutes = (s: number) => `${Math.round(s / 60)} min`;
-const hours = (s: number) => `${Math.round(s / 3600)} h`;
+const minutes = (s: number) => t('shell.facts.minutes', { count: Math.round(s / 60) });
+const hours = (s: number) => t('shell.facts.hours', { count: Math.round(s / 3600) });
 
 /** The numbers that matter before paying (V4 §6.2), straight from the core constants. */
 export function ModeFacts({ id, detailed = false }: { id: ModeId; detailed?: boolean }) {
@@ -12,19 +14,17 @@ export function ModeFacts({ id, detailed = false }: { id: ModeId; detailed?: boo
   return (
     <dl className={styles.facts}>
       <div>
-        <dt>Jury</dt>
+        <dt>{t('shell.facts.jury')}</dt>
+        <dd>{t('shell.facts.juryValue', { size: jurySize(mode), threshold: verdictThreshold(mode) })}</dd>
+      </div>
+      <div>
+        <dt>{t('shell.facts.ballot')}</dt>
         <dd>
-          {jurySize(mode)} verified humans · {verdictThreshold(mode)} must match
+          {ballotLabel(ballot[0])} / {ballotLabel(ballot[1])}
         </dd>
       </div>
       <div>
-        <dt>Ballot</dt>
-        <dd>
-          {ballot[0]} / {ballot[1]}
-        </dd>
-      </div>
-      <div>
-        <dt>{mode.funding.kind === 'split' ? 'Case charge (both sides)' : mode.funding.kind === 'crowdfund' ? 'Crowdfund target' : 'Case charge'}</dt>
+        <dt>{t(mode.funding.kind === 'split' ? 'shell.facts.charge.both' : mode.funding.kind === 'crowdfund' ? 'shell.facts.charge.crowdfund' : 'shell.facts.charge.single')}</dt>
         <dd>
           <Amount value={caseCharge(mode)} size="sm" />
         </dd>
@@ -32,22 +32,26 @@ export function ModeFacts({ id, detailed = false }: { id: ModeId; detailed?: boo
       {detailed && (
         <>
           <div>
-            <dt>Juror bond</dt>
+            <dt>{t('shell.facts.bond')}</dt>
             <dd>
               <Amount value={economics.bondPerJuror} size="sm" />
             </dd>
           </div>
           <div>
-            <dt>Juror reward on a verdict</dt>
+            <dt>{t('shell.facts.reward')}</dt>
             <dd>
               <Amount value={economics.successBonusPerJuror} size="sm" />
             </dd>
           </div>
           <div>
-            <dt>Deadlines</dt>
+            <dt>{t('shell.facts.deadlines')}</dt>
             <dd>
-              {deadlines.preTrial !== null && <>{hours(deadlines.preTrial)} {id === 'versus' ? 'consent' : 'funding'} · </>}
-              {minutes(deadlines.recruitment)} jury · {minutes(deadlines.commit)} seal · {minutes(deadlines.reveal)} reveal
+              {[
+                ...(deadlines.preTrial !== null ? [t(id === 'versus' ? 'shell.facts.deadline.consent' : 'shell.facts.deadline.funding', { time: hours(deadlines.preTrial) })] : []),
+                t('shell.facts.deadline.jury', { time: minutes(deadlines.recruitment) }),
+                t('shell.facts.deadline.seal', { time: minutes(deadlines.commit) }),
+                t('shell.facts.deadline.reveal', { time: minutes(deadlines.reveal) }),
+              ].join(t('shell.facts.join'))}
             </dd>
           </div>
         </>

@@ -4,11 +4,13 @@
  * mode's frozen transcript and verdict. Loaded lazily: it carries three.js.
  */
 import type { AvatarSpec, PlayerRole, RemotePlayerFeed, SpawnId } from '@cringe-court/scene/roam';
-import { BEAT_LABELS, RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
+import { RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Icon, Spinner } from '@/ds';
+import { t } from '@/i18n';
 import { appAudio } from '@/platform/audio';
 import { playBeats, type PlannedBeat } from './beats';
+import { roamStrings } from './roamStrings';
 import styles from './Trial.module.css';
 
 export interface RoamTrialProps {
@@ -27,7 +29,17 @@ export interface RoamTrialProps {
   onDone?: () => void;
 }
 
-export function RoamTrial({ beats, label, role = 'defendant', spawn = 'defendant', avatar = { model: 'creator', name: 'You' }, remotes, onExit, onBeat, onDone }: RoamTrialProps) {
+export function RoamTrial({
+  beats,
+  label,
+  role = 'defendant',
+  spawn = 'defendant',
+  avatar = { model: 'creator', name: t('trial.roam.you') },
+  remotes,
+  onExit,
+  onBeat,
+  onDone,
+}: RoamTrialProps) {
   const roam = useRoamCourtroom({ audio: appAudio(), role, spawn, avatar, ...(remotes ? { remotes } : {}) });
   const [run, setRun] = useState(0);
   const [current, setCurrent] = useState<number | null>(null);
@@ -72,48 +84,46 @@ export function RoamTrial({ beats, label, role = 'defendant', spawn = 'defendant
 
   if (roam.status === 'error')
     return (
-      <Alert tone="warning" title="The roaming courtroom could not load here" actions={<Button onClick={onExit}>Use the classic stage</Button>}>
+      <Alert tone="warning" title={t('trial.roam.error')} actions={<Button onClick={onExit}>{t('trial.roam.useClassic')}</Button>}>
         {roam.error.message}
       </Alert>
     );
   if (roam.status !== 'ready')
     return (
       <div className={styles.loading} role="status">
-        <Spinner label={null} /> Building the courtroom…
+        <Spinner label={null} /> {t('trial.roam.building')}
       </div>
     );
 
+  const strings = roamStrings();
   const beat = current !== null ? beats[current] : undefined;
   return (
     <div className={styles.roam} ref={box}>
-      <RoamCourtroom controller={roam.controller} data={roam.data} onExit={onExit} label={label} className={styles.canvas} />
-      <div className={styles.roamBar}>
+      <RoamCourtroom controller={roam.controller} data={roam.data} onExit={onExit} label={label} strings={strings} className={styles.canvas} />
+      <div className={styles.roamBar} data-surface="wood">
         <p className={styles.roamStatus} aria-live="polite">
           {beat ? (
             <>
-              <span className={styles.roamStep}>
-                Beat {current! + 1} of {beats.length}
-              </span>{' '}
-              {BEAT_LABELS[beat.id]}
+              <span className={styles.roamStep}>{t('trial.roam.beatOf', { current: current! + 1, total: beats.length })}</span> {strings.beatLabels[beat.id]}
             </>
           ) : done ? (
-            'The hearing is over. Look around, or replay it.'
+            t('trial.roam.over')
           ) : (
-            'The court is about to sit.'
+            t('trial.roam.aboutToSit')
           )}
         </p>
         <div className={styles.roamActions}>
           {beat && (
             <Button size="sm" variant="ghost" onClick={() => roam.controller.skipBeat()}>
-              Skip beat
+              {t('trial.roam.skipBeat')}
             </Button>
           )}
           <Button size="sm" variant="ghost" iconStart={<Icon name="refresh" />} onClick={() => setRun((n) => n + 1)}>
-            Replay hearing
+            {t('trial.roam.replay')}
           </Button>
           {canFull && (
             <Button size="sm" variant="ghost" aria-pressed={full} onClick={toggleFull}>
-              {full ? 'Exit full screen' : 'Full screen'}
+              {full ? t('trial.roam.exitFullScreen') : t('trial.roam.fullScreen')}
             </Button>
           )}
         </div>

@@ -1,6 +1,8 @@
-import { CHARACTERS, portrait, type CharacterId, type Expression } from '../../../art/art';
+import { portrait, type CharacterId, type Expression } from '../../../art/art';
+import { t } from '@/i18n';
 import { cx } from '../../lib/cx';
 import styles from './Portrait.module.css';
+import { characterName } from '@/i18n/domain';
 
 export type PortraitSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type PortraitRing = 'neutral' | 'accent' | 'highlight' | 'side-a' | 'side-b';
@@ -28,13 +30,18 @@ export function Portrait({ character, expression = 'neutral', size = 'md', ring 
   const { src, srcSet } = portrait(character, expression);
   return (
     <span className={cx(styles.portrait, size !== 'md' && styles[size], ringClass[ring], className)}>
-      <img src={src} srcSet={srcSet} sizes="128px" alt={alt ?? CHARACTERS[character]} width={128} height={128} decoding="async" data-pixel />
+      <img src={src} srcSet={srcSet} sizes="128px" alt={alt ?? characterName(character)} width={128} height={128} decoding="async" data-pixel />
     </span>
   );
 }
 
 /** The anonymous defendant silhouette: who is on trial is never shown as a face. */
-export function AnonymousPortrait({ size = 'md', ring = 'neutral', label = 'Anonymous defendant', className }: Omit<PortraitProps, 'character' | 'expression' | 'alt'> & { label?: string }) {
+export function AnonymousPortrait({
+  size = 'md',
+  ring = 'neutral',
+  label = t('ds.portrait.anonymous'),
+  className,
+}: Omit<PortraitProps, 'character' | 'expression' | 'alt'> & { label?: string }) {
   return (
     <span role="img" aria-label={label} className={cx(styles.portrait, styles.anonymous, size !== 'md' && styles[size], ringClass[ring], className)}>
       <svg viewBox="0 0 12 12" fill="currentColor" shapeRendering="crispEdges" aria-hidden focusable="false">

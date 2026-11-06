@@ -36,14 +36,14 @@ export const ROAM_CSS = `
 .ccr-name{position:absolute;top:-17px;left:14px;padding:5px 10px;font-size:14px;color:#FFF9ED;background:var(--cc-color-accent,#7A1C2E);border:3px solid #4A3A32;box-shadow:2px 2px 0 #4A3A32}
 .ccr-line{margin:0;font-size:17px;line-height:1.45;min-height:2.9em}
 .ccr-more{display:block;text-align:right;margin-top:4px;font-size:12px;color:var(--cc-color-text-muted,#7B645A)}
-.ccr-callout{position:absolute;left:50%;top:9%;transform:translateX(-50%) rotate(-3deg);padding:8px 20px;font-size:clamp(24px,5vw,46px);line-height:1;color:#FFF9ED;background:var(--cc-color-accent,#7A1C2E);border:4px solid #4A3A32;box-shadow:inset 0 0 0 3px var(--cc-color-highlight,#F6C75B),6px 6px 0 #4A3A32;white-space:nowrap;animation:ccr-pop .32s steps(4,end)}
+.ccr-callout{position:absolute;left:50%;top:9%;transform:translateX(-50%) rotate(-3deg);padding:8px 20px;font-size:clamp(24px,5vw,46px);line-height:1;color:#FFF9ED;background:var(--cc-color-accent,#7A1C2E);border:4px solid #4A3A32;box-shadow:inset 0 0 0 3px var(--cc-color-highlight,#F6C75B),6px 6px 0 #4A3A32;white-space:nowrap;animation:ccr-pop var(--cc-duration-slow,320ms) var(--cc-ease-pixel,steps(4,end))}
 .ccr-callout--verdict{background:var(--cc-color-highlight,#F6C75B);color:#4A3A32;box-shadow:inset 0 0 0 3px var(--cc-color-accent,#7A1C2E),6px 6px 0 #4A3A32}
 .ccr-callout--order{background:#4A3A32;color:var(--cc-color-highlight,#F6C75B)}
 .ccr-callout--jury-out{background:var(--cc-teal-700,#2E5F73)}
 @keyframes ccr-pop{0%{transform:translateX(-50%) rotate(-3deg) scale(.4)}100%{transform:translateX(-50%) rotate(-3deg) scale(1)}}
 .ccr-beat{position:absolute;left:12px;top:56px;padding:6px 8px 6px 10px;font-size:13px;color:#FFF9ED;background:rgb(122 28 46 / .9);border:2px solid var(--cc-color-frame,#D9A046);display:flex;gap:10px;align-items:center;pointer-events:auto}
-.ccr-legend{position:absolute;right:12px;top:64px;width:min(300px,calc(100% - 24px));padding:12px 14px;font-size:14px;pointer-events:auto}
-.ccr-legend--inline{position:static;width:auto;padding:10px 0 0;border-top:2px dashed #A9917D}
+.ccr-legend{position:absolute;right:12px;top:64px;width:min(300px,calc(100% - 24px));max-height:calc(100% - 76px);overflow:auto;overscroll-behavior:contain;padding:12px 14px;font-size:14px;pointer-events:auto}
+.ccr-legend--inline{position:static;width:auto;max-height:none;overflow:visible;padding:10px 0 0;border-top:2px dashed #A9917D}
 .ccr-legend h2,.ccr-modal h2{margin:0 0 8px;font-size:16px;font-weight:400;color:var(--cc-color-accent,#7A1C2E)}
 .ccr-legend ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
 .ccr-legend li{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
@@ -54,6 +54,8 @@ export const ROAM_CSS = `
 .ccr-scrim{position:absolute;inset:0;display:grid;place-items:center;background:var(--cc-color-scrim,rgb(74 58 50 / .62));pointer-events:auto;z-index:2}
 .ccr-modal{width:min(460px,calc(100% - 28px));max-height:calc(100% - 28px);overflow:auto;padding:20px;display:grid;gap:12px}
 .ccr-modal-row{display:flex;gap:8px;flex-wrap:wrap}
+.ccr-modal-row .ccr-btn{min-height:32px;flex:none}
+.ccr-modal{align-content:start}
 .ccr-field{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
 .ccr-field select{font:inherit;min-height:36px;padding:4px 8px;border:2px solid #4A3A32;background:#FFF2C7;color:#4A3A32;border-radius:0}
 .ccr-field input{width:20px;height:20px;accent-color:var(--cc-color-accent,#7A1C2E)}
@@ -74,7 +76,8 @@ export const ROAM_CSS = `
 .ccr-act{min-width:84px!important;min-height:84px!important;border-radius:0}
 .ccr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .ccr-loading{position:absolute;inset:0;display:grid;place-items:center;color:#FFF9ED;font-size:18px}
-@media (prefers-reduced-motion: reduce){.ccr-callout{animation:none}}
+@media (prefers-reduced-motion: reduce){:root:not([data-reduced-motion]) .ccr-callout{animation:none}}
+:root[data-reduced-motion="true"] .ccr-callout{animation:none}
 @media (max-width:560px){.ccr-top{left:8px;right:8px;top:8px}.ccr-zone{font-size:12px}.ccr-btn--sm{font-size:12px;padding:6px 8px}.ccr-dialogue{bottom:auto;top:58px}.ccr-line{font-size:15px}.ccr-prompt{top:auto;bottom:122px}}
 `;
 

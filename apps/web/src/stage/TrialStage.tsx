@@ -5,6 +5,7 @@ import type { CourtroomRuntime } from '@cringe-court/scene';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { CharacterId } from '@/art/art';
 import { DialogueBox, ImpactText, Stamp, cx, type ImpactKind, type StampTone } from '@/ds';
+import { t, type MessageKey } from '@/i18n';
 import styles from './TrialStage.module.css';
 
 const SPEAKER: Readonly<Record<Speaker, CharacterId>> = {
@@ -30,17 +31,18 @@ type Card = { id: number; tone: StampTone; text: string; sub?: string; size: 'lg
 function cardFor(e: Extract<PlayerEvent, { type: 'card' }>, id: number): Card | null {
   switch (e.card) {
     case 'case-number':
-      return { id, tone: 'case-number', text: e.text ?? 'CASE', size: 'lg' };
+      return { id, tone: 'case-number', text: e.text ?? t('solo.stage.card.case'), size: 'lg' };
     case 'charges-filed':
-      return { id, tone: 'filed', text: 'CHARGES FILED', size: 'lg' };
+      return { id, tone: 'filed', text: t('solo.stage.card.charges'), size: 'lg' };
     case 'jury-out':
-      return { id, tone: 'case-number', text: 'THE JURY IS OUT', sub: 'Verdict by a human jury', size: 'lg' };
+      return { id, tone: 'case-number', text: t('solo.stage.card.juryOut'), sub: t('solo.stage.card.juryOutSub'), size: 'lg' };
     case 'mistrial':
-      return { id, tone: 'no-verdict', text: 'MISTRIAL', sub: 'No verdict · full refund', size: 'xl' };
+      return { id, tone: 'no-verdict', text: t('solo.stage.card.mistrial'), sub: t('solo.stage.card.mistrialSub'), size: 'xl' };
     case 'verdict': {
       const label = e.text ?? '';
       const tone: StampTone = label === 'GUILTY' ? 'guilty' : label === 'NOT COOKED' ? 'not-cooked' : label === 'SIDE A' ? 'side-a' : label === 'SIDE B' ? 'side-b' : 'filed';
-      return { id, tone, text: label, sub: 'The jury has spoken', size: 'xl' };
+      const text = label === 'GUILTY' ? t('solo.stage.card.guilty') : label === 'NOT COOKED' ? t('solo.stage.card.notCooked') : label === 'SIDE A' ? t('solo.stage.card.sideA') : label === 'SIDE B' ? t('solo.stage.card.sideB') : label;
+      return { id, tone, text, sub: t('solo.stage.card.spoken'), size: 'xl' };
     }
     case 'receipt':
       return null;
@@ -133,15 +135,15 @@ export function TrialStage({ runtime, scene, player, caseLabel, status, speakerN
   };
 
   return (
-    <section className={styles.stage} aria-label="Courtroom">
+    <section className={styles.stage} aria-label={t('solo.stage.label')}>
       <div className={styles.screen}>
         <div className={styles.frame}>
-          <Courtroom runtime={runtime} paused={paused} className={styles.canvas} label="The voxel courtroom. Every line spoken is in the transcript below." />
+          <Courtroom runtime={runtime} paused={paused} className={styles.canvas} label={t('solo.stage.canvas')} />
           <div className={styles.vignette} aria-hidden />
           {flash > 0 && <div key={flash} className={styles.flash} aria-hidden />}
           <div className={styles.hud}>
             {caseLabel && <span className={styles.caseBadge}>{caseLabel}</span>}
-            <span className={styles.testnet}>TESTNET · demo data</span>
+            <span className={styles.testnet}>{t('solo.stage.testnet')}</span>
             {status && <span className={styles.status}>{status}</span>}
           </div>
           {callout && (
@@ -173,47 +175,49 @@ export function TrialStage({ runtime, scene, player, caseLabel, status, speakerN
         )}
       </div>
 
-      <div className={styles.controls} role="group" aria-label="Playback">
+      <div className={styles.controls} role="group" aria-label={t('solo.stage.controls')}>
         <button type="button" className={styles.control} onClick={togglePause} disabled={!playing} aria-pressed={paused}>
-          {paused ? 'Resume' : 'Pause'}
+          {paused ? t('solo.stage.resume') : t('solo.stage.pause')}
         </button>
         <button type="button" className={styles.control} onClick={() => player.skipLine()} disabled={!playing || !line}>
-          Next line
+          {t('solo.stage.nextLine')}
         </button>
         <fieldset className={styles.speed}>
-          <legend className="cc-visually-hidden">Speed</legend>
+          <legend className="cc-visually-hidden">{t('solo.stage.speed')}</legend>
           {[1, 1.5, 2].map((v) => (
             <label key={v} className={cx(styles.speedOption, speed === v && styles.speedOn)}>
               <input type="radio" name="stage-speed" value={v} checked={speed === v} onChange={() => changeSpeed(v)} />
-              {v}×
+              {t('solo.stage.speedOption', { v })}
             </label>
           ))}
         </fieldset>
       </div>
 
       <details className={styles.transcript} open={said.length > 0 && !playing}>
-        <summary>Transcript ({said.length} {said.length === 1 ? 'line' : 'lines'})</summary>
+        <summary>{t('solo.stage.transcript', { count: said.length })}</summary>
         <ol className={styles.lines} role="list">
           {said.map((l) => (
             <li key={l.id} className={styles.lineItem} data-bench={l.bench ?? 'court'}>
-              <span className={styles.lineSpeaker}>{speakerNames?.[l.speaker] ?? SPEAKER_NAMES[l.speaker]}</span>
+              <span className={styles.lineSpeaker}>{speakerNames?.[l.speaker] ?? speakerLabel(l.speaker)}</span>
               <span>{l.text}</span>
             </li>
           ))}
         </ol>
       </details>
       <p className="cc-visually-hidden" aria-live="polite">
-        {line ? `${speakerNames?.[line.speaker] ?? SPEAKER_NAMES[line.speaker]}: ${line.text}` : ''}
+        {line ? t('solo.courtroom.speech', { speaker: speakerNames?.[line.speaker] ?? speakerLabel(line.speaker), text: line.text }) : ''}
       </p>
     </section>
   );
 }
 
-const SPEAKER_NAMES: Readonly<Record<Speaker, string>> = {
-  judge: 'Judge Gavel.exe',
-  prosecutor: 'Miss Ratio',
-  defense: 'Counsel Chaos',
-  'side-a': 'Side A',
-  'side-b': 'Side B',
-  narrator: 'AI Narrator',
+const SPEAKER_NAME_KEYS: Readonly<Record<Speaker, MessageKey>> = {
+  judge: 'solo.stage.speaker.judge',
+  prosecutor: 'solo.stage.speaker.prosecutor',
+  defense: 'solo.stage.speaker.defense',
+  'side-a': 'common.role.sideA',
+  'side-b': 'common.role.sideB',
+  narrator: 'solo.stage.speaker.narrator',
 };
+
+const speakerLabel = (speaker: Speaker): string => t(SPEAKER_NAME_KEYS[speaker]);

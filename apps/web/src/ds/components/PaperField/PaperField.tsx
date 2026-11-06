@@ -1,4 +1,5 @@
 import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode } from 'react';
+import { t } from '@/i18n';
 import { cx } from '../../lib/cx';
 import { Icon, type IconName } from '../Icon/Icon';
 import styles from './PaperField.module.css';
@@ -39,7 +40,7 @@ export const PaperField = forwardRef<HTMLInputElement, PaperFieldProps>(function
       <label htmlFor={id} className={styles.label}>
         {icon && iconPlacement === 'label' && <Icon name={icon} className={styles.labelIcon} />}
         <span>{label}</span>
-        {optional && <span className={styles.optional}>(optional)</span>}
+        {optional && <span className={styles.optional}>{t('ds.field.optional')}</span>}
       </label>
       <div className={styles.strip} data-has-icon={icon && iconPlacement === 'inside' ? true : undefined} data-revealable={revealable || undefined}>
         {icon && iconPlacement === 'inside' && <Icon name={icon} className={styles.insideIcon} />}
@@ -57,7 +58,7 @@ export const PaperField = forwardRef<HTMLInputElement, PaperFieldProps>(function
           <button
             type="button"
             className={styles.reveal}
-            aria-label={revealed ? 'Hide password' : 'Show password'}
+            aria-label={revealed ? t('ds.field.password.hide') : t('ds.field.password.show')}
             aria-pressed={revealed}
             aria-controls={id}
             onClick={() => setRevealed((r) => !r)}

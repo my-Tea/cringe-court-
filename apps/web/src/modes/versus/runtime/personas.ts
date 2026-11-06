@@ -6,6 +6,7 @@
  * A persona is a demo wallet address plus the "human" the mock World ID
  * verifier proves. Nothing here is a real wallet or a real World ID.
  */
+import { t } from '@/i18n';
 import type { Hex } from '@cringe-court/core';
 import type { Persona } from '@cringe-court/modes-versus';
 
@@ -41,7 +42,7 @@ function saveRegistry(list: readonly Persona[], storage: Storage) {
 
 export function createPersona(storage: Storage = window.localStorage): Persona {
   const list = listPersonas(storage);
-  const persona: Persona = { id: `p-${randomHex(6)}`, name: `Demo persona ${list.length + 1}`, account: `0x${randomHex(20)}` as Hex };
+  const persona: Persona = { id: `p-${randomHex(6)}`, name: t('versus.persona.defaultName', { n: list.length + 1 }), account: `0x${randomHex(20)}` as Hex };
   saveRegistry([...list, persona], storage);
   return persona;
 }

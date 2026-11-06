@@ -1,23 +1,12 @@
-import { formatUsdc, subUsdc, usdc, type BallotChoice, type Usdc } from '@cringe-court/core';
-import { FUNDING_PROMISES, galleryPercents, targetBreakdown, type CaseDetail } from '@cringe-court/modes-grand-jury';
+import { subUsdc, usdc, type BallotChoice, type Usdc } from '@cringe-court/core';
+import { ballotLabel, formatAmount } from '@/i18n/domain';
+import { galleryPercents, targetBreakdown, type CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useId, useState, type FormEvent } from 'react';
-import {
-  Alert,
-  Amount,
-  Button,
-  Countdown,
-  Dialog,
-  DialogContent,
-  Icon,
-  PaperButton,
-  Receipt,
-  TextArea,
-  PaperField,
-  useToast,
-} from '@/ds';
+import { Alert, Amount, Button, Countdown, Dialog, DialogContent, Icon, PaperButton, Receipt, TextArea, PaperField, useToast } from '@/ds';
+import { t, tRich } from '@/i18n';
 import { useCourtContext } from '../state/context';
 import { useAction, useCourtNowMs } from '../state/hooks';
-import { sound } from '../lib';
+import { fundingPromise, sound } from '../lib';
 import styles from '../GrandJury.module.css';
 import { BallotChip, CourtPanel, FundingMeter, JuryBox } from './parts';
 
@@ -25,13 +14,18 @@ import { BallotChip, CourtPanel, FundingMeter, JuryBox } from './parts';
 const explorer = (url?: string) => (url?.startsWith('https://') ? url : undefined);
 
 function parseAmount(raw: string): Usdc | null {
-  const t = raw.trim().replace(/^\./, '0.');
-  if (!/^\d{1,6}(\.\d{1,6})?$/.test(t)) return null;
+  const s = raw.trim().replace(/^\./, '0.');
+  if (!/^\d{1,6}(\.\d{1,6})?$/.test(s)) return null;
   try {
-    return usdc(t);
+    return usdc(s);
   } catch {
     return null;
   }
+}
+
+/** "You sealed [chip]. Only you can see this." with the chosen position as a coloured chip. */
+function SealedNote({ bench, choice }: { bench: 0 | 1; choice: string }) {
+  return <>{tRich('grandJury.sealed.note', { chip: (chunk) => <BallotChip bench={bench}>{chunk}</BallotChip> }, { choice })}</>;
 }
 
 /* ── Summon the court (D9) ─────────────────────────────────────────────── */
@@ -50,11 +44,11 @@ export function FundingPanel({ detail }: { detail: CaseDetail }) {
 
   const invalid =
     amount === null
-      ? 'Enter an amount like 0.50.'
+      ? t('grandJury.fund.invalid.amount')
       : amount > remaining
-        ? `Only ${formatUsdc(remaining)} is left to raise.`
+        ? t('grandJury.fund.invalid.max', { left: formatAmount(remaining) })
         : amount < min && amount !== remaining
-          ? `Contributions start at ${formatUsdc(min)}.`
+          ? t('grandJury.fund.invalid.min', { min: formatAmount(min) })
           : null;
 
   const submit = async (e: FormEvent) => {
@@ -64,7 +58,7 @@ export function FundingPanel({ detail }: { detail: CaseDetail }) {
     const r = await action.run(amount);
     if (r.ok) {
       sound({ type: 'bond.posted' });
-      toast({ tone: 'success', title: `You summoned the court with ${formatUsdc(amount)}`, description: 'Your Summoner credit is on the case page. Refunded in full if the trial does not happen.' });
+      toast({ tone: 'success', title: t('grandJury.fund.toast.title', { amount: formatAmount(amount) }), description: t('grandJury.fund.toast.body') });
       setTouched(false);
     }
   };
@@ -76,81 +70,87 @@ export function FundingPanel({ detail }: { detail: CaseDetail }) {
   ].filter((q) => q.value <= remaining);
 
   return (
-    <CourtPanel id="summon-title" tone="cream" backing="gold" className={styles.actionCard} eyebrow="Step 1 · Anyone can chip in" title="Summon the court">
-        <FundingMeter raised={detail.raised} target={detail.target} summoners={detail.summoners} />
-        {detail.viewer.contributed > 0n && (
-          <p className={styles.youNote}>
-            <Icon name="check" /> You have chipped in {formatUsdc(detail.viewer.contributed)}. Thanks, Summoner.
-          </p>
-        )}
-        <form onSubmit={submit} className={styles.fundForm} noValidate>
-          <fieldset className={styles.quickAmounts}>
-            <legend className={styles.quickLegend}>Quick amounts (test USDC)</legend>
-            {quick.map((q) => (
-              <Button key={q.label} type="button" size="sm" variant={raw === q.label ? 'primary' : 'secondary'} aria-pressed={raw === q.label} onClick={() => setRaw(q.label)}>
-                {q.label}
-              </Button>
-            ))}
-            <Button type="button" size="sm" variant={raw === formatUsdc(remaining, { unit: false }) ? 'primary' : 'secondary'} aria-pressed={raw === formatUsdc(remaining, { unit: false })} onClick={() => setRaw(formatUsdc(remaining, { unit: false }))}>
-              Fill the rest
+    <CourtPanel id="summon-title" tone="cream" backing="gold" className={styles.actionCard} eyebrow={t('grandJury.fund.eyebrow')} title={t('grandJury.fund.title')}>
+      <FundingMeter raised={detail.raised} target={detail.target} summoners={detail.summoners} />
+      {detail.viewer.contributed > 0n && (
+        <p className={styles.youNote}>
+          <Icon name="check" /> {t('grandJury.fund.chipped', { amount: formatAmount(detail.viewer.contributed) })}
+        </p>
+      )}
+      <form onSubmit={submit} className={styles.fundForm} noValidate>
+        <fieldset className={styles.quickAmounts}>
+          <legend className={styles.quickLegend}>{t('grandJury.fund.quick')}</legend>
+          {quick.map((q) => (
+            <Button key={q.label} type="button" size="sm" variant={raw === q.label ? 'primary' : 'secondary'} aria-pressed={raw === q.label} onClick={() => setRaw(q.label)}>
+              {q.label}
             </Button>
-          </fieldset>
-          <PaperField
-            id={fieldId}
-            label="Your contribution (test USDC)"
-            icon="sparkle"
-            inputMode="decimal"
-            autoComplete="off"
-            value={raw}
-            onChange={(e) => setRaw(e.target.value)}
-            onBlur={() => setTouched(true)}
-            hint={`From ${formatUsdc(min)}. ${formatUsdc(remaining)} left to raise.`}
-            error={touched ? (invalid ?? undefined) : undefined}
-          />
-          {action.error && (
-            <Alert tone="danger" title="That didn’t go through" live="assertive">
-              {action.error}
-            </Alert>
-          )}
-          <PaperButton type="submit" fullWidth loading={action.pending} iconStart={<Icon name="gavel" />}>
-            Summon with {amount && !invalid ? formatUsdc(amount) : 'test USDC'}
-          </PaperButton>
-        </form>
-        <ul className={styles.promises}>
-          <li>
-            <Icon name="refresh" /> {FUNDING_PROMISES.refund}
-          </li>
-          <li>
-            <Icon name="star" /> {FUNDING_PROMISES.summoner}
-          </li>
-          <li>
-            <Icon name="scales" /> {FUNDING_PROMISES.noOdds}
-          </li>
-        </ul>
-        <details className={styles.breakdown}>
-          <summary>Where the {formatUsdc(b.target)} goes</summary>
-          <dl>
-            <div>
-              <dt>Jury pool ({b.jurors} × {formatUsdc(b.rewardPerJuror, { unit: false })})</dt>
-              <dd>
-                <Amount value={b.juryPool} size="sm" />
-              </dd>
-            </div>
-            <div>
-              <dt>Protocol fee</dt>
-              <dd>
-                <Amount value={b.protocolFee} size="sm" />
-              </dd>
-            </div>
-            <div>
-              <dt>AI counsel fee (0G Compute)</dt>
-              <dd>
-                <Amount value={b.aiFee} size="sm" />
-              </dd>
-            </div>
-          </dl>
-          <p>Fees are only kept when the trial reaches a verdict. Otherwise every summoner is refunded pro rata.</p>
-        </details>
+          ))}
+          <Button
+            type="button"
+            size="sm"
+            variant={raw === formatAmount(remaining, { unit: false }) ? 'primary' : 'secondary'}
+            aria-pressed={raw === formatAmount(remaining, { unit: false })}
+            onClick={() => setRaw(formatAmount(remaining, { unit: false }))}
+          >
+            {t('grandJury.fund.fillRest')}
+          </Button>
+        </fieldset>
+        <PaperField
+          id={fieldId}
+          label={t('grandJury.fund.field')}
+          icon="sparkle"
+          inputMode="decimal"
+          autoComplete="off"
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          onBlur={() => setTouched(true)}
+          hint={t('grandJury.fund.hint', { min: formatAmount(min), left: formatAmount(remaining) })}
+          error={touched ? (invalid ?? undefined) : undefined}
+        />
+        {action.error && (
+          <Alert tone="danger" title={t('grandJury.fund.error')} live="assertive">
+            {action.error}
+          </Alert>
+        )}
+        <PaperButton type="submit" fullWidth loading={action.pending} iconStart={<Icon name="gavel" />}>
+          {amount && !invalid ? t('grandJury.fund.submit', { amount: formatAmount(amount) }) : t('grandJury.fund.submitDefault')}
+        </PaperButton>
+      </form>
+      <ul className={styles.promises}>
+        <li>
+          <Icon name="refresh" /> {fundingPromise('refund')}
+        </li>
+        <li>
+          <Icon name="star" /> {fundingPromise('summoner')}
+        </li>
+        <li>
+          <Icon name="scales" /> {fundingPromise('odds')}
+        </li>
+      </ul>
+      <details className={styles.breakdown}>
+        <summary>{t('grandJury.fund.breakdown.summary', { amount: formatAmount(b.target) })}</summary>
+        <dl>
+          <div>
+            <dt>{t('grandJury.fund.breakdown.pool', { jurors: b.jurors, reward: formatAmount(b.rewardPerJuror, { unit: false }) })}</dt>
+            <dd>
+              <Amount value={b.juryPool} size="sm" />
+            </dd>
+          </div>
+          <div>
+            <dt>{t('grandJury.fund.breakdown.protocol')}</dt>
+            <dd>
+              <Amount value={b.protocolFee} size="sm" />
+            </dd>
+          </div>
+          <div>
+            <dt>{t('grandJury.fund.breakdown.ai')}</dt>
+            <dd>
+              <Amount value={b.aiFee} size="sm" />
+            </dd>
+          </div>
+        </dl>
+        <p>{t('grandJury.fund.breakdown.note')}</p>
+      </details>
     </CourtPanel>
   );
 }
@@ -175,35 +175,35 @@ function ScreeningDialog({ open, onOpenChange, detail }: { open: boolean; onOpen
   return (
     <Dialog open={open} onOpenChange={(o) => !busy && onOpenChange(o)}>
       <DialogContent
-        title="Juror Screening"
-        description="Before you take a paid seat, the court checks you are a real, unique person with World ID (Orb level)."
+        title={t('grandJury.screening.title')}
+        description={t('grandJury.screening.description')}
         footer={
           <>
             <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
-              Not now
+              {t('grandJury.screening.notNow')}
             </Button>
             <PaperButton onClick={verify} loading={busy} iconStart={<Icon name="eye" />}>
-              {error ? 'Try again' : 'Verify with World ID'}
+              {error ? t('common.action.retry') : t('grandJury.screening.verify')}
             </PaperButton>
           </>
         }
       >
         <ul className={styles.screeningList}>
           <li>
-            <Icon name="lock" /> We never learn who you are. Nothing about your identity is shown to anyone.
+            <Icon name="lock" /> {t('grandJury.screening.privacy')}
           </li>
           <li>
-            <Icon name="user" /> One human, one seat: the same person cannot sit twice on this jury, even with another wallet.
+            <Icon name="user" /> {t('grandJury.screening.unique')}
           </li>
           <li>
-            <Icon name="info" /> Honest note: this proves you are one human. It does not prove you are impartial. That part is on you.
+            <Icon name="info" /> {t('grandJury.screening.honest')}
           </li>
         </ul>
         <p className={styles.demoNote}>
-          <Icon name="gear" /> Demo build: a mock World ID verifier stands in for IDKit, the same flow the staging app uses.
+          <Icon name="gear" /> {t('grandJury.screening.demo')}
         </p>
         {error && (
-          <Alert tone="danger" title="Screening did not pass" live="assertive">
+          <Alert tone="danger" title={t('grandJury.screening.failed')} live="assertive">
             {error}
           </Alert>
         )}
@@ -223,30 +223,30 @@ function BallotForm({ detail }: { detail: CaseDetail }) {
     if (choice === null) return;
     const r = await seal.run(choice);
     if (r.ok) {
-      toast({ tone: 'success', title: 'Ballot sealed', description: 'Keep your Secret Verdict Scroll. You will open it in the next window.' });
+      toast({ tone: 'success', title: t('grandJury.ballot.sealed'), description: t('grandJury.ballot.toastBody') });
     }
   };
   return (
     <form onSubmit={submit} className={styles.ballotForm}>
       <fieldset className={styles.ballotOptions}>
-        <legend className={styles.ballotLegend}>Your secret ballot</legend>
+        <legend className={styles.ballotLegend}>{t('grandJury.ballot.legend')}</legend>
         {([0, 1] as const).map((b) => (
           <label key={b} className={styles.ballotOption} data-bench={b} data-checked={choice === b || undefined}>
             <input type="radio" name={name} value={b} checked={choice === b} onChange={() => setChoice(b)} />
-            <span className={styles.ballotOptionTitle}>{detail.ballot[b]}</span>
+            <span className={styles.ballotOptionTitle}>{ballotLabel(detail.ballot[b])}</span>
             <span className={styles.ballotOptionSummary}>{detail.file.positions[b].summary}</span>
           </label>
         ))}
       </fieldset>
       {seal.error && (
-        <Alert tone="danger" title="Ballot not sealed" live="assertive">
+        <Alert tone="danger" title={t('grandJury.ballot.error')} live="assertive">
           {seal.error}
         </Alert>
       )}
       <PaperButton type="submit" variant="maroon" fullWidth disabled={choice === null} loading={seal.pending} iconStart={<Icon name="lock" />}>
-        Seal my ballot
+        {t('grandJury.ballot.seal')}
       </PaperButton>
-      <p className={styles.fineprint}>Only a fingerprint of your vote goes on the ledger. The secret that opens it stays on this device.</p>
+      <p className={styles.fineprint}>{t('grandJury.ballot.fineprint')}</p>
     </form>
   );
 }
@@ -257,9 +257,9 @@ function ScrollBox({ scroll }: { scroll: string }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(scroll);
-      toast({ tone: 'success', title: 'Scroll copied', description: 'Paste it somewhere private. It reveals your vote.' });
+      toast({ tone: 'success', title: t('grandJury.scroll.copied.title'), description: t('grandJury.scroll.copied.body') });
     } catch {
-      toast({ tone: 'warning', title: 'Could not copy', description: 'Select the scroll text and copy it by hand.' });
+      toast({ tone: 'warning', title: t('grandJury.share.copyFailed.title'), description: t('grandJury.scroll.copyFailed.body') });
     }
   };
   const download = () => {
@@ -273,18 +273,18 @@ function ScrollBox({ scroll }: { scroll: string }) {
   return (
     <div className={styles.scroll}>
       <label htmlFor={id} className={styles.scrollLabel}>
-        <Icon name="document" /> Secret Verdict Scroll
+        <Icon name="document" /> {t('grandJury.scroll.label')}
       </label>
       <textarea id={id} readOnly value={scroll} rows={3} className={styles.scrollText} onFocus={(e) => e.currentTarget.select()} />
       <div className={styles.scrollActions}>
         <Button size="sm" variant="secondary" onClick={copy} iconStart={<Icon name="copy" />}>
-          Copy scroll
+          {t('grandJury.scroll.copy')}
         </Button>
         <Button size="sm" variant="ghost" onClick={download} iconStart={<Icon name="arrow-right" />}>
-          Download
+          {t('common.action.download')}
         </Button>
       </div>
-      <p className={styles.fineprint}>If this tab is lost, paste the scroll here during the reveal window and your bond is safe. Keep it secret until then.</p>
+      <p className={styles.fineprint}>{t('grandJury.scroll.fineprint')}</p>
     </div>
   );
 }
@@ -298,33 +298,27 @@ function RevealForm({ detail }: { detail: CaseDetail }) {
     e.preventDefault();
     const r = await reveal.run(detail.viewer.hasSalt ? undefined : scroll);
     if (r.ok) {
-      toast({ tone: 'success', title: 'Scroll opened', description: `Your vote for ${detail.ballot[r.value]} is counted. Your bond comes back at settlement.` });
+      toast({ tone: 'success', title: t('grandJury.reveal.opened'), description: t('grandJury.reveal.toastBody', { choice: ballotLabel(detail.ballot[r.value]) }) });
     }
   };
   return (
     <form onSubmit={open} className={styles.ballotForm}>
       {detail.viewer.hasSalt ? (
         <p className={styles.sealedNote}>
-          <Icon name="lock" /> You sealed <BallotChip bench={detail.viewer.sealedChoice ?? 0}>{detail.ballot[detail.viewer.sealedChoice ?? 0]}</BallotChip>. Only you can see this.
+          <Icon name="lock" /> <SealedNote bench={detail.viewer.sealedChoice ?? 0} choice={ballotLabel(detail.ballot[detail.viewer.sealedChoice ?? 0])} />
         </p>
       ) : (
-        <TextArea
-          label="Paste your Secret Verdict Scroll"
-          hint="This device doesn’t have your sealed ballot. The scroll you saved when you sealed it opens it."
-          value={scroll}
-          onChange={(e) => setScroll(e.target.value)}
-          rows={3}
-        />
+        <TextArea label={t('grandJury.reveal.pasteLabel')} hint={t('grandJury.reveal.pasteHint')} value={scroll} onChange={(e) => setScroll(e.target.value)} rows={3} />
       )}
       {reveal.error && (
-        <Alert tone="danger" title="Scroll not opened" live="assertive">
+        <Alert tone="danger" title={t('grandJury.reveal.error')} live="assertive">
           {reveal.error}
         </Alert>
       )}
       <PaperButton type="submit" variant="maroon" fullWidth loading={reveal.pending} disabled={!detail.viewer.hasSalt && !scroll.trim()} iconStart={<Icon name="unlock" />}>
-        Open my scroll
+        {t('grandJury.reveal.open')}
       </PaperButton>
-      <p className={styles.fineprint}>Miss this window and the bond is forfeited (disclosed on the case page).</p>
+      <p className={styles.fineprint}>{t('grandJury.reveal.fineprint')}</p>
     </form>
   );
 }
@@ -343,72 +337,74 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
   const swear = async () => {
     const r = await accept.run();
     if (r.ok) {
-      toast({ tone: 'success', title: 'You are sworn in', description: `Bond of ${formatUsdc(detail.terms.bondPerJuror)} posted. Come back when the court is in session.` });
+      toast({ tone: 'success', title: t('grandJury.juror.toast.title'), description: t('grandJury.juror.toast.body', { bond: formatAmount(detail.terms.bondPerJuror) }) });
     }
   };
 
-  let eyebrow = 'Step 2 · Verified humans only';
-  let title = 'Join the jury';
+  let eyebrow = t('grandJury.juror.eyebrow');
+  let title = t('grandJury.juror.title');
   let body: React.ReactNode;
 
   if (detail.phase === 'recruiting') {
     if (v.seat !== null) {
-      title = `You hold seat ${v.seat}`;
-      body = <p className={styles.panelLede}>Your bond is in. The hearing opens and ballots start sealing as soon as all seven seats are filled.</p>;
+      title = t('grandJury.juror.seat.title', { n: v.seat });
+      body = <p className={styles.panelLede}>{t('grandJury.juror.seat.lede')}</p>;
     } else if (v.isSponsor) {
-      body = <Alert title="Sponsors can’t serve">The sponsor of a case cannot sit on its jury.</Alert>;
+      body = <Alert title={t('grandJury.juror.sponsor.title')}>{t('grandJury.juror.sponsor.body')}</Alert>;
     } else if (v.offer) {
-      title = 'A seat is offered to you';
+      title = t('grandJury.juror.offer.title');
       body = (
         <>
           <p className={styles.panelLede}>
-            You were drawn from the verified pool. Accepting posts a <strong>{formatUsdc(detail.terms.bondPerJuror)}</strong> bond. You get it back with a{' '}
-            <strong>{formatUsdc(detail.terms.successBonusPerJuror)}</strong> reward if you seal and open your ballot on time.
+            {tRich(
+              'grandJury.juror.offer.lede',
+              { b: (chunk) => <strong>{chunk}</strong> },
+              { bond: formatAmount(detail.terms.bondPerJuror), reward: formatAmount(detail.terms.successBonusPerJuror) },
+            )}
           </p>
-          <Countdown label="Offer expires" startsAt={(v.offer.expiresAt - 180) * 1000} endsAt={v.offer.expiresAt * 1000} now={nowMs} compact />
+          <Countdown label={t('grandJury.juror.offer.expires')} startsAt={(v.offer.expiresAt - 180) * 1000} endsAt={v.offer.expiresAt * 1000} now={nowMs} compact />
           {accept.error && (
-            <Alert tone="danger" title="Seat not taken" live="assertive">
+            <Alert tone="danger" title={t('grandJury.juror.offer.error')} live="assertive">
               {accept.error}
             </Alert>
           )}
           <div className={styles.buttonRow}>
             <PaperButton variant="maroon" onClick={swear} loading={accept.pending} iconStart={<Icon name="gavel" />}>
-              I swear to show up
+              {t('grandJury.juror.offer.swear')}
             </PaperButton>
             <Button variant="ghost" onClick={() => void decline.run()} disabled={accept.pending}>
-              Decline (free)
+              {t('grandJury.juror.offer.decline')}
             </Button>
           </div>
         </>
       );
     } else if (full) {
-      body = <p className={styles.panelLede}>All seven seats are taken.</p>;
+      body = <p className={styles.panelLede}>{t('grandJury.juror.full')}</p>;
     } else {
       body = (
         <>
           <p className={styles.panelLede}>
-            Seven verified strangers decide. Pass a quick World ID check, take a random seat offer and post a {formatUsdc(detail.terms.bondPerJuror)} bond. Show up for both
-            windows and you earn {formatUsdc(detail.terms.successBonusPerJuror)} on top of your bond.
+            {t('grandJury.juror.recruit.lede', { bond: formatAmount(detail.terms.bondPerJuror), reward: formatAmount(detail.terms.successBonusPerJuror) })}
           </p>
           <PaperButton fullWidth onClick={() => setScreening(true)} iconStart={<Icon name="user" />}>
-            Volunteer for the jury
+            {t('grandJury.juror.recruit.volunteer')}
           </PaperButton>
-          <p className={styles.fineprint}>Declining an offer never costs anything. Only an accepted seat can be forfeited, and only for not showing up.</p>
+          <p className={styles.fineprint}>{t('grandJury.juror.recruit.fineprint')}</p>
           <ScreeningDialog open={screening} onOpenChange={setScreening} detail={detail} />
         </>
       );
     }
   } else if (detail.phase === 'commit') {
-    eyebrow = v.seat !== null ? `Seat ${v.seat} · Secret ballot` : 'The jury is deliberating';
-    title = v.seat !== null ? (v.committed ? 'Ballot sealed' : 'Seal your ballot') : 'Ballots are sealing';
+    eyebrow = v.seat !== null ? t('grandJury.juror.commit.eyebrowSeat', { n: v.seat }) : t('grandJury.juror.commit.eyebrow');
+    title = v.seat !== null ? (v.committed ? t('grandJury.ballot.sealed') : t('grandJury.juror.commit.sealTitle')) : t('grandJury.juror.commit.sealing');
     body =
       v.seat === null ? (
-        <p className={styles.panelLede}>Seven jurors are sealing secret ballots. Nobody, including the court, can see a vote until the scrolls are opened.</p>
+        <p className={styles.panelLede}>{t('grandJury.juror.commit.lede')}</p>
       ) : v.committed ? (
         <>
           {v.sealedChoice !== null && (
             <p className={styles.sealedNote}>
-              <Icon name="lock" /> You sealed <BallotChip bench={v.sealedChoice}>{detail.ballot[v.sealedChoice]}</BallotChip>. Only you can see this.
+              <Icon name="lock" /> <SealedNote bench={v.sealedChoice} choice={ballotLabel(detail.ballot[v.sealedChoice])} />
             </p>
           )}
           {v.scroll && <ScrollBox scroll={v.scroll} />}
@@ -417,33 +413,33 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
         <BallotForm detail={detail} />
       );
   } else if (detail.phase === 'reveal') {
-    eyebrow = v.seat !== null ? `Seat ${v.seat} · Reveal` : 'Opening the scrolls';
-    title = v.seat !== null ? (v.revealed ? 'Scroll opened' : 'Open your scroll') : 'Jurors are opening their scrolls';
+    eyebrow = v.seat !== null ? t('grandJury.juror.reveal.eyebrowSeat', { n: v.seat }) : t('grandJury.juror.reveal.eyebrow');
+    title = v.seat !== null ? (v.revealed ? t('grandJury.reveal.opened') : t('grandJury.juror.reveal.openTitle')) : t('grandJury.juror.reveal.opening');
     body =
       v.seat === null ? (
-        <p className={styles.panelLede}>The tally stays hidden until the window closes. Four matching votes are needed for a verdict.</p>
+        <p className={styles.panelLede}>{t('grandJury.juror.reveal.lede')}</p>
       ) : v.revealed ? (
-        <p className={styles.panelLede}>Your vote is counted. Your bond and reward are paid at settlement.</p>
+        <p className={styles.panelLede}>{t('grandJury.juror.reveal.counted')}</p>
       ) : v.committed ? (
         <RevealForm detail={detail} />
       ) : (
-        <Alert tone="warning" title="You didn’t seal a ballot in time">
-          Your bond will be forfeited at settlement. This is disclosed on the case page.
+        <Alert tone="warning" title={t('grandJury.juror.reveal.missed.title')}>
+          {t('grandJury.juror.reveal.missed.body')}
         </Alert>
       );
   } else if (detail.phase === 'finalizing') {
-    eyebrow = 'Anyone can do this';
-    title = 'Settle the case';
+    eyebrow = t('grandJury.juror.settle.eyebrow');
+    title = t('grandJury.juror.settle.title');
     body = (
       <>
-        <p className={styles.panelLede}>Every deadline has passed. Settlement is permissionless: anyone can trigger it, and the ledger pays everyone by the same rules.</p>
+        <p className={styles.panelLede}>{t('grandJury.juror.settle.lede')}</p>
         {settle.error && (
-          <Alert tone="danger" title="Not settled" live="assertive">
+          <Alert tone="danger" title={t('grandJury.juror.settle.error')} live="assertive">
             {settle.error}
           </Alert>
         )}
         <PaperButton fullWidth loading={settle.pending} onClick={() => void settle.run()} iconStart={<Icon name="scales" />}>
-          Settle and read the verdict
+          {t('grandJury.juror.settle.button')}
         </PaperButton>
       </>
     );
@@ -453,8 +449,8 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
 
   return (
     <CourtPanel id="duty-title" tone="cream" backing="gold" className={styles.actionCard} eyebrow={eyebrow} title={title}>
-        <JuryBox entry={detail} viewerSeat={v.seat} />
-        {body}
+      <JuryBox entry={detail} viewerSeat={v.seat} />
+      {body}
     </CourtPanel>
   );
 }
@@ -472,35 +468,41 @@ export function ClaimPanel({ detail }: { detail: CaseDetail }) {
     const r = await claim.run();
     if (r.ok) {
       sound({ type: 'settlement', kind: refund ? 'refund' : 'payout' });
-      toast({ tone: 'success', title: `${formatUsdc(c.amount)} collected`, description: 'It is back in your test wallet.' });
+      toast({ tone: 'success', title: t('grandJury.claim.toast.title', { amount: formatAmount(c.amount) }), description: t('grandJury.claim.toast.body') });
     }
   };
   return (
-    <CourtPanel id="claim-title" tone="cream" className={styles.actionCard} eyebrow={c.claimed ? 'Collected' : 'Ready to collect'} title={refund ? 'Your refund' : 'Your payout'}>
-        <Receipt
-          caseNumber={detail.caseNumber}
-          title={refund ? 'Refund receipt' : 'Jury duty receipt'}
-          lines={c.lines}
-          explorerUrl={explorer()}
-          note={refund ? 'Refunds are pulled by you; nobody can keep them from you.' : 'Rewards come only from the jury pool and forfeited bonds, never from the outcome you voted for.'}
-        />
-        {c.amount > 0n &&
-          (c.claimed ? (
-            <p className={styles.youNote}>
-              <Icon name="check" /> Collected.
-            </p>
-          ) : (
-            <>
-              {claim.error && (
-                <Alert tone="danger" title="Not collected" live="assertive">
-                  {claim.error}
-                </Alert>
-              )}
-              <PaperButton fullWidth loading={claim.pending} onClick={run} iconStart={<Icon name="sparkle" />}>
-                Collect {formatUsdc(c.amount)}
-              </PaperButton>
-            </>
-          ))}
+    <CourtPanel
+      id="claim-title"
+      tone="cream"
+      className={styles.actionCard}
+      eyebrow={c.claimed ? t('grandJury.claim.eyebrow.done') : t('grandJury.claim.eyebrow.ready')}
+      title={refund ? t('grandJury.claim.title.refund') : t('grandJury.claim.title.payout')}
+    >
+      <Receipt
+        caseNumber={detail.caseNumber}
+        title={refund ? t('grandJury.claim.receipt.refund') : t('grandJury.claim.receipt.payout')}
+        lines={c.lines}
+        explorerUrl={explorer()}
+        note={refund ? t('grandJury.claim.note.refund') : t('grandJury.claim.note.payout')}
+      />
+      {c.amount > 0n &&
+        (c.claimed ? (
+          <p className={styles.youNote}>
+            <Icon name="check" /> {t('grandJury.claim.collected')}
+          </p>
+        ) : (
+          <>
+            {claim.error && (
+              <Alert tone="danger" title={t('grandJury.claim.error')} live="assertive">
+                {claim.error}
+              </Alert>
+            )}
+            <PaperButton fullWidth loading={claim.pending} onClick={run} iconStart={<Icon name="sparkle" />}>
+              {t('grandJury.claim.button', { amount: formatAmount(c.amount) })}
+            </PaperButton>
+          </>
+        ))}
     </CourtPanel>
   );
 }
@@ -518,51 +520,54 @@ export function GalleryPanel({ detail }: { detail: CaseDetail }) {
     if (r.ok) sound({ type: 'crowd', reaction: 'murmur' });
   };
   return (
-    <CourtPanel id="gallery-title" tone="kraft" elevation={1} eyebrow="Free · points only · never binding" title="The gallery">
-        {pct && tally ? (
-          <>
-            <p className={styles.panelLede}>THE GALLERY SAYS… ({tally.total} {tally.total === 1 ? 'call' : 'calls'})</p>
-            <div className={styles.galleryBars}>
-              {([0, 1] as const).map((b) => (
-                <div key={b} className={styles.galleryBar} data-bench={b}>
-                  <span className={styles.galleryBarLabel}>
-                    {detail.ballot[b]}
-                    {v.galleryVote === b && <span className={styles.yourPick}> (your call)</span>}
-                  </span>
-                  <span className={styles.galleryTrack} aria-hidden>
-                    <span className={styles.galleryFill} style={{ ['--_pct' as string]: `${pct[b]}%` }} />
-                  </span>
-                  <span className={styles.galleryPct}>{pct[b]}%</span>
-                </div>
-              ))}
-            </div>
-          </>
-        ) : v.galleryVote !== null ? (
-          <p className={styles.panelLede}>
-            You called it for <BallotChip bench={v.galleryVote}>{detail.ballot[v.galleryVote]}</BallotChip>. The gallery’s tally stays hidden until the jury’s reveal window
-            closes, so it can’t sway the jurors. {detail.gallery.total} calls so far.
-          </p>
-        ) : v.galleryBlocked ? (
-          <p className={styles.panelLede}>{v.galleryBlocked}</p>
-        ) : v.galleryOpen ? (
-          <>
-            <p className={styles.panelLede}>Make your call. It’s free, it doesn’t count toward the verdict, and the tally stays hidden until the jury has revealed.</p>
-            <div className={styles.buttonRow}>
-              {([0, 1] as const).map((b) => (
-                <Button key={b} variant="secondary" onClick={() => void cast(b)} loading={vote.pending} className={styles.galleryButton} data-bench={b}>
-                  {detail.ballot[b]}
-                </Button>
-              ))}
-            </div>
-            {vote.error && (
-              <Alert tone="danger" title="Not counted" live="assertive">
-                {vote.error}
-              </Alert>
-            )}
-          </>
-        ) : (
-          <p className={styles.panelLede}>The gallery is closed.</p>
-        )}
+    <CourtPanel id="gallery-title" tone="kraft" elevation={1} eyebrow={t('grandJury.gallery.eyebrow')} title={t('grandJury.gallery.title')}>
+      {pct && tally ? (
+        <>
+          <p className={styles.panelLede}>{t('grandJury.gallery.says', { count: tally.total })}</p>
+          <div className={styles.galleryBars}>
+            {([0, 1] as const).map((b) => (
+              <div key={b} className={styles.galleryBar} data-bench={b}>
+                <span className={styles.galleryBarLabel}>
+                  {ballotLabel(detail.ballot[b])}
+                  {v.galleryVote === b && <span className={styles.yourPick}> {t('grandJury.gallery.yourCall')}</span>}
+                </span>
+                <span className={styles.galleryTrack} aria-hidden>
+                  <span className={styles.galleryFill} style={{ ['--_pct' as string]: `${pct[b]}%` }} />
+                </span>
+                <span className={styles.galleryPct}>{pct[b]}%</span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : v.galleryVote !== null ? (
+        <p className={styles.panelLede}>
+          {tRich(
+            'grandJury.gallery.called',
+            { chip: (chunk) => <BallotChip bench={v.galleryVote!}>{chunk}</BallotChip> },
+            { choice: ballotLabel(detail.ballot[v.galleryVote]), count: detail.gallery.total },
+          )}
+        </p>
+      ) : v.galleryBlocked ? (
+        <p className={styles.panelLede}>{v.galleryBlocked}</p>
+      ) : v.galleryOpen ? (
+        <>
+          <p className={styles.panelLede}>{t('grandJury.gallery.make')}</p>
+          <div className={styles.buttonRow}>
+            {([0, 1] as const).map((b) => (
+              <Button key={b} variant="secondary" onClick={() => void cast(b)} loading={vote.pending} className={styles.galleryButton} data-bench={b}>
+                {ballotLabel(detail.ballot[b])}
+              </Button>
+            ))}
+          </div>
+          {vote.error && (
+            <Alert tone="danger" title={t('grandJury.gallery.error')} live="assertive">
+              {vote.error}
+            </Alert>
+          )}
+        </>
+      ) : (
+        <p className={styles.panelLede}>{t('grandJury.gallery.closed')}</p>
+      )}
     </CourtPanel>
   );
 }

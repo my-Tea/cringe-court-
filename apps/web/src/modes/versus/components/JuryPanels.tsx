@@ -1,7 +1,10 @@
-import { formatUsdc, usdc } from '@cringe-court/core';
-import { jurorStake, seatsOf, sideLabel, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
+import { usdc } from '@cringe-court/core';
+import { formatAmount, sideLabel } from '@/i18n/domain';
+import { jurorStake, seatsOf, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { useEffect, useState } from 'react';
+import { t } from '@/i18n';
 import { Alert, Amount, Badge, Button, Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, RadioCards, Stamp, useToast } from '@/ds';
+import { agentName } from '../copy';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
 import { VersusTrialFrame } from './VersusTrialFrame';
@@ -12,16 +15,24 @@ function SeatRow({ c }: { c: VersusCase }) {
   const seats = seatsOf(c);
   const size = c.state.terms.jurySize;
   return (
-    <ol className={styles.seats} aria-label={`${seats.length} of ${size} jury seats taken`}>
+    <ol className={styles.seats} aria-label={t('versus.jury.seats.aria', { taken: seats.length, size })}>
       {Array.from({ length: size }, (_, i) => {
         const seat = seats[i];
         const state = !seat ? 'empty' : seat.revealed ? 'opened' : seat.committed ? 'sealed' : 'seated';
         const demo = seat && c.demoJurors.has(seat.account.toLowerCase());
         return (
           <li key={i} className={styles.seat} data-state={state}>
-            <span className={styles.seatNo}>Seat {i + 1}</span>
-            <span className={styles.seatState}>{state === 'empty' ? 'Empty' : state === 'opened' ? 'Scroll opened' : state === 'sealed' ? 'Scroll sealed' : 'Seated · bond posted'}</span>
-            {demo && <Badge tone="info">Simulated</Badge>}
+            <span className={styles.seatNo}>{t('versus.jury.seats.seat', { n: i + 1 })}</span>
+            <span className={styles.seatState}>
+              {state === 'empty'
+                ? t('versus.jury.seats.empty')
+                : state === 'opened'
+                  ? t('versus.court.jury.opened')
+                  : state === 'sealed'
+                    ? t('versus.court.jury.sealed')
+                    : t('versus.jury.seats.posted')}
+            </span>
+            {demo && <Badge tone="info">{t('versus.jury.seats.simulated')}</Badge>}
           </li>
         );
       })}
@@ -39,30 +50,28 @@ export function RecruitingPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }
   const link = `${window.location.origin}/versus/case/${c.trialId}`;
   return (
     <div className={styles.stack}>
-      <PaperSection as="section" padding="lg" ribbon="Jury selection" aria-labelledby="jury-title">
+      <PaperSection as="section" padding="lg" ribbon={t('versus.jury.ribbon')} aria-labelledby="jury-title">
         <h2 id="jury-title" className={styles.panelTitle}>
-          {viewer === 'juror' ? 'You have a seat. Waiting for the rest of the jury.' : party ? 'Both halves are in. Calling the jury.' : 'This jury needs you'}
+          {viewer === 'juror' ? t('versus.jury.title.juror') : party ? t('versus.jury.title.party') : t('versus.jury.title.spectator')}
         </h2>
-        <p className={styles.muted}>
-          Three verified humans hear the case. Neither side can sit on their own jury, and each human can hold only one seat (World ID). {c.state.terms.threshold} matching votes decide it.
-        </p>
+        <p className={styles.muted}>{t('versus.jury.intro', { threshold: c.state.terms.threshold })}</p>
         <SeatRow c={c} />
         {party && (
-          <Alert tone="info" title="Where do jurors come from?">
-            In production the court draws random verified jurors from the waiting pool. In this demo court, open the case link in another tab to sit as a juror, or fill the seats with simulated jurors from Demo controls.
+          <Alert tone="info" title={t('versus.jury.where.title')}>
+            {t('versus.jury.where.body')}
             <div className={styles.inlineActions}>
               <PaperButton
-        size="sm"
-        variant="maroon"
-        iconStart={<Icon name="copy" />}
-        onClick={() =>
-         void navigator.clipboard
-          .writeText(link)
-          .then(() => toast({ title: 'Jury link copied', tone: 'success' }))
-          .catch(() => toast({ title: 'Copy did not work here', tone: 'warning' }))
-        }
-       >
-                Copy jury link
+                size="sm"
+                variant="maroon"
+                iconStart={<Icon name="copy" />}
+                onClick={() =>
+                  void navigator.clipboard
+                    .writeText(link)
+                    .then(() => toast({ title: t('versus.jury.linkCopied'), tone: 'success' }))
+                    .catch(() => toast({ title: t('versus.invite.copyFailed'), tone: 'warning' }))
+                }
+              >
+                {t('versus.jury.copyLink')}
               </PaperButton>
             </div>
           </Alert>
@@ -71,27 +80,27 @@ export function RecruitingPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }
 
       {!party && viewer !== 'juror' && (
         <Card as="section" tone="ornate" aria-labelledby="summons-title">
-          <CardHeader eyebrow="Jury duty · I swear to show up">
+          <CardHeader eyebrow={t('versus.jury.summons.eyebrow')}>
             <CardTitle id="summons-title" as="h2">
-              Take a seat on “{c.state.filing.title}”
+              {t('versus.jury.summons.title', { title: c.state.filing.title })}
             </CardTitle>
           </CardHeader>
           <CardBody className={styles.stack}>
             <dl className={styles.stakeList}>
               <div>
-                <dt>Your bond</dt>
+                <dt>{t('versus.jury.stake.bond')}</dt>
                 <dd>
                   <Amount value={stake.bond} />
                 </dd>
               </div>
               <div>
-                <dt>Reward for finishing</dt>
+                <dt>{t('versus.jury.stake.reward')}</dt>
                 <dd>
                   <Amount value={stake.reward} direction="credit" />
                 </dd>
               </div>
               <div>
-                <dt>Back to you if you finish</dt>
+                <dt>{t('versus.jury.stake.back')}</dt>
                 <dd>
                   <Amount value={stake.bestCase} />
                 </dd>
@@ -100,27 +109,31 @@ export function RecruitingPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }
             <ul className={styles.ruleList} role="list">
               <li>
                 <Icon name="eye" aria-hidden />
-                <span>Watch the trial, then seal a Secret Verdict Scroll. Nobody can see your vote until the reveal window.</span>
+                <span>{t('versus.jury.rule.watch')}</span>
               </li>
               <li>
                 <Icon name="clock" aria-hidden />
-                <span>Miss the seal or the reveal deadline and the bond is forfeited. If the jury can’t agree, timely jurors still get their bond back plus {formatUsdc(stake.failedTrialBonus)}.</span>
+                <span>{t('versus.jury.rule.miss', { bonus: formatAmount(stake.failedTrialBonus) })}</span>
               </li>
             </ul>
             <div className={styles.inlineActions}>
               {short && (
-                <PaperButton variant="maroon" iconStart={<Icon name="plus" />} onClick={() => void run(() => desk.faucet(usdc('5.00')), { success: 'Added 5.00 test USDC' })}>
-                  Get test USDC for the bond
+                <PaperButton
+                  variant="maroon"
+                  iconStart={<Icon name="plus" />}
+                  onClick={() => void run(() => desk.faucet(usdc('5.00')), { success: t('versus.fund.faucetSuccess') })}
+                >
+                  {t('versus.jury.faucet')}
                 </PaperButton>
               )}
               <WorldIdDialog
-                title="Prove you are a unique human"
-                purpose="Jury seats need a strong proof of human. The same proof checks you are not one of the two sides."
-                confirmLabel={`Verify & post ${formatUsdc(stake.bond)} bond`}
-                onVerified={() => run(() => desk.takeSeat(c.trialId), { success: 'You are on the jury. Watch the trial when court opens.' })}
+                title={t('versus.world.title')}
+                purpose={t('versus.jury.world.purpose')}
+                confirmLabel={t('versus.jury.world.confirm', { amount: formatAmount(stake.bond) })}
+                onVerified={() => run(() => desk.takeSeat(c.trialId), { success: t('versus.jury.seated') })}
                 trigger={
                   <Button size="lg" variant="swear" disabled={short} iconStart={<Icon name="gavel" />}>
-                    I swear to show up ({formatUsdc(stake.bond)})
+                    {t('versus.jury.swear', { amount: formatAmount(stake.bond) })}
                   </Button>
                 }
               />
@@ -155,60 +168,60 @@ function BallotPanel({ c }: { c: VersusCase }) {
         className={styles.stack}
         onSubmit={(e) => {
           e.preventDefault();
-          if (choice) void run(() => desk.commitBallot(c.trialId, choice === 'a' ? 0 : 1), { success: 'Scroll sealed. Open it in the reveal window.' });
+          if (choice) void run(() => desk.commitBallot(c.trialId, choice === 'a' ? 0 : 1), { success: t('versus.ballot.sealedToast') });
         }}
       >
         <RadioCards
-          legend="Who argued it better?"
+          legend={t('versus.ballot.legend')}
           name={`ballot-${c.trialId}`}
           value={choice}
           onValueChange={setChoice}
           options={[
-            { value: 'a', label: labels[0], description: 'Agent A’s case', tone: 'side-a' },
-            { value: 'b', label: labels[1], description: 'Agent B’s case', tone: 'side-b' },
+            { value: 'a', label: labels[0], description: t('versus.ballot.case', { agent: agentName('a') }), tone: 'side-a' },
+            { value: 'b', label: labels[1], description: t('versus.ballot.case', { agent: agentName('b') }), tone: 'side-b' },
           ]}
-          hint="Your choice is sealed with a secret saved only in this browser. Nobody, including the court, sees it until you open it."
+          hint={t('versus.ballot.hint')}
         />
         <Button type="submit" size="lg" variant="swear" disabled={!choice} iconStart={<Icon name="lock" />}>
-          Seal my Secret Verdict Scroll
+          {t('versus.ballot.seal')}
         </Button>
       </form>
     );
   } else if (s.step === 'commit') {
     body = (
-      <Alert tone="success" title="Your scroll is sealed">
-        {sealed !== null ? `Only this device knows you chose ${labels[sealed]}.` : 'Your choice is saved on this device.'} Come back when the reveal window opens to open it; keep this browser.
+      <Alert tone="success" title={t('versus.ballot.sealed.title')}>
+        {t('versus.ballot.sealed.body', { known: sealed !== null ? 'yes' : 'no', choice: sealed !== null ? labels[sealed] : '' })}
       </Alert>
     );
   } else if (s.step === 'reveal' && !seat.committed) {
     body = (
-      <Alert tone="danger" title="You missed the commit window">
-        Your bond will be forfeited, as the summons said. The rest of the jury still decides.
+      <Alert tone="danger" title={t('versus.ballot.missed.title')}>
+        {t('versus.ballot.missed.body')}
       </Alert>
     );
   } else if (s.step === 'reveal' && !seat.revealed) {
     body = (
       <div className={styles.stack}>
-        <Alert tone="warning" title="Open your scroll now">
-          The vote only counts once it is opened. Miss this window and the bond is forfeited.
+        <Alert tone="warning" title={t('versus.ballot.open.title')}>
+          {t('versus.ballot.open.body')}
         </Alert>
-        <PaperButton size="lg" iconStart={<Icon name="unlock" />} onClick={() => void run(() => desk.revealBallot(c.trialId), { success: 'Scroll opened. Your vote is counted.' })}>
-          Open my scroll{sealed !== null ? ` (${labels[sealed]})` : ''}
+        <PaperButton size="lg" iconStart={<Icon name="unlock" />} onClick={() => void run(() => desk.revealBallot(c.trialId), { success: t('versus.ballot.openedToast') })}>
+          {sealed !== null ? t('versus.ballot.open.withChoice', { choice: labels[sealed] }) : t('versus.ballot.open.button')}
         </PaperButton>
       </div>
     );
   } else {
     body = (
-      <Alert tone="success" title={seat.revealed ? 'Your vote is counted' : 'Deliberation is closed'}>
-        {s.step === 'finalizing' ? 'The clerk is counting the scrolls.' : 'Waiting for the reveal window to close.'}
+      <Alert tone="success" title={seat.revealed ? t('versus.ballot.done.counted') : t('versus.ballot.done.closed')}>
+        {s.step === 'finalizing' ? t('versus.ballot.done.counting') : t('versus.ballot.done.waiting')}
       </Alert>
     );
   }
   return (
     <Card as="section" tone="ornate" aria-labelledby="ballot-title">
-      <CardHeader eyebrow={`Juror · seat ${seat.seat}`}>
+      <CardHeader eyebrow={t('versus.ballot.eyebrow', { seat: seat.seat })}>
         <CardTitle id="ballot-title" as="h2">
-          {s.step === 'commit' ? 'Secret Verdict Scroll' : 'Open Your Scroll'}
+          {s.step === 'commit' ? t('versus.ballot.title.commit') : t('versus.ballot.title.reveal')}
         </CardTitle>
       </CardHeader>
       <CardBody>{body}</CardBody>
@@ -225,28 +238,28 @@ export function TrialPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
   const revealed = seats.filter((x) => x.revealed).length;
   return (
     <div className={styles.stack}>
-      <PaperSection as="section" padding="md" ribbon="Court is in session" aria-label="The trial">
+      <PaperSection as="section" padding="md" ribbon={t('versus.trial.ribbon')} aria-label={t('versus.trial.aria')}>
         <VersusTrialFrame viewer={viewer} lines={s.transcript.lines} exhibits={s.exhibits} filing={s.filing} seats={seats} jurySize={s.terms.jurySize} />
       </PaperSection>
       {viewer === 'juror' ? (
         <BallotPanel c={c} />
       ) : (
         <Card as="section" aria-labelledby="deliberation-title">
-          <CardHeader eyebrow="The jury">
+          <CardHeader eyebrow={t('versus.trial.jury')}>
             <CardTitle id="deliberation-title" as="h2">
-              {s.step === 'reveal' ? 'Opening the scrolls' : s.step === 'finalizing' ? 'Counting' : 'Deliberating'}
+              {s.step === 'reveal' ? t('versus.trial.opening') : s.step === 'finalizing' ? t('versus.trial.counting') : t('versus.trial.deliberating')}
             </CardTitle>
           </CardHeader>
           <CardBody className={styles.stack}>
             <div className={styles.tallyRow} role="status">
               <Stamp tone="filed" size="sm">
-                {committed} of {s.terms.jurySize} sealed
+                {t('versus.trial.sealed', { n: committed, total: s.terms.jurySize })}
               </Stamp>
               <Stamp tone="case-number" size="sm">
-                {revealed} of {s.terms.jurySize} opened
+                {t('versus.trial.opened', { n: revealed, total: s.terms.jurySize })}
               </Stamp>
             </div>
-            <p className={styles.muted}>Votes stay secret until the reveal window closes, so nobody can be swayed by a live tally.</p>
+            <p className={styles.muted}>{t('versus.trial.secret')}</p>
             <SeatRow c={c} />
           </CardBody>
         </Card>

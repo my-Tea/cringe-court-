@@ -133,6 +133,17 @@
   }
 }
 
+/* Tablets: the wordmark gives way to the mark so the tabs keep one row. */
+@media (min-width: 40.01rem) and (max-width: 64rem) {
+  .brandWide {
+    display: none;
+  }
+
+  .brandMark {
+    display: inline-flex;
+  }
+}
+
 @media (max-width: 40rem) {
   .brandWide,
   .badgeButton,
@@ -180,6 +191,10 @@
   flex: 1;
   width: 100%;
   min-width: 0;
+  /* Decorative paper (ribbon tails, torn edges) may reach past the page edge on
+     phones; it must never make the page scroll sideways. clip, not hidden: no
+     scroll container, so sticky children keep working. */
+  overflow-x: clip;
 }
 
 .main:focus {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, Dialog, DialogContent, PaperButton, Spinner } from '@/ds';
+import { t } from '@/i18n';
 import styles from './WorldIdConnectDialog.module.css';
 
 export interface WorldIdConnectDialogProps {
@@ -25,36 +26,36 @@ export function WorldIdConnectDialog({ uri, onCancel }: WorldIdConnectDialogProp
   return (
     <Dialog open={uri !== null} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent
-        title="Verify with World ID"
-        description="Open World App and approve the request. The court never learns who you are."
+        title={t('shell.worldId.title')}
+        description={t('shell.worldId.description')}
         size="sm"
         footer={
           <PaperButton variant="ghost" onClick={onCancel}>
-            Cancel
+            {t('common.action.cancel')}
           </PaperButton>
         }
       >
         <div className={styles.body}>
           <div className={styles.actions}>
             {uri && (
-              <PaperButton onClick={() => window.open(uri, '_blank', 'noopener,noreferrer')}>Open in World App</PaperButton>
+              <PaperButton onClick={() => window.open(uri, '_blank', 'noopener,noreferrer')}>{t('shell.worldId.open')}</PaperButton>
             )}
             <PaperButton variant="ghost" onClick={copy}>
-              {copied === 'done' ? 'Link copied' : 'Copy link'}
+              {copied === 'done' ? t('shell.worldId.copied') : t('shell.worldId.copy')}
             </PaperButton>
           </div>
           <p className={styles.link} data-testid="world-id-link">
             {uri}
           </p>
           {copied === 'failed' && (
-            <Alert tone="warning" title="Could not copy" live="polite">
-              Select the link above and copy it by hand.
+            <Alert tone="warning" title={t('shell.worldId.copyFailed.title')} live="polite">
+              {t('shell.worldId.copyFailed.body')}
             </Alert>
           )}
           <p className={styles.status} role="status">
-            <Spinner size="sm" label={null} /> Waiting for World App…
+            <Spinner size="sm" label={null} /> {t('shell.worldId.waiting')}
           </p>
-          <p className={styles.note}>Honest note: this build does not render a QR code. On a computer, send the link to your phone and open it in World App.</p>
+          <p className={styles.note}>{t('shell.worldId.note')}</p>
         </div>
       </DialogContent>
     </Dialog>

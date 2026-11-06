@@ -477,7 +477,7 @@
   font-size: var(--cc-text-xs);
   letter-spacing: var(--cc-tracking-wide);
   text-transform: uppercase;
-  animation: nudge 2.4s var(--cc-ease-standard) infinite;
+  animation: nudge var(--cc-loop-nudge) var(--cc-ease-standard) infinite;
 }
 
 @keyframes nudge {
@@ -881,11 +881,11 @@
 }
 
 .draftingStage > :first-child {
-  animation: bob 1.6s var(--cc-ease-standard) infinite alternate;
+  animation: bob var(--cc-loop-pulse) var(--cc-ease-sway) infinite alternate;
 }
 
 .draftingStage > :last-child {
-  animation: bob 1.6s var(--cc-ease-standard) 0.8s infinite alternate;
+  animation: bob var(--cc-loop-pulse) var(--cc-ease-sway) calc(var(--cc-loop-pulse) / 2) infinite alternate;
 }
 
 @keyframes bob {

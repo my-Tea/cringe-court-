@@ -13,13 +13,18 @@
  */
 import { createModeRegistry, type ModeDefinition, type ModeId, type ModeRegistry } from '@cringe-court/core';
 import type { RouteObject } from 'react-router';
+import { allKeys, en, t, type MessageKey } from '@/i18n';
 
 export interface WebModeModule {
   /** The mode's rules (from packages/modes-<mode>, or a core BASE_MODES entry). */
   definition: ModeDefinition;
   /** Child routes under `/<mode id>/`. */
   routes?: RouteObject[];
-  /** The landing page's primary call to action, once the mode is playable. */
+  /**
+   * The landing page's primary call to action, once the mode is playable. A
+   * `label` is either a catalog key (preferred; translated when shown) or plain
+   * text. Render it through `resolveModeLabel`.
+   */
   landing?: { label: string; to: string; secondary?: { label: string; to: string } };
   /** Where a player finds their own cases in this mode (the lobby's "Your cases" row). */
   docket?: { label: string; to: string };
@@ -49,4 +54,12 @@ export const { registry: modeRegistry, modules: webModes } = loadWebModes();
 /** Child routes every registered mode contributes, keyed by mode path. */
 export function modeChildRoutes(id: ModeId): RouteObject[] {
   return webModes.get(id)?.routes ?? [];
+}
+
+let catalogKeys: ReadonlySet<string> | undefined;
+
+/** Translates a mode-module label: a catalog key is looked up, anything else is shown as written. */
+export function resolveModeLabel(label: MessageKey | (string & {})): string {
+  catalogKeys ??= new Set<string>(allKeys(en));
+  return catalogKeys.has(label) ? t(label as MessageKey) : label;
 }

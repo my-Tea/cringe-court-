@@ -273,3 +273,12 @@ describe('dialogue and audio', () => {
     expect(detectAudio({ play: 1 })).toBeNull();
   });
 });
+
+describe('keyboard trap (WCAG 2.1.2)', () => {
+  it('Tab is never bound, so focus can always leave the room', async () => {
+    const { DEFAULT_BINDINGS, KeyState } = await import('../input');
+    expect(DEFAULT_BINDINGS.Tab).toBeUndefined();
+    expect(DEFAULT_BINDINGS.KeyX).toBe('skip');
+    expect(new KeyState().down('Tab')).toBeNull();
+  });
+});

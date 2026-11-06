@@ -1,32 +1,25 @@
-import { CATEGORIES, formatUsdc, type Category } from '@cringe-court/core';
+import { CATEGORIES, type Category } from '@cringe-court/core';
+import { formatAmount } from '@/i18n/domain';
 import { CURRENT_PRICING, FILTER_STATUSES, crowdSize, type DocketEntry, type DocketFilter } from '@cringe-court/modes-grand-jury';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
+import { t, tRich, type MessageKey } from '@/i18n';
 import { EmptyState, ErrorState, Icon, PaperButton, PaperButtonLink, PaperPanel, PaperRibbon, Skeleton, SkeletonText, cx } from '@/ds';
 import { CaseCard } from '../components/CaseCard';
-import { STEPS, paths } from '../lib';
+import { categoryLabel, paths, steps } from '../lib';
 import { useCourtNowMs, useDocket } from '../state/hooks';
 import styles from '../GrandJury.module.css';
 
-const FILTERS: readonly { value: DocketFilter; label: string; hint: string }[] = [
-  { value: 'all', label: 'All cases', hint: 'Every case on the public docket' },
-  { value: 'open', label: 'Open to join', hint: 'Raising money or seating the jury' },
-  { value: 'live', label: 'In session', hint: 'The jury is out or opening scrolls' },
-  { value: 'closed', label: 'Decided', hint: 'Verdicts, no-verdicts and dismissals' },
+const FILTERS: readonly { value: DocketFilter; label: MessageKey; hint: MessageKey }[] = [
+  { value: 'all', label: 'grandJury.docket.filter.all', hint: 'grandJury.docket.filter.allHint' },
+  { value: 'open', label: 'grandJury.docket.filter.open', hint: 'grandJury.docket.filter.openHint' },
+  { value: 'live', label: 'grandJury.docket.filter.live', hint: 'grandJury.docket.filter.liveHint' },
+  { value: 'closed', label: 'grandJury.docket.filter.closed', hint: 'grandJury.docket.filter.closedHint' },
 ];
 
 /** Live cases first (soonest deadline), then open ones, then the archive (newest first). */
-const RANK: Record<DocketEntry['status'], number> = {
-  'opening-scrolls': 0,
-  'in-session': 1,
-  'settle-ready': 2,
-  seating: 3,
-  summoning: 4,
-  verdict: 5,
-  mistrial: 6,
-  cancelled: 7,
-};
+const RANK: Record<DocketEntry['status'], number> = { 'opening-scrolls': 0, 'in-session': 1, 'settle-ready': 2, seating: 3, summoning: 4, verdict: 5, mistrial: 6, cancelled: 7 };
 
 function sortDocket(list: readonly DocketEntry[]): DocketEntry[] {
   return [...list].sort((a, b) => RANK[a.status] - RANK[b.status] || (a.phaseEndsAt ?? Infinity) - (b.phaseEndsAt ?? Infinity) || b.caseNumber - a.caseNumber);
@@ -34,7 +27,7 @@ function sortDocket(list: readonly DocketEntry[]): DocketEntry[] {
 
 function matches(e: DocketEntry, q: string): boolean {
   if (!q) return true;
-  const hay = [e.label, e.file.title, e.file.question, e.file.hook, ...e.ballot, ...e.file.tags, CATEGORIES[e.file.category]].join(' ').toLowerCase();
+  const hay = [e.label, e.file.title, e.file.question, e.file.hook, ...e.ballot, ...e.file.tags, categoryLabel(e.file.category)].join(' ').toLowerCase();
   return q
     .toLowerCase()
     .split(/\s+/)
@@ -65,7 +58,7 @@ function DocketSkeleton() {
 
 /** The public docket: every Grand Jury case, filterable, live. */
 export function DocketPage() {
-  useDocumentTitle('Grand Jury docket');
+  useDocumentTitle(t('grandJury.docket.docTitle'));
   const docket = useDocket();
   const nowMs = useCourtNowMs();
   const [params, setParams] = useSearchParams();
@@ -108,17 +101,14 @@ export function DocketPage() {
     <div className={styles.page}>
       <header className={styles.docketHero}>
         <p className={styles.kicker}>
-          <Icon name="users" /> Mode 3 · Public court
+          <Icon name="users" /> {t('grandJury.docket.kicker')}
         </p>
         <PaperRibbon as="h1" tone="maroon" size="lg" sparks className={styles.heroRibbon}>
-          The Grand Jury docket
+          {t('grandJury.docket.title')}
         </PaperRibbon>
-        <p className={styles.heroLede}>
-          The internet’s oldest arguments, finally on trial. The crowd chips in to summon the court, seven verified strangers take a bonded seat, two AI lawyers argue it
-          out, and the sealed ballots decide.
-        </p>
-        <ol className={styles.howStrip} aria-label="How a Grand Jury case runs">
-          {STEPS.map((s, i) => (
+        <p className={styles.heroLede}>{t('grandJury.docket.lede')}</p>
+        <ol className={styles.howStrip} aria-label={t('grandJury.docket.how')}>
+          {steps().map((s, i) => (
             <li key={s} className={styles.howStep} style={{ ['--_i' as string]: i }}>
               <span className={styles.howNum} aria-hidden>
                 {i + 1}
@@ -129,21 +119,23 @@ export function DocketPage() {
         </ol>
         <p className={styles.heroFacts}>
           <span>
-            <strong>{formatUsdc(p.target)}</strong> summons a court (about {crowdSize(p.target)} people at {formatUsdc(p.typicalTicket, { unit: false })})
+            {tRich(
+              'grandJury.docket.facts.summon',
+              { b: (chunk) => <strong>{chunk}</strong> },
+              { target: formatAmount(p.target), people: crowdSize(p.target), ticket: formatAmount(p.typicalTicket, { unit: false }) },
+            )}
           </span>
           <span aria-hidden>·</span>
-          <span>
-            <strong>{p.jurors}</strong> jurors, <strong>{p.threshold}</strong> to win
-          </span>
+          <span>{tRich('grandJury.docket.facts.jurors', { b: (chunk) => <strong>{chunk}</strong> }, { jurors: p.jurors, threshold: p.threshold })}</span>
           <span aria-hidden>·</span>
-          <span>Full refund if it doesn’t happen</span>
+          <span>{t('grandJury.docket.facts.refund')}</span>
         </p>
       </header>
 
       {featured && (
         <section aria-labelledby="featured-title" className={styles.featured}>
           <h2 id="featured-title" className={styles.sectionTitle}>
-            <Icon name="megaphone" /> Happening now
+            <Icon name="megaphone" /> {t('grandJury.docket.featured')}
           </h2>
           <div className={styles.featuredCard}>
             <CaseCard entry={featured} nowMs={nowMs} />
@@ -154,18 +146,18 @@ export function DocketPage() {
       <section aria-labelledby="docket-title" className={styles.docketSection}>
         <div className={styles.docketHead}>
           <h2 id="docket-title" className={styles.sectionTitle}>
-            <Icon name="document" /> The docket
+            <Icon name="document" /> {t('grandJury.docket.section')}
           </h2>
           <div className={styles.search}>
             <label htmlFor="docket-search" className="cc-visually-hidden">
-              Search the docket
+              {t('grandJury.docket.search.label')}
             </label>
             <Icon name="eye" className={styles.searchIcon} />
             <input
               id="docket-search"
               type="search"
               className={styles.searchInput}
-              placeholder="Search: soup, pineapple, GIF…"
+              placeholder={t('grandJury.docket.search.placeholder')}
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -176,28 +168,34 @@ export function DocketPage() {
         </div>
 
         <div className={styles.filters}>
-          <div role="group" aria-label="Show" className={styles.filterGroup}>
+          <div role="group" aria-label={t('grandJury.docket.filter.group')} className={styles.filterGroup}>
             {FILTERS.map((f) => (
               <button
                 key={f.value}
                 type="button"
                 className={cx(styles.filterChip, filter === f.value && styles.filterChipOn)}
                 aria-pressed={filter === f.value}
-                title={f.hint}
+                title={t(f.hint)}
                 onClick={() => set('show', f.value)}
               >
-                {f.label}
+                {t(f.label)}
                 <span className={styles.filterCount}>{all ? counts[f.value] : '–'}</span>
               </button>
             ))}
           </div>
-          <div role="group" aria-label="Topic" className={styles.filterGroup}>
+          <div role="group" aria-label={t('grandJury.docket.topic.group')} className={styles.filterGroup}>
             <button type="button" className={cx(styles.topicChip, category === null && styles.topicChipOn)} aria-pressed={category === null} onClick={() => set('topic', null)}>
-              Any topic
+              {t('grandJury.docket.topic.any')}
             </button>
             {(Object.keys(CATEGORIES) as Category[]).map((c) => (
-              <button key={c} type="button" className={cx(styles.topicChip, category === c && styles.topicChipOn)} aria-pressed={category === c} onClick={() => set('topic', category === c ? null : c)}>
-                {CATEGORIES[c]}
+              <button
+                key={c}
+                type="button"
+                className={cx(styles.topicChip, category === c && styles.topicChipOn)}
+                aria-pressed={category === c}
+                onClick={() => set('topic', category === c ? null : c)}
+              >
+                {categoryLabel(c)}
               </button>
             ))}
           </div>
@@ -206,20 +204,22 @@ export function DocketPage() {
         {docket.state === 'loading' && (
           <>
             <p className="cc-visually-hidden" role="status">
-              Loading the docket…
+              {t('grandJury.docket.loading')}
             </p>
             <DocketSkeleton />
           </>
         )}
         {docket.state === 'error' && (
-          <ErrorState title="The docket would not open" onRetry={docket.retry} details={docket.error.message}>
-            We couldn’t read the cases from the ledger. Nothing was charged.
+          <ErrorState title={t('grandJury.docket.error.title')} onRetry={docket.retry} details={docket.error.message}>
+            {t('grandJury.docket.error.body')}
           </ErrorState>
         )}
         {all && (
           <>
             <p className={styles.resultCount} role="status" aria-live="polite">
-              {visible.length === all.length ? `${all.length} cases` : `${visible.length} of ${all.length} cases`}
+              {visible.length === all.length
+                ? t('grandJury.docket.count.all', { count: all.length })
+                : t('grandJury.docket.count.some', { visible: visible.length, total: all.length })}
             </p>
             {visible.length > 0 ? (
               <ul className={styles.caseGrid}>
@@ -230,12 +230,16 @@ export function DocketPage() {
                 ))}
               </ul>
             ) : all.length === 0 ? (
-              <EmptyState title="The docket is empty" character="clerk" actions={<PaperButtonLink to={paths.pricing}>How cases get here</PaperButtonLink>}>
-                No public cases are published yet. The court editor reviews every case before it goes up.
+              <EmptyState
+                title={t('grandJury.docket.empty.title')}
+                character="clerk"
+                actions={<PaperButtonLink to={paths.pricing}>{t('grandJury.docket.empty.action')}</PaperButtonLink>}
+              >
+                {t('grandJury.docket.empty.body')}
               </EmptyState>
             ) : (
               <EmptyState
-                title="No case matches"
+                title={t('grandJury.docket.noMatch.title')}
                 character="clerk"
                 expression="shocked"
                 actions={
@@ -246,11 +250,11 @@ export function DocketPage() {
                     }}
                     iconStart={<Icon name="refresh" />}
                   >
-                    Clear filters
+                    {t('grandJury.docket.noMatch.clear')}
                   </PaperButton>
                 }
               >
-                {q ? `Nothing on the docket mentions “${q}”` : 'Nothing in this part of the docket right now'}. Try another filter or topic.
+                {q ? t('grandJury.docket.noMatch.query', { q }) : t('grandJury.docket.noMatch.body')}
               </EmptyState>
             )}
           </>

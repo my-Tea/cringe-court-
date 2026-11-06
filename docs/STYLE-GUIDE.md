@@ -438,6 +438,35 @@ helper also has explicit `animation: none` blocks for both the in-app toggle
 (`:root[data-reduced-motion='true']`) and the system setting. Enforced by
 `ds/papercraft.test.ts`.
 
+**Motion tokens (polish pass, 2026-11-03).** Every duration, delay and easing in
+the app is a token. Never write a literal `ms`/`s`, `ease*`, `linear`,
+`cubic-bezier()` or `steps()` in CSS; `ds/motion/motionTokens.test.ts` fails on any.
+
+| Token family | Values | Use |
+|---|---|---|
+| `--cc-duration-*` | instant 0, fast 120, base 200, slow 320, slower 480, dramatic 720 ms | one-shot transitions and animations |
+| `--cc-loop-*` | caret 900, blink 1000, spin 800, shimmer 1400, pulse 1600, nudge 2400, idle 4800, sway 6000 ms | ambient loops (carets, spinner, skeleton, badges, idle sways) |
+| `--cc-stagger-*` | tight 60, base 70, loose 120 ms | delay between siblings entering in turn (`calc(var(--_i) * var(--cc-stagger-base))`) |
+| `--cc-ease-*` | standard, enter, exit, emphasized, stamp, unfold, press, pixel, **sway** (in-out), **linear**, **blink** `steps(2, jump-none)`, **frame** `steps(1, end)`, **shake** `steps(6, end)` | pick by role, not by curve |
+
+- **Page transitions.** Every route change replays `.cc-page-enter` on `<main>`
+  (`usePageEnter`): a fade and a `--cc-space-2` rise over `--cc-duration-slow` with
+  `--cc-ease-enter`. The page is not remounted, so no state is lost. The fill mode
+  is `backwards`, so no transform lingers to trap `position: fixed` children.
+- **State transitions.** Panels unfold, list items slide in staggered, stamps slam
+  (`--cc-ease-stamp`), and progress bars move linearly. Loading uses the pixel
+  spinner (`--cc-loop-spin`) or skeleton shimmer, and both stop under reduced motion.
+- **Reduced motion.** Under `data-reduced-motion='true'` (or the system setting
+  with no override), all `--cc-duration-*`, `--cc-loop-*` and `--cc-stagger-*`
+  tokens collapse to 0 ms. A global net in `base.css` also forces
+  `animation-iteration-count: 1`, zero delays and `scroll-behavior: auto` on
+  every element, so third-party CSS stops too. Animations still make one 0 ms
+  pass, so `animationend` handlers fire.
+- **Roaming courtroom HUD.** Its stylesheet (`packages/scene/src/roam/react/styles.ts`)
+  reads the same tokens, with fallbacks, and honours both reduced-motion
+  switches. In-world motion such as head-bob, shake and cinematic cuts has its own
+  reduced-motion handling, described in `docs/ROAM.md`.
+
 ### 9.12 What the mode tracks adopt
 
 Merge `v3/p3c-papercraft` first; then use, from `@/ds` only:

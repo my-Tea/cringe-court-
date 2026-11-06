@@ -1,10 +1,11 @@
-import { CATEGORIES } from '@cringe-court/core';
 import type { DocketEntry } from '@cringe-court/modes-grand-jury';
 import { Link } from 'react-router';
+import { t } from '@/i18n';
 import { Countdown, Icon, PaperPanel, Stamp, cx } from '@/ds';
-import { deadlineLabel, isClosed, paths } from '../lib';
+import { categoryLabel, deadlineLabel, isClosed, paths } from '../lib';
 import styles from '../GrandJury.module.css';
 import { BallotChip, FundingMeter, JuryBox, StatusBadge } from './parts';
+import { ballotLabel, caseLabel, verdictLabel } from '@/i18n/domain';
 
 /** One case on the docket. The whole card is the link; inner content stays plain text. */
 export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }) {
@@ -24,11 +25,11 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
       aria-labelledby={titleId}
     >
       <header className={styles.caseCardHead}>
-        <span className={styles.caseLabel}>{e.label}</span>
+        <span className={styles.caseLabel}>{caseLabel(e.label)}</span>
         <StatusBadge status={e.status} />
       </header>
       <p className={styles.caseCardEyebrow}>
-        {e.file.title} · {CATEGORIES[e.file.category]}
+        {e.file.title} · {categoryLabel(e.file.category)}
       </p>
       <h3 id={titleId} className={styles.caseCardQuestion}>
         <Link to={paths.case(e.caseNumber)} className={styles.stretchedLink}>
@@ -36,15 +37,15 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
         </Link>
       </h3>
       <p className={styles.caseCardHook}>{e.file.hook}</p>
-      <div className={styles.caseCardBallot} aria-label="Ballot">
+      <div className={styles.caseCardBallot} aria-label={t('grandJury.card.ballotLabel')}>
         <BallotChip bench={0} size="sm">
-          {e.ballot[0]}
+          {ballotLabel(e.ballot[0])}
         </BallotChip>
         <span className={styles.vs} aria-hidden>
-          vs
+          {t('grandJury.card.vs')}
         </span>
         <BallotChip bench={1} size="sm">
-          {e.ballot[1]}
+          {ballotLabel(e.ballot[1])}
         </BallotChip>
       </div>
 
@@ -54,22 +55,20 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
         {e.status === 'verdict' && e.verdict && (
           <div className={styles.caseCardVerdict}>
             <Stamp tone={e.verdict.kind === 'ballot-0' ? 'guilty' : 'side-a'} size="sm">
-              {e.verdict.label}
+              {verdictLabel(e.verdict.label)}
             </Stamp>
-            <span className={styles.tallyText}>
-              {e.verdict.tally[0]}–{e.verdict.tally[1]} of {e.verdict.appointed}
-            </span>
+            <span className={styles.tallyText}>{t('grandJury.card.tally', { a: e.verdict.tally[0], b: e.verdict.tally[1], total: e.verdict.appointed })}</span>
           </div>
         )}
         {e.status === 'mistrial' && (
           <div className={styles.caseCardVerdict}>
             <Stamp tone="no-verdict" size="sm">
-              No verdict
+              {t('grandJury.card.noVerdict')}
             </Stamp>
-            <span className={styles.tallyText}>Summoners refunded</span>
+            <span className={styles.tallyText}>{t('grandJury.card.refunded')}</span>
           </div>
         )}
-        {e.status === 'cancelled' && <p className={styles.caseCardNote}>Dismissed before trial. Every summoner can claim a full refund.</p>}
+        {e.status === 'cancelled' && <p className={styles.caseCardNote}>{t('grandJury.card.dismissed')}</p>}
       </div>
 
       <footer className={styles.caseCardFoot}>
@@ -77,12 +76,12 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
           <Countdown compact label={deadlineLabel(e)} startsAt={e.phaseStartedAt * 1000} endsAt={e.phaseEndsAt * 1000} now={nowMs} />
         ) : (
           <span className={styles.caseCardFootNote}>
-            {e.gallery.tally ? `${e.gallery.total} in the gallery called it` : e.status === 'settle-ready' ? 'Anyone can settle it now' : ' '}
+            {e.gallery.tally ? t('grandJury.card.gallery', { count: e.gallery.total }) : e.status === 'settle-ready' ? t('grandJury.card.settleNow') : ' '}
           </span>
         )}
         {e.sponsor && (
           <span className={styles.presentedBy}>
-            <Icon name="star" /> Presented by {e.sponsor.name}
+            <Icon name="star" /> {t('grandJury.card.presentedBy', { name: e.sponsor.name })}
           </span>
         )}
       </footer>

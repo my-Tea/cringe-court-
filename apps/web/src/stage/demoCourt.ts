@@ -4,11 +4,11 @@
  * mock World ID. Nothing here is a mode UI; it proves the engine end to end and
  * gives every mode track a reference for wiring a trial to the stage.
  */
+import { t, type MessageKey } from '@/i18n';
 import { createFixtureCounsel } from '@cringe-court/ai';
-import { BASE_MODES, formatCaseNumber, trialId, usdc, type AudioPort, type BallotChoice, type CaseNumber, type Hex, type ReceiptLine, type ScenePort, type TrialState } from '@cringe-court/core';
+import { BASE_MODES, trialId, usdc, type AudioPort, type BallotChoice, type CaseNumber, type Hex, type ReceiptLine, type ScenePort, type TrialState } from '@cringe-court/core';
 import { ManualClock, MemoryChain, MemorySaltVault, MockIdentity, testAddress } from '@cringe-court/core/testing';
-import type {
-  ShowPlayer} from '@cringe-court/engine';
+import type { ShowPlayer } from '@cringe-court/engine';
 import {
   JurorSession,
   TrialEngine,
@@ -20,7 +20,9 @@ import {
   directTrial,
   directVerdict,
 } from '@cringe-court/engine';
+import { formatCaseNo } from '@/i18n/domain';
 
+/** Demo content: the text fields resolve through the catalog each time they are read, so they follow the active locale. */
 export interface SampleCase {
   id: string;
   title: string;
@@ -31,34 +33,35 @@ export interface SampleCase {
   exhibit: { title: string; body: string };
 }
 
+type SampleKey = 'replyAll' | 'diamondHands' | 'ghosted';
+
+function sample(id: string, key: SampleKey, category: SampleCase['category']): SampleCase {
+  const k = (field: string) => `solo.stage.sample.${key}.${field}` as MessageKey;
+  return {
+    id,
+    category,
+    get title() {
+      return t(k('title'));
+    },
+    get story() {
+      return t(k('story'));
+    },
+    get privateNotes() {
+      return t(k('notes'));
+    },
+    get angle() {
+      return t(k('angle'));
+    },
+    get exhibit() {
+      return { title: t(k('exhibitTitle')), body: t(k('exhibitBody')) };
+    },
+  };
+}
+
 export const SAMPLE_CASES: readonly SampleCase[] = [
-  {
-    id: 'reply-all',
-    title: 'Replied-all with a frog meme',
-    category: 'internet-crimes',
-    story: 'I replied-all to a 400-person company thread with a dancing frog GIF. It was the CEO’s retirement announcement.',
-    privateNotes: 'I thought it was the team chat. The frog was wearing a tiny tie.',
-    angle: 'The frog was a tribute to a long and hoppy career.',
-    exhibit: { title: 'The frog', body: 'A 3-second GIF of a frog in a tie, dancing. Sent 09:02, read by 400.' },
-  },
-  {
-    id: 'diamond-hands',
-    title: 'Bought the top, called it a strategy',
-    category: 'crypto-crimes',
-    story: 'I bought a dog-themed coin at its all-time high and told my group chat it was “a long-term position”.',
-    privateNotes: 'I panic-sold 40 minutes later.',
-    angle: 'Market conditions were emotionally unavailable.',
-    exhibit: { title: 'The group chat', body: '“Zoom out, boys. Generational wealth.” — sent 2 minutes before the dip.' },
-  },
-  {
-    id: 'ghosted',
-    title: 'Left on read for 6 business days',
-    category: 'dating-crimes',
-    story: 'I left a second date on read for six business days, then replied “haha sorry just saw this”.',
-    privateNotes: 'I had been composing the perfect reply the whole time.',
-    angle: 'Perfection takes time. Six business days, to be exact.',
-    exhibit: { title: 'Read receipt', body: 'Read Tue 19:14. Replied the following Wednesday, 23:58.' },
-  },
+  sample('reply-all', 'replyAll', 'internet-crimes'),
+  sample('diamond-hands', 'diamondHands', 'crypto-crimes'),
+  sample('ghosted', 'ghosted', 'dating-crimes'),
 ];
 
 /** How the simulated jury votes, so every verdict screen can be shown. */
@@ -119,7 +122,7 @@ export async function runDemoCourt({ sample, plan, scene, player, onUpdate, sign
   let receipts: DemoUpdate['receipts'] = [];
   const update = (log: string) => onUpdate({ phase, state: engine.state, caseLabel: engine.caseLabel, caseNumber: engine.caseNumber, sealed, revealed, receipts, log });
   const check = () => {
-    if (signal.aborted) throw new DOMException('Demo stopped', 'AbortError');
+    if (signal.aborted) throw new DOMException(t('solo.stage.run.stopped'), 'AbortError');
   };
   const play = async (show: Parameters<ShowPlayer['play']>[0]) => {
     check();
@@ -128,29 +131,29 @@ export async function runDemoCourt({ sample, plan, scene, player, onUpdate, sign
   };
 
   try {
-    update('Filing the confession…');
+    update(t('solo.stage.run.filing'));
     engine.editFiling('a', { story: sample.story, privateNotes: sample.privateNotes, angle: sample.angle });
     engine.submitFiling();
     engine.addExhibit({ id: 'exhibit-a', submittedBy: 'a', kind: 'quote', title: sample.exhibit.title, body: sample.exhibit.body, redacted: true });
-    update('Counsel Chaos and Miss Ratio are drafting…');
+    update(t('solo.stage.run.drafting'));
     await engine.approveEvidence('a', signal);
     await engine.approveDraft('a');
     await engine.fund();
     const caseNumber = engine.caseNumber as CaseNumber;
     phase = 'opening';
-    update(`${formatCaseNumber(caseNumber)} opened. 1.20 test USDC in escrow.`);
+    update(t('solo.stage.run.opened', { caseNumber: formatCaseNo(caseNumber) }));
 
     scene.setCast(mode.staging(engine.state.terms));
-    await play(directCaseOpened(formatCaseNumber(caseNumber)));
+    await play(directCaseOpened(formatCaseNo(caseNumber)));
 
     const s = engine.state;
     if (s.stage !== 'jury') throw new Error(`Expected the jury stage, got ${s.stage}`);
     phase = 'trial';
-    update('The trial is in session.');
+    update(t('solo.stage.run.trial'));
     await play(directTrial(`trial-${sample.id}`, s.transcript.lines, mode.staging(s.terms)));
 
     phase = 'jury';
-    update('Three verified jurors take their seats.');
+    update(t('solo.stage.run.seats'));
     const sessions = jurors.map(
       (j, i) => new JurorSession({ caseNumber, ports: { chain: chain.as(j), identity: new MockIdentity({ human: `demo-human-${i}` }), salts }, clock: clock.now }),
     );
@@ -169,12 +172,12 @@ export async function runDemoCourt({ sample, plan, scene, player, onUpdate, sign
       if (choice === null || choice === undefined) continue;
       await session.commit(choice);
       sealed++;
-      update(`Juror ${i + 1} sealed a ballot.`);
+      update(t('solo.stage.run.sealed', { n: i + 1 }));
       await play(directBallotCommitted());
     }
     clock.advance(s.terms.deadlines.commit);
     await engine.tick();
-    update('The commit window closed. Opening the scrolls…');
+    update(t('solo.stage.run.commitClosed'));
     await play(directReveal());
     for (const [i, session] of sessions.entries()) {
       if (votes[i] === null) continue;
@@ -188,18 +191,18 @@ export async function runDemoCourt({ sample, plan, scene, player, onUpdate, sign
     const sentence = await engine.readSentence(signal);
     const v = engine.state;
     if (v.stage !== 'verdict') throw new Error(`Expected a verdict, got ${v.stage}`);
-    update(`The jury says ${v.verdict.label}.`);
+    update(t('solo.stage.run.verdict', { label: v.verdict.label }));
     await play(directVerdict(v.verdict, mode.staging(v.terms), sentence));
 
     for (const [i, session] of sessions.entries()) {
       const claimed = await session.claim();
-      receipts.push({ party: `Juror ${i + 1}`, lines: claimed.ok ? claimed.value : await chain.receipts(caseNumber, jurors[i]!) });
+      receipts.push({ party: t('solo.stage.run.juror', { n: i + 1 }), lines: claimed.ok ? claimed.value : await chain.receipts(caseNumber, jurors[i]!) });
     }
     if (v.verdict.kind === 'no-verdict') await chain.as(filer).claim(caseNumber);
-    receipts = [{ party: 'You (the filer)', lines: await chain.receipts(caseNumber, filer as Hex) }, ...receipts];
+    receipts = [{ party: t('solo.stage.run.filer'), lines: await chain.receipts(caseNumber, filer as Hex) }, ...receipts];
     await play(directSettlement());
     phase = 'done';
-    update('Case closed. Receipts are below.');
+    update(t('solo.stage.run.done'));
   } finally {
     engine.dispose();
   }

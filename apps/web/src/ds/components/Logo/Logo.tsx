@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import { useId, type SVGProps } from 'react';
 import { cx } from '../../lib/cx';
 import styles from './Logo.module.css';
@@ -54,21 +55,24 @@ function Gavel({ x, y, s }: { x: number; y: number; s: number }) {
   );
 }
 
+/** Brand mark, not translatable copy. */
+const BRAND_WORD = 'CRINGECOURT'; // i18n-ignore
+
 function Wordmark({ x, y, w, id }: { x: number; y: number; w: number; id: string }) {
   const common = { x, y, textLength: w, lengthAdjust: 'spacingAndGlyphs' as const, className: styles.word };
   return (
     <g>
       {/* paper thickness: the dark card under the letters */}
       <text {...common} transform="translate(0 5)" className={cx(styles.word, styles.extrude)}>
-        CRINGECOURT
+        {BRAND_WORD}
       </text>
       {/* maroon outline cut around the letters */}
       <text {...common} className={cx(styles.word, styles.outline)}>
-        CRINGECOURT
+        {BRAND_WORD}
       </text>
       {/* the gold card letters, folded across the middle */}
       <text {...common} fill={`url(#${id}-letters)`}>
-        CRINGECOURT
+        {BRAND_WORD}
       </text>
     </g>
   );
@@ -79,7 +83,7 @@ function Wordmark({ x, y, w, id }: { x: number; y: number; w: number; id: string
  * Pure SVG: the letters are live text in the paper display face (sized with
  * `textLength`, so the plate fits before and after the font loads).
  */
-export function Logo({ layout = 'stacked', title = 'CringeCourt', className, ...rest }: LogoProps) {
+export function Logo({ layout = 'stacked', title = t('common.app.name'), className, ...rest }: LogoProps) {
   const id = useId().replace(/:/g, '');
   const a11y = title ? { role: 'img' as const, 'aria-label': title } : { 'aria-hidden': true as const };
   const viewBox = layout === 'stacked' ? '0 0 360 214' : layout === 'inline' ? '0 0 330 72' : '0 0 104 104';

@@ -1,17 +1,19 @@
-import { MODE_IDS, MODES } from "@cringe-court/core";
+import { MODE_IDS } from "@cringe-court/core";
 import { Link } from "react-router";
 import { stagePose } from "@/art/art";
 import { Icon, PaperButtonLink, PaperPanel, PaperRibbon } from "@/ds";
 import { paths } from "@/app/routes";
 import { useDocumentTitle } from "@/app/useDocumentTitle";
-import { webModes } from "@/modes/registry";
+import { resolveModeLabel, webModes } from "@/modes/registry";
+import { t } from "@/i18n";
 import { MODE_PRESENTATION } from "./modeContent";
+import { MODE_NAME_KEY, MODE_TAGLINE_KEY } from "./modeText";
 import { ModeFacts } from "./ModeFacts";
 import styles from "./pages.module.css";
 
 /** The courts lobby (/court): pick Solo, Versus or Grand Jury. */
 export function HomePage() {
-  useDocumentTitle("The court");
+  useDocumentTitle(t("shell.nav.court"));
   return (
     <div className={styles.page}>
       <PaperPanel
@@ -32,7 +34,7 @@ export function HomePage() {
             sparks
             className={styles.heroTitle}
           >
-            Pick your court
+            {t("shell.courts.pick")}
           </PaperRibbon>
           <PaperRibbon
             as="p"
@@ -40,17 +42,15 @@ export function HomePage() {
             size="sm"
             className={styles.heroTag}
           >
-            Same jury rules everywhere. Different drama.
+            {t("shell.courts.tagline")}
           </PaperRibbon>
           <p className={styles.lede}>
-            AI lawyers make the case, a jury of verified strangers seals the
-            verdict, and every test-USDC bond, reward and refund is on the
-            record.
+            {t("shell.home.lede")}
           </p>
         </div>
       </PaperPanel>
 
-      <section aria-label="Courts">
+      <section aria-label={t("shell.nav.courts")}>
         <ul className={styles.modeGrid} role="list">
           {MODE_IDS.map((id) => {
             const m = MODE_PRESENTATION[id];
@@ -74,14 +74,14 @@ export function HomePage() {
                         />
                       ))}
                     </div>
-                    <p className={styles.modeEyebrow}>{m.eyebrow}</p>
+                    <p className={styles.modeEyebrow}>{t(m.eyebrow)}</p>
                     <h2 className={styles.modeName}>
-                      <Link to={paths.mode(id)}>{MODES[id].name}</Link>
+                      <Link to={paths.mode(id)}>{t(MODE_NAME_KEY[id])}</Link>
                     </h2>
-                    <p className={styles.modeTagline}>{MODES[id].tagline}</p>
+                    <p className={styles.modeTagline}>{t(MODE_TAGLINE_KEY[id])}</p>
                     <ModeFacts id={id} />
                     <span className={styles.modeMore}>
-                      {webModes.get(id)?.landing ? "Enter" : "Explore"} {MODES[id].name} <Icon name="arrow-right" />
+                      {t(webModes.get(id)?.landing ? "shell.home.enter" : "shell.home.explore", { name: t(MODE_NAME_KEY[id]) })} <Icon name="arrow-right" />
                     </span>
                   </div>
                 </PaperPanel>
@@ -94,9 +94,9 @@ export function HomePage() {
       <section aria-labelledby="mine-title" className={styles.mine}>
         <div className={styles.sectionHead}>
           <PaperRibbon as="h2" id="mine-title" tone="gold" size="md">
-            Your cases
+            {t("shell.home.mine.title")}
           </PaperRibbon>
-          <p className={styles.sectionLede}>Pick up where you left off: open trials, sealed ballots and money to collect.</p>
+          <p className={styles.sectionLede}>{t("shell.home.mine.lede")}</p>
         </div>
         <ul className={styles.mineList} role="list">
           {MODE_IDS.map((id) => {
@@ -105,7 +105,7 @@ export function HomePage() {
             return (
               <li key={id}>
                 <PaperButtonLink to={docket.to} variant="maroon" size="md" iconStart={<Icon name="document" />}>
-                  {docket.label}
+                  {resolveModeLabel(docket.label)}
                 </PaperButtonLink>
               </li>
             );
@@ -123,12 +123,10 @@ export function HomePage() {
       >
         <div className={styles.cta}>
           <h2 id="cta-title" className={styles.ctaTitle}>
-            New here? Learn the trial in a minute.
+            {t("shell.home.cta.title")}
           </h2>
           <p className={styles.sectionLede}>
-            Every court is open on the testnet demo: scripted AI counsel, an
-            in-browser twin of the Arc contract and free test USDC. Read the
-            rules, or watch a whole trial play out in the demo court.
+            {t("shell.home.cta.body")}
           </p>
           <div className={styles.heroActions}>
             <PaperButtonLink
@@ -136,7 +134,7 @@ export function HomePage() {
               size="md"
               iconStart={<Icon name="book" />}
             >
-              How to play
+              {t("shell.nav.howToPlay")}
             </PaperButtonLink>
             <PaperButtonLink
               to={paths.courtroom}
@@ -144,7 +142,7 @@ export function HomePage() {
               size="md"
               iconStart={<Icon name="gavel" />}
             >
-              Visit the demo court
+              {t("shell.home.cta.demo")}
             </PaperButtonLink>
           </div>
         </div>

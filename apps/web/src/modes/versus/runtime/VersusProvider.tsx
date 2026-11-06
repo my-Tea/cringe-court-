@@ -4,6 +4,7 @@ import { VersusCounsel, VersusDesk, VersusError, World, type FactStore, type Per
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { VersusContext, type VersusRuntime } from './context';
 import { useToast } from '@/ds';
+import { t } from '@/i18n';
 import { platformConfig } from '@/platform/config';
 import { identityFor } from '@/platform/identity/createIdentity';
 import { appAudio } from '@/platform/audio';
@@ -116,8 +117,8 @@ export function VersusProvider({ children, store: storeProp, persona: personaPro
         await rebuild();
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Something went wrong';
-        if (!options.quiet) toast({ title: err instanceof VersusError && err.code === 'identity' ? 'World ID check did not finish' : 'The court says no', description: message, tone: 'danger' });
+        const message = err instanceof Error ? err.message : t('versus.error.generic');
+        if (!options.quiet) toast({ title: err instanceof VersusError && err.code === 'identity' ? t('versus.error.identity') : t('versus.error.refused'), description: message, tone: 'danger' });
         audio.handle({ type: 'tx.failed' });
         return false;
       }

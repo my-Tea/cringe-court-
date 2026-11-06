@@ -1,5 +1,6 @@
 import { grandJuryMode } from '@cringe-court/modes-grand-jury';
 import { Navigate } from 'react-router';
+import { t } from '@/i18n';
 import type { WebModeModule } from '../registry';
 import { GrandJuryLayout } from './GrandJuryLayout';
 import { paths } from './lib';
@@ -10,8 +11,19 @@ import { paths } from './lib';
  */
 const grandJury: WebModeModule = {
   definition: grandJuryMode,
-  landing: { label: 'Open the docket', to: paths.docket },
-  docket: { label: 'My court', to: paths.duty },
+  // Labels are getters so they translate at read time (render), not once at module load.
+  landing: {
+    get label() {
+      return t('grandJury.mode.landing');
+    },
+    to: paths.docket,
+  },
+  docket: {
+    get label() {
+      return t('grandJury.mode.docket');
+    },
+    to: paths.duty,
+  },
   routes: [
     {
       element: <GrandJuryLayout />,

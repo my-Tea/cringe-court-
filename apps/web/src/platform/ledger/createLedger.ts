@@ -15,6 +15,7 @@ import { createPublicClient, createWalletClient, custom, http, type EIP1193Provi
 import type { Address, PlatformConfig } from '../config';
 import { ArcLedger, RelayerSeatOffers } from './arcLedger';
 import { DemoBackend } from './demoBackend';
+import { t } from '@/i18n';
 
 export interface LedgerInfo {
   kind: 'demo' | 'arc-testnet';
@@ -62,7 +63,7 @@ function injectedProvider(): EIP1193Provider | null {
 
 export function createLedger(config: PlatformConfig, options: CreateLedgerOptions = {}): Ledger {
   if (config.ledger === 'arc-testnet') {
-    if (!config.arc) throw new ChainError('rejected', 'Arc testnet needs VITE_ARC_COURT, VITE_ARC_USDC and VITE_ARC_REGISTRY');
+    if (!config.arc) throw new ChainError('rejected', t('shell.ledger.error.arcConfig'));
     return createArc(config.arc);
   }
   return createDemo(options);
@@ -90,7 +91,7 @@ function createDemo(options: CreateLedgerOptions): Ledger {
     port,
     info: {
       kind: 'demo',
-      label: 'Demo ledger (in your browser)',
+      label: t('shell.ledger.demo.label'),
       chainId: 5042002,
       court: chain.court,
       usdc: null,
@@ -98,7 +99,7 @@ function createDemo(options: CreateLedgerOptions): Ledger {
       rpcUrl: null,
       simulated: true,
       explorerTx,
-      notes: ['An in-memory twin of the court contract with the same rules, errors and settlement. No real money moves.'],
+      notes: [t('shell.ledger.demo.note')],
     },
     demo: { chain, backend, faucet: (a, n) => chain.mint(a, n), advance: (s) => chain.advance(s) },
   };
@@ -124,7 +125,7 @@ function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
       return account.toLowerCase() as Hex;
     } catch (e) {
       if (o.silent) return null;
-      throw e instanceof ChainError ? e : new ChainError('rejected', 'The wallet request was declined');
+      throw e instanceof ChainError ? e : new ChainError('rejected', t('shell.ledger.error.walletDeclined'));
     }
   };
 
@@ -133,7 +134,7 @@ function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
     port,
     info: {
       kind: 'arc-testnet',
-      label: 'Arc testnet',
+      label: t('shell.ledger.arc.label'),
       chainId: arc.chainId,
       court: arc.court,
       usdc: arc.usdc,
@@ -141,7 +142,7 @@ function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
       rpcUrl: arc.rpcUrl,
       simulated: false,
       explorerTx,
-      notes: ['Test USDC only (D14). Seat offers come from the court relayer, which is not deployed yet, so jury seats cannot be taken from the browser.'],
+      notes: [t('shell.ledger.arc.note')],
     },
     connect,
   };

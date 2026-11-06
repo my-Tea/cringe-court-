@@ -1,4 +1,5 @@
 import { versusMode } from '@cringe-court/modes-versus';
+import { t } from '@/i18n';
 import type { WebModeModule } from '../registry';
 
 export const versusPaths = {
@@ -12,8 +13,25 @@ export const versusPaths = {
 
 const mode: WebModeModule = {
   definition: versusMode,
-  landing: { to: versusPaths.newCase, label: 'Start a Versus case', secondary: { to: versusPaths.join, label: 'I have an invite code' } },
-  docket: { label: 'Versus cases', to: versusPaths.cases },
+  // Labels are getters so they translate at read time (render), not once at module load.
+  landing: {
+    to: versusPaths.newCase,
+    get label() {
+      return t('versus.mode.landing.start');
+    },
+    secondary: {
+      to: versusPaths.join,
+      get label() {
+        return t('versus.mode.landing.join');
+      },
+    },
+  },
+  docket: {
+    get label() {
+      return t('versus.mode.docket');
+    },
+    to: versusPaths.cases,
+  },
   routes: [
     {
       lazy: async () => ({ Component: (await import('./VersusLayout')).VersusLayout }),

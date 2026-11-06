@@ -1,5 +1,7 @@
 import type { Hex, IdentityAction, IdentityPort, ProofRequest, ProofResult, ScreeningResult, VerificationLevel, VerifyContext, WorldIdProof } from '@cringe-court/core';
-import { IdentityLevel, JUROR_SCREENING_COPY, levelFromCredential, type FailureReason, type VerificationResult } from '@cringe-court/world-id/client';
+import { IdentityLevel, levelFromCredential, type FailureReason, type VerificationResult } from '@cringe-court/world-id/client';
+import { t } from '@/i18n';
+import { screeningCopy, type ScreeningCopyKey } from '@/i18n/domain';
 
 /** The slice of `@worldcoin/idkit-core` this adapter uses (injectable for tests). */
 export interface IdkitRequestLike {
@@ -37,11 +39,11 @@ const NOT_VERIFIED_CODES = new Set(['credential_unavailable', 'identity_attribut
 
 /** Map an IDKit error code to a core ProofResult failure. */
 export function mapIdkitError(code: string): Extract<ProofResult, { ok: false }> {
-  if (CANCEL_CODES.has(code)) return { ok: false, reason: 'cancelled', message: JUROR_SCREENING_COPY.cancelled };
-  if (NOT_VERIFIED_CODES.has(code)) return { ok: false, reason: 'not-verified', message: JUROR_SCREENING_COPY.ineligible_level };
-  if (code === 'timeout' || /expired|timestamp/.test(code)) return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.expired };
-  if (code === 'connection_failed') return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.network };
-  return { ok: false, reason: 'error', message: `World ID could not finish (${code}). Please try again.` };
+  if (CANCEL_CODES.has(code)) return { ok: false, reason: 'cancelled', message: screeningCopy('cancelled') };
+  if (NOT_VERIFIED_CODES.has(code)) return { ok: false, reason: 'not-verified', message: screeningCopy('ineligible_level') };
+  if (code === 'timeout' || /expired|timestamp/.test(code)) return { ok: false, reason: 'error', message: screeningCopy('expired') };
+  if (code === 'connection_failed') return { ok: false, reason: 'error', message: screeningCopy('network') };
+  return { ok: false, reason: 'error', message: t('shell.identity.error.generic', { code }) };
 }
 
 const rec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -82,7 +84,7 @@ function toWorldIdProof(result: unknown): WorldIdProof | null {
   };
 }
 
-const COPY_FOR: Record<FailureReason, keyof typeof JUROR_SCREENING_COPY> = {
+const COPY_FOR: Record<FailureReason, ScreeningCopyKey> = {
   invalid_proof: 'invalid_proof',
   ineligible_level: 'ineligible_level',
   already_verified: 'already_verified',
@@ -96,13 +98,20 @@ const COPY_FOR: Record<FailureReason, keyof typeof JUROR_SCREENING_COPY> = {
 /** Map world-id's VerificationResult (+ the caller's party exclusions) to core's ScreeningResult. */
 export function screeningFromVerification(res: VerificationResult, nullifier: Hex, juror: boolean, exclude: readonly Hex[] = []): ScreeningResult {
   if (!res.ok) {
-    const reason = res.reason === 'cancelled' ? 'cancelled' : res.reason === 'network' || res.reason === 'malformed' ? 'error' : res.reason === 'already_verified' ? 'already-used' : 'not-verified';
-    return { ok: false, reason, message: JUROR_SCREENING_COPY[COPY_FOR[res.reason]] };
+    const reason =
+      res.reason === 'cancelled'
+        ? 'cancelled'
+        : res.reason === 'network' || res.reason === 'malformed'
+          ? 'error'
+          : res.reason === 'already_verified'
+            ? 'already-used'
+            : 'not-verified';
+    return { ok: false, reason, message: screeningCopy(COPY_FOR[res.reason]) };
   }
-  if (juror && res.level < IdentityLevel.ORB) return { ok: false, reason: 'not-verified', message: JUROR_SCREENING_COPY.ineligible_level };
+  if (juror && res.level < IdentityLevel.ORB) return { ok: false, reason: 'not-verified', message: screeningCopy('ineligible_level') };
   const id = res.humanId.toLowerCase();
   if (juror && exclude.some((x) => x.toLowerCase() === id || x.toLowerCase() === nullifier.toLowerCase())) {
-    return { ok: false, reason: 'conflicted', message: JUROR_SCREENING_COPY.is_party };
+    return { ok: false, reason: 'conflicted', message: screeningCopy('is_party') };
   }
   return { ok: true, nullifier: res.humanId };
 }
@@ -145,27 +154,29 @@ export class IdkitIdentityPort implements IdentityPort {
       try {
         const q = new URLSearchParams({ action: request.action, signal: request.signal });
         const res = await this.#fetch()(`${this.#o.backendUrl}/rp-context?${q}`, { signal: own.signal });
-        if (!res.ok) return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.network };
+        if (!res.ok) return { ok: false, reason: 'error', message: screeningCopy('network') };
         rpContext = await res.json();
       } catch {
-        return own.signal.aborted ? mapIdkitError('cancelled') : { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.network };
+        return own.signal.aborted ? mapIdkitError('cancelled') : { ok: false, reason: 'error', message: screeningCopy('network') };
       }
-      if (!rec(rpContext)) return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.malformed };
+      if (!rec(rpContext)) return { ok: false, reason: 'error', message: screeningCopy('malformed') };
 
       const runtime = await this.#loadRuntime();
       const juror = JUROR_ACTIONS.has(request.action);
       const preset = juror || request.minLevel === 'orb' ? runtime.orbLegacy({ signal: request.signal }) : runtime.deviceLegacy({ signal: request.signal });
-      const req = await runtime.IDKit.request({ app_id: this.#o.appId, action: request.action, rp_context: rpContext, allow_legacy_proofs: true }).preset(preset, { signal: own.signal });
+      const req = await runtime.IDKit.request({ app_id: this.#o.appId, action: request.action, rp_context: rpContext, allow_legacy_proofs: true }).preset(preset, {
+        signal: own.signal,
+      });
       cleanup = this.#o.onConnect?.(req.connectorURI, abort);
       const done = await req.pollUntilCompletion({ signal: own.signal });
       if (!done.success) return mapIdkitError(own.signal.aborted ? 'cancelled' : done.error);
       const proof = toWorldIdProof(done.result);
-      if (!proof) return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.malformed };
+      if (!proof) return { ok: false, reason: 'error', message: screeningCopy('malformed') };
       this.#raw.set(`${request.action}:${request.signal}:${proof.nullifierHash.toLowerCase()}`, done.result);
       return { ok: true, proof };
     } catch (err) {
       if (own.signal.aborted) return mapIdkitError('cancelled');
-      return { ok: false, reason: 'error', message: err instanceof Error ? err.message : JUROR_SCREENING_COPY.malformed };
+      return { ok: false, reason: 'error', message: err instanceof Error ? err.message : screeningCopy('malformed') };
     } finally {
       signal?.removeEventListener('abort', abort);
       if (typeof cleanup === 'function') cleanup();
@@ -174,7 +185,7 @@ export class IdkitIdentityPort implements IdentityPort {
 
   async verify(proof: WorldIdProof, request: ProofRequest, context: VerifyContext = {}): Promise<ScreeningResult> {
     const raw = this.#raw.get(`${request.action}:${request.signal}:${proof.nullifierHash.toLowerCase()}`);
-    if (raw === undefined) return { ok: false, reason: 'not-verified', message: JUROR_SCREENING_COPY.not_verified };
+    if (raw === undefined) return { ok: false, reason: 'not-verified', message: screeningCopy('not_verified') };
     let body: unknown;
     try {
       const wallet = this.#o.wallet?.();
@@ -184,11 +195,11 @@ export class IdkitIdentityPort implements IdentityPort {
         body: JSON.stringify({ proof: raw, action: request.action, signal: request.signal, ...(wallet ? { wallet } : {}) }),
       });
       body = await res.json().catch(() => undefined);
-      if (res.status >= 500 && !isVerificationResult(body)) return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.network };
+      if (res.status >= 500 && !isVerificationResult(body)) return { ok: false, reason: 'error', message: screeningCopy('network') };
     } catch {
-      return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.network };
+      return { ok: false, reason: 'error', message: screeningCopy('network') };
     }
-    if (!isVerificationResult(body)) return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.malformed };
+    if (!isVerificationResult(body)) return { ok: false, reason: 'error', message: screeningCopy('malformed') };
     return screeningFromVerification(body, proof.nullifierHash, JUROR_ACTIONS.has(request.action), context.exclude);
   }
 }

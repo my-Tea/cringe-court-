@@ -4,13 +4,9 @@ import type { CharacterId as CoreCharacterId, CourtLine } from '@cringe-court/co
 import type { CharacterId } from '@/art/art';
 import type { CaseDetail, DocketEntry, DocketStatus, SharePalette } from '@cringe-court/modes-grand-jury';
 import type { BadgeTone } from '@/ds';
+import { t, type MessageKey } from '@/i18n';
 
-export const paths = {
-  docket: '/grand-jury/docket',
-  duty: '/grand-jury/duty',
-  pricing: '/grand-jury/pricing',
-  case: (n: number) => `/grand-jury/case/${n}`,
-} as const;
+export const paths = { docket: '/grand-jury/docket', duty: '/grand-jury/duty', pricing: '/grand-jury/pricing', case: (n: number) => `/grand-jury/case/${n}` } as const;
 
 /** Statuses where the case is over and nothing more can happen except claims. */
 export function isClosed(status: DocketStatus): boolean {
@@ -30,7 +26,11 @@ export const STATUS_TONE: Readonly<Record<DocketStatus, { tone: BadgeTone; dot?:
 };
 
 /** Stepper index per status (Summon → Seat → Argue & seal → Reveal → Verdict). */
-export const STEPS = ['Summon', 'Seat the jury', 'Argue & seal', 'Open scrolls', 'Verdict'] as const;
+const STEP_KEYS: readonly MessageKey[] = ['grandJury.steps.summon', 'grandJury.steps.seat', 'grandJury.steps.argue', 'grandJury.steps.open', 'grandJury.steps.verdict'];
+/** The five step labels, translated at call time. */
+export function steps(): string[] {
+  return STEP_KEYS.map((k) => t(k));
+}
 export function stepOf(status: DocketStatus): number {
   switch (status) {
     case 'summoning':
@@ -47,28 +47,52 @@ export function stepOf(status: DocketStatus): number {
   }
 }
 
+/** Display name of a case category (the core table is English-only; labels come from the catalog). */
+export { categoryLabel } from '@/i18n/domain';
+
+/** Docket status badge text (the package table is English-only). */
+export function statusLabel(s: DocketStatus): string {
+  return t(STATUS_KEYS[s]);
+}
+
+const STATUS_KEYS: Record<DocketStatus, MessageKey> = {
+  summoning: 'grandJury.status.summoning',
+  seating: 'grandJury.status.seating',
+  'in-session': 'grandJury.status.inSession',
+  'opening-scrolls': 'grandJury.status.openingScrolls',
+  'settle-ready': 'grandJury.status.settleReady',
+  verdict: 'grandJury.status.verdict',
+  mistrial: 'grandJury.status.mistrial',
+  cancelled: 'grandJury.status.cancelled',
+};
+
+/** The four funding promises (package copy is English-only; the catalog carries the words). */
+export function fundingPromise(k: 'refund' | 'summoner' | 'odds' | 'sponsor'): string {
+  return t(`grandJury.promise.${k}`);
+}
+
 /** What the current countdown is counting down to. */
 export function deadlineLabel(e: Pick<DocketEntry, 'status'>): string {
   switch (e.status) {
     case 'summoning':
-      return 'Funding closes';
+      return t('grandJury.deadline.summoning');
     case 'seating':
-      return 'Jury selection closes';
+      return t('grandJury.deadline.seating');
     case 'in-session':
-      return 'Ballots seal';
+      return t('grandJury.deadline.inSession');
     case 'opening-scrolls':
-      return 'Scrolls must be opened';
+      return t('grandJury.deadline.openingScrolls');
     default:
-      return 'Deadline';
+      return t('grandJury.deadline.default');
   }
 }
 
 /** "3 min ago", "just now". */
 export function ago(seconds: number): string {
-  if (seconds < 20) return 'just now';
-  if (seconds < 3600) return `${Math.max(1, Math.round(seconds / 60))} min ago`;
-  if (seconds < 86400) return `${Math.round(seconds / 3600)} h ago`;
-  return `${Math.round(seconds / 86400)} d ago`;
+  if (seconds < 20) return t('grandJury.ago.now');
+  if (seconds < 3600) return t('grandJury.ago.minutes', { n: Math.max(1, Math.round(seconds / 60)) });
+  if (seconds < 86400) return t('grandJury.ago.hours', { n: Math.round(seconds / 3600) });
+  return t('grandJury.ago.days', { n: Math.round(seconds / 86400) });
 }
 
 /** Read the share-card colours from the live design tokens (never hard-coded). */
