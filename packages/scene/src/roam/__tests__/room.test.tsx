@@ -18,6 +18,7 @@ vi.mock('../three/renderer', () => ({
     preset = { level: 'medium' };
     setQuality() {}
     setPerspective() {}
+    setAttract() {}
     dispose() {}
   },
 }));

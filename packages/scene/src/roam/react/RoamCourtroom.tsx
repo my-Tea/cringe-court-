@@ -176,6 +176,10 @@ export function RoamCourtroom({
   );
 
   const focusRoot = useCallback(() => root.current?.focus({ preventScroll: true }), []);
+  // Back to play (from a title screen or a menu over the room): the keys belong to the room again.
+  useEffect(() => {
+    if (presentation === 'play') focusRoot();
+  }, [presentation, focusRoot]);
 
   // Keyboard: the root element owns the keys while it has focus.
   useEffect(() => {
@@ -289,7 +293,8 @@ export function RoamCourtroom({
           flat
           shadows={{ type: THREE.PCFSoftShadowMap }}
           gl={{ antialias: false, powerPreference: 'high-performance', preserveDrawingBuffer: true, outputColorSpace: THREE.SRGBColorSpace, toneMapping: THREE.NoToneMapping }}
-          frameloop={presentation === 'suspended' ? 'never' : 'always'}
+          // Suspended draws on demand: one frame on mount (a deep link still shows the world), then it holds.
+          frameloop={presentation === 'suspended' ? 'demand' : 'always'}
           style={{ width: '100%', height: '100%' }}
         >
           <Driver
