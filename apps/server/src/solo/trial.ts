@@ -22,7 +22,7 @@ export interface StakeReader {
 }
 
 export function arcStakeReader(env: Readonly<Record<string, string | undefined>>, court: Address): StakeReader {
-  const client = createPublicClient({ transport: http(env.ARC_RPC_URL?.trim() || ARC_RPC) });
+  const client = createPublicClient({ transport: http(env.ARC_RPC_URL?.trim() || ARC_RPC, { retryCount: 4, retryDelay: 500 }) });
   return {
     async filing(txHash) {
       const receipt = await client.getTransactionReceipt({ hash: txHash });
@@ -70,6 +70,8 @@ const ANSWER_WITHIN_MS = 3000;
 export function createSoloTrials(o: { writer: CourtAI | null; stakes: StakeReader; answerWithinMs?: number }) {
   const store = new MemoryTranscriptStore();
   const jobs = new Map<string, Promise<Transcript>>();
+  // A stake never changes once mined, so the page's repeat asks must not spend the RPC's rate limit.
+  const filings = new Map<string, { caseId: bigint; contentHash: Hex }>();
 
   const generate = async (caseKey: string, title: string, story: string): Promise<Transcript> => {
     const prepared = prepare(title, story, caseKey);
@@ -88,7 +90,16 @@ export function createSoloTrials(o: { writer: CourtAI | null; stakes: StakeReade
         return { ok: false, reason: 'bad-request', message: 'Send {txHash, title, story}.' };
       }
       if (!o.writer) return { ok: false, reason: 'unavailable', message: 'The court has no lawyers on call.' };
-      const filing = await o.stakes.filing(txHash as Hex);
+      let filing = filings.get(txHash) ?? null;
+      if (!filing) {
+        try {
+          filing = await o.stakes.filing(txHash as Hex);
+        } catch {
+          // Rate limited, or not indexed yet. The player has paid, so this is a reason to wait, never to fail.
+          return { ok: 'writing' };
+        }
+        if (filing) filings.set(txHash, filing);
+      }
       if (!filing) return { ok: false, reason: 'not-a-stake', message: 'That transaction is not a Solo stake.' };
       if (filing.contentHash.toLowerCase() !== confessionHash(title, story)) {
         return { ok: false, reason: 'wrong-confession', message: 'That stake was for a different confession.' };

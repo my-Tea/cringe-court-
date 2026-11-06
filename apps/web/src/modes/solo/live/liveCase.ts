@@ -83,8 +83,9 @@ export async function fetchTrial(c: LiveCase, alive: () => boolean): Promise<Cou
       const r = await api.connection.post<{ ok: true; lines: CourtLine[] } | { ok: 'writing' }>('/api/v1/solo/trial', { txHash: c.txHash, title: c.title, story: c.story });
       if (r.ok === true) return r.lines;
     } catch (e) {
-      // A refusal from the court is final; a timeout or a blip is not.
-      if ((e as { code?: string }).code !== 'timeout' && (e as { code?: string }).code !== 'unreachable') throw e;
+      // Only a clear refusal is final. Anything else is a blip, and this player has already paid.
+      const code = (e as { code?: string }).code;
+      if (code === 'forbidden' || code === 'bad-request' || code === 'disabled') throw e;
       lastError = e;
     }
     await new Promise((resolve) => setTimeout(resolve, POLL_MS));

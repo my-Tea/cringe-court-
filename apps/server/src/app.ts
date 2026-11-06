@@ -140,6 +140,8 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     writes: new RateLimiter({ capacity: 30, refill: 3 }, clockMs),
     inviteSession: new RateLimiter({ capacity: 8, refill: 1 / 60 }, clockMs),
     world: new RateLimiter({ capacity: 8, refill: 1 / 30 }, clockMs),
+    // The trial page asks every couple of seconds until a paid trial is written.
+    soloTrial: new RateLimiter({ capacity: 90, refill: 1 }, clockMs),
     inviteIp: new RateLimiter({ capacity: 40, refill: 0.2 }, clockMs),
     faucet: new RateLimiter({ capacity: 6, refill: 1 / 20 }, clockMs),
   };
@@ -289,7 +291,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       return json(res, 200, screenConfession(b.title, b.story));
     }
     if (path === `${API}/solo/trial` && method === 'POST') {
-      limit(limits.world, sid, 'Too many requests. Wait a minute.');
+      limit(limits.soloTrial, sid, 'Too many requests. Wait a minute.');
       const b = await body<{ txHash?: unknown; title?: unknown; story?: unknown }>(req);
       const r = await soloTrials.trial(b.txHash, b.title, b.story);
       if (r.ok) return json(res, r.ok === 'writing' ? 202 : 200, r);

@@ -29,6 +29,22 @@ describe('Solo trial', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
+  it('waits, rather than fails, when Arc rate-limits the stake lookup, and reads it only once', async () => {
+    let calls = 0;
+    const reader: StakeReader = {
+      filing: async () => {
+        calls += 1;
+        if (calls === 1) throw new Error('rate limit exceeded');
+        return { caseId: 7n, contentHash: confessionHash(TITLE, STORY) };
+      },
+    };
+    const trials = createSoloTrials({ writer: writer(), stakes: reader });
+    expect(await trials.trial(TX, TITLE, STORY)).toEqual({ ok: 'writing' });
+    expect((await trials.trial(TX, TITLE, STORY)).ok).toBe(true);
+    await trials.trial(TX, TITLE, STORY);
+    expect(calls).toBe(2);
+  });
+
   it('refuses a stake made for a different confession, without calling the model', async () => {
     const ai = writer();
     const spy = vi.spyOn(ai, 'generateTrial');
