@@ -13,6 +13,8 @@ import { AppShell } from './shell/AppShell';
 export const routes: RouteObject[] = [
   // The landing has its own layout: the sign-in panel and the courtroom hero.
   { index: true, element: <LandingPage />, errorElement: <RouteError /> },
+  // The arrival run is full-bleed (no shell): walk through verification, the wardrobe and the trial gates (three.js, own chunk).
+  { path: 'play', lazy: async () => ({ Component: (await import('@/play/PlayPage')).PlayPage }), errorElement: <RouteError />, hydrateFallbackElement: <LoadingState /> },
   {
     element: <AppShell />,
     errorElement: <RouteError />,
