@@ -50,20 +50,16 @@ interface Shared {
   clock: () => number;
   /** Escrow account address, for balance accounting. */
   escrow: Hex;
-  court?: Hex;
 }
 
 const key = (a: Hex) => a.toLowerCase();
 const ESCROW = '0x00000000000000000000000000000000c0c0c0c0' as Hex;
-const DEFAULT_COURT = '0x00000000000000000000000000000000c0c0c0c1' as Hex;
 
 export interface MemoryChainOptions {
   clock?: () => number;
   /** First case number (default 69, like the stamp art). */
   firstCase?: number;
   account?: Hex | null;
-  /** Court contract address, part of the commitment encoding (default: a fixed test address). */
-  court?: Hex;
 }
 
 /**
@@ -76,7 +72,6 @@ export class MemoryChain implements ChainPort {
   readonly id = 'memory' as const;
   readonly network = 'arc-testnet' as const;
   readonly chainId = 5042002;
-  readonly court: Hex;
   readonly #s: Shared;
   readonly #account: Hex | null;
 
@@ -91,8 +86,6 @@ export class MemoryChain implements ChainPort {
       escrow: ESCROW,
     };
     this.#account = options.account ?? null;
-    this.court = (options.court ?? shared?.court ?? DEFAULT_COURT) as Hex;
-    this.#s.court = this.court;
   }
 
   /** A view of the same ledger signing as `account`. */
@@ -221,19 +214,12 @@ export class MemoryChain implements ChainPort {
     return this.#receipt();
   }
 
-  /**
-   * Same bytes as CringeCourt.commitmentOf on v3/p5-contracts:
-   * keccak256(abi.encode(uint256 chainid, address court, uint256 caseId, address juror, uint8 choice, bytes32 salt)).
-   */
   commitmentFor(caseNumber: CaseNumber, juror: Hex, choice: BallotChoice, salt: Hex): Hex {
     const saltBytes = hexToBytes(salt);
     if (saltBytes.length !== 32) throw new ChainError('bad-reveal', 'Salt must be 32 bytes');
-    const address = (a: Hex) => {
-      const word = new Uint8Array(32);
-      word.set(hexToBytes(a), 12);
-      return word;
-    };
-    return keccak256(concatBytes(uint256Word(this.chainId), address(this.court), uint256Word(caseNumber), address(juror), uint256Word(choice), saltBytes));
+    const addr = new Uint8Array(32);
+    addr.set(hexToBytes(juror), 12);
+    return keccak256(concatBytes(uint256Word(caseNumber), addr, uint256Word(choice), saltBytes));
   }
 
   async commit(caseNumber: CaseNumber, commitment: Hex): Promise<TxReceipt> {

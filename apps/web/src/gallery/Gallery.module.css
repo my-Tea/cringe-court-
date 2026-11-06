@@ -408,10 +408,3 @@
   text-decoration: none;
   text-transform: capitalize;
 }
-
-.paperLogo {
-  max-width: 22rem;
-  padding: var(--cc-space-4);
-  background: var(--cc-royal-900);
-  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
-}

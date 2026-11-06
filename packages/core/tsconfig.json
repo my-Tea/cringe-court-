@@ -5,15 +5,8 @@
     "emitDeclarationOnly": true,
     "noEmit": false,
     "outDir": "../../node_modules/.tsc/core",
-    "lib": [
-      "ES2023"
-    ],
-    "types": [
-      "node"
-    ]
+    "lib": ["ES2023"],
+    "types": ["node"]
   },
-  "include": [
-    "src",
-    "src/**/*.json"
-  ]
+  "include": ["src"]
 }

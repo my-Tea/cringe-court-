@@ -1,11 +1,8 @@
 {
+  "//": "Mirrors tsconfig.base.json from v3/p3-app-shell so this package type-checks on its own; composite like packages/core so the root `tsc -b` can reference it after the app shell merges.",
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2023",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "moduleDetection": "force",
@@ -24,20 +21,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "src",
-    "test",
-    "scripts",
-    "demo",
-    "vitest.config.ts"
-  ],
-  "references": [
-    {
-      "path": "../core"
-    }
-  ]
+  "include": ["src", "test", "scripts", "demo", "vitest.config.ts"]
 }

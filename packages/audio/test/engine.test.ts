@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { AudioEngine, type AudioEngineOptions } from '../src/engine.ts';
 import { CUES } from '../src/cues.ts';
 import { dbToGain, memoryStore } from '../src/settings.ts';
-import { FakeMedia, FakeTarget, FakeTimers, MockAudioContext, asAudioContext } from './mock-audio-context.ts';
 import type { MockParam } from './mock-audio-context.ts';
+import { FakeMedia, FakeTarget, FakeTimers, MockAudioContext, asAudioContext } from './mock-audio-context.ts';
 
 function setup(opts: Partial<AudioEngineOptions> & { reducedOS?: boolean } = {}) {
   const contexts: MockAudioContext[] = [];
