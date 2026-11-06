@@ -6,9 +6,33 @@
     "noEmit": false,
     "outDir": "../../node_modules/.tsc/web",
     "jsx": "react-jsx",
-    "paths": { "@/*": ["./src/*"] },
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom/vitest", "node"]
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "@testing-library/jest-dom/vitest",
+      "node"
+    ]
   },
-  "include": ["src"],
-  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/modes-solo" }, { "path": "../../packages/engine" }, { "path": "../../packages/scene" }, { "path": "../../packages/audio" }]
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/ai"
+    },
+    {
+      "path": "../../packages/engine"
+    },
+    {
+      "path": "../../packages/scene"
+    }
+  ]
 }

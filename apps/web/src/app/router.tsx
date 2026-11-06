@@ -16,6 +16,8 @@ export const routes: RouteObject[] = [
       { path: 'versus', children: [{ index: true, element: <ModePage id="versus" /> }, ...modeChildRoutes('versus')] },
       { path: 'grand-jury', children: [{ index: true, element: <ModePage id="grand-jury" /> }, ...modeChildRoutes('grand-jury')] },
       // The gallery is a developer tool: split out so it never weighs on real pages.
+      // The demo court pulls in three.js: its own chunk, loaded only on this route.
+      { path: 'courtroom', lazy: async () => ({ Component: (await import('@/stage/DemoCourtPage')).DemoCourtPage }) },
       { path: 'gallery', lazy: async () => ({ Component: (await import('@/gallery/GalleryPage')).GalleryPage }) },
       { path: '*', element: <NotFoundPage /> },
     ],

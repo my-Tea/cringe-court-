@@ -305,6 +305,7 @@ export class CourtroomRuntime implements Omit<ScenePort, 'camera' | 'lighting' |
     this.#time += dt;
     this.lighting.update(dt);
 
+    this.#fadeOccluders();
     for (const [id, a] of this.#actors) {
       const frame = a.animator.update(dt);
       a.sprite.apply(frame, dt);
@@ -358,6 +359,27 @@ export class CourtroomRuntime implements Omit<ScenePort, 'camera' | 'lighting' |
       }
     });
     this.#listeners.clear();
+  }
+
+  /**
+   * Camera occlusion fade, as games do: an actor standing between the camera and
+   * the shot's subject fades out so the subject stays readable (e.g. Counsel
+   * Chaos in front of the jury box).
+   */
+  #fadeOccluders(): void {
+    const cam = new THREE.Vector3(...this.#view.pos);
+    const target = new THREE.Vector3(...this.#view.target);
+    const axis = target.clone().sub(cam);
+    const length = axis.length();
+    axis.normalize();
+    const centre = new THREE.Vector3();
+    for (const a of this.#actors.values()) {
+      centre.copy(a.sprite.object.position).add(new THREE.Vector3(0, 32, 0));
+      const along = centre.clone().sub(cam).dot(axis);
+      const off = centre.clone().sub(cam).sub(axis.clone().multiplyScalar(along)).length();
+      const inFront = along > 0 && along < length - 24;
+      a.sprite.fadeTo(inFront && off < 22 ? 0.12 : 1);
+    }
   }
 
   #applyView(view: CameraPreset): void {
