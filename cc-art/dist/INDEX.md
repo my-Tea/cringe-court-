@@ -17,7 +17,7 @@ Start here. Five guides, in the order a coding agent should read them.
 |---|---|
 | `scene/courtroom.boxes.json` | **1606 boxes** in world space — the whole room, ready to mesh |
 | `scene/courtroom.layout.json` | Room dims, 55 prop instances, 8 camera presets |
-| `animation/animations.json` | 8 characters, 54 animations, 10 system animations, state machine |
+| `animation/animations.json` | 8 characters, 55 animations, 10 system animations, state machine |
 | `characters/manifest.json` | Per-character boxes, sizes, materials, files |
 | `sprites/props/manifest.json` | Per-prop bounds, footprints, heights |
 | `models/CringeCourt_Props.bbmodel` | 41 props, editable in Blockbench |
@@ -30,6 +30,8 @@ Start here. Five guides, in the order a coding agent should read them.
 | `preview_blocks.png` | 13 block textures, tiled 2×2 to show seams |
 | `preview_props@4x.png` | All 41 props, isometric |
 | `characters/_previews/lineup.png` | All 8 characters, equal scale |
+| `characters/_previews/gallery.png`, `gallery_benches.png` | 8 seated gallery NPCs: back / rear 3/4 / front 3/4, and on benches |
+| `characters/gallery/` | Gallery NPC sprites + manifest (seeded) |
 
 ## Quick start
 
