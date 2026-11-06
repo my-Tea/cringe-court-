@@ -331,12 +331,15 @@
   text-transform: uppercase;
 }
 
+.summonsFrame {
+  width: min(100%, 48rem);
+  margin-inline: auto;
+}
+
 .summons {
   display: flex;
   flex-direction: column;
   gap: var(--cc-space-6);
-  width: min(100%, 48rem);
-  margin-inline: auto;
 }
 
 .summonsTop {
@@ -1125,6 +1128,7 @@
   align-items: center;
   gap: var(--cc-space-5);
   text-align: center;
+  container-type: inline-size;
 }
 
 .verdict .eyebrow {
@@ -1139,9 +1143,11 @@
   gap: var(--cc-space-4);
 }
 
-@media (max-width: 640px) {
+/* The verdict sits in the case column beside the rail, so it reflows on its own width, not the viewport's. */
+@container (max-width: 44rem) {
   .verdictStage {
     grid-template-columns: auto auto;
+    column-gap: var(--cc-space-10);
   }
 
   .verdictStage > :nth-child(2) {

@@ -29,7 +29,7 @@ export function DismissedPanel({ c, viewer }: { c: VersusCase; viewer: Viewer })
   const mine = claimable(c, persona.account);
   return (
     <div className={styles.stack}>
-      <PaperSection as="section" padding="lg" aria-labelledby="dismissed-title" className={styles.dismissed}>
+      <PaperSection as="section" padding="lg" aria-labelledby="dismissed-title" bodyClassName={styles.dismissed}>
         <Stamp tone="no-verdict" size="lg" animate sub={total > 0n ? 'Full refunds' : 'Nothing charged'}>
           Case dismissed
         </Stamp>

@@ -166,7 +166,7 @@ export function JoinPage() {
     <>
       {head}
       <div className={styles.page}>
-        <PaperSection as="article" padding="lg" ribbon="Summons" className={styles.summons} aria-labelledby="summons-title">
+        <PaperSection as="article" padding="lg" ribbon="Summons" className={styles.summonsFrame} bodyClassName={styles.summons} aria-labelledby="summons-title">
           <div className={styles.summonsTop}>
             <Portrait character="side-a" expression="smug" size="lg" ring="side-a" alt="Side A" />
             <div>

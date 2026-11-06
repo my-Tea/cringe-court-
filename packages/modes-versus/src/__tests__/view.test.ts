@@ -1,7 +1,8 @@
 import { usdc, type TrialState } from '@cringe-court/core';
 import { testAddress } from '@cringe-court/core/testing';
 import { describe, expect, it } from 'vitest';
-import { casesFor, nextStep, roleLabel, stepIndex, VERSUS_STEPS, viewerOf } from '../view';
+import { sideCharges } from '../economics';
+import { casesFor, nextStep, receiptFor, roleLabel, stepIndex, VERSUS_STEPS, viewerOf } from '../view';
 import type { VersusCase } from '../world';
 import { briefA, briefB, rig, toFunding, toVerdict } from './helpers';
 
@@ -179,6 +180,22 @@ describe('viewerOf / roleLabel / nextStep through the lifecycle', () => {
     expect(c.state.stage).toBe('closed');
     expect(stepIndex(c.state)).toBe(1);
     expect(nextStep(c, 'a', a.account)).toMatchObject({ label: 'Case dismissed', yourMove: false });
+  });
+});
+
+describe('receiptFor', () => {
+  it('itemises where each side’s half went on a verdict, and pays the juror from the ledger', async () => {
+    const t = rig();
+    const trialId = await toVerdict(t);
+    const c = (await t.a.world()).case(trialId)!;
+    const [chargeA, chargeB] = sideCharges(c.state.terms);
+    for (const [desk, charge] of [[t.a, chargeA], [t.b, chargeB]] as const) {
+      const lines = receiptFor(c, desk.account);
+      expect(lines.every((l) => l.kind === 'fee' && l.label.startsWith('Spent: '))).toBe(true);
+      expect(lines.reduce((sum, l) => sum + l.amount, 0n)).toBe(charge.total);
+    }
+    expect(receiptFor(c, t.j.account).some((l) => l.kind === 'bond-returned')).toBe(true);
+    expect(receiptFor(c, stranger)).toEqual([]);
   });
 });
 

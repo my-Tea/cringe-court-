@@ -72,7 +72,7 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
 
   return (
     <div className={styles.stack}>
-      <PaperSection as="section" padding="lg" tone="maroon" aria-labelledby="verdict-title" className={styles.verdict} data-outcome={winner ?? 'none'}>
+      <PaperSection as="section" padding="lg" tone="maroon" aria-labelledby="verdict-title" bodyClassName={styles.verdict} data-outcome={winner ?? 'none'}>
         <p className={styles.eyebrow}>The jury has spoken</p>
         <h2 id="verdict-title" className="cc-visually-hidden">
           Verdict: {winner ? `${winner === 'a' ? labelA : labelB} wins` : 'no verdict'}, {v.tally[0]} to {v.tally[1]}

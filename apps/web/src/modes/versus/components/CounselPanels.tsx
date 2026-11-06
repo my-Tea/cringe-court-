@@ -13,7 +13,7 @@ export function DraftingPanel({ c }: { c: VersusCase }) {
   const attempt = s.stage === 'counsel' ? s.attempt : 1;
   const redraft = s.stage === 'counsel' ? s.pendingRedraft : null;
   return (
-    <PaperSection as="section" padding="lg" tone="maroon" aria-labelledby="drafting-title" className={styles.drafting}>
+    <PaperSection as="section" padding="lg" tone="maroon" aria-labelledby="drafting-title" bodyClassName={styles.drafting}>
       <div className={styles.draftingStage} aria-hidden>
         <Portrait character="side-a" expression="smug" size="xl" ring="side-a" alt="" />
         <span className={styles.vs}>VS</span>

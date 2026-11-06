@@ -6,6 +6,8 @@ export interface PaperSectionProps extends Omit<PaperPanelProps, 'edge' | 'facet
   /** The banner across the top: a label (`p`) over a section that has its own heading, or the section's `h2`. */
   ribbon?: ReactNode;
   ribbonAs?: 'p' | 'h2';
+  /** Layout for the content under the ribbon (the sheet itself wraps it in its own padded box). */
+  bodyClassName?: string;
 }
 
 /**
@@ -13,7 +15,7 @@ export interface PaperSectionProps extends Omit<PaperPanelProps, 'edge' | 'facet
  * stock, with a paper ribbon pinned across its top edge. Every panel in the case
  * room (brief, draft, funding, jury, verdict) is one of these.
  */
-export function PaperSection({ ribbon, ribbonAs = 'p', tone = 'cream', elevation = 2, backing, padding = 'lg', as = 'section', className, children, ...rest }: PaperSectionProps) {
+export function PaperSection({ ribbon, ribbonAs = 'p', bodyClassName, tone = 'cream', elevation = 2, backing, padding = 'lg', as = 'section', className, children, ...rest }: PaperSectionProps) {
   return (
     <PaperPanel
       as={as}
@@ -30,7 +32,7 @@ export function PaperSection({ ribbon, ribbonAs = 'p', tone = 'cream', elevation
           {ribbon}
         </PaperRibbon>
       )}
-      {children}
+      {bodyClassName ? <div className={bodyClassName}>{children}</div> : children}
     </PaperPanel>
   );
 }

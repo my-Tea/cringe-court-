@@ -24,7 +24,7 @@ export function InvitePanel({ c }: { c: VersusCase }) {
   };
 
   return (
-    <PaperSection as="section" padding="lg" ribbon="Invite Side B" aria-labelledby="invite-title" className={styles.invite}>
+    <PaperSection as="section" padding="lg" ribbon="Invite Side B" aria-labelledby="invite-title" bodyClassName={styles.invite}>
       <h2 id="invite-title" className={styles.panelTitle}>
         Send this to the other side
       </h2>
