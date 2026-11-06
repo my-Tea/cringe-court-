@@ -87,7 +87,7 @@ export function CasePage() {
             Docket
           </ButtonLink>
           <div className={styles.badges}>
-            {caseNumber && <Badge tone="highlight">{caseNumber}</Badge>}
+            {caseNumber && <Badge tone="accent">{caseNumber}</Badge>}
             <TestnetBadge />
             {isDemoTerms(t.terms) && <Badge tone="info">Demo court</Badge>}
           </div>

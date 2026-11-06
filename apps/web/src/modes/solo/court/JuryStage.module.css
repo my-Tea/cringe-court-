@@ -27,8 +27,16 @@
   font-size: var(--cc-text-3xl);
 }
 
-.stepper {
-  min-width: 0;
+.stepNote {
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+}
+
+@media (min-width: 900px) {
+  .stepNote {
+    justify-self: end;
+  }
 }
 
 /* The jury box: the voxel jury render, dimmed, behind three seats. */

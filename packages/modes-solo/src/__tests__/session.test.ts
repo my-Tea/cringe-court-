@@ -185,3 +185,25 @@ describe('SoloSession — the whole case', () => {
     expect(session.getSnapshot().error?.message).toMatch(/At most 4/);
   });
 });
+
+describe('SoloSession — NO VERDICT refunds the filer in full', () => {
+  it('forfeits no-show bonds, refunds 1.20 and lets the filer claim it', async () => {
+    const { session, ports } = setup();
+    await toJury(session);
+    for (let i = 0; i < 3; i++) await session.seatNextJuror();
+    await session.commitBallot(1); // seats 2 and 3 never seal a ballot
+    await session.closeCommit();
+    await session.revealBallot(1);
+    await session.closeReveal();
+    await session.finalize();
+    const s = session.getSnapshot();
+    if (s.trial.stage !== 'verdict') throw new Error(s.trial.stage);
+    expect(s.trial.verdict).toMatchObject({ kind: 'no-verdict', label: 'NO VERDICT', completedDuty: 1 });
+    expect(formatUsdc(s.trial.settlement.protocol.fees)).toBe('0.00 USDC');
+    expect(s.receipt?.map((l) => l.kind)).toEqual(['refund']);
+    expect(s.trial.sentence?.text).toMatch(/MISTRIAL/);
+    await session.claimRefund();
+    expect(session.getSnapshot().claimed).toBe(true);
+    expect(formatUsdc(await ports.chain.usdcBalance(FILER))).toBe('5.00 USDC');
+  });
+});

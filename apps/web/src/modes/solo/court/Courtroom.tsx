@@ -148,7 +148,7 @@ export function Courtroom({ lines, title, exhibits = [], autoPlay = true, onFini
         <div className={styles.light} data-mood={shot.lighting} aria-hidden />
         {shot.fx === 'flash' && <div key={`flash-${index}`} className={styles.flash} aria-hidden />}
         {impact && (
-          <div key={`callout-${index}`} className={styles.callout} aria-hidden>
+          <div key={`callout-${index}`} className={styles.callout} data-speaker={shot.speaker} aria-hidden>
             <ImpactText kind={impact} size="lg" animate>
               {shot.callout!.text}
             </ImpactText>

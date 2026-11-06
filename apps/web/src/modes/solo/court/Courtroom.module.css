@@ -43,16 +43,16 @@
 }
 
 .camera[data-camera='close_judge'] {
-  transform: scale(1.55);
-  transform-origin: 50% 24%;
+  transform: scale(1.45);
+  transform-origin: 50% 22%;
 }
 .camera[data-camera='close_prosecution'] {
-  transform: scale(1.4);
-  transform-origin: 14% 78%;
+  transform: scale(1.22);
+  transform-origin: 8% 70%;
 }
 .camera[data-camera='close_defense'] {
-  transform: scale(1.4);
-  transform-origin: 84% 78%;
+  transform: scale(1.22);
+  transform-origin: 92% 70%;
 }
 .camera[data-camera='pov_corner'] {
   transform: scale(1.12);
@@ -91,9 +91,9 @@
 .judgeBox {
   position: absolute;
   left: 50%;
-  top: 9%;
-  width: 24%;
-  height: 49%;
+  top: 5%;
+  width: 30%;
+  height: 52%;
   translate: -50% 0;
   overflow: hidden;
 }
@@ -107,7 +107,7 @@
 .actor {
   position: absolute;
   bottom: -14%;
-  height: 92%;
+  height: 86%;
   width: auto;
   filter: drop-shadow(0 12px 14px color-mix(in srgb, var(--cc-neutral-900) 55%, transparent));
   transition: filter var(--cc-duration-base) var(--cc-ease-standard), translate var(--cc-duration-base) var(--cc-ease-standard);
@@ -117,13 +117,12 @@
   left: -9%;
 }
 .defense {
-  right: 4%;
+  right: 12%;
 }
 .defendant {
-  right: -16%;
-  height: 74%;
-  bottom: -16%;
-  z-index: -0;
+  right: -9%;
+  height: 66%;
+  bottom: -12%;
 }
 
 /* The speaker steps forward a touch and gets a warm rim. */
@@ -151,7 +150,7 @@
   left: 3%;
 }
 .plateD {
-  right: 22%;
+  right: 26%;
 }
 
 .light {
@@ -185,11 +184,23 @@
 
 .callout {
   position: absolute;
-  top: 8%;
+  top: 6%;
   left: 50%;
   translate: -50% 0;
   z-index: 2;
   pointer-events: none;
+}
+
+/* Keep the shout clear of whoever is talking. */
+.callout[data-speaker='judge'] {
+  top: auto;
+  bottom: 30%;
+}
+.callout[data-speaker='prosecutor'] {
+  left: 64%;
+}
+.callout[data-speaker='defense'] {
+  left: 36%;
 }
 
 .juryOut {
@@ -396,4 +407,43 @@
 
 :global(:root[data-reduced-motion='true']) .flash {
   display: none;
+}
+
+/* Phones: a taller frame, smaller shouts, no nameplates, a scrolling chapter rail. */
+@media (max-width: 639px) {
+  .viewport {
+    aspect-ratio: 4 / 3.4;
+  }
+
+  .set {
+    object-position: 50% 40%;
+  }
+
+  .nameplate {
+    display: none;
+  }
+
+  .callout {
+    scale: 0.62;
+    transform-origin: top center;
+  }
+
+  .juryOut {
+    scale: 0.7;
+  }
+
+  .exhibit {
+    width: 86%;
+  }
+
+  .chapters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--cc-space-1);
+    scrollbar-width: thin;
+  }
+
+  .chapter {
+    flex: none;
+  }
 }

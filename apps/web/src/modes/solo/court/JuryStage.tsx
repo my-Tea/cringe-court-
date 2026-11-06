@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { JurySeat, JuryState } from '@cringe-court/core';
 import { NPC_PERSONAS, isDemoTerms, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
-import { Alert, Badge, Button, Countdown, ErrorState, PhaseStepper, Spinner, Stamp, cx, useReducedMotion } from '@/ds';
+import { Alert, Badge, Button, Countdown, ErrorState, Spinner, Stamp, cx, useReducedMotion } from '@/ds';
 import { jurorArt, sceneArt } from '../lib/art';
 import type { DemoClock } from '../lib/demoCourt';
 import { SoloIcon } from '../lib/SoloIcon';
@@ -74,7 +74,9 @@ export function JuryStage({ session, snap, clock }: JuryStageProps) {
             {t.step === 'finalizing' ? 'Counting the scrolls' : 'The jury is out'}
           </h2>
         </div>
-        <PhaseStepper steps={STEPS} current={current} label="Jury progress" className={styles.stepper} />
+        <p className={styles.stepNote}>
+          Step {current + 1} of {STEPS.length} · {STEPS[current]}
+        </p>
       </header>
 
       {demo && (

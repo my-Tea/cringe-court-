@@ -87,6 +87,12 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
                 </div>
               ))}
             </dl>
+            {!refundDue && (
+              <p className={styles.small}>
+                The jury reached a verdict, so the case is paid for: {formatUsdc(t.terms.juryPool)} rewarded the jurors who voted on time and{' '}
+                {formatUsdc(disclosure.fees)} covered the court fee and both AI lawyers.
+              </p>
+            )}
             {refundDue &&
               (snap.claimed ? (
                 <Alert tone="success" title="Refund claimed" live="polite">
