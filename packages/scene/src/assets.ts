@@ -11,6 +11,13 @@ export const COURTROOM_URLS = {
   atlas: new URL('../assets/atlas/atlas.json', import.meta.url).href,
 } as const;
 
+export const TOWN_URLS = {
+  /** The 53 props from cc-art/props.mjs, emitted by cc-art/town-props.mjs. */
+  props: new URL('../../../cc-art/dist/town/props.json', import.meta.url).href,
+  /** The town architecture from cc-art/town-buildings.mjs. */
+  buildings: new URL('../../../cc-art/dist/town/buildings.json', import.meta.url).href,
+} as const;
+
 // One literal per file so bundlers can see every asset.
 export const ATLAS_IMAGE_URLS: Readonly<Record<string, string>> = {
   judge: new URL('../assets/atlas/judge.png', import.meta.url).href,

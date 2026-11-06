@@ -10,7 +10,8 @@
     "./react": "./src/react/index.ts",
     "./assets/*": "./assets/*",
     "./roam": "./src/roam/index.ts",
-    "./roam/react": "./src/roam/react/index.ts"
+    "./roam/react": "./src/roam/react/index.ts",
+    "./iso": "./src/iso/index.ts"
   },
   "scripts": {
     "atlas": "tsx scripts/gen-atlas.ts",
