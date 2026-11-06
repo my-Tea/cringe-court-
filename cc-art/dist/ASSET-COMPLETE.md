@@ -80,6 +80,19 @@ and juror, and the defense's bandage moved off his eye.
 
 ---
 
+## Portraits
+
+```
+characters/<id>/portraits/{neutral,smug,shocked,defeated}{,_32,@2x}.png   # 64 / 32 / 128 px
+characters/_previews/portraits.png                                       # contact sheet
+characters/portraits.json                                                # index
+```
+
+Head-and-shoulders busts on dialogue-box plum, cropped from the voxel render
+(`export-portraits.mjs`). `defeated` uses the crying face. Expression contrast is
+only as good as the face rig; re-run after the face rig (`feat/voxel-expressions`)
+lands for much stronger differences.
+
 ## Poses
 
 ```
@@ -275,6 +288,7 @@ node export-player-vox.mjs   # player parts
 node ui-kit.mjs              # UI
 node fx-kit.mjs              # FX
 node brand-kit.mjs           # wordmark, share card, case card
+node export-portraits.mjs    # dialogue portraits (after export-vox)
 ```
 
 ---
