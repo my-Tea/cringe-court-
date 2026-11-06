@@ -805,6 +805,10 @@ export class RoamController implements BeatHost {
     return this.#mood;
   }
 
+  get zone(): ZoneId | null {
+    return this.#zone;
+  }
+
   get control(): ControlMode {
     return this.#control;
   }
