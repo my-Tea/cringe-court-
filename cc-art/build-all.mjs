@@ -64,7 +64,9 @@ const STEPS = [
     node('../judge/tools/preview.mjs', '../judge/dist/GavelExe.bbmodel', '../judge/dist/preview-rest.png')();
     py('judge/tools/glbcheck.py', 'preview', 'judge/dist/GavelExe.glb', 'judge/dist/preview-glb.png')();
   }],
-  ['economics', 'economics calculator + CSVs', py('docs/economics/cringe_econ.py')],
+  // docs/economics arrives with the P1 decisions PR (#19); skip until it is merged
+  ['economics', 'economics calculator + CSVs', () => fs.existsSync(path.join(ROOT, 'docs/economics/cringe_econ.py'))
+    ? py('docs/economics/cringe_econ.py')() : console.log('   docs/economics/cringe_econ.py not present; skipped')],
 ];
 
 const want = only ? new Set(only.split(',')) : null;
