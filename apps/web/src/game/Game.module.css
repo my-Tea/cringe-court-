@@ -1,0 +1,237 @@
+/* The game shell: one full-screen world, screens layered over it. No site chrome. */
+
+.game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--cc-blue-700);
+  color: var(--cc-color-text);
+}
+
+/* ── The world layer ───────────────────────────────────────── */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  transition: filter var(--cc-duration-slower) var(--cc-ease-standard), opacity var(--cc-duration-slow) var(--cc-ease-standard);
+}
+
+/* No WebGL2 (or no world yet): warm parchment instead of a black hole. */
+.paper {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 22px, var(--cc-gold-100) 22px 23px),
+    linear-gradient(180deg, var(--cc-blue-300), var(--cc-gold-100) 60%);
+}
+
+/* Behind a panel the world freezes, softens and darkens, like a paused console game. */
+.dimmed {
+  filter: blur(3px) saturate(0.8) brightness(0.62);
+}
+
+.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.room {
+  width: 100%;
+  height: 100%;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--cc-space-3);
+  color: var(--cc-neutral-100);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xl);
+}
+
+.worldNote {
+  position: absolute;
+  inset-inline: 0;
+  bottom: var(--cc-space-8);
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ── Title screen ──────────────────────────────────────────── */
+
+.title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  align-items: center;
+  justify-items: start;
+  padding: var(--cc-space-8) clamp(var(--cc-space-4), 6vw, var(--cc-space-24));
+  /* A dark vignette on the left keeps the menu readable over the orbiting world. */
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cc-neutral-900) 72%, transparent), color-mix(in srgb, var(--cc-neutral-900) 25%, transparent) 45%, transparent 70%);
+  outline: none;
+}
+
+.titleCorner {
+  position: absolute;
+  top: var(--cc-space-4);
+  right: var(--cc-space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+.titleHead {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-3);
+  align-self: end;
+  width: min(32rem, 100%);
+}
+
+.titleTagline {
+  white-space: nowrap;
+}
+
+.titleLogo {
+  width: 100%;
+  filter: drop-shadow(0 6px 0 var(--cc-royal-900)) drop-shadow(0 18px 30px color-mix(in srgb, var(--cc-neutral-900) 50%, transparent));
+}
+
+.titleNav {
+  display: grid;
+  gap: var(--cc-space-3);
+  width: min(22rem, 100%);
+  margin-block-start: var(--cc-space-6);
+  margin-inline-start: calc((min(32rem, 100%) - min(22rem, 100%)) / 2);
+}
+
+.titleMenu {
+  display: grid;
+  gap: var(--cc-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.titleConfirm {
+  padding: var(--cc-space-3) var(--cc-space-4);
+  background: var(--cc-royal-900);
+  color: var(--cc-gold-100);
+  border: 2px solid var(--cc-gold-500);
+  font-size: var(--cc-text-sm);
+}
+
+.titleHint {
+  text-align: center;
+  font-size: var(--cc-text-xs);
+  color: var(--cc-gold-100);
+  text-shadow: 0 1px 0 var(--cc-neutral-900);
+}
+
+.titleFoot {
+  align-self: end;
+  font-size: var(--cc-text-xs);
+  color: var(--cc-gold-100);
+  text-shadow: 0 1px 0 var(--cc-neutral-900);
+}
+
+/* ── Panels and hearings ───────────────────────────────────── */
+
+.frame {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.scene {
+  background:
+    repeating-linear-gradient(90deg, var(--cc-gold-900) 0 46px, var(--cc-neutral-900) 46px 48px),
+    var(--cc-gold-900);
+}
+
+.frameBar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-2) var(--cc-space-4);
+  background: var(--cc-royal-900);
+  border-bottom: 3px solid var(--cc-gold-500);
+  box-shadow: 0 3px 0 var(--cc-gold-900), var(--cc-shadow-2);
+  color: var(--cc-gold-100);
+}
+
+.frameLabel {
+  justify-self: center;
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-lg);
+  letter-spacing: 0.04em;
+  color: var(--cc-gold-300);
+}
+
+.frameEnd {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+.frameBody {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--cc-space-6) var(--cc-gutter) var(--cc-space-12);
+  outline: none;
+}
+
+/* Every filing step and menu page sits on one sheet of parchment over the world. */
+.sheet {
+  max-width: 82rem;
+  margin-inline: auto;
+  background: var(--cc-color-canvas);
+  border: 3px solid var(--cc-gold-500);
+  box-shadow: 0 0 0 3px var(--cc-gold-900), var(--cc-shadow-4);
+}
+
+.menuWrap {
+  display: grid;
+  justify-items: center;
+}
+
+/* ── Menu screens ──────────────────────────────────────────── */
+
+.menu {
+  width: min(32rem, 100%);
+  display: grid;
+  gap: var(--cc-space-4);
+  justify-items: stretch;
+}
+
+.menuLede {
+  color: var(--cc-gold-100);
+  text-align: center;
+}
+
+.menuList {
+  display: grid;
+  gap: var(--cc-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 40rem) {
+  .title {
+    justify-items: center;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--cc-neutral-900) 20%, transparent), color-mix(in srgb, var(--cc-neutral-900) 70%, transparent));
+  }
+
+  .titleNav {
+    margin-inline-start: 0;
+  }
+
+  .frameLabel {
+    display: none;
+  }
+}

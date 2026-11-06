@@ -3,11 +3,14 @@ import type { MessageKey } from '@/i18n';
 
 /** Every path in the app, so links never drift from the router. */
 export const paths = {
-  /** The landing: sign-in panel and the courtroom hero. */
+  /** The title screen (the world orbits behind it). */
   home: '/',
-  /** The arrival run: verify, dress, pick a trial, walk into the courthouse. */
+  /** The world: the arrival run, the courthouse, the lobby. */
   play: '/play',
-  /** The courts lobby: pick Solo, Versus or Grand Jury. */
+  /** The game menu (pause screen) and its "My cases" screen. */
+  menu: '/menu',
+  cases: '/cases',
+  /** The three courts at a glance (a menu screen). */
   court: '/court',
   leaderboard: '/leaderboard',
   howToPlay: '/how-to-play',
