@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ICON_NAMES, Icon, Button } from '@/ds';
 import { uiIcon, type UiIconName } from '@/art/art';
 import { contrastRatio } from '@/ds/lib/contrast';
-import { colorRoles, contrastPairs, duration, easing, palette, radius, shadow, space, surfaces, type fontSize, type Surface } from '@/ds/tokens';
+import { colorRoles, contrastPairs, duration, easing, palette, paletteGroups, radius, shadow, space, surfaces, type fontSize, type Surface } from '@/ds/tokens';
 import styles from './Gallery.module.css';
 import { GallerySection, Specimen } from './Specimen';
 
@@ -13,12 +13,12 @@ export function ColorSection({ surface }: { surface: Surface }) {
     <GallerySection
       id="color"
       title="Color"
-      description="Neon-noir is the brand; parchment is the in-world document. Components use semantic roles only, so a whole subtree re-themes by setting data-surface."
+      description="The 30 swatches of the CringeCourt pixel-art style guide are the only colours (docs/STYLE-GUIDE.md). Parchment is the default surface, wood the deep variant. Components use semantic roles only, so a whole subtree re-themes by setting data-surface."
     >
-      <Specimen label="Palette" note="cc-art/brand-kit.mjs · ui-kit.mjs · vox-chars.mjs" layout="stack">
+      <Specimen label="Palette" note="docs/assets/style-guide.png · printed hex labels" layout="stack">
         {Object.entries(palette).map(([family, steps]) => (
           <div key={family} className={styles.swatches}>
-            <span className={styles.familyLabel}>{family}</span>
+            <span className={styles.familyLabel}>{paletteGroups[family as keyof typeof palette]}</span>
             {Object.entries(steps).map(([step, value]) => (
               <div key={step} className={styles.swatch}>
                 <span className={styles.swatchChip} style={{ background: value }} />
@@ -89,6 +89,7 @@ export function TypeSection() {
     ['4xl', 'display', 'Pick your court'],
     ['3xl', 'display', 'Secret Verdict Scroll'],
     ['2xl', 'display', 'Jury selection'],
+    ['xl', 'pixel', 'Case #0069 · in session'],
     ['xl', 'body', 'Counsel Chaos has entered the chat'],
     ['lg', 'body', 'A comedy courtroom where humans decide.'],
     ['md', 'body', 'Every fee, bond and deadline is fixed when the case opens.'],
@@ -99,7 +100,7 @@ export function TypeSection() {
     <GallerySection
       id="type"
       title="Typography"
-      description="Pixelify Sans for display (echoes the voxel wordmark), Space Grotesk for reading, JetBrains Mono for money and time. Display sizes are fluid."
+      description="Fraunces (soft axis) for display, after the style-guide title; Pixelify Sans for pixel accents (eyebrows, badges, stamps); Space Grotesk for reading; JetBrains Mono for money and time. Display sizes are fluid."
     >
       <Specimen label="Type scale" layout="stack">
         {samples.map(([size, family, text]) => (
@@ -123,7 +124,7 @@ export function TypeSection() {
 
 export function SpaceSection() {
   return (
-    <GallerySection id="space" title="Spacing, radius & elevation" description="A 4px grid. Small radii keep the pixel edge. On a dark stage, elevation is light: each level adds a top highlight and a deeper drop; neon glows mark focus of attention.">
+    <GallerySection id="space" title="Spacing, radius & elevation" description="A 4px grid. Rounded radii follow the style-guide frames and tiles. Elevation is warm ink-brown shadow with a hard pixel edge; ring-* are the gold ornate rims; bevel is the inner light/dark edge of a tile.">
       <Specimen label="Space scale" note="--cc-space-*" layout="stack">
         {Object.entries(space)
           .filter(([k]) => k !== 'px' && k !== '0')

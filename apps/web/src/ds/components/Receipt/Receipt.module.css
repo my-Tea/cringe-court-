@@ -3,7 +3,7 @@
   position: relative;
   max-width: 24rem;
   padding: var(--cc-space-5) var(--cc-space-5) var(--cc-space-6);
-  background: var(--cc-color-canvas);
+  background: var(--cc-color-surface);
   color: var(--cc-color-text);
   box-shadow: var(--cc-shadow-3);
   /* Zig-zag tear along the bottom edge. */

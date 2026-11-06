@@ -3,9 +3,9 @@
  * adapter (later phases) and a deterministic mock/fixture adapter for tests and
  * demos, chosen at startup. Nothing outside an adapter imports a sponsor SDK.
  */
-import type { CaseNumber, CaseSummary, Hex } from '../case';
-import type { ModeId } from '../modes';
-import type { Usdc } from '../money';
+import type { CaseNumber, CaseSummary, Hex } from './case';
+import type { ModeId } from './modes';
+import type { Usdc } from './money';
 
 /* ── 0G Compute: AI prosecution and defense ─────────────────────────────── */
 
@@ -36,7 +36,6 @@ export interface ArgumentResult {
   transcriptHash: Hex;
 }
 
-/** @deprecated Phase 3 sketch; use AiCounselPort. */
 export interface AiCourtProvider {
   readonly id: 'og-compute' | 'fixture';
   argue(request: ArgumentRequest, signal?: AbortSignal): Promise<ArgumentResult>;
@@ -50,7 +49,6 @@ export type ScreeningResult =
   | { ok: true; nullifier: Hex }
   | { ok: false; reason: 'not-verified' | 'already-used' | 'conflicted' | 'cancelled' | 'error'; message: string };
 
-/** @deprecated Phase 3 sketch; use IdentityPort. */
 export interface JurorVerifier {
   readonly id: 'world-idkit' | 'mock';
   /** Prove a unique human for one juror action on one case. */
@@ -65,7 +63,6 @@ export interface TxReceipt {
   explorerUrl: string;
 }
 
-/** @deprecated Phase 3 sketch; use ChainPort. Kept so existing imports compile. */
 export interface CourtLedger {
   readonly id: 'arc-testnet' | 'memory';
   readonly network: 'arc-testnet';
@@ -79,7 +76,7 @@ export interface CourtLedger {
   finalize(caseNumber: CaseNumber): Promise<TxReceipt>;
 }
 
-/** @deprecated Phase 3 sketch; use CourtPorts. */
+/** The set of adapters the app runs with. */
 export interface CourtServices {
   ai: AiCourtProvider;
   verifier: JurorVerifier;
