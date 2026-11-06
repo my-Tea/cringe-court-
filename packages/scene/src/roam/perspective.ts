@@ -14,16 +14,16 @@ export function cameraMode(choice: PerspectiveChoice): CameraMode {
 }
 
 /**
- * Third-person rig, in world units. A player is 50 tall (≈1.8 blocks), so
- * `distance` is a little past Minecraft's four blocks behind the head; with
- * the renderer's 70° field of view the player stands about 29% of the screen
- * tall, as Steve does. `lift` raises the
+ * Third-person rig, in world units. A player is 50 tall (≈1.8 blocks);
+ * `distance` keeps the camera far enough back that, with the renderer's 70°
+ * field of view, the player stands about a fifth of the screen tall and the
+ * world around them reads first. `lift` raises the
  * pivot over the eyes so the head sits just under the crosshair, not on it.
  * `cinematic` is the tighter over-the-shoulder distance used while a beat holds
  * the camera.
  */
 export const THIRD_RIG = {
-  distance: 125,
+  distance: 175,
   cinematic: 72,
   lift: 14,
   /** Gap kept between the camera and any wall it backs into. */
