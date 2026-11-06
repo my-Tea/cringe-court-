@@ -4,6 +4,7 @@
 // the base centre (y=0 is the ground plane), so the game can drop them straight
 // onto a floor.
 import { MAT as M } from './palette.mjs';
+import { gavelBoxes, exhibitABoxes, popcornBoxes, papersBoxes, ANCHORS, standalone, handJoint, rotateVoxels } from './held-props.mjs';
 
 const b = (f, t, m) => ({ f, t, m });
 
@@ -551,6 +552,51 @@ export const PROPS = {
     ],
   },
 };
+
+// ───────────────────── character props (GAP-ANALYSIS #12) ─────────────────────
+// Held items baked into the characters (vox-chars.mjs), extracted as standalone
+// sprites. Geometry + colours come from held-props.mjs — the SAME functions the
+// characters call — so they cannot drift. Each carries `hold`:
+//   anchor  = grip point in prop space (centre-x/z, ground y=0, front +z)
+//   hand    = 'left' | 'right' hand it is baked into on its character
+//   offset  = (character hand joint - grip) in prop space, as baked on the character;
+//             to attach: prop position = handJoint - anchor (+ offset to match the baked look)
+const heldProp = (label, boxes, grip, side, origin) => {
+  const s = standalone(boxes, { grip, hand: handJoint(side), origin });
+  return { label, parts: s.parts, hold: { anchor: s.holdAnchor, hand: side, offset: s.handOffset, character: null } };
+};
+const posedGavel = (deg, grip) => {
+  const rot = (p) => { const a = (deg * Math.PI) / 180; return [p[0] * Math.cos(a) - p[1] * Math.sin(a), p[0] * Math.sin(a) + p[1] * Math.cos(a), p[2]]; };
+  const g = heldProp('', rotateVoxels(gavelBoxes(0, 0), deg), rot(grip), 'right', [...ANCHORS.gavel(), 0]);
+  g.hold.offset = REST_OFFSET;   // the hand keeps the same grip on the handle in every pose
+  return g;
+};
+
+PROPS.judge_gavel = heldProp('Judge gavel, oversized, at rest (judge held prop)', gavelBoxes(0, 0), [0, 8, 0], 'right', [...ANCHORS.gavel(), 0]);
+const REST_OFFSET = PROPS.judge_gavel.hold.offset;
+PROPS.judge_gavel.hold.character = 'judge';
+PROPS.judge_gavel_raised = posedGavel(35, [0, 8, 0]);
+PROPS.judge_gavel_raised.keepOrder = true;
+PROPS.judge_gavel_raised.label = 'Judge gavel, raised for the strike (35 deg, voxel-snapped)';
+PROPS.judge_gavel_raised.hold.character = 'judge';
+PROPS.judge_gavel_strike = posedGavel(125, [0, 8, 0]);
+PROPS.judge_gavel_strike.keepOrder = true;
+PROPS.judge_gavel_strike.label = 'Judge gavel, mid-strike (125 deg, voxel-snapped)';
+PROPS.judge_gavel_strike.hold.character = 'judge';
+
+{
+  const [ex, ey] = ANCHORS.exhibit();
+  PROPS.exhibit_a_paper = heldProp('"EXHIBIT A" paper (defense held prop)', exhibitABoxes(ex, ey), [ex + 2.5, ey + 5, -5.3], 'left');
+  PROPS.exhibit_a_paper.hold.character = 'defense';
+  PROPS.exhibit_a_paper.keepOrder = true;   // red label sits on the sheet: draw in authored order
+  const [px, py] = ANCHORS.popcorn();
+  PROPS.popcorn_bucket = heldProp('Popcorn bucket (juror held prop)', popcornBoxes(px, py), [px - 7, py + 7, -3], 'left');
+  PROPS.popcorn_bucket.hold.character = 'juror';
+  PROPS.popcorn_bucket.keepOrder = true;
+  const [kx, ky] = ANCHORS.papers();
+  PROPS.papers_stack = heldProp('Armful of papers (clerk held prop)', papersBoxes(kx, ky), [kx - 2.5, ky + 3.5, -4.5], 'left');
+  PROPS.papers_stack.hold.character = 'clerk';
+}
 
 import { DETAILS } from './detail.mjs';
 
