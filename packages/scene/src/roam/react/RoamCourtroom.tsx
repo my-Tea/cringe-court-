@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import type { RoamController } from '../controller';
 import { gamepadInput, lookDelta } from '../input';
 import type { RoamData } from '../load';
-import { cameraMode, type PerspectiveChoice } from '../perspective';
+import type { PerspectiveChoice } from '../perspective';
 import { AutoQuality, QUALITY, type QualityLevel } from '../quality';
 import { RoamRenderer } from '../three/renderer';
 import { BeatChip, Callout, ControlLegend, Dialogue, Dock, ExhibitPanel, Onboarding, PauseMenu, Prompt, TopBar } from './Hud';
@@ -19,7 +19,7 @@ export interface RoamCourtroomProps {
   data: RoamData;
   /** Initial quality (the pause menu can change it). Default medium. */
   quality?: QualityLevel;
-  /** `auto` is third-person isometric. Default auto. */
+  /** `auto` is the trailing third person. Default auto. */
   perspective?: PerspectiveChoice;
   onPerspectiveChange?: (p: PerspectiveChoice) => void;
   onQualityChange?: (q: QualityLevel) => void;
@@ -43,6 +43,16 @@ export interface RoamCourtroomProps {
   onRenderer?: (r: RoamRenderer) => void;
   /** Open the controls legend at start. Default false: the Controls button and the onboarding card cover it. */
   controlsOpen?: boolean;
+  /**
+   * How the room is shown. `play` (default) is the walkable room with its HUD.
+   * `attract` is a title-screen backdrop: a slow orbit, no HUD, no input.
+   * `suspended` stops drawing (the last frame stays) while something covers it.
+   */
+  presentation?: 'play' | 'attract' | 'suspended';
+  /** Extra entries in the pause menu (a game's Leaderboard, Settings, Quit…), after Resume. */
+  pauseExtra?: ReactNode;
+  /** Show "Back to the lobby" in the pause menu. Default true. */
+  pauseLobby?: boolean;
 }
 
 function Driver({ controller, renderer, pixelated, auto, onDowngrade }: { controller: RoamController; renderer: RoamRenderer; pixelated: boolean; auto: AutoQuality | null; onDowngrade: (q: QualityLevel) => void }) {
@@ -104,6 +114,9 @@ export function RoamCourtroom({
   children,
   onRenderer,
   controlsOpen = false,
+  presentation = 'play',
+  pauseExtra,
+  pauseLobby = true,
 }: RoamCourtroomProps) {
   ensureRoamStyles();
   const S = resolveRoamStrings(strings);
@@ -130,6 +143,15 @@ export function RoamCourtroom({
 
   const renderer = useMemo(() => new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller, quality: initialQuality }), [data, controller]);
   useEffect(() => () => renderer.dispose(), [renderer]);
+  const live = presentation === 'play';
+  useEffect(() => {
+    renderer.setAttract(presentation === 'attract');
+    // Nothing drives the room from outside play: drop held keys and give the mouse back.
+    if (presentation !== 'play') {
+      controller.keys.clear();
+      if (typeof document !== 'undefined' && document.pointerLockElement === root.current) document.exitPointerLock?.();
+    }
+  }, [renderer, controller, presentation]);
   useEffect(() => onRenderer?.(renderer), [renderer, onRenderer]);
   const auto = useMemo(() => (autoQuality ? new AutoQuality(initialQuality) : null), [autoQuality, initialQuality]);
 
@@ -190,7 +212,8 @@ export function RoamCourtroom({
     const onChange = () => {
       const isLocked = document.pointerLockElement === root.current;
       setLocked(isLocked);
-      if (!isLocked && engagedRef.current && !controller.paused && !controller.snapshot().exhibit) controller.setPaused(true);
+      const snapNow = controller.snapshot();
+      if (!isLocked && engagedRef.current && !controller.paused && !snapNow.exhibit && !snapNow.panel) controller.setPaused(true);
     };
     const onMove = (e: MouseEvent) => {
       if (document.pointerLockElement !== root.current) return;
@@ -207,10 +230,10 @@ export function RoamCourtroom({
   const engagedRef = useRef(engaged);
   engagedRef.current = engaged;
 
-  // Pause and exhibits release the pointer so menus are usable.
+  // Pause, exhibits and station panels release the pointer so menus are usable.
   useEffect(() => {
-    if ((snap.paused || snap.exhibit) && document.pointerLockElement === root.current) document.exitPointerLock?.();
-  }, [snap.paused, snap.exhibit]);
+    if ((snap.paused || snap.exhibit || snap.panel) && document.pointerLockElement === root.current) document.exitPointerLock?.();
+  }, [snap.paused, snap.exhibit, snap.panel]);
 
   const changePerspective = useCallback(
     (p: PerspectiveChoice) => {
@@ -223,7 +246,7 @@ export function RoamCourtroom({
   const capture = useCallback(() => {
     setEngaged(true);
     focusRoot();
-    if (isTouch || cameraMode(perspective) === 'iso') return;
+    if (isTouch) return;
     const el = root.current as (HTMLDivElement & { requestPointerLock?: () => Promise<void> | void }) | null;
     try {
       const r = el?.requestPointerLock?.();
@@ -231,18 +254,18 @@ export function RoamCourtroom({
     } catch {
       /* pointer lock unavailable (iframe, headless): keyboard turning still works */
     }
-  }, [focusRoot, isTouch, perspective, setEngaged]);
+  }, [focusRoot, isTouch, setEngaged]);
 
   const cinematic = snap.control === 'cinematic';
   // Non-blocking onboarding (B4): a corner card, never during a cinematic beat, gone once dismissed or used.
-  const showOnboarding = !engaged && !onboarded && !isTouch && !snap.paused && !snap.exhibit && !cinematic && !legend;
+  const showOnboarding = !engaged && !onboarded && !isTouch && !snap.paused && !snap.exhibit && !snap.panel && !cinematic && !legend;
 
   return (
     <div
       ref={root}
       className={`ccr-root${className ? ` ${className}` : ''}`}
       style={style}
-      tabIndex={0}
+      tabIndex={live ? 0 : -1}
       role="application"
       aria-label={label ?? S.roomLabel}
       aria-roledescription={S.roomRoleDescription}
@@ -254,6 +277,7 @@ export function RoamCourtroom({
       onClick={(e) => {
         if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'CANVAS') {
           // Clicking the room captures the mouse, except during a cinematic beat (the camera is not yours yet).
+          if (!live) return;
           if (!isTouch && !locked && !snap.paused && !cinematic) capture();
           else focusRoot();
         }
@@ -263,9 +287,9 @@ export function RoamCourtroom({
         <Canvas
           dpr={1}
           flat
-          shadows={{ type: THREE.PCFShadowMap }}
+          shadows={{ type: THREE.PCFSoftShadowMap }}
           gl={{ antialias: false, powerPreference: 'high-performance', preserveDrawingBuffer: true, outputColorSpace: THREE.SRGBColorSpace, toneMapping: THREE.NoToneMapping }}
-          frameloop="always"
+          frameloop={presentation === 'suspended' ? 'never' : 'always'}
           style={{ width: '100%', height: '100%' }}
         >
           <Driver
@@ -280,7 +304,9 @@ export function RoamCourtroom({
 
       <RoamStringsProvider strings={S}>
         <div className="ccr-hud">
-          {cameraMode(perspective) === 'first' && !snap.paused && snap.control !== 'cinematic' && !snap.exhibit ? <div className={`ccr-cross${snap.focus ? ' ccr-cross--on' : ''}`} aria-hidden="true" /> : null}
+          {live ? (
+            <>
+          {!snap.paused && snap.control !== 'cinematic' && !snap.exhibit && !snap.panel ? <div className={`ccr-cross${snap.focus ? ' ccr-cross--on' : ''}`} aria-hidden="true" /> : null}
           <TopBar snap={snap} touch={isTouch} onExit={onExit} onPause={() => controller.setPaused(true)} legendOpen={legend} onToggleLegend={() => setLegend((v) => !v)} />
           <BeatChip snap={snap} onSkip={() => controller.skipBeat()} />
           {legend && !snap.paused ? <ControlLegend touch={isTouch} onClose={() => setLegend(false)} /> : null}
@@ -289,7 +315,7 @@ export function RoamCourtroom({
           <Dock snap={snap} touch={isTouch} />
           <Dialogue snap={snap} touch={isTouch} tapToContinue={isTouch && cinematic} onAdvance={() => controller.advanceDialogue()} />
           {/* B5: no joystick or buttons over a cinematic beat; they come back when the camera is yours. */}
-          {isTouch && !snap.paused && !snap.exhibit && !cinematic ? <TouchControls controller={controller} prompt={snap.focus?.prompt ?? null} /> : null}
+          {isTouch && !snap.paused && !snap.exhibit && !snap.panel && !cinematic ? <TouchControls controller={controller} prompt={snap.focus?.prompt ?? null} /> : null}
           {showOnboarding ? (
             <Onboarding
               onCapture={capture}
@@ -318,7 +344,11 @@ export function RoamCourtroom({
             onExit={onExit}
             restoreFocus={focusRoot}
             autoNote={autoNote}
+            extra={pauseExtra}
+            lobby={pauseLobby}
           />
+            </>
+          ) : null}
           {children}
         </div>
       </RoamStringsProvider>
