@@ -151,6 +151,14 @@ export function SpaceSection() {
           </span>
         ))}
       </Specimen>
+      <Specimen label="Paper elevation" note="--cc-paper-1 … 4 · layers of card, each lifted a little higher">
+        {[1, 2, 3, 4].map((n) => (
+          <span key={n} className={styles.paperElevBox} style={{ boxShadow: `var(--cc-paper-${n})` }}>
+            <span>paper-{n}</span>
+            <span>drop-{n}</span>
+          </span>
+        ))}
+      </Specimen>
     </GallerySection>
   );
 }

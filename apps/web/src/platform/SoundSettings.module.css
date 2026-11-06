@@ -1,0 +1,116 @@
+/* Sound settings: paper-slip sliders and the header button pair. Tokens only. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-5);
+  color: var(--cc-color-text);
+}
+
+.sliders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-4);
+  background: var(--cc-color-surface-sunken);
+  border: var(--cc-space-px) solid var(--cc-color-border);
+  border-radius: var(--cc-radius-sm);
+  box-shadow: var(--cc-paper-1);
+}
+
+.slider {
+  display: grid;
+  grid-template-columns: 5rem 1fr 3rem;
+  align-items: center;
+  gap: var(--cc-space-3);
+}
+
+.sliderLabel {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-sm);
+  letter-spacing: var(--cc-tracking-wide);
+  color: var(--cc-color-accent-text);
+}
+
+.sliderValue {
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-sm);
+  text-align: right;
+  color: var(--cc-color-text-muted);
+}
+
+/* The range: a folded paper strip whose gold fill follows --_fill; the thumb is a cut gem. */
+.range {
+  --_track: 0.625rem;
+  --_thumb: 1.5rem;
+
+  appearance: none;
+  width: 100%;
+  min-height: var(--cc-control-sm);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: var(--_track);
+  border-radius: var(--cc-radius-xs);
+  border: var(--cc-space-px) solid var(--cc-color-border-strong);
+  background: linear-gradient(to right, var(--cc-gold-300) var(--_fill), var(--cc-neutral-300) var(--_fill));
+}
+
+.range::-moz-range-track {
+  height: var(--_track);
+  border-radius: var(--cc-radius-xs);
+  border: var(--cc-space-px) solid var(--cc-color-border-strong);
+  background: linear-gradient(to right, var(--cc-gold-300) var(--_fill), var(--cc-neutral-300) var(--_fill));
+}
+
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--_thumb);
+  height: var(--_thumb);
+  margin-top: calc((var(--_track) - var(--_thumb)) / 2 - var(--cc-space-px));
+  background: var(--cc-royal-700);
+  border: 2px solid var(--cc-gold-500);
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+  box-shadow: var(--cc-paper-1);
+}
+
+.range::-moz-range-thumb {
+  width: var(--_thumb);
+  height: var(--_thumb);
+  background: var(--cc-royal-700);
+  border: 2px solid var(--cc-gold-500);
+  border-radius: var(--cc-radius-xs);
+}
+
+.range:focus-visible {
+  outline: 3px solid var(--cc-color-focus);
+  outline-offset: 2px;
+}
+
+.test {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-3);
+}
+
+.testNote {
+  margin: 0;
+  min-height: 1.25em;
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+}
+
+@media (max-width: 30rem) {
+  .slider {
+    grid-template-columns: 4rem 1fr 2.75rem;
+  }
+}

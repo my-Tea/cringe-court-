@@ -19,6 +19,10 @@ export interface WebModeModule {
   definition: ModeDefinition;
   /** Child routes under `/<mode id>/`. */
   routes?: RouteObject[];
+  /** The landing page's primary call to action, once the mode is playable. */
+  landing?: { label: string; to: string; secondary?: { label: string; to: string } };
+  /** Where a player finds their own cases in this mode (the lobby's "Your cases" row). */
+  docket?: { label: string; to: string };
 }
 
 const discovered = import.meta.glob<WebModeModule>('./*/mode.{ts,tsx}', { eager: true, import: 'default' });

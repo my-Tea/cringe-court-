@@ -15,8 +15,8 @@ export type CastGroup = (typeof CAST_GROUPS)[number];
 export type RigGroup = 'body' | 'head' | 'armR' | 'armL';
 export const RIG_GROUPS: readonly RigGroup[] = ['body', 'head', 'armR', 'armL'];
 
-/** World units per voxel: a 100-voxel character stands 48 tall: chibi cast at desk scale (desks are 28.6), the player's eye (44) just above their heads. */
-export const CAST_SCALE = 0.48;
+/** World units per voxel: a 100-voxel character stands 58 tall, a head taller than the player's eye (48). */
+export const CAST_SCALE = 0.58;
 
 /** Row: x0 y0 z0 x1 y1 z1 colourIndex groupIndex [M00..M23 when posed]. */
 export type CastRow = readonly number[];

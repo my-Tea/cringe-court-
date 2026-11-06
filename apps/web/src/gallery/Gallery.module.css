@@ -147,21 +147,34 @@
   color: var(--cc-color-accent-text);
 }
 
+/* A specimen is a sheet of card laid on the table: chamfered, with a paper shadow. */
 .specimen {
+  --_c: var(--cc-paper-cut-lg);
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--cc-color-border);
-  border-radius: var(--cc-radius-lg);
-  overflow: hidden;
+  margin: 0;
+  filter: var(--cc-paper-drop-2);
+}
+
+.specimen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--cc-color-surface);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+  box-shadow: inset 0 0 0 1px var(--cc-color-border);
+  clip-path: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
 }
 
 .specimenLabel {
   display: flex;
   justify-content: space-between;
   gap: var(--cc-space-3);
-  padding: var(--cc-space-2) var(--cc-space-4);
-  border-bottom: 1px solid var(--cc-color-border);
-  background: var(--cc-color-surface-sunken);
+  padding: var(--cc-space-2) var(--cc-space-4) var(--cc-space-2) calc(var(--cc-space-4) + var(--cc-paper-cut-md));
+  border-bottom: 2px dashed color-mix(in srgb, var(--cc-color-frame) 55%, var(--cc-color-border));
   color: var(--cc-color-text-subtle);
   font-family: var(--cc-font-mono);
   font-size: var(--cc-text-xs);
@@ -173,10 +186,6 @@
   align-items: center;
   gap: var(--cc-space-4);
   padding: var(--cc-space-6);
-  background:
-    linear-gradient(45deg, color-mix(in srgb, var(--cc-color-text) 2.5%, transparent) 25%, transparent 25%, transparent 75%, color-mix(in srgb, var(--cc-color-text) 2.5%, transparent) 75%) 0 0 / 24px 24px,
-    linear-gradient(45deg, color-mix(in srgb, var(--cc-color-text) 2.5%, transparent) 25%, transparent 25%, transparent 75%, color-mix(in srgb, var(--cc-color-text) 2.5%, transparent) 75%) 12px 12px / 24px 24px,
-    var(--cc-color-canvas);
 }
 
 .stack {
@@ -318,7 +327,22 @@
 
 .elevationBox {
   border-color: transparent;
-  border-radius: var(--cc-radius-md);
+  border-radius: var(--cc-radius-xs);
+}
+
+.paperElevBox {
+  display: grid;
+  place-items: center;
+  gap: var(--cc-space-1);
+  width: 8rem;
+  height: 6rem;
+  border-radius: var(--cc-radius-xs);
+  background-color: var(--cc-color-surface-raised);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+  color: var(--cc-color-text-muted);
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-xs);
+  text-align: center;
 }
 
 .motionDemo {
@@ -407,4 +431,11 @@
   font-weight: var(--cc-weight-bold);
   text-decoration: none;
   text-transform: capitalize;
+}
+
+.paperLogo {
+  max-width: 22rem;
+  padding: var(--cc-space-4);
+  background: var(--cc-royal-900);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
 }

@@ -1,0 +1,173 @@
+/*
+ * PaperField (STYLE-GUIDE §9.5): label row, then a hand-trimmed cream strip.
+ * The strip's paper is a clipped pseudo-element; the strip box itself stays
+ * square so the focus ring is never clipped.
+ */
+.field {
+  display: grid;
+  gap: var(--cc-space-1_5);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  color: var(--cc-color-text);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-md);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.labelIcon {
+  width: 1.15em;
+  height: 1.15em;
+  color: var(--cc-gold-900);
+}
+
+/* On the maroon sheet the icons are gold foil with a small paper shadow. */
+[data-surface='wood'] .labelIcon {
+  color: var(--cc-gold-300);
+  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--cc-neutral-900) 45%, transparent));
+}
+
+.optional {
+  color: var(--cc-color-text-muted);
+  font-family: var(--cc-font-body);
+  font-size: var(--cc-text-sm);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.strip {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  border-radius: var(--cc-radius-sm);
+  filter: var(--cc-paper-drop-1);
+  transition: box-shadow var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+/* The cream strip: trimmed by hand, a touch of fold shading along the bottom. */
+.strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--cc-neutral-100);
+  background-image:
+    var(--cc-paper-grain),
+    linear-gradient(178deg, transparent 0 58%, color-mix(in srgb, var(--cc-neutral-900) 6%, transparent) calc(58% + 1px)),
+    linear-gradient(95deg, color-mix(in srgb, var(--cc-gold-100) 70%, transparent) 0 8%, transparent calc(8% + 1px));
+  clip-path: polygon(0.8% 8%, 30% 0, 66% 4%, 99% 0, 100% 46%, 99.2% 100%, 62% 96%, 22% 100%, 0 95%, 0.4% 50%);
+}
+
+.strip:focus-within {
+  filter: none;
+  box-shadow:
+    0 0 0 2px var(--cc-neutral-900),
+    0 0 0 5px var(--cc-color-focus);
+}
+
+.field[data-invalid] .strip::before {
+  background-image:
+    var(--cc-paper-grain),
+    linear-gradient(178deg, transparent 0 58%, color-mix(in srgb, var(--cc-neutral-900) 6%, transparent) calc(58% + 1px)),
+    linear-gradient(0deg, var(--cc-royal-700) 0 3px, transparent 3px);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 3rem;
+  padding: 0 var(--cc-space-4);
+  border: 0;
+  background: transparent;
+  color: var(--cc-neutral-900);
+  font: inherit;
+  font-size: var(--cc-text-md);
+  font-weight: 600;
+}
+
+.input::placeholder {
+  color: var(--cc-gold-900);
+  font-weight: 500;
+  opacity: 1;
+}
+
+.input:focus,
+.input:focus-visible {
+  outline: none;
+}
+
+.strip[data-has-icon] .input {
+  padding-left: var(--cc-space-2);
+}
+
+.insideIcon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: var(--cc-space-4);
+  color: var(--cc-gold-900);
+}
+
+.reveal {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-right: var(--cc-space-1);
+  border: 0;
+  border-radius: var(--cc-radius-sm);
+  background: transparent;
+  color: var(--cc-neutral-900);
+  cursor: pointer;
+}
+
+.reveal svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.reveal:hover {
+  background: color-mix(in srgb, var(--cc-neutral-900) 8%, transparent);
+}
+
+.reveal:focus-visible {
+  outline: 2px solid var(--cc-teal-900);
+  outline-offset: -2px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--cc-color-text-muted);
+  font-size: var(--cc-text-sm);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-1_5);
+  margin: 0;
+  color: var(--cc-color-danger-text);
+  font-size: var(--cc-text-sm);
+  font-weight: 700;
+}
+
+.error svg {
+  flex-shrink: 0;
+}
+
+@media (forced-colors: active) {
+  .strip {
+    border: 2px solid FieldText;
+  }
+
+  .strip:focus-within {
+    outline: 3px solid Highlight;
+  }
+}
