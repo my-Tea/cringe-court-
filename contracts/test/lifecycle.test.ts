@@ -961,3 +961,70 @@ describe("Lifecycle: phases, events and boundaries", () => {
     });
   });
 });
+
+describe("Solo with a chosen jury", () => {
+  const CASES = [
+    { jurors: 3, bond: "0.40", bonus: "0.30", price: "1.20" },
+    { jurors: 5, bond: "0.80", bonus: "0.60", price: "3.30" },
+    { jurors: 7, bond: "1.20", bonus: "0.90", price: "6.60" },
+  ];
+
+  for (const c of CASES) {
+    it(`prices and seats a jury of ${c.jurors}`, async () => {
+      const w = await deployWorld();
+      const [price, bond, bonus] = await w.court.soloPrice(c.jurors);
+      expect(price).to.equal(usdc(c.price));
+      expect(bond).to.equal(usdc(c.bond));
+      expect(bonus).to.equal(usdc(c.bonus));
+
+      await w.court.connect(w.creator).fileSoloJury(CONTENT, c.jurors);
+      const id = await w.court.caseCount();
+      const stored = await w.court.getCase(id);
+      expect(stored.jurySize).to.equal(c.jurors);
+      expect(stored.target).to.equal(usdc(c.price));
+      const terms = await w.court.caseTerms(id);
+      expect(terms.bond).to.equal(usdc(c.bond));
+      expect(terms.n).to.equal((c.jurors - 1) / 2);
+    });
+  }
+
+  it("refuses an even or oversized jury", async () => {
+    const w = await deployWorld();
+    for (const jurors of [0, 1, 2, 4, 9]) {
+      await expect(w.court.connect(w.creator).fileSoloJury(CONTENT, jurors)).to.be.revertedWithCustomError(w.court, "InvalidTerms");
+    }
+  });
+
+  it("a full jury of 5 settles: each juror gets the bond back plus the 0.60 bonus", async () => {
+    const w = await deployWorld();
+    await w.court.connect(w.creator).fileSoloJury(CONTENT, 5);
+    const id = await w.court.caseCount();
+    const seated = await fillJury(w, id);
+    expect(seated).to.have.length(5);
+    await openCourt(w, id);
+    const before = await bal(w, seated[0].address);
+    await runTrial(w, id, [0, 0, 0, 1, 1]);
+    expect(await w.court.claimable(seated[0].address)).to.equal(usdc("1.40"));
+    await drain(w);
+    expect((await bal(w, seated[0].address)) - before).to.equal(usdc("1.40"));
+  });
+
+  it("a no-show on a jury of 5: their bond pays the 0.20 to everyone else, and the books close", async () => {
+    const w = await deployWorld();
+    await w.court.connect(w.creator).fileSoloJury(CONTENT, 5);
+    const id = await w.court.caseCount();
+    const seated = await fillJury(w, id);
+    await openCourt(w, id);
+    await runTrial(w, id, [0, 1, 0, 1, "absent"]);
+    const paid = await w.court.claimable(seated[0].address);
+    expect(await w.court.claimable(seated[4].address)).to.equal(0n);
+    expect(paid).to.equal(usdc("1.00"));
+    await drain(w);
+  });
+
+  it("does not change the mode's own terms for the next case", async () => {
+    const w = await deployWorld();
+    await w.court.connect(w.creator).fileSoloJury(CONTENT, 7);
+    expect((await w.court.termsOf(0)).n).to.equal(1);
+  });
+});

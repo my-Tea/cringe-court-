@@ -1497,6 +1497,30 @@ export const cringeCourtAbi = [
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "contentHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "jurors",
+        "type": "uint8"
+      }
+    ],
+    "name": "fileSoloJury",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "caseId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "caseId",
         "type": "uint256"
@@ -2340,6 +2364,35 @@ export const cringeCourtAbi = [
     "name": "setTreasuries",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint8",
+        "name": "jurors",
+        "type": "uint8"
+      }
+    ],
+    "name": "soloPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint64",
+        "name": "bond",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint64",
+        "name": "successBonus",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

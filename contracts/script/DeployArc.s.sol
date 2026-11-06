@@ -23,7 +23,9 @@ contract DeployArc is Script, ICringeCourtTypes {
 
         vm.startBroadcast(pk);
 
-        HumanRegistry registry = new HumanRegistry(admin, admin);
+        // Reuse the live registry when one is given, so verified wallets stay verified.
+        address existing = vm.envOr("ARC_REGISTRY", address(0));
+        HumanRegistry registry = existing == address(0) ? new HumanRegistry(admin, admin) : HumanRegistry(existing);
         CringeCourt court = new CringeCourt(IERC20(USDC), registry, admin, admin, admin);
 
         court.grantRole(court.OPERATOR_ROLE(), admin);
@@ -74,7 +76,7 @@ contract DeployArc is Script, ICringeCourtTypes {
     }
 
     function _windows() internal pure returns (uint32 recruit, uint32 prep, uint32 commitW, uint32 revealW) {
-        return (1800, 3600, 1200, 600);
+        return (900, 600, 300, 180);
     }
 
     function _solo() internal pure returns (Terms memory t) {

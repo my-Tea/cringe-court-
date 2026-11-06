@@ -139,6 +139,50 @@ contract CringeCourt is ICringeCourtTypes, AccessControl, ReentrancyGuard, EIP71
         _openRecruitment(c, caseId, t);
     }
 
+    /// @notice Files a Solo case with the jury the player chose: 3, 5 or 7 seats.
+    ///         One absent bond covers the failed-trial bonus of every other juror, so
+    ///         the bond is that bonus times (jurors - 1). The success bonus is 75% of
+    ///         the bond, and the filer pays it for every seat, plus the flat fees.
+    function fileSoloJury(bytes32 contentHash, uint8 jurors) external nonReentrant returns (uint256 caseId) {
+        Terms storage base = _requireEnabled(Mode.Solo);
+        (uint8 n, uint64 bond, uint64 successBonus) = _jury(base, jurors);
+        bytes32 human = _requireParty(msg.sender, base);
+
+        caseId = _createCase(Mode.Solo, base, contentHash);
+        Terms storage t = _caseTerms[caseId];
+        t.n = n;
+        t.bond = bond;
+        t.successBonus = successBonus;
+
+        Case storage c = _cases[caseId];
+        c.jurySize = jurors;
+        c.creator = msg.sender;
+        c.creatorHuman = human;
+        c.poolHeld = CourtMath.pool(n, successBonus);
+        c.protocolFeeHeld = t.protocolFee;
+        c.aiFeeHeld = t.aiFeePerAgent;
+        c.target = c.poolHeld + c.protocolFeeHeld + c.aiFeeHeld;
+        emit CaseCreated(caseId, Mode.Solo, msg.sender, address(0), contentHash);
+
+        _collect(caseId, msg.sender, c.target, false);
+        _openRecruitment(c, caseId, t);
+    }
+
+    /// @notice What a Solo filer pays, and what each juror stakes and can earn, for a jury size.
+    function soloPrice(uint8 jurors) external view returns (uint256 price, uint64 bond, uint64 successBonus) {
+        Terms storage t = _terms[Mode.Solo];
+        uint8 n;
+        (n, bond, successBonus) = _jury(t, jurors);
+        price = uint256(CourtMath.pool(n, successBonus)) + t.protocolFee + t.aiFeePerAgent;
+    }
+
+    function _jury(Terms storage t, uint8 jurors) internal view returns (uint8 n, uint64 bond, uint64 successBonus) {
+        if (jurors != 3 && jurors != 5 && jurors != 7) revert InvalidTerms("jurors");
+        n = (jurors - 1) / 2;
+        bond = t.failedTrialBonus * (jurors - 1);
+        successBonus = (bond * 3) / 4;
+    }
+
     // ---------------------------------------------------------------------
     // Mode 2 — Versus
     // ---------------------------------------------------------------------
