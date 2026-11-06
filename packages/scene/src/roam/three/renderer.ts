@@ -59,7 +59,8 @@ export interface RoamRendererOptions {
 
 export class RoamRenderer {
   readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(58, 16 / 9, 0.6, 1400);
+  /** Minecraft's default 70° field of view: the player reads about a third of the screen tall in third person. */
+  readonly camera = new THREE.PerspectiveCamera(70, 16 / 9, 0.6, 1400);
   /** Third-person boom length after wall pull-in, eased back out. */
   #boom: number = THIRD_RIG.distance;
   readonly #controller: RoamController;
