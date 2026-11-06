@@ -49,8 +49,23 @@ const pair = (f, t, m) => [b(f, t, m), b([-t[0], f[1], f[2]], [-f[0], t[1], t[2]
 
 /* ───────────────────────────── shared anatomy ───────────────────────────── */
 
-/** Head cube with chamfered jaw and face features. */
-function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral', faceHair = null, o = C.outline }) {
+/** Per-expression face rig. `eye`: open | wide | lidded | narrow | closed.
+ *  `brow`: [inner, outer] lift in units for the -x and +x brow (+ = up), so a
+ *  V (angry) is inner-down and a worried brow is inner-up. `fx`: extras. */
+export const FACE = {
+  neutral:  { eye: 'open',   brow: [[0, 0], [0, 0]] },
+  happy:    { eye: 'open',   brow: [[1, 1], [1, 1]] },
+  angry:    { eye: 'narrow', brow: [[-1.6, 0.6], [-1.6, 0.6]], fx: ['vein'] },
+  shocked:  { eye: 'wide',   brow: [[2.2, 2.2], [2.2, 2.2]], fx: ['sweat'] },
+  laughing: { eye: 'closed', brow: [[1.4, 0.8], [1.4, 0.8]] },
+  crying:   { eye: 'open',   brow: [[1.6, -0.6], [1.6, -0.6]], fx: ['tears'] },
+  confused: { eye: 'open',   brow: [[1.8, 1.8], [-1, -0.4]], fx: ['sweat'] },
+  smug:     { eye: 'lidded', brow: [[0, 0], [1.6, 1]] },
+};
+
+/** Head cube with chamfered jaw and face features. Passing `expr` drives eyes,
+ *  brows and extras from FACE; without it the face is the legacy neutral. */
+function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral', faceHair = null, expr = null, o = C.outline }) {
   const out = [];
   const w = H.headW, lo = H.headBot, hi = H.headTop;
   const d = w;                                  // depth = width (cube head)
@@ -65,7 +80,10 @@ function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral
 
   // face plate (front of the head, slightly proud)
   const fz = -d - 0.6;
-  if (eyeStyle === 'shades') {
+  const F = expr ? FACE[expr] || FACE.neutral : null;
+  if (F) {
+    out.push(...face({ F, fz, skin, brow: hair || C.hairBr, shades: eyeStyle === 'shades', sharp: eyeStyle === 'sharp' }));
+  } else if (eyeStyle === 'shades') {
     // black pixel shades
     out.push(b([-w + 1.5, H.eyeY - 3.5, fz], [w - 1.5, H.eyeY + 3, fz + 1.4], C.ink));
     out.push(b([-w + 2.5, H.eyeY - 2.5, fz - 0.6], [-2.5, H.eyeY + 2, fz + 0.4], C.ink));
@@ -100,11 +118,88 @@ function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral
     out.push(b([-2.4, H.mouthY - 0.6, fz - 0.2], [2.4, H.mouthY + 0.8, fz + 0.7], C.white));
   } else if (mouth === 'frown') {
     out.push(b([-2, H.mouthY + 1, fz], [2, H.mouthY + 2, fz + 1], C.mouth));
+  } else if (mouth === 'grit' && expr) {
+    // clenched teeth
+    out.push(b([-3, H.mouthY - 0.6, fz], [3, H.mouthY + 1.8, fz + 1], C.mouth));
+    out.push(b([-2.4, H.mouthY - 0.2, fz - 0.2], [2.4, H.mouthY + 1.4, fz + 0.7], C.white));
+    out.push(b([-2.4, H.mouthY + 0.5, fz - 0.3], [2.4, H.mouthY + 0.7, fz + 0.6], C.mouth));
+  } else if (mouth === 'smirk' && expr) {
+    // lopsided: flat on the left, hooked up on the right
+    out.push(b([-1.8, H.mouthY, fz], [2.2, H.mouthY + 1.2, fz + 1], C.mouth));
+    out.push(b([2.2, H.mouthY + 1, fz], [3.4, H.mouthY + 2.2, fz + 1], C.mouth));
   } else {
     out.push(b([-1.8, H.mouthY, fz], [1.8, H.mouthY + 1.2, fz + 1], C.mouth));
   }
   if (faceHair) out.push(...faceHair);
   return tag('head', out);
+}
+
+/** Eyes, brows and expression extras for one FACE entry. */
+function face({ F, fz, skin, brow, shades, sharp }) {
+  const out = [];
+  const ink = '#241A22';
+  if (shades) {
+    // the shades never come off — the brows above them carry the emotion
+    out.push(b([-H.headW + 1.5, H.eyeY - 3.5, fz], [H.headW - 1.5, H.eyeY + 3, fz + 1.4], C.ink));
+    out.push(b([-H.headW + 2.5, H.eyeY - 2.5, fz - 0.6], [-2.5, H.eyeY + 2, fz + 0.4], C.ink));
+    out.push(b([2.5, H.eyeY - 2.5, fz - 0.6], [H.headW - 2.5, H.eyeY + 2, fz + 0.4], C.ink));
+    out.push(b([-3.5, H.eyeY - 2, fz - 0.4], [-1.5, H.eyeY + 0.4, fz + 0.4], C.white));
+    out.push(b([4.5, H.eyeY - 2, fz - 0.4], [6.5, H.eyeY + 0.4, fz + 0.4], C.white));
+  } else {
+    for (const sx of [-1, 1]) {
+      const ex = sx * H.eyeX, y = H.eyeY;
+      if (F.eye === 'closed') {
+        // ^ ^ arcs
+        out.push(b([ex - 2.4, y + 0.2, fz - 0.4], [ex - 0.8, y + 1.2, fz + 0.6], ink));
+        out.push(b([ex - 0.9, y + 1.1, fz - 0.4], [ex + 0.9, y + 2.2, fz + 0.6], ink));
+        out.push(b([ex + 0.8, y + 0.2, fz - 0.4], [ex + 2.4, y + 1.2, fz + 0.6], ink));
+        continue;
+      }
+      const wide = F.eye === 'wide';
+      const sw = wide ? 2.7 : 2.2;
+      const top = wide ? y + 3 : y + 2.2;
+      out.push(b([ex - sw, y - (wide ? 1.8 : 1.2), fz], [ex + sw, top, fz + 0.9], C.white));
+      if (wide) {
+        // pinprick pupils read as shock
+        out.push(b([ex - 0.8, y - 0.1, fz - 0.5], [ex + 0.8, y + 1.5, fz + 0.4], ink));
+      } else {
+        out.push(b([ex - 1.6, y - 0.6, fz - 0.3], [ex + 1.6, y + 1.8, fz + 0.6], '#5A4234'));
+        out.push(b([ex - 0.9, y - 0.2, fz - 0.5], [ex + 0.9, y + 1.4, fz + 0.4], ink));
+        out.push(b([ex - 1.5, y - 0.3, fz - 0.6], [ex - 0.4, y + 0.7, fz + 0.2], C.white));
+      }
+      // upper lid drops for narrow / lidded, and a touch for sharp-eyed characters
+      const lid = F.eye === 'lidded' ? 1.6 : F.eye === 'narrow' ? 1.1 : sharp ? 0.4 : 0;
+      if (lid) out.push(b([ex - sw - 0.2, top - lid, fz - 0.7], [ex + sw + 0.2, top + 0.1, fz + 0.5], skin === C.skin ? C.skinSh : skin));
+      out.push(b([ex - sw - 0.2, top - lid, fz - 0.8], [ex + sw + 0.2, top - lid + 0.8, fz + 0.6], ink));
+    }
+  }
+  // brows: inner + outer half per side, lifted independently so they slant
+  const by = shades ? H.eyeY + 4 : H.eyeY + 3.6;
+  for (const [i, sx] of [[0, -1], [1, 1]]) {
+    const [inner, outer] = F.brow[i];
+    const xi = sx * 0.8, xm = sx * (H.eyeX - 0.6), xo = sx * (H.eyeX + 2.6);
+    out.push(b([xi, by + inner, fz - 0.2], [xm, by + inner + 1.1, fz + 0.7], brow));
+    out.push(b([xm, by + outer, fz - 0.2], [xo, by + outer + 1.1, fz + 0.7], brow));
+  }
+  // extras
+  for (const fx of F.fx || []) {
+    if (fx === 'tears') {
+      for (const sx of [-1, 1]) {
+        const ex = sx * H.eyeX;
+        out.push(b([ex - 0.8, H.eyeY - 6, fz - 1], [ex + 0.8, H.eyeY - 1, fz - 0.2], C.cyan));
+        out.push(b([ex - 0.6, H.eyeY - 8, fz - 1], [ex + 0.6, H.eyeY - 6, fz - 0.2], C.cyanLt));
+      }
+    } else if (fx === 'sweat') {
+      out.push(b([H.headW - 1.5, H.eyeY + 1, fz - 1], [H.headW + 0.5, H.eyeY + 5, fz + 1], C.cyanLt));
+      out.push(b([H.headW - 1, H.eyeY - 0.4, fz - 1], [H.headW, H.eyeY + 1, fz + 1], C.cyan));
+    } else if (fx === 'vein') {
+      // cartoon anger mark on the forehead corner
+      const vx = -H.headW + 3, vy = H.eyeY + 6.5;
+      out.push(b([vx, vy, fz - 1], [vx + 3.4, vy + 0.9, fz - 0.2], '#D23C4A'));
+      out.push(b([vx + 1.25, vy - 1.25, fz - 1], [vx + 2.15, vy + 2.15, fz - 0.2], '#D23C4A'));
+    }
+  }
+  return out;
 }
 
 /** Torso with garment. `trim` adds gold/contrast detail. */

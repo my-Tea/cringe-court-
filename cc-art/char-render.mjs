@@ -118,20 +118,30 @@ export function renderCharacter(boxes, opts = {}) {
   // draws the face first and then paints the back of the head over it.
   faces.sort((a, b) => b.z - a.z);
 
-  const fillQuad = (pts, col) => {
-    const ys = pts.map((p) => p[1]);
-    const yA = Math.ceil(Math.min(...ys)), yB = Math.floor(Math.max(...ys));
-    for (let y = yA; y <= yB; y++) {
-      const xs = [];
-      for (let i = 0; i < 4; i++) {
-        const [ax, ay] = pts[i], [bx2, by] = pts[(i + 1) % 4];
-        if ((ay <= y && by > y) || (by <= y && ay > y)) xs.push(ax + (bx2 - ax) * ((y - ay) / (by - ay)));
+  // Depth buffer. Sorting by a quad's AVERAGE depth is not enough: a large
+  // face (the narrator's screen, a sclera) can average nearer than a small
+  // feature sitting in front of part of it, and paint over it. Rasterise each
+  // quad as two triangles with interpolated depth and keep the nearest.
+  const zbuf = new Float32Array(W * H).fill(Infinity);
+  const fillTri = (a, b2, c2, col) => {
+    const yA = Math.ceil(Math.min(a[1], b2[1], c2[1])), yB = Math.floor(Math.max(a[1], b2[1], c2[1]));
+    const xA = Math.ceil(Math.min(a[0], b2[0], c2[0])), xB = Math.floor(Math.max(a[0], b2[0], c2[0]));
+    const den = (b2[1] - c2[1]) * (a[0] - c2[0]) + (c2[0] - b2[0]) * (a[1] - c2[1]);
+    if (Math.abs(den) < 1e-9) return;
+    for (let y = Math.max(0, yA); y <= Math.min(H - 1, yB); y++) {
+      for (let x = Math.max(0, xA); x <= Math.min(W - 1, xB); x++) {
+        const l1 = ((b2[1] - c2[1]) * (x - c2[0]) + (c2[0] - b2[0]) * (y - c2[1])) / den;
+        const l2 = ((c2[1] - a[1]) * (x - c2[0]) + (a[0] - c2[0]) * (y - c2[1])) / den;
+        const l3 = 1 - l1 - l2;
+        if (l1 < -1e-6 || l2 < -1e-6 || l3 < -1e-6) continue;
+        const z = l1 * a[2] + l2 * b2[2] + l3 * c2[2];
+        const i = y * W + x;
+        // <= so that, on exact ties, the later (nearer-sorted) face still wins
+        if (z <= zbuf[i] + 1e-6) { zbuf[i] = z; c.set(x, y, col); }
       }
-      if (xs.length < 2) continue;
-      const xA = Math.ceil(Math.min(...xs)), xB = Math.floor(Math.max(...xs));
-      for (let x = xA; x <= xB; x++) c.set(x, y, col);
     }
   };
+  const fillQuad = (pts, col) => { fillTri(pts[0], pts[1], pts[2], col); fillTri(pts[0], pts[2], pts[3], col); };
   for (const f of faces) fillQuad(f.pts, f.col);
 
   // downsample

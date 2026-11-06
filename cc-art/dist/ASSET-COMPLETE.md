@@ -51,15 +51,23 @@ sleepy / sparkle), mouth (neutral / smile / grin / shout / frown / smirk / grit)
 brow tilt, blush strength, plus expression extras — tears, sweat, anger veins,
 shock lines, laugh arcs.
 
-### Known limitation: the Judge
+### The voxel face rig
 
-His **8 expressions look similar** because black sunglasses cover his eyes — his
-focal point and his joke. The differences are in the mouth and beard (shout opens
-it), but at a glance they read alike.
+The voxel heads take the expression directly: `FACE` in `vox-base.mjs` sets eye
+shape (open / wide / lidded / narrow / closed), independently slanted inner/outer
+brows, and extras (tears, sweat drop, anger vein). Mouths: neutral, grin, shout,
+frown, grit, smirk. The AI Narrator draws a per-expression pixel face on its screen.
+The player's 8 `expression/` parts use the same rig.
 
-That is faithful to the character, not a bug. If you want more separation, the
-options are: (a) let the shades lift on shocked/crying, or (b) give him expressive
-brows above the shades. Say the word and I'll do (b) — it's a 10-line change.
+Verified by hash: all 8 expression PNGs differ for every character. Before this
+pass the Judge and creator had 3 distinct faces of 8, and the narrator had 1.
+
+**The Judge** keeps his shades on (they are the joke); brows above the shades
+plus the mouth now carry the emotion. That was option (b) in the previous report.
+
+Fixed along the way: a depth-buffered renderer (the narrator used to lose an eye to
+draw order), hair masses no longer cover foreheads, open glasses rims on the clerk
+and juror, and the defense's bandage moved off his eye.
 
 ---
 
