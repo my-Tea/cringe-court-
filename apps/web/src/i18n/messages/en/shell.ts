@@ -306,6 +306,7 @@ export const shell = {
   'identity.world.detail': 'World ID · {appId} · verifier backend {host}',
   'identity.mock.label': 'Mock World ID',
   'identity.mock.detail': 'Mock World ID (demo personas)',
+  'identity.error.replayed': 'This World ID has already verified for CringeCourt, and World only allows that once. Trying again will not help.',
   'identity.error.generic': 'World ID could not finish ({code}). Please try again.',
 
   // ── ledger

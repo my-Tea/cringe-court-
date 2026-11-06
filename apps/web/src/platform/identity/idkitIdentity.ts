@@ -56,6 +56,8 @@ const NOT_VERIFIED_CODES = new Set(['credential_unavailable', 'identity_attribut
 /** Map an IDKit error code to a core ProofResult failure. */
 export function mapIdkitError(code: string): Extract<ProofResult, { ok: false }> {
   if (CANCEL_CODES.has(code)) return { ok: false, reason: 'cancelled', message: screeningCopy('cancelled') };
+  // World allows one proof per person per action, and World App refuses to make a second.
+  if (code === 'nullifier_replayed' || code === 'max_verifications_reached') return { ok: false, reason: 'error', message: t('shell.identity.error.replayed') };
   if (NOT_VERIFIED_CODES.has(code)) return { ok: false, reason: 'not-verified', message: screeningCopy('ineligible_level') };
   if (code === 'timeout' || /expired|timestamp/.test(code)) return { ok: false, reason: 'error', message: screeningCopy('expired') };
   if (code === 'connection_failed' || code === 'inclusion_proof_pending') return { ok: false, reason: 'error', message: screeningCopy('network') };

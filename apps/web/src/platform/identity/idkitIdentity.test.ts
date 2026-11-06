@@ -83,6 +83,8 @@ describe('IdkitIdentityPort', () => {
     expect(await setup({ completion: { success: false, error: 'user_rejected' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'cancelled' });
     expect(await setup({ completion: { success: false, error: 'credential_unavailable' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'not-verified' });
     expect(await setup({ completion: { success: false, error: 'generic_error' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'error' });
+    const replayed = await setup({ completion: { success: false, error: 'nullifier_replayed' } }).port.requestProof(seat);
+    expect(replayed).toMatchObject({ ok: false, message: expect.stringContaining('only allows that once') });
     expect(mapIdkitError('timeout')).toMatchObject({ reason: 'error', message: JUROR_SCREENING_COPY.expired });
     expect(mapIdkitError('world_id_4_not_available')).toMatchObject({ reason: 'not-verified' });
     expect(mapIdkitError('inclusion_proof_pending')).toMatchObject({ reason: 'error', message: JUROR_SCREENING_COPY.network });

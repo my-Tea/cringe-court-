@@ -280,6 +280,9 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       return json(res, 200, result);
     }
 
+    if (path === `${API}/chain/human` && method === 'GET') {
+      return json(res, 200, { verified: !!world?.humans.byWallet(session.persona.account) });
+    }
     if (path === `${API}/chain/attest` && method === 'POST') {
       limit(limits.world, sid, 'Too many verification requests. Wait a minute.');
       const b = await body<{ wallet?: unknown; signature?: unknown }>(req);
