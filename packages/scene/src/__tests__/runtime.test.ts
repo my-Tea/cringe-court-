@@ -1,7 +1,7 @@
 import { BASE_MODES, type SceneSignal } from '@cringe-court/core';
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { CourtroomRuntime, asScenePort } from '../index';
+import { CLOSE_UPS, CourtroomRuntime, asScenePort } from '../index';
 import { realData } from './fixtures';
 
 async function runtime(reducedMotion = false) {
@@ -62,12 +62,12 @@ describe('CourtroomRuntime (headless three.js)', () => {
     run(rt, 0.5);
     const mid = rt.camera.position.clone();
     run(rt, 1);
-    expect(rt.camera.position.distanceTo(new THREE.Vector3(0, 62, -14))).toBeLessThan(2);
+    expect(rt.camera.position.distanceTo(new THREE.Vector3(...CLOSE_UPS.close_judge.pos))).toBeLessThan(2);
     expect(mid.distanceTo(rt.camera.position)).toBeGreaterThan(5);
     const reduced = await runtime(true);
     reduced.port.camera('close_defense', 1);
     reduced.rt.update(1 / 60);
-    expect(reduced.rt.camera.position.distanceTo(new THREE.Vector3(26, 50, 18))).toBeLessThan(0.01);
+    expect(reduced.rt.camera.position.distanceTo(new THREE.Vector3(...CLOSE_UPS.close_defense.pos))).toBeLessThan(0.01);
   });
 
   it('reports unknown actors and animations instead of throwing', async () => {

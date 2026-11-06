@@ -12,6 +12,7 @@
     "guide-art": "python3 -I scripts/gen-guide-art.py"
   },
   "dependencies": {
+    "@cringe-court/ai": "*",
     "@cringe-court/audio": "*",
     "@cringe-court/core": "*",
     "@cringe-court/engine": "*",

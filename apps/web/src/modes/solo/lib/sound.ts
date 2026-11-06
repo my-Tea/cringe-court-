@@ -5,36 +5,13 @@
  * the engine honours its own mute / reduce-sound settings (`cc:audio`).
  */
 import type { AudioCueId, AudioPort } from '@cringe-court/core';
-import { createAudioEngine, type AudioEngine, type CaseAudioEvent, type CueId } from '@cringe-court/audio';
+import { createAudioEngine, isCueId, type AudioEngine, type CaseAudioEvent, type CueId } from '@cringe-court/audio';
+import { AUDIO_CUE_MAP } from '@/stage/audioCues';
 
-/** Core cue vocabulary → the audio engine's procedural recipes. Unmapped cues (voices, music) stay silent. */
-export const CUE_MAP: Readonly<Partial<Record<AudioCueId, CueId>>> = {
-  'sfx.gavel': 'gavel_strike',
-  'sfx.stamp': 'stamp',
-  'sfx.coin': 'coin',
-  'sfx.paper': 'paper',
-  'sfx.unlock': 'ballot_unlock',
-  'sfx.door-creak': 'door_creak',
-  'sfx.desk-slam': 'gavel_triple',
-  'sfx.impact': 'stamp',
-  'sfx.crowd-gasp': 'crowd_gasp',
-  'sfx.crowd-laugh': 'crowd_laugh',
-  'sfx.crowd-murmur': 'crowd_murmur',
-  'sfx.ballot-drop': 'ballot_seal',
-  'sfx.box-shut': 'ballot_seal',
-  'sfx.seal-break': 'ballot_unlock',
-  'stinger.objection': 'objection',
-  'stinger.case-open': 'gavel_triple',
-  'stinger.jury-out': 'crowd_murmur',
-  'stinger.verdict-guilty': 'verdict_guilty',
-  'stinger.verdict-not-cooked': 'verdict_not_cooked',
-  'stinger.mistrial': 'verdict_none',
-  'ui.click': 'ui_click',
-  'ui.toggle': 'ui_toggle',
-  'ui.success': 'ui_confirm',
-  'ui.error': 'ui_error',
-  'ui.notify': 'ui_toast',
-};
+/** Core cue vocabulary → the audio engine's recipes: the shared map from the stage layer (v3/p4-core). Nulls stay silent. */
+export const CUE_MAP: Readonly<Partial<Record<AudioCueId, CueId>>> = Object.fromEntries(
+  Object.entries(AUDIO_CUE_MAP).filter((e): e is [AudioCueId, CueId] => e[1] !== null && isCueId(e[1])),
+);
 
 let engine: AudioEngine | null = null;
 
