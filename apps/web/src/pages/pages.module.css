@@ -22,12 +22,37 @@
   margin-bottom: var(--cc-space-8);
 }
 
+/* "◆ Title ———": a gold diamond and a fading gold rule (style-guide section heads). */
 .eyebrow {
-  font-family: var(--cc-font-display);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  font-family: var(--cc-font-pixel);
   font-size: var(--cc-text-sm);
   letter-spacing: var(--cc-tracking-caps);
   text-transform: uppercase;
   color: var(--cc-color-accent-text);
+}
+
+.eyebrow::before,
+.eyebrow::after {
+  content: '';
+  width: 2.5rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cc-color-frame));
+}
+
+.eyebrow::after {
+  background: linear-gradient(270deg, transparent, var(--cc-color-frame));
+}
+
+.sectionHead[data-align='start'] .eyebrow::before,
+.modeHeroCopy .eyebrow::before {
+  width: 0.55rem;
+  height: 0.55rem;
+  rotate: 45deg;
+  background: var(--cc-color-frame);
+  box-shadow: inset -1px -1px 0 var(--cc-color-frame-dark);
 }
 
 .sectionTitle {
@@ -42,28 +67,19 @@
 
 /* ── Hero ──────────────────────────────────────────────────────────── */
 
+/* Sky over the courthouse: environment blues fading into the parchment, with
+   soft cream clouds (style guide: "Blues (env)"). */
 .hero {
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid var(--cc-color-border);
+  border-bottom: 3px solid var(--cc-color-frame);
+  box-shadow: 0 1px 0 var(--cc-color-frame-dark);
   background:
-    linear-gradient(180deg, transparent 60%, rgb(11 7 16 / 0.65)),
-    radial-gradient(50rem 28rem at 75% 30%, rgb(107 76 168 / 0.32), transparent 70%);
-}
-
-/* Faint voxel floor grid, receding: the courtroom tiles. */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 45% -20% -10%;
-  background-image:
-    linear-gradient(rgb(255 79 184 / 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 79 184 / 0.12) 1px, transparent 1px);
-  background-size: 48px 48px;
-  transform: perspective(500px) rotateX(62deg);
-  transform-origin: top;
-  mask-image: linear-gradient(180deg, transparent, #000 30%, #000 60%, transparent);
-  pointer-events: none;
+    radial-gradient(22rem 7rem at 72% 18%, color-mix(in srgb, var(--cc-neutral-100) 85%, transparent), transparent 70%),
+    radial-gradient(18rem 6rem at 92% 34%, color-mix(in srgb, var(--cc-neutral-100) 70%, transparent), transparent 70%),
+    radial-gradient(26rem 8rem at 48% 8%, color-mix(in srgb, var(--cc-neutral-100) 60%, transparent), transparent 70%),
+    radial-gradient(60rem 30rem at 80% 110%, color-mix(in srgb, var(--cc-royal-100) 70%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--cc-color-sky) 0%, var(--cc-color-sky-light) 38%, var(--cc-color-canvas) 78%);
 }
 
 .heroInner {
@@ -73,20 +89,46 @@
   gap: var(--cc-space-8);
   max-width: var(--cc-content-max);
   margin-inline: auto;
-  padding: var(--cc-space-12) var(--cc-gutter) var(--cc-space-16);
+  padding: var(--cc-space-12) var(--cc-gutter) var(--cc-space-12);
 }
 
 @media (min-width: 960px) {
   .heroInner {
-    grid-template-columns: 1.05fr 1fr;
-    padding-block: var(--cc-space-16) var(--cc-space-20);
+    grid-template-columns: 1fr 1.05fr;
+    padding-block: var(--cc-space-12) var(--cc-space-8);
   }
 }
 
 .heroCopy {
   display: flex;
   flex-direction: column;
-  gap: var(--cc-space-6);
+  gap: var(--cc-space-5);
+}
+
+/* The scales crest over the title, flanked by gold rules (style-guide header). */
+.crest {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  width: min(100%, 30rem);
+  color: var(--cc-gold-700);
+}
+
+.crestRule {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cc-color-frame) 30%, var(--cc-color-frame));
+  box-shadow: 0 1px 0 var(--cc-gold-100);
+}
+
+.crestRule:last-child {
+  background: linear-gradient(270deg, transparent, var(--cc-color-frame) 30%, var(--cc-color-frame));
+}
+
+.crestIcon {
+  width: 2.75rem;
+  height: 2.75rem;
+  filter: drop-shadow(1px 1px 0 var(--cc-gold-900));
 }
 
 .heroTitle {
@@ -95,21 +137,52 @@
   gap: var(--cc-space-5);
 }
 
+/* The style-guide title: heavy soft serif in maroon with a gold-and-ink extrusion. */
 .heroWordmark {
-  width: min(100%, 34rem);
-  height: auto;
-  filter: drop-shadow(0 0 28px rgb(255 79 184 / 0.35));
+  font-size: clamp(3.25rem, 2rem + 5.4vw, 6.25rem);
+  font-weight: 900;
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--cc-royal-900);
+  text-shadow:
+    0 1px 0 var(--cc-royal-700),
+    2px 3px 0 var(--cc-gold-500),
+    3px 5px 0 var(--cc-neutral-900),
+    0 10px 24px color-mix(in srgb, var(--cc-neutral-900) 25%, transparent);
+}
+
+/* "← ◆ Your Honor, Bro Is Cooked. ◆ →" */
+.heroMotto {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  font-size: var(--cc-text-2xl);
+  font-style: italic;
+  font-weight: var(--cc-weight-semibold);
+  letter-spacing: 0;
+  color: var(--cc-neutral-900);
+}
+
+.heroMotto::before,
+.heroMotto::after {
+  content: '';
+  flex: 0 1 3rem;
+  height: 2px;
+  background: var(--cc-color-frame);
 }
 
 .heroTagline {
-  font-size: var(--cc-text-4xl);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-3xl);
+  font-weight: var(--cc-weight-bold);
+  font-variation-settings: 'SOFT' 100;
   line-height: var(--cc-leading-tight);
 }
 
 .heroTagline em {
   font-style: normal;
-  color: var(--cc-color-accent);
-  text-shadow: 0 0 24px rgb(255 79 184 / 0.55);
+  color: var(--cc-color-accent-text);
 }
 
 .heroLede {
@@ -125,21 +198,56 @@
   gap: var(--cc-space-3);
 }
 
+/* Quick links on the style-guide round tiles. */
+.hud ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-5);
+  margin: var(--cc-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hudLink {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cc-space-2);
+  min-width: 4.5rem;
+  border-radius: var(--cc-radius-md);
+  color: var(--cc-color-text);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-sm);
+  font-weight: var(--cc-weight-bold);
+  font-variation-settings: 'SOFT' 100;
+  text-decoration: none;
+}
+
+.hudLink:hover {
+  color: var(--cc-color-accent-text);
+}
+
 /* ── Stage (hero art) ──────────────────────────────────────────────── */
 
 .stage {
   position: relative;
-  aspect-ratio: 5 / 4;
-  min-height: 18rem;
-  max-width: 34rem;
+  max-width: 38rem;
   width: 100%;
   margin-inline: auto;
+}
+
+.courthouse {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Soften the crop further so it melts into the sky; no drop shadow (it would outline the crop). */
+  mask-image: radial-gradient(75% 72% at 50% 50%, var(--cc-neutral-900) 62%, transparent 100%);
 }
 
 .spotlight {
   position: absolute;
   inset: -12% 18% 8%;
-  background: conic-gradient(from 180deg at 50% 0%, transparent 160deg, rgb(255 246 228 / 0.16) 172deg, rgb(255 246 228 / 0.22) 180deg, rgb(255 246 228 / 0.16) 188deg, transparent 200deg);
+  background: conic-gradient(from 180deg at 50% 0%, transparent 160deg, color-mix(in srgb, var(--cc-neutral-100) 30%, transparent) 172deg, color-mix(in srgb, var(--cc-neutral-100) 45%, transparent) 180deg, color-mix(in srgb, var(--cc-neutral-100) 30%, transparent) 188deg, transparent 200deg);
   filter: blur(6px);
   animation: sway 9s ease-in-out infinite alternate;
   transform-origin: 50% 0;
@@ -163,63 +271,26 @@
   position: absolute;
   left: 4%;
   right: 4%;
-  bottom: 4%;
-  height: 16%;
+  bottom: 2%;
+  height: 14%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(255 79 184 / 0.35), rgb(107 76 168 / 0.18) 60%, transparent);
-}
-
-.stageChar {
-  position: absolute;
-  bottom: -2%;
-  height: auto;
-  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.55));
-  z-index: 1;
-}
-
-.stageCenter {
-  left: 50%;
-  width: 52%;
-  translate: -50% 0;
-  bottom: 1%;
-  z-index: 2;
-  animation: bob 4s ease-in-out infinite;
-}
-
-.stageLeft {
-  left: -4%;
-  width: 42%;
-}
-
-.stageRight {
-  right: -4%;
-  width: 42%;
-}
-
-@keyframes bob {
-  50% {
-    translate: -50% -4px;
-  }
-}
-
-:global(:root[data-reduced-motion='true']) .stageCenter {
-  animation: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--cc-gold-900) 30%, transparent), transparent);
 }
 
 .stageImpact {
   position: absolute;
-  top: 6%;
-  right: -2%;
+  top: 2%;
+  right: 0;
   z-index: 3;
   animation-delay: 400ms;
 }
 
 .stageStamp {
   position: absolute;
-  top: 12%;
+  top: 6%;
   left: 2%;
   z-index: 3;
-  background: rgb(20 14 26 / 0.7);
+  background: color-mix(in srgb, var(--cc-neutral-100) 85%, transparent);
   animation-delay: 900ms;
 }
 
@@ -254,18 +325,23 @@
 .modeArt {
   position: relative;
   height: 11rem;
-  border-bottom: 1px solid var(--cc-color-border);
+  border-bottom: 3px solid var(--cc-color-frame);
+  border-radius: calc(var(--cc-radius-lg) - 2px) calc(var(--cc-radius-lg) - 2px) 0 0;
+  /* The colonnade from the style guide is the courtroom backdrop; a warm floor
+     glow in the mode colour grounds the cast. */
   background:
-    radial-gradient(70% 90% at 50% 100%, color-mix(in srgb, var(--_glow) 30%, transparent), transparent 70%),
-    linear-gradient(180deg, var(--cc-night-850), var(--cc-night-700));
+    radial-gradient(70% 60% at 50% 105%, color-mix(in srgb, var(--_glow) 45%, transparent), transparent 70%),
+    linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--cc-neutral-300) 80%, transparent)),
+    url('../art/guide/colonnade.webp') center 30% / cover;
   overflow: hidden;
 }
 
 .modeCard[data-accent='side'] .modeArt {
   background:
-    radial-gradient(50% 90% at 15% 100%, rgb(63 184 201 / 0.35), transparent 70%),
-    radial-gradient(50% 90% at 85% 100%, rgb(240 138 60 / 0.35), transparent 70%),
-    linear-gradient(180deg, var(--cc-night-850), var(--cc-night-700));
+    radial-gradient(50% 70% at 12% 105%, color-mix(in srgb, var(--cc-teal-700) 55%, transparent), transparent 70%),
+    radial-gradient(50% 70% at 88% 105%, color-mix(in srgb, var(--cc-royal-300) 55%, transparent), transparent 70%),
+    linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--cc-neutral-300) 80%, transparent)),
+    url('../art/guide/colonnade.webp') center 30% / cover;
 }
 
 .modeArtChar {
@@ -273,7 +349,7 @@
   bottom: -0.75rem;
   width: auto;
   height: 82%;
-  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.5));
+  filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--cc-neutral-900) 50%, transparent));
   transition: translate var(--cc-duration-slow) var(--cc-ease-emphasized);
 }
 
@@ -381,24 +457,31 @@
   flex-direction: column;
   gap: var(--cc-space-3);
   padding: var(--cc-space-6) var(--cc-space-5);
-  border: 1px solid var(--cc-color-border);
+  border: 2px solid color-mix(in srgb, var(--cc-color-frame) 55%, var(--cc-color-border));
   border-radius: var(--cc-radius-lg);
-  background: linear-gradient(180deg, var(--cc-color-surface), var(--cc-color-canvas));
+  background: linear-gradient(180deg, var(--cc-color-surface), color-mix(in srgb, var(--cc-color-surface) 60%, var(--cc-color-canvas)));
+  box-shadow: var(--cc-shadow-bevel), var(--cc-shadow-1);
 }
 
 .stepNum {
   position: absolute;
   top: var(--cc-space-4);
   right: var(--cc-space-5);
-  font-family: var(--cc-font-display);
+  font-family: var(--cc-font-pixel);
   font-size: var(--cc-text-3xl);
   line-height: 1;
-  color: var(--cc-night-600);
+  color: var(--cc-gold-700);
+  text-shadow: 1px 1px 0 var(--cc-gold-100);
 }
 
 .stepIcon {
-  width: 3rem;
-  height: 3rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0.25rem;
+  border: 2px solid var(--cc-color-frame);
+  border-radius: 32%;
+  background: var(--cc-color-canvas);
+  box-shadow: 0 0 0 1px var(--cc-color-frame-dark), 0 2px 0 var(--cc-color-frame-dark);
 }
 
 .stepTitle {
@@ -442,8 +525,9 @@
   height: 1.75rem;
   padding: 0.3rem;
   border-radius: var(--cc-radius-sm);
-  background: color-mix(in srgb, var(--cc-color-accent) 18%, transparent);
-  color: var(--cc-color-accent-text);
+  border: 2px solid var(--cc-color-frame);
+  background: var(--cc-color-accent);
+  color: var(--cc-gold-300);
 }
 
 .pillarTitle {
@@ -464,7 +548,7 @@
 
 .ctaBand {
   background:
-    radial-gradient(40rem 16rem at 100% 100%, rgb(255 79 184 / 0.18), transparent 70%),
+    radial-gradient(40rem 16rem at 100% 100%, color-mix(in srgb, var(--cc-royal-100) 60%, transparent), transparent 70%),
     var(--cc-color-surface);
 }
 
@@ -485,19 +569,22 @@
 /* ── Mode page ─────────────────────────────────────────────────────── */
 
 .modeHero {
-  --_glow: rgb(255 79 184 / 0.28);
+  --_glow: color-mix(in srgb, var(--cc-royal-100) 80%, transparent);
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid var(--cc-color-border);
-  background: radial-gradient(46rem 26rem at 78% 40%, var(--_glow), transparent 70%);
+  border-bottom: 3px solid var(--cc-color-frame);
+  box-shadow: 0 1px 0 var(--cc-color-frame-dark);
+  background:
+    radial-gradient(46rem 26rem at 78% 60%, var(--_glow), transparent 70%),
+    linear-gradient(180deg, var(--cc-color-sky-light), var(--cc-color-canvas) 70%);
 }
 
 .modeHero[data-accent='side'] {
-  --_glow: rgb(63 184 201 / 0.22);
+  --_glow: color-mix(in srgb, var(--cc-teal-300) 45%, transparent);
 }
 
 .modeHero[data-accent='highlight'] {
-  --_glow: rgb(246 199 91 / 0.2);
+  --_glow: color-mix(in srgb, var(--cc-gold-300) 45%, transparent);
 }
 
 .modeHeroInner {
@@ -534,19 +621,30 @@
 }
 
 .modeHero[data-accent='side'] .modeHeadline {
-  color: var(--cc-teal-300);
+  color: var(--cc-color-secondary-text);
 }
 
 .modeHero[data-accent='highlight'] .modeHeadline {
-  color: var(--cc-color-highlight);
+  color: var(--cc-color-highlight-shadow);
 }
 
+/* The colonnade painting in an ornate frame, with the cast in front of it. */
 .modeStage {
   position: relative;
   aspect-ratio: 16 / 11;
   max-width: 32rem;
   width: 100%;
   margin-inline: auto;
+  border: 4px solid var(--cc-color-frame);
+  border-radius: var(--cc-radius-xl);
+  background:
+    linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--cc-neutral-300) 85%, transparent)),
+    url('../art/guide/colonnade.webp') center 25% / cover;
+  box-shadow:
+    0 0 0 1px var(--cc-color-frame-dark),
+    inset 0 0 0 2px color-mix(in srgb, var(--cc-gold-100) 50%, transparent),
+    var(--cc-shadow-3);
+  overflow: hidden;
 }
 
 .modeStageChar {
@@ -554,7 +652,7 @@
   bottom: -1%;
   width: 40%;
   height: auto;
-  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.55));
+  filter: drop-shadow(0 10px 18px color-mix(in srgb, var(--cc-neutral-900) 55%, transparent));
 }
 
 .modeStageChar[data-pos='0'] {
@@ -606,11 +704,11 @@
 
 .moneyList dt {
   margin-bottom: var(--cc-space-1);
-  font-family: var(--cc-font-display);
+  font-family: var(--cc-font-pixel);
   font-size: var(--cc-text-sm);
   letter-spacing: var(--cc-tracking-wide);
   text-transform: uppercase;
-  color: var(--cc-color-highlight);
+  color: var(--cc-color-highlight-shadow);
 }
 
 .moneyList dd {

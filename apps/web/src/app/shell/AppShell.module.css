@@ -28,9 +28,13 @@
   position: sticky;
   top: 0;
   z-index: var(--cc-z-sticky);
-  border-bottom: 1px solid color-mix(in srgb, var(--cc-color-border) 70%, transparent);
-  background: color-mix(in srgb, var(--cc-color-canvas) 82%, transparent);
-  backdrop-filter: blur(12px) saturate(1.3);
+  /* Parchment bar on a gold double rule, like the frame of the style-guide sheet. */
+  border-bottom: 3px solid var(--cc-color-frame);
+  background: color-mix(in srgb, var(--cc-color-surface) 92%, transparent);
+  box-shadow:
+    0 1px 0 var(--cc-color-frame-dark),
+    0 4px 14px color-mix(in srgb, var(--cc-gold-900) 14%, transparent);
+  backdrop-filter: blur(10px);
 }
 
 .headerInner {
@@ -46,17 +50,28 @@
 .brand {
   display: inline-flex;
   align-items: center;
+  gap: var(--cc-space-2);
   border-radius: var(--cc-radius-sm);
-  transition: filter var(--cc-duration-base) var(--cc-ease-standard);
-}
-
-.brand img {
-  width: auto;
-  height: 1.6rem;
+  color: var(--cc-royal-900);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-2xl);
+  font-weight: 900;
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-decoration: none;
+  text-shadow: 1px 2px 0 var(--cc-gold-500);
 }
 
 .brand:hover {
-  filter: drop-shadow(0 0 10px rgb(255 79 184 / 0.55));
+  color: var(--cc-royal-700);
+}
+
+.brandMark {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--cc-gold-700);
+  filter: drop-shadow(1px 1px 0 var(--cc-gold-900));
 }
 
 .nav {
@@ -80,8 +95,10 @@
   padding: 0 var(--cc-space-3);
   border-radius: var(--cc-radius-sm);
   color: var(--cc-color-text-muted);
-  font-size: var(--cc-text-sm);
-  font-weight: var(--cc-weight-semibold);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-md);
+  font-weight: var(--cc-weight-bold);
+  font-variation-settings: 'SOFT' 100;
   text-decoration: none;
   transition:
     color var(--cc-duration-fast) var(--cc-ease-standard),
@@ -94,7 +111,7 @@
 }
 
 .navLink[aria-current='page'] {
-  color: var(--cc-color-text);
+  color: var(--cc-color-accent-text);
 }
 
 .navLink[aria-current='page']::after {
@@ -103,9 +120,10 @@
   left: var(--cc-space-3);
   right: var(--cc-space-3);
   bottom: 0.2rem;
-  height: 2px;
+  height: 3px;
+  border-radius: 2px;
   background: var(--cc-color-accent);
-  box-shadow: 0 0 8px var(--cc-color-accent);
+  box-shadow: 0 1px 0 var(--cc-color-frame);
 }
 
 .tools {
@@ -194,10 +212,14 @@
   outline: none;
 }
 
+/* Wood footer: the one deep band on the page, capped by the gold double rule. */
 .footer {
   margin-top: var(--cc-space-20);
-  border-top: 1px solid var(--cc-color-border);
-  background: var(--cc-color-surface-sunken);
+  border-top: 3px solid var(--cc-color-frame);
+  background:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--cc-royal-900) 22%, transparent) 0 3px, transparent 3px 22px),
+    var(--cc-color-canvas);
+  box-shadow: 0 -1px 0 var(--cc-color-frame-dark), inset 0 4px 0 color-mix(in srgb, var(--cc-gold-900) 50%, transparent);
 }
 
 .footerInner {
@@ -223,18 +245,48 @@
   font-size: var(--cc-text-sm);
 }
 
-.footerBrand img {
-  width: 11rem;
-  height: auto;
+.footerWordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  color: var(--cc-gold-300);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-2xl);
+  font-weight: 900;
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  line-height: 1;
+  text-shadow: 1px 2px 0 var(--cc-royal-900);
+}
+
+/* "TESTNET ONLY ◆ CRINGECOURT ——— YOUR HONOR, BRO IS COOKED." (style-guide footer line) */
+.signature {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-3);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xs);
+  font-weight: var(--cc-weight-bold);
+  letter-spacing: var(--cc-tracking-caps);
+  text-transform: uppercase;
+  color: var(--cc-color-accent-text);
+}
+
+.signatureRule {
+  flex: 1;
+  min-width: 2rem;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cc-color-frame), color-mix(in srgb, var(--cc-color-frame) 30%, transparent));
 }
 
 .footerHeading {
   margin-bottom: var(--cc-space-3);
-  font-family: var(--cc-font-display);
+  font-family: var(--cc-font-pixel);
   font-size: var(--cc-text-sm);
   letter-spacing: var(--cc-tracking-caps);
   text-transform: uppercase;
-  color: var(--cc-color-text-subtle);
+  color: var(--cc-color-accent-text);
 }
 
 .footerList {
@@ -270,6 +322,7 @@
   grid-column: 1 / -1;
   padding-top: var(--cc-space-6);
   border-top: 1px solid var(--cc-color-border);
+  line-height: var(--cc-leading-relaxed);
   font-size: var(--cc-text-xs);
   color: var(--cc-color-text-subtle);
 }

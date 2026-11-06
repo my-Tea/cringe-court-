@@ -1,9 +1,9 @@
 /* Global base: page canvas, type defaults, focus, selection, utilities. */
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   background: var(--cc-color-canvas);
-  scrollbar-color: var(--cc-night-500) var(--cc-night-950);
+  scrollbar-color: var(--cc-gold-700) var(--cc-gold-100);
 }
 
 body {
@@ -11,11 +11,14 @@ body {
   font-size: var(--cc-text-md);
   line-height: var(--cc-leading-normal);
   color: var(--cc-color-text);
+  /* The style-guide sheet: cream paper warmed toward peach at the edges, with a
+     faint 4px pixel weave so large areas never read as flat fill. */
   background:
-    radial-gradient(60rem 40rem at 50% -12rem, rgb(255 79 184 / 0.09), transparent 70%),
-    radial-gradient(40rem 30rem at 100% 0, rgb(107 76 168 / 0.12), transparent 70%),
+    radial-gradient(70rem 40rem at 50% -10rem, color-mix(in srgb, var(--cc-neutral-100) 85%, transparent), transparent 70%),
+    radial-gradient(60rem 50rem at 0% 100%, color-mix(in srgb, var(--cc-royal-100) 30%, transparent), transparent 70%),
+    radial-gradient(60rem 50rem at 100% 60%, color-mix(in srgb, var(--cc-royal-100) 22%, transparent), transparent 70%),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--cc-gold-700) 3%, transparent) 0 2px, transparent 2px 4px),
     var(--cc-color-canvas);
-  background-attachment: fixed;
   font-feature-settings: 'ss01' on;
 }
 
@@ -27,20 +30,33 @@ body {
   color-scheme: light;
 }
 
+[data-surface='wood'] {
+  color-scheme: dark;
+}
+
 /* Pixel art must stay crisp at every scale. */
 img[data-pixel],
 .cc-pixel {
   image-rendering: pixelated;
 }
 
+/* Display serif with the soft axis full on: the rounded, heavy old-style of the
+   style-guide title. Big headings take the maroon ink; small ones stay brown. */
 h1,
 h2,
 h3,
 h4 {
   font-family: var(--cc-font-display);
-  font-weight: var(--cc-weight-semibold);
+  font-weight: var(--cc-weight-bold);
+  font-variation-settings: 'SOFT' 100, 'WONK' 0;
   line-height: var(--cc-leading-tight);
-  letter-spacing: var(--cc-tracking-normal);
+  letter-spacing: var(--cc-tracking-tight);
+}
+
+h1,
+h2 {
+  color: var(--cc-color-accent-text);
+  font-weight: var(--cc-weight-black);
 }
 
 a {
@@ -61,7 +77,7 @@ samp {
   font-size: 0.92em;
 }
 
-/* One focus ring for the whole product: gold on night, plum on parchment.
+/* One focus ring for the whole product: deep teal on parchment, gold on wood.
    Two rings (inner canvas, outer focus) keep it visible on any background. */
 :focus-visible {
   outline: 2px solid var(--cc-color-focus);
@@ -74,8 +90,8 @@ samp {
 }
 
 ::selection {
-  background: var(--cc-neon-500);
-  color: var(--cc-night-900);
+  background: var(--cc-gold-300);
+  color: var(--cc-neutral-900);
 }
 
 /* Screen-reader-only text. */
@@ -89,6 +105,16 @@ samp {
   clip-path: inset(50%) !important;
   white-space: nowrap !important;
   border: 0 !important;
+}
+
+/* Ornament: the gold diamond used on rules, eyebrows and footers (style guide "◆"). */
+.cc-diamond {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  rotate: 45deg;
+  background: var(--cc-color-frame);
+  box-shadow: inset -1px -1px 0 var(--cc-color-frame-dark);
 }
 
 /* Numbers that carry money or time line up. */

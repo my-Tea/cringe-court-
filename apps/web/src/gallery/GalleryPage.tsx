@@ -8,6 +8,7 @@ import {
   ButtonSection,
   CardSection,
   CastSection,
+  ChromeSection,
   FeedbackSection,
   FormSection,
   OverlaySection,
@@ -32,6 +33,7 @@ const TOC: ReadonlyArray<{ group: string; items: ReadonlyArray<[string, string]>
     group: 'Components',
     items: [
       ['buttons', 'Buttons'],
+      ['chrome', 'Ornate chrome'],
       ['badges', 'Badges'],
       ['cards', 'Cards'],
       ['forms', 'Form fields'],
@@ -53,7 +55,7 @@ const TOC: ReadonlyArray<{ group: string; items: ReadonlyArray<[string, string]>
 /** Storybook-style catalogue of every token, component and state. */
 export function GalleryPage() {
   useDocumentTitle('Design gallery');
-  const [surface, setSurface] = useState<Surface>('night');
+  const [surface, setSurface] = useState<Surface>('parchment');
   const [replayKey, setReplayKey] = useState(0);
   const { reduced, setPreference } = useMotion();
 
@@ -79,16 +81,16 @@ export function GalleryPage() {
           <p className={styles.toolbarLabel}>CringeCourt design system</p>
           <h1 className={styles.title}>Design gallery</h1>
           <p className={styles.lede}>
-            Every token, component and state, live. Switch the surface to see components re-map to parchment, and toggle reduced motion
+            Every token, component and state, live. Switch the surface to see components re-map from parchment to wood, and toggle reduced motion
             to check every animation degrades to an instant state change.
           </p>
         </div>
 
         <div className={styles.toolbar} role="toolbar" aria-label="Gallery preview settings">
           <div role="group" aria-label="Preview surface" style={{ display: 'flex', gap: 'var(--cc-space-2)' }}>
-            {(['night', 'parchment'] as const).map((s) => (
+            {(['parchment', 'wood'] as const).map((s) => (
               <Button key={s} size="sm" variant={surface === s ? 'primary' : 'ghost'} aria-pressed={surface === s} onClick={() => setSurface(s)}>
-                {s === 'night' ? 'Night' : 'Parchment'}
+                {s === 'parchment' ? 'Parchment' : 'Wood'}
               </Button>
             ))}
           </div>
@@ -107,6 +109,7 @@ export function GalleryPage() {
           <IconSection />
           <h2 className={styles.groupTitle}>Components</h2>
           <ButtonSection />
+          <ChromeSection />
           <BadgeSection />
           <CardSection />
           <FormSection />
