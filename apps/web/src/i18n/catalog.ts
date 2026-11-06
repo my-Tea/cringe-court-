@@ -3,6 +3,7 @@ import { common } from './messages/en/common';
 import { domain } from './messages/en/domain';
 import { ds } from './messages/en/ds';
 import { grandJury } from './messages/en/grandJury';
+import { play } from './messages/en/play';
 import { shell } from './messages/en/shell';
 import { solo } from './messages/en/solo';
 import { trial } from './messages/en/trial';
@@ -12,7 +13,7 @@ import { versus } from './messages/en/versus';
  * The source catalog. English is the reference locale: every other locale is
  * a `LocaleMessages` (same namespaces and keys, any wording).
  */
-export const en = { common, shell, ds, trial, solo, versus, grandJury, domain, backend } as const;
+export const en = { common, shell, ds, trial, play, solo, versus, grandJury, domain, backend } as const;
 
 export type Catalog = typeof en;
 export type Namespace = keyof Catalog;
