@@ -156,6 +156,22 @@
   }
 }
 
+/* Tablets: one row of labelled tabs; icons drop out before anything wraps. */
+@media (min-width: 40.01rem) and (max-width: 64rem) {
+  .list {
+    flex-wrap: nowrap;
+    gap: var(--cc-space-1_5);
+  }
+
+  .tab {
+    padding-inline: var(--cc-space-2);
+  }
+
+  .icon:has(+ .label) {
+    display: none;
+  }
+}
+
 /* Phones: tabs fold down to their icons (the label stays as the accessible name). */
 @media (max-width: 40rem) {
   .bar {

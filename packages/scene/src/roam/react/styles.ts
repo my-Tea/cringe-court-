@@ -54,6 +54,8 @@ export const ROAM_CSS = `
 .ccr-scrim{position:absolute;inset:0;display:grid;place-items:center;background:var(--cc-color-scrim,rgb(74 58 50 / .62));pointer-events:auto;z-index:2}
 .ccr-modal{width:min(460px,calc(100% - 28px));max-height:calc(100% - 28px);overflow:auto;padding:20px;display:grid;gap:12px}
 .ccr-modal-row{display:flex;gap:8px;flex-wrap:wrap}
+.ccr-modal-row .ccr-btn{min-height:32px;flex:none}
+.ccr-modal{align-content:start}
 .ccr-field{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
 .ccr-field select{font:inherit;min-height:36px;padding:4px 8px;border:2px solid #4A3A32;background:#FFF2C7;color:#4A3A32;border-radius:0}
 .ccr-field input{width:20px;height:20px;accent-color:var(--cc-color-accent,#7A1C2E)}

@@ -13,9 +13,13 @@
 }
 
 .label {
-  font-size: var(--cc-text-sm);
-  font-weight: var(--cc-weight-semibold);
+  /* Same paper label as PaperField (STYLE-GUIDE §9), so mixed forms read as one. */
   color: var(--cc-color-text);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-md);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .required {
@@ -25,7 +29,11 @@
 
 .optional {
   margin-left: var(--cc-space-1);
+  font-family: var(--cc-font-body);
+  font-size: var(--cc-text-sm);
   font-weight: var(--cc-weight-regular);
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--cc-color-text-subtle);
 }
 

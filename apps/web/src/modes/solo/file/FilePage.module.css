@@ -56,6 +56,14 @@
 .stepTitle {
   max-width: 100%;
   justify-self: start;
+  /* The ribbon's tails hang below the band; keep the intro clear of them. */
+  margin-bottom: var(--cc-space-4);
+}
+
+@media (max-width: 30rem) {
+  .stepTitle.stepTitle {
+    font-size: var(--cc-text-xl);
+  }
 }
 
 .panelStack {

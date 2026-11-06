@@ -108,45 +108,50 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
         </Alert>
       )}
       {probe.status === 'ready' && (
-        <table className={styles.termsTable}>
-          <caption>{t('shell.connections.terms.caption')}</caption>
-          <thead>
-            <tr>
-              <th scope="col">{t('shell.connections.terms.court')}</th>
-              <th scope="col" data-num>
-                {t('shell.connections.terms.charge')}
-              </th>
-              <th scope="col" data-num>
-                {t('shell.connections.terms.bond')}
-              </th>
-              <th scope="col" data-num>
-                {t('shell.connections.terms.jurors')}
-              </th>
-              <th scope="col">{t('shell.connections.terms.check')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {probe.rows.map((r) => (
-              <tr key={r.mode}>
-                <th scope="row">{t(COURT_LABEL_KEY[r.mode])}</th>
-                <td data-num>{formatAmount(r.price)}</td>
-                <td data-num>{formatAmount(r.jurorBond)}</td>
-                <td data-num>{r.seats}</td>
-                <td>
-                  {r.matches ? (
-                    <span className={styles.match}>
-                      <Icon name="check" /> {t('shell.connections.terms.matches')}
-                    </span>
-                  ) : (
-                    <span className={styles.mismatch} title={r.diffs.join('; ')}>
-                      <Icon name="alert" /> {r.diffs.join('; ')}
-                    </span>
-                  )}
-                </td>
+        // A wide table scrolls inside its own region on phones instead of pushing the page sideways;
+        // the region takes focus so keyboard users can scroll it (WCAG 2.1.1).
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        <div className={styles.termsScroll} role="region" aria-labelledby="terms-caption" tabIndex={0}>
+          <table className={styles.termsTable}>
+            <caption id="terms-caption">{t('shell.connections.terms.caption')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('shell.connections.terms.court')}</th>
+                <th scope="col" data-num>
+                  {t('shell.connections.terms.charge')}
+                </th>
+                <th scope="col" data-num>
+                  {t('shell.connections.terms.bond')}
+                </th>
+                <th scope="col" data-num>
+                  {t('shell.connections.terms.jurors')}
+                </th>
+                <th scope="col">{t('shell.connections.terms.check')}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {probe.rows.map((r) => (
+                <tr key={r.mode}>
+                  <th scope="row">{t(COURT_LABEL_KEY[r.mode])}</th>
+                  <td data-num>{formatAmount(r.price)}</td>
+                  <td data-num>{formatAmount(r.jurorBond)}</td>
+                  <td data-num>{r.seats}</td>
+                  <td>
+                    {r.matches ? (
+                      <span className={styles.match}>
+                        <Icon name="check" /> {t('shell.connections.terms.matches')}
+                      </span>
+                    ) : (
+                      <span className={styles.mismatch} title={r.diffs.join('; ')}>
+                        <Icon name="alert" /> {r.diffs.join('; ')}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <details className={styles.body}>
