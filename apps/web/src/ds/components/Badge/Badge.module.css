@@ -1,0 +1,89 @@
+.badge {
+  --_tone: var(--cc-color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1_5);
+  min-height: 1.5rem;
+  padding: 0 var(--cc-space-2);
+  border: 1px solid color-mix(in srgb, var(--_tone) 55%, transparent);
+  border-radius: var(--cc-radius-sm);
+  background: color-mix(in srgb, var(--_tone) 14%, transparent);
+  color: var(--_tone);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xs);
+  font-weight: var(--cc-weight-medium);
+  letter-spacing: var(--cc-tracking-caps);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.solid {
+  background: var(--_tone);
+  border-color: var(--_tone);
+  color: var(--cc-color-canvas);
+}
+
+.dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.pulse::before {
+  animation: pulse 1.6s var(--cc-ease-standard) infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+:global(:root[data-reduced-motion='true']) .pulse::before {
+  animation: none;
+}
+
+.neutral {
+  --_tone: var(--cc-color-text-muted);
+}
+
+.accent {
+  --_tone: var(--cc-color-accent-text);
+}
+
+.highlight {
+  --_tone: var(--cc-color-highlight);
+}
+
+.success {
+  --_tone: var(--cc-color-success-text);
+}
+
+.danger {
+  --_tone: var(--cc-color-danger-text);
+}
+
+.info {
+  --_tone: var(--cc-color-info-text);
+}
+
+.sideA {
+  --_tone: var(--cc-color-side-a);
+}
+
+.sideB {
+  --_tone: var(--cc-color-side-b);
+}
+
+/* The permanent TESTNET badge (D14): hazard-striped so it never reads as decoration. */
+.testnet {
+  --_tone: var(--cc-color-highlight);
+  border: 1px solid var(--cc-color-highlight);
+  background:
+    repeating-linear-gradient(-45deg, rgb(246 199 91 / 0.22) 0 6px, transparent 6px 12px),
+    rgb(246 199 91 / 0.08);
+  color: var(--cc-color-highlight);
+}
