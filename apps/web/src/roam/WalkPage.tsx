@@ -1,6 +1,6 @@
 import { Courtroom, useCourtroom } from '@cringe-court/scene/react';
 import { BASE_MODES } from '@cringe-court/core';
-import { BEAT_IDS, MockRemotePlayers, QUALITY_LEVELS, type BeatId, type PlayerRole, type QualityLevel, type RoamController, type SpawnId, type VerdictKind } from '@cringe-court/scene/roam';
+import { BEAT_IDS, MockRemotePlayers, QUALITY_LEVELS, type BeatId, type PerspectiveChoice, type PlayerRole, type QualityLevel, type RoamController, type SpawnId, type VerdictKind } from '@cringe-court/scene/roam';
 import { RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
 import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
@@ -8,6 +8,7 @@ import { paths } from '@/app/routes';
 import { Alert, Button, EmptyState, PaperButtonLink, Spinner, useReducedMotion } from '@/ds';
 import { t, type MessageKey } from '@/i18n';
 import { appAudio } from '@/platform/audio';
+import { readPerspective, writePerspective } from '@/roam/perspectivePref';
 import { roamStrings } from '@/trial/roamStrings';
 import { canRoam } from '@/trial/trialView';
 import styles from './WalkPage.module.css';
@@ -134,6 +135,7 @@ function WalkSandbox() {
   const strings = roamStrings();
   const [view, setView] = useState<'roam' | 'menu'>('roam');
   const [quality, setQuality] = useState<QualityLevel>(params.quality);
+  const [perspective, setPerspective] = useState<PerspectiveChoice>(() => readPerspective());
   const [verdict, setVerdict] = useState<VerdictKind>('guilty');
   const [running, setRunning] = useState<BeatId | null>(null);
   const [renderer, setRenderer] = useState<unknown>(null);
@@ -180,7 +182,7 @@ function WalkSandbox() {
           {view === 'menu' ? (
             <MenuView onBack={() => setView('roam')} />
           ) : roam.status === 'ready' ? (
-            <RoamCourtroom controller={roam.controller} data={roam.data} quality={quality} onQualityChange={setQuality} autoQuality={params.auto} strings={strings} touch={params.touch} onExit={() => setView('menu')} onRenderer={params.debug ? setRenderer : undefined} />
+            <RoamCourtroom controller={roam.controller} data={roam.data} quality={quality} onQualityChange={setQuality} perspective={perspective} onPerspectiveChange={(p) => { writePerspective(p); setPerspective(p); }} autoQuality={params.auto} strings={strings} touch={params.touch} onExit={() => setView('menu')} onRenderer={params.debug ? setRenderer : undefined} />
           ) : roam.status === 'error' ? (
             <Alert tone="danger" title={t('trial.walk.error')}>
               {roam.error.message}
