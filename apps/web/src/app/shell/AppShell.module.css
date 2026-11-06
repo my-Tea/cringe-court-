@@ -126,18 +126,10 @@
   color: var(--cc-royal-900);
 }
 
-/* Mid widths: the testnet notice stays in the footer and every court page. */
-@media (max-width: 72rem) {
-  .badgeButton {
-    display: none;
-  }
-}
-
 @media (max-width: 40rem) {
   .brandWide,
   .badgeButton,
-  .header .sound,
-  .gear {
+  .cta {
     display: none;
   }
 

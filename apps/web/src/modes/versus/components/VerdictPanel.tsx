@@ -1,5 +1,6 @@
 import { formatUsdc, type CaseNumber, type Hex } from '@cringe-court/core';
 import { claimable, claimedBy, disclose, receiptFor, roleLabel, seatsOf, sideLabel, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
+import { useEffect, useRef } from 'react';
 import { Alert, Badge, Button, Card, CardBody, CardHeader, CardTitle, DialogueBox, Icon, Portrait, Receipt, Spinner, Stamp } from '@/ds';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
@@ -48,8 +49,15 @@ export function ClaimCard({ c, caseNumber }: { c: VersusCase; caseNumber: CaseNu
 }
 
 export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
-  // The verdict sting fires from CasePage, once, when the case moves into its verdict.
+  const { audio } = useVersus();
   const s = c.state;
+  const announced = useRef(false);
+  const kind = s.stage === 'verdict' || s.stage === 'share' || s.stage === 'appeal' ? s.verdict.kind : 'no-verdict';
+  useEffect(() => {
+    if (announced.current) return;
+    announced.current = true;
+    audio.handle({ type: 'verdict.read', outcome: kind === 'ballot-0' ? 'side-a' : kind === 'ballot-1' ? 'side-b' : 'no-verdict' });
+  }, [audio, kind]);
   if (s.stage !== 'verdict' && s.stage !== 'share' && s.stage !== 'appeal') return null;
 
   const v = s.verdict;

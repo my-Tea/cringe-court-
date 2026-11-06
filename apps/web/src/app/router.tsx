@@ -19,8 +19,6 @@ export const routes: RouteObject[] = [
       { path: 'court', element: <HomePage /> },
       { path: 'leaderboard', element: <LeaderboardPage /> },
       { path: 'how-to-play', element: <HowToPlayPage /> },
-      // Settings probes the ledger (viem) and identity adapters: its own chunk.
-      { path: 'settings', lazy: async () => ({ Component: (await import('@/pages/settings/SettingsPage')).SettingsPage }) },
       { path: 'solo', children: [{ index: true, element: <ModePage id="solo" /> }, ...modeChildRoutes('solo')] },
       { path: 'versus', children: [{ index: true, element: <ModePage id="versus" /> }, ...modeChildRoutes('versus')] },
       { path: 'grand-jury', children: [{ index: true, element: <ModePage id="grand-jury" /> }, ...modeChildRoutes('grand-jury')] },

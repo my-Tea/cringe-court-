@@ -8,8 +8,7 @@
  * A real build swaps these for the 0G / Arc / World adapters behind the same ports.
  */
 import { usdc, type AudioPort, type Hex } from '@cringe-court/core';
-import { MemoryChain, MemorySaltVault, testAddress } from '@cringe-court/core/testing';
-import { createMockIdentity } from '@/platform/identity/mockIdentity';
+import { MemoryChain, MemorySaltVault, MockIdentity, testAddress } from '@cringe-court/core/testing';
 import { soloAudioPort } from './sound';
 import { DemoCounsel, NpcJury, SoloSession, TeaserQuota, fromJson, memoryQuotaStore, toJson, type QuotaStore, type SoloSnapshot } from '@cringe-court/modes-solo';
 
@@ -65,7 +64,7 @@ export function createDemoCourt(options: DemoCourtOptions = {}): DemoCourt {
   const jury = new NpcJury({
     chainFor: (a) => chain.as(a),
     nullifierFor: async (a, n) => {
-      const r = await createMockIdentity(a).requestProof({ action: 'accept-jury-seat', signal: `case:${n}:seat` });
+      const r = await new MockIdentity({ human: a }).requestProof({ action: 'accept-jury-seat', signal: `case:${n}:seat` });
       if (!r.ok) throw new Error(r.message);
       return r.proof.nullifierHash;
     },

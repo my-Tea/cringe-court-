@@ -5,7 +5,6 @@ import { Alert, Badge, Button, Countdown, ErrorState, PaperButton, PaperPanel, P
 import { jurorArt, sceneArt } from '../lib/art';
 import type { DemoClock } from '../lib/demoCourt';
 import { SoloIcon } from '../lib/SoloIcon';
-import { useDeadlineCues } from '@/platform/audio';
 import { caseSound } from '../lib/sound';
 import { SoundToggle } from '../lib/SoundToggle';
 import { JURY_PACING, JURY_PACING_FAST, useJuryDirector } from './useJuryDirector';
@@ -90,10 +89,6 @@ export function JuryStage({ session, snap, clock }: JuryStageProps) {
     }
     prev.current = { seated, sealed, opened };
   }, [seated, sealed, opened]);
-
-  // Deadline warnings for whichever window is open (once per second, last 30 s).
-  const endsAt = t.step === 'commit' ? t.commitEndsAt : t.step === 'reveal' ? t.revealEndsAt : t.step === 'recruiting' ? t.recruitEndsAt : null;
-  useDeadlineCues(endsAt ? endsAt * 1000 : null, now);
 
   const announce =
     t.step === 'recruiting'

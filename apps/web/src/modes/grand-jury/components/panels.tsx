@@ -223,6 +223,7 @@ function BallotForm({ detail }: { detail: CaseDetail }) {
     if (choice === null) return;
     const r = await seal.run(choice);
     if (r.ok) {
+      sound({ type: 'ballot.committed' });
       toast({ tone: 'success', title: 'Ballot sealed', description: 'Keep your Secret Verdict Scroll. You will open it in the next window.' });
     }
   };
@@ -298,6 +299,7 @@ function RevealForm({ detail }: { detail: CaseDetail }) {
     e.preventDefault();
     const r = await reveal.run(detail.viewer.hasSalt ? undefined : scroll);
     if (r.ok) {
+      sound({ type: 'ballot.revealed' });
       toast({ tone: 'success', title: 'Scroll opened', description: `Your vote for ${detail.ballot[r.value]} is counted. Your bond comes back at settlement.` });
     }
   };
@@ -343,6 +345,7 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
   const swear = async () => {
     const r = await accept.run();
     if (r.ok) {
+      sound({ type: 'juror.seated', index: detail.seats.filled });
       toast({ tone: 'success', title: 'You are sworn in', description: `Bond of ${formatUsdc(detail.terms.bondPerJuror)} posted. Come back when the court is in session.` });
     }
   };
