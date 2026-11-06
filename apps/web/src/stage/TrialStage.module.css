@@ -5,6 +5,18 @@
 
 .screen {
   position: relative;
+  /* papercraft (STYLE-GUIDE §9.11): the stage is mounted on gold card, corners trimmed */
+  padding: 6px;
+  filter: var(--cc-paper-drop-3);
+}
+
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(155deg, var(--cc-gold-300) 0 40%, var(--cc-gold-500) 40% 80%, var(--cc-gold-700) 80%);
+  clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
 }
 
 .frame {
@@ -13,9 +25,8 @@
   max-height: 78vh;
   width: 100%;
   overflow: hidden;
-  border-radius: var(--cc-radius-xl);
   background: var(--cc-neutral-900);
-  box-shadow: var(--cc-shadow-3), 0 0 0 1px var(--cc-color-border);
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
   isolation: isolate;
 }
 
@@ -62,12 +73,12 @@
   font-size: var(--cc-text-xs);
   letter-spacing: var(--cc-tracking-caps);
   text-transform: uppercase;
-  padding: var(--cc-space-1) var(--cc-space-3);
-  border-radius: var(--cc-radius-pill);
-  background: color-mix(in srgb, var(--cc-neutral-900) 72%, transparent);
+  /* folded paper tags: maroon card, lit upper half, notched ends */
+  padding: var(--cc-space-1) var(--cc-space-4);
+  background-color: var(--cc-paper-maroon-deep);
+  background-image: var(--cc-paper-grain), linear-gradient(180deg, color-mix(in srgb, var(--cc-royal-700) 70%, transparent) 0 50%, transparent 50%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.5em) 50%, 100% 100%, 0 100%, 0.5em 50%);
   color: var(--cc-gold-100);
-  backdrop-filter: blur(6px);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc-gold-100) 18%, transparent);
 }
 
 .testnet {
@@ -98,6 +109,7 @@
 
 .dialogue {
   position: absolute;
+  z-index: 1;
   inset: auto var(--cc-space-4) var(--cc-space-4);
   max-width: 52rem;
   margin-inline: auto;
@@ -116,13 +128,28 @@
   font-size: var(--cc-text-sm);
   min-height: 2.5rem;
   padding: 0 var(--cc-space-4);
-  border-radius: var(--cc-radius-pill);
-  border: 1px solid var(--cc-color-border-strong);
-  background: var(--cc-color-surface);
+  /* paper chips: square-cut card, a darker card edge underneath, press = depress */
+  border: 0;
+  border-radius: var(--cc-radius-xs);
+  background-color: var(--cc-color-surface);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-plate);
+  box-shadow: inset 0 0 0 1px var(--cc-color-border-strong), 0 3px 0 var(--cc-color-border-strong);
   color: var(--cc-color-text);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  transition: translate var(--cc-duration-fast) var(--cc-ease-press), box-shadow var(--cc-duration-fast) var(--cc-ease-press);
+}
+
+.control:active:not(:disabled),
+.speedOption:active {
+  translate: 0 2px;
+  box-shadow: inset 0 0 0 1px var(--cc-color-border-strong), 0 1px 0 var(--cc-color-border-strong);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--cc-color-focus);
+  outline-offset: 3px;
 }
 
 .control:hover:not(:disabled),
@@ -133,6 +160,7 @@
 .control:disabled {
   color: var(--cc-color-disabled-text);
   background: var(--cc-color-disabled-surface);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -161,9 +189,9 @@
 }
 
 .speedOn {
-  background: var(--cc-color-accent);
+  background-color: var(--cc-color-accent);
   color: var(--cc-color-on-accent);
-  border-color: transparent;
+  box-shadow: 0 3px 0 var(--cc-color-accent-shadow);
 }
 
 .speedOn:hover {
@@ -171,10 +199,17 @@
 }
 
 .transcript {
-  border-radius: var(--cc-radius-lg);
-  background: var(--cc-color-surface);
-  box-shadow: 0 0 0 1px var(--cc-color-border);
+  /* the court record: a cream sheet with trimmed corners, grain and a paper shadow */
+  background-color: var(--cc-color-surface);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+  clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+  box-shadow: inset 0 0 0 1px var(--cc-color-border);
   padding: var(--cc-space-3) var(--cc-space-4);
+}
+
+.transcript summary:focus-visible {
+  outline: 2px solid var(--cc-color-focus);
+  outline-offset: -2px;
 }
 
 .transcript summary {
@@ -201,8 +236,8 @@
   grid-template-columns: 9.5rem 1fr;
   gap: var(--cc-space-3);
   padding: var(--cc-space-2) var(--cc-space-3);
-  border-radius: var(--cc-radius-md);
-  border-left: 3px solid var(--cc-color-border-strong);
+  border-left: 4px solid var(--cc-color-border-strong);
+  background: color-mix(in srgb, var(--cc-color-surface-sunken) 55%, transparent);
 }
 
 .lineItem[data-bench='0'] {
@@ -221,7 +256,6 @@
 @media (max-width: 40rem) {
   .frame {
     aspect-ratio: 4 / 5;
-    border-radius: var(--cc-radius-lg);
   }
   .dialogue {
     position: static;

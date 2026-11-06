@@ -19,6 +19,7 @@
   text-transform: uppercase;
   white-space: nowrap;
   isolation: isolate;
+  filter: var(--cc-paper-drop-2);
 }
 
 .impact::before,
@@ -39,8 +40,10 @@
   translate: 0.18em 0.22em;
 }
 
+/* The plate is a cut-out starburst of card: grain and a folded facet catch the light. */
 .impact::after {
-  background: var(--_plate);
+  background-color: var(--_plate);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-gem);
 }
 
 .text {
@@ -99,5 +102,15 @@
   100% {
     scale: 1;
     rotate: 0deg;
+  }
+}
+
+:global(:root[data-reduced-motion='true']) .animate {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(:root:not([data-reduced-motion])) .animate {
+    animation: none;
   }
 }

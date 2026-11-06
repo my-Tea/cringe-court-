@@ -1,48 +1,90 @@
-/* The visual-novel dialogue box: the style-guide parchment frame (gold band,
-   dark-gold line, maroon top rule), a maroon speaker plate, typewriter text. */
+/*
+ * The visual-novel dialogue box, in paper (STYLE-GUIDE §9.11): a cream sheet
+ * with a torn top edge laid on a gold backing sheet, a maroon name tag folded
+ * over the top edge, and the speaker's portrait mounted in a gold octagon.
+ * Sheets are pseudo-elements so the Skip button's focus ring is never clipped.
+ */
 .box {
   position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--cc-space-4);
   align-items: start;
+  margin: 0;
   padding: var(--cc-space-5);
   padding-top: var(--cc-space-6);
-  border: 3px solid var(--cc-gold-500);
-  border-radius: var(--cc-radius-xl);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--cc-gold-300) 14%, transparent), transparent 4rem),
-    var(--cc-neutral-100);
-  box-shadow:
-    0 0 0 1px var(--cc-gold-900),
-    inset 0 4px 0 var(--cc-royal-900),
-    var(--cc-shadow-bevel),
-    var(--cc-shadow-3);
+  filter: var(--cc-paper-drop-3);
 }
 
+.box::before,
+.box::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  clip-path: polygon(0 0.6rem, 4% 0.2rem, 11% 0.55rem, 19% 0.1rem, 28% 0.45rem, 37% 0.05rem, 47% 0.5rem, 56% 0.15rem, 66% 0.5rem, 75% 0.1rem, 84% 0.45rem, 92% 0.05rem, 100% 0.4rem, 100% calc(100% - var(--cc-paper-cut-md)), calc(100% - var(--cc-paper-cut-md)) 100%, var(--cc-paper-cut-md) 100%, 0 calc(100% - var(--cc-paper-cut-md)));
+}
+
+/* gold backing sheet, nudged down-right so it shows as a second layer */
+.box::before {
+  inset: 4px -5px -6px 5px;
+  z-index: -2;
+  background: linear-gradient(160deg, var(--cc-gold-300) 0 45%, var(--cc-gold-500) 45%);
+}
+
+.box::after {
+  inset: 0;
+  z-index: -1;
+  background-color: var(--cc-neutral-100);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+}
+
+/* Maroon name tag: a strip folded over the sheet's top edge, notched at the end. */
 .speaker {
   position: absolute;
   top: 0;
-  left: var(--cc-space-5);
-  translate: 0 -55%;
-  padding: var(--cc-space-1) var(--cc-space-3);
-  border: 2px solid var(--cc-gold-500);
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-royal-900);
-  box-shadow: 0 0 0 1px var(--cc-gold-900), 0 2px 0 var(--cc-neutral-900);
+  left: var(--cc-space-4);
+  translate: 0 -50%;
+  z-index: 1;
+  isolation: isolate;
+  padding: var(--cc-space-1) var(--cc-space-6) var(--cc-space-1) var(--cc-space-3);
   color: var(--cc-gold-100);
   font-family: var(--cc-font-display);
   font-size: var(--cc-text-sm);
-  font-weight: var(--cc-weight-bold);
-  font-variation-settings: 'SOFT' 100;
-  letter-spacing: var(--cc-tracking-normal);
+  letter-spacing: var(--cc-tracking-wide);
+  text-transform: uppercase;
+}
+
+.speaker::before,
+.speaker::after {
+  content: '';
+  position: absolute;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.8em) 50%, 100% 100%, 0 100%);
+}
+
+.speaker::before {
+  inset: 0;
+  z-index: -1;
+  background-color: var(--cc-royal-900);
+  background-image: var(--cc-paper-grain), linear-gradient(180deg, color-mix(in srgb, var(--cc-royal-700) 75%, transparent) 0 50%, transparent 50%);
+}
+
+/* the fold: the tag's tail tucks behind the sheet, darker */
+.speaker::after {
+  inset: auto auto -6px 0;
+  z-index: -2;
+  width: 10px;
+  height: 8px;
+  background: var(--cc-paper-maroon-deep);
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
 }
 
 .text {
   min-height: 3lh;
+  margin: 0;
   font-size: var(--cc-text-lg);
   line-height: var(--cc-leading-normal);
-  color: var(--cc-color-text);
+  color: var(--cc-neutral-900);
 }
 
 .caret {
@@ -51,7 +93,8 @@
   height: 1em;
   margin-left: 2px;
   vertical-align: -0.12em;
-  background: var(--cc-color-accent);
+  background: var(--cc-royal-700);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
   animation: caret 0.9s steps(2, jump-none) infinite;
 }
 
@@ -65,6 +108,12 @@
   animation: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  :global(:root:not([data-reduced-motion])) .caret {
+    animation: none;
+  }
+}
+
 .skip {
   position: absolute;
   right: var(--cc-space-3);
@@ -74,5 +123,19 @@
 @media (max-width: 479px) {
   .box {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (forced-colors: active) {
+  .box {
+    border: 2px solid CanvasText;
+    filter: none;
+  }
+
+  .box::before,
+  .box::after,
+  .speaker::before,
+  .speaker::after {
+    display: none;
   }
 }

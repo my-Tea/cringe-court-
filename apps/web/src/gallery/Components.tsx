@@ -191,7 +191,7 @@ export function BadgeSection() {
 
 export function CardSection() {
   return (
-    <GallerySection id="cards" title="Cards" description="Default and raised cards have gold-tinted edges; ornate is the style-guide frame (gold band, hairline rule, pixel corner knots); parchment adds a maroon top rule for in-world documents; sunken is a well. Interactive cards lift; the title link covers the card.">
+    <GallerySection id="cards" title="Cards" description="Default and raised cards have gold-tinted edges; ornate is the mounted sheet (gold mount, hairline rule, gold photo-corners); parchment adds a maroon top rule for in-world documents; sunken is a well. Interactive cards lift; the title link covers the card.">
       <Specimen label="Tones" layout="grid3">
         {(['default', 'raised', 'ornate', 'parchment', 'sunken'] as const).map((tone) => (
           <Card key={tone} tone={tone}>

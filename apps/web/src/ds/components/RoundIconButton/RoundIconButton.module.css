@@ -2,6 +2,12 @@
  * Style-guide icon buttons: a rounded maroon tile (squircle) with a gold rim,
  * a dark-gold outer line, a soft top highlight and a hard bottom edge.
  */
+/*
+ * Icon buttons are cut gems of card (the Discord / Google tiles in the paper
+ * reference): an octagon of coloured paper in a gold rim, with a folded facet.
+ *   ::before  the rim octagon        ::after  the face octagon, inset, with facets
+ * The pseudo-elements are clipped; the button is not, so the focus ring is whole.
+ */
 .button {
   --_face: var(--cc-royal-700);
   --_face-edge: var(--cc-royal-900);
@@ -10,46 +16,58 @@
   --_rim: var(--cc-gold-500);
   --_size: 3.5rem;
   --_lift: 3px;
+  --_oct: 30%;
+  --_poly: polygon(var(--_oct) 0, calc(100% - var(--_oct)) 0, 100% var(--_oct), 100% calc(100% - var(--_oct)), calc(100% - var(--_oct)) 100%, var(--_oct) 100%, 0 calc(100% - var(--_oct)), 0 var(--_oct));
 
   position: relative;
+  isolation: isolate;
   display: inline-grid;
   place-items: center;
   flex-shrink: 0;
   width: var(--_size);
   height: var(--_size);
   padding: 0;
-  border: 3px solid var(--_rim);
-  border-radius: 32%;
-  background: radial-gradient(85% 85% at 40% 30%, var(--_face) 35%, var(--_face-edge));
-  box-shadow:
-    0 0 0 1px var(--cc-gold-900),
-    inset 0 2px 0 color-mix(in srgb, var(--cc-gold-100) 30%, transparent),
-    inset 0 -2px 0 color-mix(in srgb, var(--cc-neutral-900) 35%, transparent),
-    0 var(--_lift) 0 1px var(--cc-gold-900),
-    0 calc(var(--_lift) + 4px) 10px color-mix(in srgb, var(--cc-neutral-900) 28%, transparent);
+  border: 0;
+  border-radius: var(--cc-radius-xs);
+  background: none;
+  filter: var(--cc-paper-drop-2);
   color: var(--_glyph);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    transform var(--cc-duration-fast) var(--cc-ease-standard),
-    box-shadow var(--cc-duration-fast) var(--cc-ease-standard),
+    transform var(--cc-duration-fast) var(--cc-ease-press),
+    filter var(--cc-duration-fast) var(--cc-ease-standard),
     color var(--cc-duration-fast) var(--cc-ease-standard);
 }
 
-/* Inner gold hairline, as on the reference tiles. */
-.button::before {
+.button::before,
+.button::after {
   content: '';
   position: absolute;
-  inset: 3px;
-  border: 1px solid color-mix(in srgb, var(--cc-gold-300) 45%, transparent);
-  border-radius: 30%;
+  inset: 0;
+  z-index: -2;
   pointer-events: none;
+  clip-path: var(--_poly);
+}
+
+.button::before {
+  background-color: var(--_rim);
+  background-image: var(--cc-paper-grain);
+}
+
+.button::after {
+  inset: 3px;
+  z-index: -1;
+  background-color: var(--_face);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-gem), radial-gradient(85% 85% at 40% 30%, transparent 35%, color-mix(in srgb, var(--_face-edge) 70%, transparent));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc-gold-300) 45%, transparent);
 }
 
 .glyph {
   width: 52%;
   height: 52%;
   filter: drop-shadow(1px 1px 0 var(--_glyph-shadow));
+  z-index: 1;
 }
 
 .gold {
@@ -83,22 +101,19 @@
 
 .button:active {
   transform: translateY(var(--_lift));
-  box-shadow:
-    0 0 0 1px var(--cc-gold-900),
-    inset 0 2px 0 color-mix(in srgb, var(--cc-neutral-900) 25%, transparent),
-    0 0 0 1px var(--cc-gold-900);
+  filter: var(--cc-paper-drop-1);
 }
 
 .button[aria-pressed='true'] {
   --_rim: var(--cc-gold-300);
   --_face: var(--cc-royal-900);
   transform: translateY(2px);
+  filter: var(--cc-paper-drop-1);
 }
 
 .button:focus-visible {
   outline: 2px solid var(--cc-color-focus);
   outline-offset: 4px;
-  border-radius: 32%;
 }
 
 @media (forced-colors: active) {

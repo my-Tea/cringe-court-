@@ -155,3 +155,31 @@
     display: none;
   }
 }
+
+/* Phones: tabs fold down to their icons (the label stays as the accessible name). */
+@media (max-width: 40rem) {
+  .bar {
+    gap: var(--cc-space-2);
+    padding-inline: var(--cc-space-2);
+  }
+
+  .list {
+    flex-wrap: nowrap;
+    gap: var(--cc-space-1_5);
+  }
+
+  .tab {
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0 var(--cc-space-2);
+  }
+
+  .icon + .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
