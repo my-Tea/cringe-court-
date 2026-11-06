@@ -1,5 +1,7 @@
 /* Global base: page canvas, type defaults, focus, selection, utilities. */
 
+@import './paper.css';
+
 html {
   color-scheme: light;
   background: var(--cc-color-canvas);
@@ -11,14 +13,19 @@ body {
   font-size: var(--cc-text-md);
   line-height: var(--cc-leading-normal);
   color: var(--cc-color-text);
-  /* The style-guide sheet: cream paper warmed toward peach at the edges, with a
-     faint 4px pixel weave so large areas never read as flat fill. */
+  /* Papercraft backdrop: a big sheet of crumpled cream card. Soft pulp mottling
+     and fine grain over the parchment, warmed toward peach at the edges, with a
+     few broad crumple facets (light planes and shade planes) so the page itself
+     reads as folded paper. */
   background:
-    radial-gradient(70rem 40rem at 50% -10rem, color-mix(in srgb, var(--cc-neutral-100) 85%, transparent), transparent 70%),
-    radial-gradient(60rem 50rem at 0% 100%, color-mix(in srgb, var(--cc-royal-100) 30%, transparent), transparent 70%),
-    radial-gradient(60rem 50rem at 100% 60%, color-mix(in srgb, var(--cc-royal-100) 22%, transparent), transparent 70%),
-    repeating-linear-gradient(0deg, color-mix(in srgb, var(--cc-gold-700) 3%, transparent) 0 2px, transparent 2px 4px),
+    var(--cc-paper-grain),
+    var(--cc-paper-mottle),
+    conic-gradient(from 200deg at 18% 30%, color-mix(in srgb, var(--cc-neutral-100) 30%, transparent) 0 70deg, transparent 70deg 190deg, color-mix(in srgb, var(--cc-gold-700) 6%, transparent) 190deg 260deg, transparent 260deg),
+    conic-gradient(from 20deg at 78% 64%, color-mix(in srgb, var(--cc-gold-700) 5%, transparent) 0 80deg, transparent 80deg 200deg, color-mix(in srgb, var(--cc-neutral-100) 26%, transparent) 200deg 280deg, transparent 280deg),
+    radial-gradient(60rem 50rem at 0% 100%, color-mix(in srgb, var(--cc-royal-100) 34%, transparent), transparent 70%),
+    radial-gradient(60rem 50rem at 100% 0%, color-mix(in srgb, var(--cc-royal-100) 26%, transparent), transparent 70%),
     var(--cc-color-canvas);
+  background-attachment: scroll, scroll, fixed, fixed, fixed, fixed, scroll;
   font-feature-settings: 'ss01' on;
 }
 
@@ -42,21 +49,23 @@ img[data-pixel],
 
 /* Display serif with the soft axis full on: the rounded, heavy old-style of the
    style-guide title. Big headings take the maroon ink; small ones stay brown. */
+/* Paper display face: one heavy weight (Lilita One has no bold, so never ask
+   for one: synthetic bold smears the cut edges). Big headings take the maroon
+   ink; small ones stay brown. */
 h1,
 h2,
 h3,
 h4 {
   font-family: var(--cc-font-display);
-  font-weight: var(--cc-weight-bold);
-  font-variation-settings: 'SOFT' 100, 'WONK' 0;
+  font-weight: 400;
+  font-synthesis: none;
   line-height: var(--cc-leading-tight);
-  letter-spacing: var(--cc-tracking-tight);
+  letter-spacing: 0.01em;
 }
 
 h1,
 h2 {
   color: var(--cc-color-accent-text);
-  font-weight: var(--cc-weight-black);
 }
 
 a {
@@ -107,14 +116,15 @@ samp {
   border: 0 !important;
 }
 
-/* Ornament: the gold diamond used on rules, eyebrows and footers (style guide "◆"). */
+/* Ornament: the gold diamond used on rules, eyebrows and footers (style guide "◆"),
+   now a folded paper gem: lit top-left half, shaded bottom-right half. */
 .cc-diamond {
   display: inline-block;
   width: 0.55em;
   height: 0.55em;
   rotate: 45deg;
-  background: var(--cc-color-frame);
-  box-shadow: inset -1px -1px 0 var(--cc-color-frame-dark);
+  background: linear-gradient(135deg, var(--cc-gold-300) 0 50%, var(--cc-gold-700) 50%);
+  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--cc-neutral-900) 30%, transparent));
 }
 
 /* Numbers that carry money or time line up. */
