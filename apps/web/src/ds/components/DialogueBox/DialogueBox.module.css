@@ -1,0 +1,72 @@
+/* The visual-novel dialogue box (ui/dialogue_box.png): parchment, burgundy
+   frame, gold rule, speaker plate, typewriter text. */
+.box {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--cc-space-4);
+  align-items: start;
+  padding: var(--cc-space-5);
+  padding-top: var(--cc-space-6);
+  border: 2px solid var(--cc-burgundy-800);
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-color-canvas);
+  box-shadow:
+    inset 0 5px 0 var(--cc-gold-500),
+    0 0 0 2px var(--cc-gold-700),
+    var(--cc-shadow-3);
+}
+
+.speaker {
+  position: absolute;
+  top: 0;
+  left: var(--cc-space-5);
+  translate: 0 -55%;
+  padding: var(--cc-space-1) var(--cc-space-3);
+  border: 2px solid var(--cc-gold-500);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-burgundy-800);
+  color: var(--cc-cream-150);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-sm);
+  letter-spacing: var(--cc-tracking-wide);
+}
+
+.text {
+  min-height: 3lh;
+  font-size: var(--cc-text-lg);
+  line-height: var(--cc-leading-normal);
+  color: var(--cc-color-text);
+}
+
+.caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: var(--cc-color-accent);
+  animation: caret 0.9s steps(2, jump-none) infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+:global(:root[data-reduced-motion='true']) .caret {
+  animation: none;
+}
+
+.skip {
+  position: absolute;
+  right: var(--cc-space-3);
+  bottom: var(--cc-space-2);
+}
+
+@media (max-width: 479px) {
+  .box {
+    grid-template-columns: 1fr;
+  }
+}
