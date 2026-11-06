@@ -131,7 +131,8 @@ async function ensureArc(provider: EIP1193Provider, arc: NonNullable<PlatformCon
 
 function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
   const chain = { ...arcTestnet, rpcUrls: { default: { http: [arc.rpcUrl] } } };
-  const publicClient = createPublicClient({ chain, transport: http(arc.rpcUrl, { retryCount: 0 }) });
+  // The public RPC rate-limits hard: group reads into one call, and wait out a 429 instead of failing.
+  const publicClient = createPublicClient({ chain, batch: { multicall: { wait: 40 } }, transport: http(arc.rpcUrl, { retryCount: 4, retryDelay: 500 }) });
   const addresses = { court: arc.court, usdc: arc.usdc, registry: arc.registry };
   const readOnly = createViemChainPort({ publicClient, addresses, chainId: BigInt(arc.chainId) });
   const explorerTx = (hash: Hex) => `${ARC_EXPLORER}${hash}`;

@@ -35,9 +35,28 @@ export function StakePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [priceFailed, setPriceFailed] = useState(false);
+  const [priceTry, setPriceTry] = useState(0);
+
+  // One at a time: the public RPC refuses bursts. Prices never change on a page, so one good read is enough.
   useEffect(() => {
-    void Promise.all(JURIES.map(async (j) => [j, await ledger.port.soloPrice(j)] as const)).then((all) => setPrices(Object.fromEntries(all)));
-  }, [ledger]);
+    let live = true;
+    setPriceFailed(false);
+    void (async () => {
+      try {
+        for (const j of JURIES) {
+          const p = await ledger.port.soloPrice(j);
+          if (!live) return;
+          setPrices((all) => ({ ...all, [j]: p }));
+        }
+      } catch {
+        if (live) setPriceFailed(true);
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [ledger, priceTry]);
 
   const readLevel = useCallback(async () => {
     if (wallet.account) setLevel(await ledger.humanLevel!(wallet.account));
@@ -138,6 +157,16 @@ export function StakePage() {
         <Alert tone="danger" title={t('solo.live.stake.failed', { message: error })} live="assertive">
           {null}
         </Alert>
+      ) : null}
+      {priceFailed ? (
+        <div className={styles.actions}>
+          <p className={styles.hint} role="alert">
+            {t('solo.live.stake.priceFailed')}
+          </p>
+          <PaperButton variant="maroon" onClick={() => setPriceTry((n) => n + 1)}>
+            {t('solo.live.stake.retry')}
+          </PaperButton>
+        </div>
       ) : null}
       <div className={styles.actions}>{action}</div>
       <div className={styles.row}>

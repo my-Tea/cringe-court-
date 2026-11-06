@@ -11,7 +11,7 @@ import { questionOf } from '../arcLib';
 import styles from '../GrandJury.module.css';
 
 const CHIPS: readonly Usdc[] = [micro(100_000n), micro(500_000n), micro(1_000_000n)];
-const POLL_MS = 8000;
+const POLL_MS = 20000;
 
 async function publishCase(): Promise<void> {
   const config = platformConfig.backend;
@@ -51,7 +51,9 @@ export function ArcDocketPage() {
     first()
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setOpening(false));
-    const poll = setInterval(() => void load().catch(() => undefined), POLL_MS);
+    const poll = setInterval(() => {
+      if (!document.hidden) void load().catch(() => undefined);
+    }, POLL_MS);
     return () => clearInterval(poll);
   }, [load]);
 

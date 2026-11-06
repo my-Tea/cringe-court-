@@ -15,7 +15,7 @@ import styles from './live.module.css';
 
 const SUMMON: readonly MessageKey[] = ['solo.live.trial.summon.0', 'solo.live.trial.summon.1', 'solo.live.trial.summon.2', 'solo.live.trial.summon.3'];
 const SUMMON_MS = 2400;
-const JURY_POLL_MS = 8000;
+const JURY_POLL_MS = 20000;
 
 /** Page three: the script is written now, after the stake, and played once. */
 export function TrialPage() {
@@ -98,7 +98,9 @@ function JuryWait({ live, caseNumber }: { live: LiveCase; caseNumber: string }) 
 
   useEffect(() => {
     load();
-    const id = setInterval(load, JURY_POLL_MS);
+    const id = setInterval(() => {
+      if (!document.hidden) load();
+    }, JURY_POLL_MS);
     return () => clearInterval(id);
   }, [load]);
 

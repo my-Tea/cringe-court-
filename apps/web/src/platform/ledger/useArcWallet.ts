@@ -2,7 +2,7 @@ import type { Hex, Usdc } from '@cringe-court/core';
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { appLedger } from './appLedger';
 
-const POLL_MS = 5000;
+const POLL_MS = 15000;
 
 interface WalletState {
   account: Hex | null;
@@ -39,7 +39,10 @@ export function useArcWallet() {
   useEffect(() => {
     if (!account) return;
     void readBalance().catch(() => undefined);
-    const poll = setInterval(() => void readBalance().catch(() => undefined), POLL_MS);
+    // Hidden tabs stay quiet: several open tabs add up against the RPC's rate limit.
+    const poll = setInterval(() => {
+      if (!document.hidden) void readBalance().catch(() => undefined);
+    }, POLL_MS);
     return () => clearInterval(poll);
   }, [account]);
 

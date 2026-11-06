@@ -194,6 +194,8 @@ export const solo = {
   'live.stake.faucet': 'Get test USDC',
   'live.stake.go': 'Stake {amount} and start the trial',
   'live.stake.approve': 'Confirm in MetaMask…',
+  'live.stake.priceFailed': 'Arc is busy, so the prices did not load. Closing other CringeCourt tabs helps.',
+  'live.stake.retry': 'Try again',
   'live.stake.back': 'Change my confession',
   'live.stake.balance': 'Your wallet: {amount}',
   'live.stake.failed': 'That did not go through: {message}',
