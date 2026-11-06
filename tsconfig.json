@@ -26,12 +26,6 @@
       "path": "./packages/modes-versus"
     },
     {
-      "path": "./packages/net"
-    },
-    {
-      "path": "./apps/server"
-    },
-    {
       "path": "./apps/web"
     },
     {

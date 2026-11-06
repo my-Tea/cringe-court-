@@ -6,9 +6,10 @@ import { gamepadInput, lookDelta } from '../input';
 import type { RoamData } from '../load';
 import { AutoQuality, QUALITY, type QualityLevel } from '../quality';
 import { RoamRenderer } from '../three/renderer';
-import { BeatChip, Callout, ControlLegend, Dialogue, ExhibitPanel, PauseMenu, Prompt, TopBar } from './Hud';
+import { BeatChip, Callout, ControlLegend, Dialogue, Dock, ExhibitPanel, Onboarding, PauseMenu, Prompt, TopBar } from './Hud';
 import { ensureRoamStyles } from './styles';
 import { RoamStringsProvider, resolveRoamStrings, type RoamStrings } from './strings';
+import { readOnboarded, writeOnboarded } from './onboarding';
 import { TouchControls } from './TouchControls';
 import { useRoamSnapshot } from './useRoamCourtroom';
 
@@ -36,6 +37,8 @@ export interface RoamCourtroomProps {
   children?: ReactNode;
   /** Called with the renderer once it exists (debug / screenshots). */
   onRenderer?: (r: RoamRenderer) => void;
+  /** Open the controls legend at start. Default false: the Controls button and the onboarding card cover it. */
+  controlsOpen?: boolean;
 }
 
 function Driver({ controller, renderer, pixelated, auto, onDowngrade }: { controller: RoamController; renderer: RoamRenderer; pixelated: boolean; auto: AutoQuality | null; onDowngrade: (q: QualityLevel) => void }) {
@@ -94,6 +97,7 @@ export function RoamCourtroom({
   style,
   children,
   onRenderer,
+  controlsOpen = false,
 }: RoamCourtroomProps) {
   ensureRoamStyles();
   const S = resolveRoamStrings(strings);
@@ -101,12 +105,21 @@ export function RoamCourtroom({
   const snap = useRoamSnapshot(controller);
   const [quality, setQuality] = useState<QualityLevel>(initialQuality);
   const [pixelated, setPixelated] = useState(initialPixelated);
-  const [engaged, setEngaged] = useState(false);
+  const [engaged, setEngagedState] = useState(false);
+  const [onboarded, setOnboarded] = useState(readOnboarded);
+  // Engaging (clicking in, pressing a key) or dismissing the card is remembered: it never comes back over a hearing.
+  const setEngaged = useCallback((on: boolean) => {
+    setEngagedState(on);
+    if (on) {
+      setOnboarded(true);
+      writeOnboarded();
+    }
+  }, []);
   const [locked, setLocked] = useState(false);
   const [autoNote, setAutoNote] = useState<string | null>(null);
   const [isTouch, markTouch] = useCoarsePointer(touch);
-  // The legend starts open on desktop; on phones it would cover the room (the buttons are self-explanatory).
-  const [legend, setLegend] = useState(() => !isTouch);
+  // The legend starts closed (B4): open it would sit over the hearing. The Controls button and the onboarding card point to it.
+  const [legend, setLegend] = useState(controlsOpen);
 
   const renderer = useMemo(() => new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller, quality: initialQuality }), [data, controller]);
   useEffect(() => () => renderer.dispose(), [renderer]);
@@ -178,7 +191,7 @@ export function RoamCourtroom({
       document.removeEventListener('pointerlockchange', onChange);
       document.removeEventListener('mousemove', onMove);
     };
-  }, [controller]);
+  }, [controller, setEngaged]);
   const engagedRef = useRef(engaged);
   engagedRef.current = engaged;
 
@@ -198,9 +211,11 @@ export function RoamCourtroom({
     } catch {
       /* pointer lock unavailable (iframe, headless): keyboard turning still works */
     }
-  }, [focusRoot, isTouch]);
+  }, [focusRoot, isTouch, setEngaged]);
 
-  const showCapture = !engaged && !isTouch && !snap.paused;
+  const cinematic = snap.control === 'cinematic';
+  // Non-blocking onboarding (B4): a corner card, never during a cinematic beat, gone once dismissed or used.
+  const showOnboarding = !engaged && !onboarded && !isTouch && !snap.paused && !snap.exhibit && !cinematic && !legend;
 
   return (
     <div
@@ -218,7 +233,9 @@ export function RoamCourtroom({
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'CANVAS') {
-          if (!isTouch && engaged && !locked && !snap.paused) capture();
+          // Clicking the room captures the mouse, except during a cinematic beat (the camera is not yours yet).
+          if (!isTouch && !locked && !snap.paused && !cinematic) capture();
+          else focusRoot();
         }
       }}
     >
@@ -249,31 +266,23 @@ export function RoamCourtroom({
           {legend && !snap.paused ? <ControlLegend touch={isTouch} onClose={() => setLegend(false)} /> : null}
           <Prompt snap={snap} touch={isTouch} />
           <Callout snap={snap} />
-          <Dialogue snap={snap} touch={isTouch} />
-          {isTouch && !snap.paused && !snap.exhibit ? <TouchControls controller={controller} prompt={snap.focus?.prompt ?? null} /> : null}
-          {showCapture ? (
-            <div className="ccr-capture">
-              <div className="ccr-panel ccr-capture-card">
-                <div className="ccr-capture-title ccr-pixel">{S.captureTitle}</div>
-                <p>{S.captureMouse}</p>
-                <p>{S.captureKeyboard((cap) => <kbd className="ccr-key">{cap}</kbd>)}</p>
-                <div className="ccr-modal-row" style={{ justifyContent: 'center' }}>
-                  <button type="button" className="ccr-btn" onClick={capture}>
-                    {S.captureClick}
-                  </button>
-                  <button
-                    type="button"
-                    className="ccr-btn ccr-btn--ghost"
-                    onClick={() => {
-                      setEngaged(true);
-                      focusRoot();
-                    }}
-                  >
-                    {S.captureKeyboardOnly}
-                  </button>
-                </div>
-              </div>
-            </div>
+          <Dock snap={snap} touch={isTouch} />
+          <Dialogue snap={snap} touch={isTouch} tapToContinue={isTouch && cinematic} onAdvance={() => controller.advanceDialogue()} />
+          {/* B5: no joystick or buttons over a cinematic beat; they come back when the camera is yours. */}
+          {isTouch && !snap.paused && !snap.exhibit && !cinematic ? <TouchControls controller={controller} prompt={snap.focus?.prompt ?? null} /> : null}
+          {showOnboarding ? (
+            <Onboarding
+              onCapture={capture}
+              onKeyboard={() => {
+                setEngaged(true);
+                focusRoot();
+              }}
+              onDismiss={() => {
+                setOnboarded(true);
+                writeOnboarded();
+                focusRoot();
+              }}
+            />
           ) : null}
           <ExhibitPanel snap={snap} controller={controller} restoreFocus={focusRoot} />
           <PauseMenu

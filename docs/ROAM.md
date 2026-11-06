@@ -90,9 +90,16 @@ gives the same path at 30, 60 or 144 fps. The camera interpolates between steps.
 | Pause / release mouse | `Esc` or `P` | — | `II` | Start |
 
 - **Click to capture the mouse.** `Esc` releases it, and losing the lock opens the
-  pause menu. The first screen also offers **Use keyboard only**, because arrows
-  can turn and walk without a mouse.
-- **The control legend** shows by default on desktop and starts hidden on phones.
+  pause menu. A first-visit card in the top-right corner (not a modal) offers
+  **Click to look around**, **Use keyboard only** and **Got it**. It never shows
+  during a cinematic beat. It goes away for good (`localStorage`
+  `cc:roam-onboarded`) once you dismiss it, click in, or press a movement key.
+- **The control legend** starts closed everywhere (`controlsOpen` opens it). The
+  **Controls** button in the top bar toggles it.
+- **Narrow rooms (≤ 560 px, a container query):** the dialogue docks as a
+  sheet *below* the 3D view, which shrinks to make room, so nothing covers the
+  action. The touch joystick and buttons are hidden during cinematic beats;
+  tapping the line finishes it or moves on.
 - **Skip to menu view** (top right and in the pause menu) calls `onExit`. The
   sandbox uses it to switch to the existing non-roam 3D courtroom view, which
   has a "Back to walking" button that takes focus.
@@ -145,18 +152,23 @@ Options are the controller options plus `fetcher`.
 - `children`: your own overlay, drawn above the HUD
 - `onRenderer`
 
-Seats: `defendant`, `witness`, `gallery-left`, `gallery-right`, `lobby-bench`.
-Spawns: `lobby`, `doorway`, `aisle`, `well`, `defendant`, `witness`,
-`jury-view`, `bench-front`.
+Seats: `defendant`, `prosecution`, `witness`, `jury-box`, `gallery-left`,
+`gallery-right`, `lobby-bench`. Spawns: `lobby`, `doorway`, `aisle`, `well`,
+`defendant`, `prosecution`, `witness`, `jury-box`, `jury-view`, `bench-front`.
+
+Controller options for a hearing: `role` (seat by role, below), `jurors` (how
+many jurors sit, the player included: Solo and Versus 3, Grand Jury 7; default 7)
+and `pace` (`standard` | `highlights` | `full`). Live controls: `setPace`,
+`setFastForward`.
 
 ### Interactables
 
 The focus rule: a ray from the eye that hits an interactable's hull wins, nearest
 first. Otherwise the best-aligned item inside a 0.3 rad cone wins. Range is
 measured eye to target. The focused item gets a pulsing gold outline and a prompt
-("E: Take the stand"). There are 27 interactables:
+("E: Take the stand"). There are 32 interactables:
 
-- **Seats:** Take the stand, Sit at defendant's table, the gallery pews, the lobby bench.
+- **Seats:** Take the stand, Sit at defendant's table, Sit at the prosecution table, the gallery pews, the lobby bench.
 - **Talk:** Approach the bench, plus every counsel, bailiff, juror and spectator.
 - **Exhibits A, B and C:** open a paper exhibit card.
 - **Inspect:** the locked street doors, the sunglasses bust, globes, the docket board, the desk bell, the ballot box.
@@ -165,9 +177,13 @@ NPC barks cycle without repeats (`dialogue.ts`), with the judge's sunglasses jok
 
 ### Beats
 
-Every beat begins the same way: `control → cinematic`, then auto-seat at the
-defendant's table. The camera eases to whoever is speaking, the beat runs, and
-control comes back as `look` (seated; move or press `E` to stand).
+Every beat begins the same way: `control → cinematic`, then auto-seat **by
+role** (`ROLE_SEAT`): the defendant and Side B at the defendant's table, Side A
+(the filer) at the prosecution table, a juror in the jury box (slot 2: front
+row, gallery end) and a spectator in the gallery. The camera eases to whoever is
+speaking, the beat runs, and control comes back as `look` (seated; move or press
+`E` to stand). Mode lines replace the built-in ones exactly once per beat. A
+finished line leaves with its beat, so it never opens the next one.
 
 | Beat | What happens |
 | --- | --- |
@@ -175,8 +191,23 @@ control comes back as `look` (seated; move or press `E` to stand).
 | `opening` | Spotlight mood; the judge, the prosecution, then the defence. |
 | `counsel-arguing` | Tense mood; an OBJECTION! callout and stinger; the judge says "Order!" with the gavel. |
 | `jury-deliberating` | A JURY IS OUT callout; jurors talk among themselves; murmur. |
-| `verdict` | The defendant stands. The verdict mood (guilty / acquitted / mistrial) and a verdict callout (custom text via `verdictText`). Jurors and gallery react (cheer, shock, facepalm). You get free look to watch them. |
+| `verdict` | Parties stand (jurors and spectators stay seated, and the judge addresses "the parties"). The verdict mood (guilty / acquitted / mistrial) and a verdict callout (custom text via `verdictText`). Jurors and gallery react (cheer, shock, facepalm). You get free look to watch them. |
 
+- **Pace** (`pace.ts`, every constant in one table):
+
+  | Pace | Typewriter | Hold after a line | Looks/waits | Lines kept | Typical Solo hearing |
+  | --- | --- | --- | --- | --- | --- |
+  | `standard` (default) | 60 cps | 1.0 s + 14 ms/char, max 2.8 s | ×0.7 | all | ≈ 63 s |
+  | `highlights` | 60 cps | same | ×0.6 | max(2, ⌈n/3⌉) per beat: the first line plus the punchiest | ≈ 41 s |
+  | `full` (the original) | 48 cps | 1.4 s + 25 ms/char | ×1 | all | ≈ 92 s |
+
+  `FAST_FORWARD` (3×) speeds up hearing time only. `estimateSeconds(scripts,
+  pace)` predicts a hearing's length; a test holds it within 5 % of a watched
+  run, so hosts such as the Versus commit window can size against it. Hearing
+  time keeps real time on slow devices (frames up to 1 s count in full;
+  physics still caps at 0.25 s). Nothing skips the verdict: the HUD and the
+  trial bar hide Skip during it, and Skip to the verdict passes every beat
+  *except* the verdict.
 - **The gavel** shakes the screen (not with reduced motion), flashes the lights
   and emits `gavel` plus the `sfx.gavel` cue.
 - **`lines`** replaces the built-in dialogue: each speaker change adds a camera
@@ -246,7 +277,7 @@ Publishing your own player: call `controller.playerState()` at your send rate.
   with world-space UVs on one shared 16×16 pixel grid (`TEXEL = 2` units).
   Minecraft face shading is baked into vertex colours; Lambert lighting sits on top.
   Nothing static is re-uploaded.
-- **Cast:** 12 NPCs, each a four-node rig (body, head, two arms). Geometry is
+- **Cast:** 16 NPCs (7 jurors; the ones not in this hearing are hidden and not animated), each a four-node rig (body, head, two arms). Geometry is
   cached per model and posture, with one shared material.
 - **Pixel render:** the canvas drawing buffer itself is the low-res target (DPR
   = `pixelHeight / cssHeight`: 200 / 270 / 360 lines for low / medium / high),
@@ -258,6 +289,11 @@ Publishing your own player: call `controller.playerState()` at your send rate.
 - **Auto-downgrade:** `AutoQuality` (EMA frame time, 2 s warm-up, 3 s of frames
   over 20 ms) steps down one level and never back up, so it can't oscillate.
   The pause menu says when it happened.
+- **Lighting mood** is blended and re-applied only while a mood change or a gavel
+  flash is in progress. A settled room no longer recolours nine lights and
+  allocates sixteen `THREE.Color`s each frame. NPC specs are looked up by id
+  from a map (it used to be a linear search per NPC per frame). Neither change
+  was measured on a GPU.
 - **Shadow toggles:** quality changes only toggle the light's `castShadow`; the
   renderer's shadow map stays enabled. Toggling `renderer.shadowMap.enabled` at
   runtime left un-recompiled materials and rendered a blank frame in testing.
@@ -319,8 +355,14 @@ and `node packages/scene/scripts/roam-shots/sheet.mjs` (`OUT` sets the output di
   SwiftShader, which is a software rasteriser. It is slow enough that
   AutoQuality drops to *low* within seconds, which is why the screenshots
   disable it. The 60 fps target rests on the budget above, not on a measurement.
-- **The jury box seats three, like the existing staging.** The art's box is too
-  narrow for two tiers, so Grand Jury's seven jurors still need a layout decision.
+- **The jury box seats seven** (`world/jury.ts`). The cutaway's single row of three
+  was replaced by a two-tier box along the right wall, lengthened toward the well
+  (z −70 to +10): three seats on the floor (slots 0–2, filled first) and four on
+  a riser 17.4 higher (slots 3–6), staggered. A test checks that every back-row
+  face clears the front-row heads from the well, both counsel tables, the
+  bench front and the jury viewpoint. The wall pilasters that stood inside the
+  old box are gone. Counsel Chaos stands at the gallery end of the box, out of
+  the defendant's sightline.
 - **Chibi characters are big next to the room.** Courtroom props were built for
   60-unit people and the cast stands 48, so some framings crowd the view.
   Counsel staging was tuned so they never block the judge or jury sightlines

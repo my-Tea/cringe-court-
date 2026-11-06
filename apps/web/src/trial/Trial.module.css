@@ -1,4 +1,6 @@
 .frame {
+  /* Every mode's hearing clears the sticky header when scrolled to (B15). */
+  scroll-margin-top: calc(4rem + var(--cc-space-2) + var(--cc-space-6));
   display: flex;
   flex-direction: column;
   gap: var(--cc-space-3);
@@ -47,8 +49,11 @@
 }
 
 @media (max-width: 40rem) {
-  .canvas {
-    aspect-ratio: 3 / 4;
+  /* Tall on phones: the dialogue docks inside the room, under the 3D view (B5).
+     Two classes, so it beats the room's own injected height. */
+  .roam .canvas {
+    aspect-ratio: auto;
+    height: min(76svh, 38rem);
   }
 }
 
@@ -81,7 +86,39 @@
 
 .roamActions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--cc-space-2);
+  min-width: 0;
+}
+
+.pace {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  font-size: var(--cc-text-sm);
+  font-weight: var(--cc-weight-semibold);
+}
+
+.pace select {
+  min-height: 2.25rem;
+  padding: 0 var(--cc-space-2);
+  border: 2px solid var(--cc-gold-500);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-royal-900);
+  color: var(--cc-gold-100);
+  font: inherit;
+}
+
+/* Phones: the room gets the height (the dialogue docks inside it), the bar wraps instead of clipping (B5). */
+@media (max-width: 40rem) {
+  .roamBar {
+    padding: var(--cc-space-2) var(--cc-space-3);
+  }
+
+  .roamActions {
+    width: 100%;
+  }
 }
 
 /* The bar is a wood surface (data-surface), so ghost buttons take its light ink. */

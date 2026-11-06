@@ -20,6 +20,13 @@ export const trial = {
   'roam.replay': 'Replay hearing',
   'roam.fullScreen': 'Full screen',
   'roam.exitFullScreen': 'Exit full screen',
+  'roam.fastForward': 'Fast-forward',
+  'roam.skipToVerdict': 'Skip to the verdict',
+  'roam.pace.label': 'Pace',
+  'roam.pace.standard': 'Standard',
+  'roam.pace.highlights': 'Highlights',
+  'roam.pace.full': 'Full',
+  'roam.pace.hint': 'Highlights plays the key lines only. The verdict always plays in full.',
 
   // Walk page (sandbox)
   'walk.menuViewLabel': 'The courtroom from the entrance (menu view).',
@@ -34,7 +41,7 @@ export const trial = {
   'walk.building': 'Building the courtroom…',
   'walk.controls': 'Sandbox controls',
   'walk.beats.title': 'Trial beats',
-  'walk.beats.hint': "Each beat seats you at the defendant's table and takes the camera while someone speaks.",
+  'walk.beats.hint': "Each beat seats you where your role sits (here, the defendant's table) and takes the camera while someone speaks.",
   'walk.beats.item': '{number}. {label}',
   'walk.verdict': 'Verdict',
   'walk.verdict.guilty': 'Guilty',
@@ -74,6 +81,7 @@ export const trial = {
   'hud.zone.defendantTable': "Defendant's table",
   'hud.zone.prosecutionTable': 'Prosecution table',
   'hud.zone.witnessStand': 'Witness stand',
+  'hud.zone.juryBox': 'Jury box',
   'hud.zone.none': 'Courthouse',
 
   // Roam HUD: frame
@@ -84,6 +92,7 @@ export const trial = {
   'hud.keyInteract': 'E',
   'hud.continueTouch': '▶ tap ✋ to continue',
   'hud.continueKey': '▶ E to continue',
+  'hud.continueTap': '▶ tap to continue',
 
   // Roam HUD: controls legend (<k> marks a key cap)
   'hud.controls.title': 'Controls',
@@ -133,6 +142,7 @@ export const trial = {
   'hud.capture.keyboard': 'Keyboard only? Press any movement key: arrows walk and turn, <k>E</k> interacts.',
   'hud.capture.click': 'Click to look around',
   'hud.capture.keyboardOnly': 'Use keyboard only',
+  'hud.capture.dismiss': 'Got it',
 
   // Roam HUD: touch controls
   'hud.touch.pause': 'Pause',

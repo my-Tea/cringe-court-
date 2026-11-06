@@ -24,7 +24,7 @@ const hud = (p) =>
     prompt: document.querySelector('.ccr-prompt')?.textContent?.trim() ?? '',
     dialogue: document.querySelector('.ccr-dialogue')?.textContent?.trim().slice(0, 80) ?? '',
     legend: Boolean(document.querySelector('.ccr-legend')),
-    capture: Boolean([...document.querySelectorAll('.ccr-capture-title')].length),
+    capture: Boolean(document.querySelector('.ccr-capture-title, .ccr-onboard')),
   }));
 
 async function openWalk(p, rec) {

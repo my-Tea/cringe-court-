@@ -5,6 +5,7 @@
  */
 import type { AudioCueId } from '@cringe-court/core';
 import { BUILTIN_LINES, VERDICT_TEXT } from './dialogue';
+import { DEFAULT_PACE, HEARING_PACE, highlightLines, linesKept, stepSeconds, type PaceSpec } from './pace';
 import type { BeatId, BeatOptions, BeatStep, DialogueLine, VerdictKind } from './types';
 
 const VERDICT_MOOD = { guilty: 'guilty', 'not-cooked': 'acquitted', 'side-a': 'acquitted', 'side-b': 'acquitted', mistrial: 'mistrial' } as const;
@@ -27,59 +28,74 @@ function sayAll(lines: readonly DialogueLine[]): BeatStep[] {
   return out;
 }
 
+/** The judge's verdict opener: parties are asked to rise (and already are); jurors and the gallery are not. */
+export const VERDICT_OPENER = {
+  party: 'The jury has reached a verdict. Defendant, please rise. You are already standing. Good.',
+  others: 'The jury has reached a verdict. Will the parties please rise.',
+} as const;
+
 export function beatScript(id: BeatId, opts: BeatOptions = {}): BeatStep[] {
-  const lines = (fallback: readonly DialogueLine[]) => sayAll(opts.lines?.length ? opts.lines : fallback);
-  const open: BeatStep[] = [{ kind: 'control', mode: 'cinematic' }, { kind: 'seat', seat: 'defendant' }];
+  const pace = HEARING_PACE[opts.pace ?? DEFAULT_PACE];
+  const seat = opts.seat ?? 'defendant';
+  const party = opts.party ?? true;
+  const custom = opts.lines?.length ? opts.lines : null;
+  // Mode lines replace the built-in ones once (never twice), trimmed for highlights.
+  const said = custom ? (pace.linesPerBeat === null ? custom : highlightLines(custom, linesKept(custom.length, pace))) : null;
+  const open: BeatStep[] = [{ kind: 'control', mode: 'cinematic' }, { kind: 'seat', seat }];
   const close: BeatStep[] = [{ kind: 'control', mode: 'look' }];
   switch (id) {
-    case 'all-rise':
+    case 'all-rise': {
+      const [first, ...rest] = said ?? BUILTIN_LINES.allRise;
       return [
         ...open,
         { kind: 'mood', mood: 'house' },
         { kind: 'stand' },
         { kind: 'cue', cue: 'sfx.crowd-murmur' },
-        ...lines(BUILTIN_LINES.allRise.slice(0, 1)),
+        ...(first ? sayAll([first]) : []),
         { kind: 'look', at: 'judge', seconds: 0.9 },
         { kind: 'gavel' },
-        ...lines(BUILTIN_LINES.allRise.slice(1)),
-        { kind: 'seat', seat: 'defendant' },
+        ...sayAll(rest),
+        { kind: 'seat', seat },
         ...close,
       ];
+    }
     case 'opening':
-      return [...open, { kind: 'mood', mood: 'spotlight' }, ...lines(BUILTIN_LINES.opening), { kind: 'mood', mood: 'house' }, ...close];
+      return [...open, { kind: 'mood', mood: 'spotlight' }, ...sayAll(said ?? BUILTIN_LINES.opening), { kind: 'mood', mood: 'house' }, ...close];
     case 'counsel-arguing': {
-      const body = lines(BUILTIN_LINES.arguing);
+      const body = sayAll(said ?? BUILTIN_LINES.arguing);
       // The defence's first line is an objection: punctuate it.
       const i = body.findIndex((s) => s.kind === 'say' && s.speaker === 'defense');
-      if (i >= 0 && !opts.lines) body.splice(i, 0, { kind: 'callout', text: 'OBJECTION!', style: 'objection' }, { kind: 'cue', cue: 'stinger.objection' });
+      if (i >= 0 && !said) body.splice(i, 0, { kind: 'callout', text: 'OBJECTION!', style: 'objection' }, { kind: 'cue', cue: 'stinger.objection' });
       const j = body.findIndex((s) => s.kind === 'say' && s.speaker === 'judge');
-      if (j >= 0 && !opts.lines) body.splice(j + 1, 0, { kind: 'gavel' }, { kind: 'callout', text: 'ORDER!', style: 'order' });
+      if (j >= 0 && !said) body.splice(j + 1, 0, { kind: 'gavel' }, { kind: 'callout', text: 'ORDER!', style: 'order' });
       return [...open, { kind: 'mood', mood: 'tense' }, ...body, { kind: 'mood', mood: 'house' }, ...close];
     }
-    case 'jury-deliberating':
+    case 'jury-deliberating': {
+      const [first, ...rest] = said ?? BUILTIN_LINES.deliberating;
       return [
         ...open,
-        ...lines(BUILTIN_LINES.deliberating.slice(0, 1)),
+        ...(first ? sayAll([first]) : []),
         { kind: 'callout', text: 'JURY IS OUT', style: 'jury-out' },
         { kind: 'cue', cue: 'stinger.jury-out' },
         { kind: 'mood', mood: 'tense' },
         { kind: 'look', at: 'jury', seconds: 1 },
         { kind: 'pose', npc: 'jury', pose: 'talk' },
-        ...lines(BUILTIN_LINES.deliberating.slice(1)),
+        ...sayAll(rest),
         { kind: 'cue', cue: 'sfx.crowd-murmur' },
         { kind: 'wait', seconds: 0.8 },
         { kind: 'pose', npc: 'jury', pose: 'sit' },
         ...close,
       ];
+    }
     case 'verdict': {
       const verdict = opts.verdict ?? 'guilty';
       const text = VERDICT_TEXT[verdict]!;
       return [
         ...open,
-        { kind: 'stand' },
+        ...(party ? [{ kind: 'stand' } as const] : []),
         { kind: 'mood', mood: 'spotlight' },
         { kind: 'look', at: 'judge', seconds: 0.9 },
-        { kind: 'say', speaker: 'judge', text: 'The jury has reached a verdict. Defendant, please rise. You are already standing. Good.', pose: 'talk' },
+        { kind: 'say', speaker: 'judge', text: party ? VERDICT_OPENER.party : VERDICT_OPENER.others, pose: 'talk' },
         { kind: 'gavel' },
         { kind: 'mood', mood: VERDICT_MOOD[verdict] },
         { kind: 'callout', text: opts.verdictText ?? text.headline, style: 'verdict' },
@@ -102,6 +118,8 @@ export interface BeatHost {
   dialogueBusy(): boolean;
   /** Skip/fast-forward: drop the line on screen. */
   clearDialogue(): void;
+  /** Current pace (timed steps scale with it). Optional: full pace when absent. */
+  paceSpec?(): PaceSpec;
 }
 
 export type BeatRunnerState = 'idle' | 'running' | 'done' | 'skipped';
@@ -186,9 +204,6 @@ export class BeatRunner {
     }
     this.host.apply(s);
     if (s.kind === 'say') this.#waitingLine = true;
-    else if (s.kind === 'wait') this.#timer = s.seconds;
-    else if (s.kind === 'look') this.#timer = s.seconds ?? 0.8;
-    else if (s.kind === 'gavel') this.#timer = 0.45;
-    else this.#timer = 0;
+    else this.#timer = stepSeconds(s, this.host.paceSpec?.() ?? HEARING_PACE.full);
   }
 }
