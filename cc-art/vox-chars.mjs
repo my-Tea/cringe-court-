@@ -1,6 +1,7 @@
 // All 8 characters at realistic (non-chibi) proportions — voxel boxes.
 // Head ≈ 23% of height, matching the Judge reference.
 import { H, C, b, pair, head, torso, arms, legs, tag, posed } from './vox-base.mjs';
+import { gavelBoxes, exhibitABoxes, popcornBoxes, papersBoxes, ANCHORS } from './held-props.mjs';
 
 /** Idle variants per character, as rig deltas (same units as POSES in
  *  vox-base.mjs). Each stays an "idle": feet planted, no expression change,
@@ -68,19 +69,6 @@ const MOUTH = { neutral: 'neutral', happy: 'grin', angry: 'grit', shocked: 'shou
 
 const FACE_MATS = new Set(['#FFFFFF', '#3B2A28', '#241A22', '#5A4234', '#8E3B42', '#7A3340', '#D2686E', '#E8C4A8', '#D2A98C', '#B48A6C']);
 
-/** Brand gavel: handle + head + gold band + an end cap on each face of the
- *  head. Shared with fp-hands.mjs. */
-export function gavelBoxes(gx, gy, gz = 0) {
-  return [
-    b([gx - 1.4, gy, gz - 1.4], [gx + 1.4, gy + 26, gz + 1.4], C.hairBr),
-    b([gx - 6, gy + 24, gz - 3], [gx + 6, gy + 32, gz + 3], C.hairBrLt),
-    b([gx - 6.6, gy + 26, gz - 3.4], [gx + 6.6, gy + 29, gz + 3.4], C.gold),
-    // end caps (pair() would mirror one about the origin, onto the left hand)
-    b([gx - 7, gy + 24, gz - 3], [gx - 5.6, gy + 32, gz + 3], C.goldLt),
-    b([gx + 5.6, gy + 24, gz - 3], [gx + 7, gy + 32, gz + 3], C.goldLt),
-  ];
-}
-
 /* ══════════════════════════════════ JUDGE ══════════════════════════════════ */
 export const JUDGE = {
   id: 'judge', label: 'Judge Gavel.exe',
@@ -140,8 +128,7 @@ export const JUDGE = {
     out.push(b([-2, H.torsoTop - 16, -td - 2.4], [2, H.torsoTop - 12, -td - 1.4], C.goldLt));
 
     // ── gavel, held right — oversized ───────────────────────────────
-    const gx = H.torsoW + H.armW * 2 + 4, gy = H.armBot + 4;
-    out.push(...tag('armR', gavelBoxes(gx, gy)));
+    out.push(...tag('armR', gavelBoxes(...ANCHORS.gavel())));
 
     // the Judge never points — he raises the gavel
     return posed(out, pose, {
@@ -222,11 +209,8 @@ export const DEFENSE = {
     out.push(...arms({ col: C.navy, colSh: C.navySh, cuff: C.cream }));
     out.push(...legs({ col: C.navySh, shoe: C.ink }));
 
-    // EXHIBIT A paper
-    out.push(...tag('armL', [
-      b([-H.torsoW - H.armW * 2 - 3, H.armBot + 4, -6], [-H.torsoW - H.armW * 2 + 8, H.armBot + 16, -4.6], C.cream),
-      b([-H.torsoW - H.armW * 2 - 1, H.armBot + 13, -6.2], [-H.torsoW - H.armW * 2 + 6, H.armBot + 14, -5], '#A32D3F'),
-    ]));
+    // EXHIBIT A paper (shared with the standalone prop, see held-props.mjs)
+    out.push(...tag('armL', exhibitABoxes(...ANCHORS.exhibit())));
     return posed(out, pose, IDLE.defense);
   },
 };
@@ -290,9 +274,7 @@ export const CLERK = {
     out.push(...legs({ col: C.burgSh, shoe: C.ink }));
 
     // armful of papers
-    for (let i = 0; i < 4; i++) {
-      out.push(...tag('armL', [b([-H.torsoW - 9 + i * 0.6, H.armBot + 2 + i * 1.6, -6], [-H.torsoW + 4 + i * 0.6, H.armBot + 4 + i * 1.6, -3], i % 2 ? C.cream : C.creamSh)]));
-    }
+    out.push(...tag('armL', papersBoxes(...ANCHORS.papers())));
     return posed(out, pose, IDLE.clerk);
   },
 };
@@ -435,12 +417,8 @@ function juror(v = {}) {
     out.push(...arms({ col: top, colSh: topSh, cuff: topSh, hand: skin }));
     out.push(...legs({ col: legCol, shoe: C.ink, seat: pose === 'seated' }));
 
-    if (popcorn) {
-      out.push(b([-H.torsoW - 12, H.armBot + 2, -5], [-H.torsoW - 2, H.armBot + 13, -1], C.cream));
-      out.push(b([-H.torsoW - 12, H.armBot + 10, -5.4], [-H.torsoW - 2, H.armBot + 13, -0.6], C.burg));
-      for (let i = 0; i < 4; i++) out.push(b([-H.torsoW - 11 + i * 2.6, H.armBot + 13, -4], [-H.torsoW - 9.4 + i * 2.6, H.armBot + 16, -1.6], i % 2 ? C.goldLt : C.cream));
-      tag('armL', out.slice(-6));   // the bucket follows the left hand
-    }
+    // popcorn (shared with the standalone prop, see held-props.mjs); follows the left hand
+    if (popcorn) out.push(...tag('armL', popcornBoxes(...ANCHORS.popcorn())));
     return posed(out, pose, IDLE.juror);
   };
 }

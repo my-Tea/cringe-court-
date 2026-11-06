@@ -1032,5 +1032,221 @@
     "height": 20,
     "image": "potted_plant.png",
     "image4x": "potted_plant@4x.png"
+  },
+  {
+    "name": "judge_gavel",
+    "label": "Judge gavel, oversized, at rest (judge held prop)",
+    "boxes": 5,
+    "size": [
+      14,
+      32,
+      6.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 14,
+      "d": 6.8
+    },
+    "height": 32,
+    "holdAnchor": [
+      0,
+      8,
+      0
+    ],
+    "heldBy": {
+      "character": "judge",
+      "hand": "right",
+      "handOffset": [
+        -6,
+        -14.5,
+        0
+      ]
+    },
+    "image": "judge_gavel.png",
+    "image4x": "judge_gavel@4x.png"
+  },
+  {
+    "name": "judge_gavel_raised",
+    "label": "Judge gavel, raised for the strike (35 deg, voxel-snapped)",
+    "boxes": 44,
+    "size": [
+      25.2,
+      30.8,
+      6.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 25.2,
+      "d": 6.8
+    },
+    "height": 30.8,
+    "holdAnchor": [
+      7.311,
+      7.253,
+      0
+    ],
+    "heldBy": {
+      "character": "judge",
+      "hand": "right",
+      "handOffset": [
+        -6,
+        -14.5,
+        0
+      ]
+    },
+    "image": "judge_gavel_raised.png",
+    "image4x": "judge_gavel_raised@4x.png"
+  },
+  {
+    "name": "judge_gavel_strike",
+    "label": "Judge gavel, mid-strike (125 deg, voxel-snapped)",
+    "boxes": 41,
+    "size": [
+      30.8,
+      25.2,
+      6.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 30.8,
+      "d": 6.8
+    },
+    "height": 25.2,
+    "holdAnchor": [
+      8.147,
+      19.911,
+      0
+    ],
+    "heldBy": {
+      "character": "judge",
+      "hand": "right",
+      "handOffset": [
+        -6,
+        -14.5,
+        0
+      ]
+    },
+    "image": "judge_gavel_strike.png",
+    "image4x": "judge_gavel_strike@4x.png"
+  },
+  {
+    "name": "exhibit_a_paper",
+    "label": "\"EXHIBIT A\" paper (defense held prop)",
+    "boxes": 2,
+    "size": [
+      11,
+      12,
+      1.6
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 11,
+      "d": 1.6
+    },
+    "height": 12,
+    "holdAnchor": [
+      0,
+      1,
+      -0.1
+    ],
+    "heldBy": {
+      "character": "defense",
+      "hand": "left",
+      "handOffset": [
+        -0.5,
+        -7.5,
+        -5.3
+      ]
+    },
+    "image": "exhibit_a_paper.png",
+    "image4x": "exhibit_a_paper@4x.png"
+  },
+  {
+    "name": "popcorn_bucket",
+    "label": "Popcorn bucket (juror held prop)",
+    "boxes": 6,
+    "size": [
+      10.4,
+      14,
+      4.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 10.4,
+      "d": 4.8
+    },
+    "height": 14,
+    "holdAnchor": [
+      -0.2,
+      5,
+      0
+    ],
+    "heldBy": {
+      "character": "juror",
+      "hand": "left",
+      "handOffset": [
+        1,
+        -9.5,
+        -3
+      ]
+    },
+    "image": "popcorn_bucket.png",
+    "image4x": "popcorn_bucket@4x.png"
+  },
+  {
+    "name": "papers_stack",
+    "label": "Armful of papers (clerk held prop)",
+    "boxes": 4,
+    "size": [
+      14.8,
+      6.8,
+      3
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 14.8,
+      "d": 3
+    },
+    "height": 6.8,
+    "holdAnchor": [
+      -0.9,
+      1.5,
+      0
+    ],
+    "heldBy": {
+      "character": "clerk",
+      "hand": "left",
+      "handOffset": [
+        -3.5,
+        -6,
+        -4.5
+      ]
+    },
+    "image": "papers_stack.png",
+    "image4x": "papers_stack@4x.png"
   }
 ]

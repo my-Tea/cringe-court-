@@ -68,6 +68,12 @@ subtree, so `group → mesh` is a 1:1 split with no cleanup.
 ```
 Use `footprint` for collision, `height` for camera targeting and occlusion.
 
+Character-held props (`judge_gavel*`, `exhibit_a_paper`, `popcorn_bucket`, `papers_stack`)
+also carry `holdAnchor` (grip point in prop space; x/z centred, y=0 on the ground,
+front toward +z) and `heldBy: { character, hand, handOffset }`. To attach to a hand,
+put the prop at `handJoint - holdAnchor`; `handOffset` (hand joint minus grip) is the
+offset baked into the original character pose. Geometry source: `held-props.mjs`.
+
 ---
 
 ## 3. Block textures

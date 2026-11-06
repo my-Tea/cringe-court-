@@ -4,7 +4,7 @@
 // renderer's pitch tips the far end up the screen (FPS viewmodel framing).
 // Right hand is authored; the left hand is an x-mirror.
 import { C, b, shadeHex } from './vox-base.mjs';
-import { gavelBoxes } from './vox-chars.mjs';
+import { gavelBoxes } from './held-props.mjs';
 import { PLAYER, PLAYER_CFG_DEFAULT } from './player-vox.mjs';
 
 export const SKIN_TONES = PLAYER.skin;
