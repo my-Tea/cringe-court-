@@ -1,9 +1,12 @@
+import { useState } from 'react';
+import type { PerspectiveChoice } from '@cringe-court/scene/roam';
 import { Icon, PaperPanel, PaperRibbon } from '@/ds';
 import { RadioCards } from '@/ds';
 import { LOCALES, t, useLocale, type Locale, type MessageKey } from '@/i18n';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { MotionToggle } from '@/app/shell/MotionToggle';
 import { SoundSettings } from '@/platform/SoundSettings';
+import { readPerspective, writePerspective } from '@/roam/perspectivePref';
 import { ConnectionsPanel } from './ConnectionsPanel';
 import { DemoDataPanel } from './DemoDataPanel';
 import pages from '../pages.module.css';
@@ -15,9 +18,15 @@ const LANGUAGE_OPTIONS: ReadonlyArray<{ value: Locale; label: MessageKey }> = LO
 }));
 
 /** /settings: sound, motion, where the court's money and jurors come from, and the demo data. */
+const PERSPECTIVE_OPTIONS: ReadonlyArray<{ value: PerspectiveChoice; label: MessageKey }> = [
+  { value: 'auto', label: 'shell.settings.perspective.auto' },
+  { value: 'first', label: 'shell.settings.perspective.first' },
+];
+
 export function SettingsPage() {
   useDocumentTitle(t('shell.nav.settings'));
   const { locale, setLocale } = useLocale();
+  const [perspective, setPerspective] = useState<PerspectiveChoice>(() => readPerspective());
   return (
     <div className={pages.page}>
       <PaperPanel as="section" tone="maroon" edge="cut" elevation={3} backing="gold" padding="lg" unfold aria-labelledby="settings-title">
@@ -47,6 +56,25 @@ export function SettingsPage() {
             {t('shell.settings.motion.body')}
           </p>
           <MotionToggle />
+        </PaperPanel>
+
+        <PaperPanel as="section" tone="cream" edge="cut" elevation={2} padding="lg" aria-labelledby="perspective-title" className={styles.panel}>
+          <h2 id="perspective-title" className={styles.heading}>
+            <Icon name="eye" className={styles.headingIcon} />
+            {t('shell.settings.perspective')}
+          </h2>
+          <p className={styles.body}>{t('shell.settings.perspective.body')}</p>
+          <RadioCards
+            legend={t('shell.settings.perspective.legend')}
+            name="cc-perspective"
+            options={PERSPECTIVE_OPTIONS.map((o) => ({ value: o.value, label: t(o.label) }))}
+            value={perspective}
+            onValueChange={(v) => {
+              const next = v as PerspectiveChoice;
+              setPerspective(next);
+              writePerspective(next);
+            }}
+          />
         </PaperPanel>
 
         <PaperPanel as="section" tone="cream" edge="cut" elevation={2} padding="lg" aria-labelledby="language-title" className={styles.panel}>

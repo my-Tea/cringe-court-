@@ -18,9 +18,16 @@ describe('Settings page', () => {
   it('has sound, motion, court connections and demo data sections, with no axe violations', async () => {
     const { container } = renderWithProviders(<SettingsPage />);
     expect(screen.getByRole('heading', { level: 1, name: 'Settings' })).toBeInTheDocument();
-    for (const name of ['Sound', 'Motion', 'Court connections', 'Demo data']) {
+    for (const name of ['Sound', 'Motion', 'Perspective', 'Court connections', 'Demo data']) {
       expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument();
     }
+    const autoView = screen.getByRole('radio', { name: 'Auto · third person' });
+    expect(autoView).toBeChecked();
+    await userEvent.click(screen.getByRole('radio', { name: 'First person' }));
+    expect(autoView).not.toBeChecked();
+    expect(localStorage.getItem('cc:perspective')).toBe('first');
+    await userEvent.click(autoView);
+    expect(localStorage.getItem('cc:perspective')).toBe('auto');
     expect(screen.getByRole('switch', { name: /Reduce motion/ })).toBeInTheDocument();
     // The demo ledger is read through the real adapter: every mode's on-chain terms match the app's.
     const table = await screen.findByRole('table', { name: /Terms on the ledger/ }, { timeout: 5000 });
