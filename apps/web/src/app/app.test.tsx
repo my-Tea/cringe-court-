@@ -51,7 +51,6 @@ describe('app shell', () => {
 
   it.each([
     ['/solo', 'Solo Court', 'GUILTY / NOT COOKED'],
-    ['/versus', 'Versus Court', 'SIDE A / SIDE B'],
     ['/grand-jury', 'Grand Jury', 'FOR / AGAINST'],
   ])('%s renders its mode page with ballot and a disabled filing button', async (path, title, ballot) => {
     renderAt(path);
@@ -59,6 +58,15 @@ describe('app shell', () => {
     expect(screen.getByText(ballot)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Filing opens soon/ })).toHaveAttribute('aria-disabled', 'true');
     expect(document.title).toBe(`${title} · CringeCourt`);
+  });
+
+  it('/versus renders its mode page with ballot and the live filing calls to action', async () => {
+    renderAt('/versus');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Versus Court' })).toBeInTheDocument();
+    expect(screen.getByText('SIDE A / SIDE B')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Start a Versus case/ })).toHaveAttribute('href', '/versus/new');
+    expect(screen.getByRole('link', { name: /I have an invite code/ })).toHaveAttribute('href', '/versus/join');
+    expect(screen.queryByRole('button', { name: /Filing opens soon/ })).not.toBeInTheDocument();
   });
 
   it('marks the current nav item and navigates client-side, moving focus to main', async () => {

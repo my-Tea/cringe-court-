@@ -1,0 +1,421 @@
+/* The shared trial: a pixel courtroom under the style-guide colonnade, in a gold-rimmed wood frame. */
+
+.court {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-4);
+}
+
+.stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 4px solid var(--cc-color-frame);
+  border-radius: var(--cc-radius-xl);
+  outline: 2px solid var(--cc-color-frame-dark);
+  outline-offset: -1px;
+  background: linear-gradient(180deg, var(--cc-color-sky) 0%, var(--cc-color-sky-light) 45%, var(--cc-gold-100) 46%, var(--cc-neutral-300) 100%);
+  box-shadow: var(--cc-shadow-3), inset 0 0 0 2px var(--cc-gold-300);
+  isolation: isolate;
+}
+
+@media (min-width: 720px) {
+  .stage {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  opacity: 0.55;
+  z-index: -2;
+  mask-image: linear-gradient(180deg, var(--cc-neutral-900) 40%, transparent 92%);
+}
+
+/* The court floor: warm boards with a maroon carpet run, echoing the style-guide red stairs. */
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 34%;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, transparent 38%, color-mix(in srgb, var(--cc-royal-700) 70%, transparent) 38% 62%, transparent 62%),
+    repeating-linear-gradient(90deg, var(--cc-gold-700) 0 46px, var(--cc-gold-900) 46px 48px),
+    var(--cc-gold-700);
+  border-top: 3px solid var(--cc-gold-900);
+  box-shadow: inset 0 6px 0 color-mix(in srgb, var(--cc-neutral-900) 18%, transparent);
+}
+
+/* A soft spotlight follows whoever is speaking. */
+.light {
+  position: absolute;
+  top: -10%;
+  bottom: 20%;
+  left: 50%;
+  width: 34%;
+  translate: -50% 0;
+  background: radial-gradient(50% 100% at 50% 0%, color-mix(in srgb, var(--cc-neutral-100) 75%, transparent), transparent 75%);
+  transition: left var(--cc-duration-slower) var(--cc-ease-emphasized);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stage[data-speaker='side-a'] .light {
+  left: 17%;
+}
+
+.stage[data-speaker='side-b'] .light {
+  left: 83%;
+}
+
+.bench {
+  position: absolute;
+  bottom: 12%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 21%;
+  margin: 0;
+  z-index: 1;
+  filter: saturate(0.8) brightness(0.86);
+  transition:
+    filter var(--cc-duration-slow) var(--cc-ease-standard),
+    translate var(--cc-duration-slow) var(--cc-ease-stamp);
+}
+
+.bench[data-at='a'] {
+  left: 4%;
+}
+
+.bench[data-at='b'] {
+  right: 4%;
+}
+
+/* The judge stands on the raised bench, upstage. */
+.bench[data-at='judge'] {
+  left: 50%;
+  bottom: 31%;
+  width: 14.5%;
+  translate: -50% 0;
+}
+
+.bench[data-active] {
+  filter: none;
+  translate: 0 -4px;
+}
+
+.bench[data-at='judge'][data-active] {
+  translate: -50% -4px;
+}
+
+.sprite {
+  display: block;
+  width: 100%;
+  max-height: 62%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 0 color-mix(in srgb, var(--cc-neutral-900) 22%, transparent));
+}
+
+.bench[data-at='judge']::before {
+  content: '';
+  position: absolute;
+  inset: auto -35% -10% -35%;
+  height: 24%;
+  z-index: -1;
+  border: 3px solid var(--cc-gold-900);
+  border-radius: var(--cc-radius-md) var(--cc-radius-md) 0 0;
+  background: linear-gradient(180deg, var(--cc-royal-700), var(--cc-royal-900));
+  box-shadow: inset 0 3px 0 var(--cc-gold-500);
+}
+
+.plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  margin-top: var(--cc-space-1);
+  padding: var(--cc-space-0_5) var(--cc-space-2);
+  border: 2px solid var(--cc-color-frame-dark);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-neutral-100);
+  color: var(--cc-neutral-900);
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-xs);
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 2px 0 var(--cc-gold-900);
+}
+
+.plate span {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: var(--cc-font-body);
+  font-size: var(--cc-text-2xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plate[data-side='a'] {
+  border-color: var(--cc-color-side-a);
+}
+
+.plate[data-side='b'] {
+  border-color: var(--cc-color-side-b);
+}
+
+@media (max-width: 560px) {
+  .plate span {
+    display: none;
+  }
+}
+
+.juryBox {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--cc-space-1);
+  width: 30%;
+  padding: var(--cc-space-1);
+  translate: -50% 0;
+  border: 3px solid var(--cc-gold-900);
+  border-radius: var(--cc-radius-md);
+  background: linear-gradient(180deg, var(--cc-gold-700), var(--cc-gold-900));
+  box-shadow: inset 0 2px 0 var(--cc-gold-300), var(--cc-shadow-2);
+  z-index: 2;
+}
+
+.juror {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  aspect-ratio: 1;
+  border-radius: var(--cc-radius-sm);
+  background: color-mix(in srgb, var(--cc-neutral-900) 25%, transparent);
+}
+
+.juror img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+  object-position: bottom;
+}
+
+.jurorTag {
+  position: absolute;
+  inset: auto 2px 2px;
+  padding: 0 2px;
+  border-radius: var(--cc-radius-xs);
+  background: color-mix(in srgb, var(--cc-neutral-900) 72%, transparent);
+  color: var(--cc-neutral-100);
+  font-family: var(--cc-font-pixel);
+  font-size: 0.5625rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.juror[data-state='sealed'] .jurorTag {
+  background: var(--cc-royal-900);
+}
+
+.juror[data-state='opened'] .jurorTag {
+  background: var(--cc-green-900);
+}
+
+@media (max-width: 560px) {
+  .jurorTag {
+    display: none;
+  }
+}
+
+.callout {
+  position: absolute;
+  top: 6%;
+  z-index: 3;
+  rotate: -6deg;
+}
+
+.callout[data-at='side-a'] {
+  left: 6%;
+}
+
+.callout[data-at='side-b'] {
+  right: 6%;
+  rotate: 6deg;
+}
+
+.callout[data-at='judge'] {
+  left: 8%;
+  rotate: -4deg;
+}
+
+.juryOut {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 4;
+  background: color-mix(in srgb, var(--cc-neutral-900) 35%, transparent);
+}
+
+.juryOut > * {
+  background: var(--cc-neutral-100);
+}
+
+.banner {
+  position: absolute;
+  top: var(--cc-space-3);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 5;
+  padding: var(--cc-space-1) var(--cc-space-3);
+  border: 2px solid var(--cc-color-frame-dark);
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-gold-300);
+  color: var(--cc-royal-900);
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-xs);
+  letter-spacing: var(--cc-tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The evidence screen drops in over the well. */
+.exhibit {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  z-index: 3;
+  width: min(22rem, 46%);
+  padding: var(--cc-space-3) var(--cc-space-4);
+  translate: -50% 0;
+  border: 3px solid var(--cc-color-frame);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-neutral-100);
+  color: var(--cc-neutral-900);
+  box-shadow: var(--cc-shadow-3);
+  rotate: -1.5deg;
+  animation: drop var(--cc-duration-slower) var(--cc-ease-stamp) both;
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    translate: -50% -24px;
+  }
+}
+
+.exhibitLabel {
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-2xs);
+  letter-spacing: var(--cc-tracking-caps);
+  text-transform: uppercase;
+  color: var(--cc-color-text-subtle);
+}
+
+.exhibitTitle {
+  font-family: var(--cc-font-display);
+  font-weight: var(--cc-weight-bold);
+}
+
+.exhibitBody {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--cc-text-sm);
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+@media (max-width: 560px) {
+  .exhibitBody {
+    display: none;
+  }
+}
+
+.dialogue {
+  min-height: 8.5rem;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+.progress {
+  margin-left: auto;
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+}
+
+.transcript {
+  border: 2px solid var(--cc-color-border);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-surface);
+}
+
+.transcript summary {
+  padding: var(--cc-space-3) var(--cc-space-4);
+  cursor: pointer;
+  font-weight: var(--cc-weight-semibold);
+}
+
+.transcriptList {
+  display: flex;
+  flex-direction: column;
+  max-height: 22rem;
+  margin: 0;
+  padding: 0 var(--cc-space-2) var(--cc-space-3);
+  overflow-y: auto;
+  list-style: none;
+}
+
+.transcriptLine {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: var(--cc-space-3);
+  width: 100%;
+  padding: var(--cc-space-2);
+  border: 0;
+  border-radius: var(--cc-radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--cc-text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.transcriptLine:hover,
+li[aria-current] > .transcriptLine {
+  background: var(--cc-color-surface-sunken);
+}
+
+.transcriptWho {
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-xs);
+  color: var(--cc-color-text-subtle);
+}
+
+li[data-speaker='side-a'] .transcriptWho {
+  color: var(--cc-color-secondary-text);
+}
+
+li[data-speaker='side-b'] .transcriptWho {
+  color: var(--cc-color-danger-text);
+}
+
+:global(:root[data-reduced-motion='true']) .exhibit {
+  animation: none;
+}
