@@ -126,6 +126,8 @@ export class BeatRunner {
     if (this.state !== 'idle') return;
     this.state = 'running';
     this.#enter();
+    // Apply the leading instant steps now (seat, camera lock) so callers see them synchronously.
+    this.advance(0);
   }
 
   /** Move time forward; returns true once finished. */

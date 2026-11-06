@@ -1,29 +1,15 @@
-/* Settlement receipt (ui/receipt_card.png): a paper slip, torn along the top, zig-zag cut along the bottom. */
+/* Settlement receipt (ui/receipt_card.png): a torn-edge paper slip. */
 .receipt {
-  --_tooth: 8px;
-  --_tear: 8px;
   position: relative;
-  isolation: isolate;
   max-width: 24rem;
-  padding: calc(var(--cc-space-5) + var(--_tear)) var(--cc-space-5) calc(var(--cc-space-6) + var(--_tooth));
-  background: none;
+  padding: var(--cc-space-5) var(--cc-space-5) var(--cc-space-6);
+  background: var(--cc-color-surface);
   color: var(--cc-color-text);
-  filter: var(--cc-paper-drop-3);
-}
-
-/* The sheet lives on a pseudo so the mask does not eat the drop shadow. */
-.receipt::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-color: var(--cc-color-surface);
-  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
-  pointer-events: none;
+  box-shadow: var(--cc-shadow-3);
+  /* Zig-zag tear along the bottom edge. */
+  --_tooth: 8px;
   mask:
-    var(--cc-paper-edge-torn-top) top / 100% var(--_tear) no-repeat,
-    linear-gradient(var(--cc-neutral-900) 0 0) 0 var(--_tear) / 100% calc(100% - var(--_tear) - var(--_tooth)) no-repeat,
-    var(--cc-paper-edge-zigzag-bottom) bottom / calc(var(--_tooth) * 2) var(--_tooth) repeat-x;
+    conic-gradient(from -45deg at bottom, transparent, var(--cc-neutral-900) 1deg 89deg, transparent 90deg) 50% / calc(var(--_tooth) * 2) 100%;
 }
 
 .head {

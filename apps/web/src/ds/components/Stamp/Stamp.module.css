@@ -1,80 +1,28 @@
 /*
- * Verdict slip (STYLE-GUIDE §9.11): a cream card slip cut with pinking shears
- * (zig-zag ends), lifted on a darker layer, with the verdict rubber-stamped
- * on it in worn ink. GUILTY, NOT COOKED, CHARGES FILED, CASE #0069.
- * The slip is always parchment (data-surface in the markup), so ink tones keep
- * their measured contrast even when the stamp sits on the maroon wood surface.
+ * Rubber stamp (GUILTY, NOT COOKED, CHARGES FILED, CASE #0069). Text is live
+ * HTML, not a bitmap, so case numbers and labels can vary and stay accessible.
  */
 .stamp {
   --_tone: var(--cc-color-guilty);
   --_rotate: -7deg;
-  --_zig: 0.32em;
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  padding: 0.32em calc(var(--_zig) + 0.35em);
-  font-size: var(--_size, var(--cc-text-2xl));
-  rotate: var(--_rotate);
-  filter: var(--cc-paper-drop-2);
-}
-
-/* the slip and the darker layer under it; both cut with pinking shears on the ends */
-.stamp::before,
-.stamp::after {
-  content: '';
-  position: absolute;
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    calc(100% - var(--_zig)) 12.5%,
-    100% 25%,
-    calc(100% - var(--_zig)) 37.5%,
-    100% 50%,
-    calc(100% - var(--_zig)) 62.5%,
-    100% 75%,
-    calc(100% - var(--_zig)) 87.5%,
-    100% 100%,
-    0 100%,
-    var(--_zig) 87.5%,
-    0 75%,
-    var(--_zig) 62.5%,
-    0 50%,
-    var(--_zig) 37.5%,
-    0 25%,
-    var(--_zig) 12.5%
-  );
-}
-
-.stamp::before {
-  inset: 0.12em -0.1em -0.14em 0.1em;
-  z-index: -2;
-  background: var(--cc-paper-cream-shade);
-}
-
-.stamp::after {
-  inset: 0;
-  z-index: -1;
-  background-color: var(--cc-neutral-100);
-  background-image: var(--cc-paper-grain), var(--cc-paper-facets-plate);
-}
-
-/* The rubber stamp itself: double ink frame, worn speckle. */
-.ink {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: 0.1em;
-  padding: 0.3em 0.6em 0.26em;
-  border: 0.13em solid var(--_tone);
-  border-radius: 0.18em;
-  box-shadow: inset 0 0 0 0.06em var(--cc-neutral-100), inset 0 0 0 0.11em var(--_tone);
+  padding: 0.35em 0.7em 0.3em;
+  border: 0.14em solid var(--_tone);
+  border-radius: 0.22em;
+  box-shadow: inset 0 0 0 0.07em var(--cc-color-canvas), inset 0 0 0 0.12em var(--_tone);
   color: var(--_tone);
-  font-family: var(--cc-font-display);
-  font-weight: 400;
+  font-family: var(--cc-font-pixel);
+  font-size: var(--_size, var(--cc-text-2xl));
+  font-weight: var(--cc-weight-bold);
   line-height: 1;
   letter-spacing: var(--cc-tracking-wide);
   text-transform: uppercase;
   white-space: nowrap;
+  rotate: var(--_rotate);
+  /* Worn ink: a fine speckle mask, so it reads as a stamp and not a button. */
   mask-image: radial-gradient(circle at 30% 40%, var(--cc-neutral-900) 60%, color-mix(in srgb, var(--cc-neutral-900) 82%, transparent) 61%), radial-gradient(var(--cc-neutral-900) 0.5px, transparent 0.6px);
   mask-size: 100% 100%, 5px 5px;
   mask-composite: add;
@@ -130,7 +78,7 @@
   --_rotate: 6deg;
 }
 
-/* The slam: the slip drops onto the page, overshoots, and the page jolts (gavel bang). */
+/* The slam: drops from above the page, overshoots, settles. */
 .animate {
   animation: slam var(--cc-duration-dramatic) var(--cc-ease-stamp) both;
 }
@@ -138,49 +86,21 @@
 @keyframes slam {
   0% {
     opacity: 0;
-    scale: 2.4;
-    translate: 0 -0.4em;
+    scale: 2.6;
+    filter: blur(3px);
   }
 
   45% {
     opacity: 1;
     scale: 0.94;
-    translate: 0 0;
+    filter: blur(0);
   }
 
-  60% {
-    translate: -2px 1px;
-  }
-
-  75% {
+  70% {
     scale: 1.03;
-    translate: 1px 0;
   }
 
   100% {
     scale: 1;
-    translate: 0 0;
-  }
-}
-
-:root[data-reduced-motion='true'] .animate {
-  animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root:not([data-reduced-motion]) .animate {
-    animation: none;
-  }
-}
-
-@media (forced-colors: active) {
-  .stamp::before,
-  .stamp::after {
-    display: none;
-  }
-
-  .ink {
-    border-color: CanvasText;
-    mask-image: none;
   }
 }

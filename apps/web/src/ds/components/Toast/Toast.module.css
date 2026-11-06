@@ -14,54 +14,23 @@
   outline: none;
 }
 
-/* A toast is a cut slip: chamfered, tone-coloured folded tab on the left, it slides in from the right and settles. */
 .toast {
   --_tone: var(--cc-color-info-text);
-  --_c: var(--cc-paper-cut-md);
-  --_edge: var(--cc-color-frame);
-  position: relative;
-  isolation: isolate;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: start;
   gap: var(--cc-space-3);
-  padding: var(--cc-space-4) var(--cc-space-4) var(--cc-space-4) calc(var(--cc-space-4) + 6px);
-  border-radius: var(--cc-radius-xs);
-  background: none;
-  filter: var(--cc-paper-drop-3);
+  padding: var(--cc-space-4);
+  border: 2px solid var(--cc-color-frame);
+  border-left: 5px solid var(--_tone);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-surface-raised);
+  box-shadow: 0 0 0 1px var(--cc-color-frame-dark), var(--cc-shadow-bevel), var(--cc-shadow-3);
   color: var(--cc-color-text);
 }
 
-.toast::before,
-.toast::after {
-  content: '';
-  position: absolute;
-  z-index: -2;
-  pointer-events: none;
-  clip-path: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
-}
-
-.toast::before {
-  inset: 0;
-  background: var(--_edge);
-}
-
-/* The sheet, inset by the edge; its left strip is the tone-coloured folded tab. */
-.toast::after {
-  inset: 2px;
-  z-index: -1;
-  background-color: var(--cc-color-surface-raised);
-  background-image:
-    linear-gradient(90deg, var(--_tone) 0 6px, transparent 6px),
-    var(--cc-paper-grain),
-    var(--cc-paper-facets-panel);
-}
-
 .toast[data-state='open'] {
-  animation: cc-paper-slide-in var(--cc-duration-slow) var(--cc-ease-enter) both;
-  --cc-slide-x: 2rem;
-  --cc-slide-y: 0px;
-  --cc-slide-r: 1.5deg;
+  animation: slideUp var(--cc-duration-slow) var(--cc-ease-stamp);
 }
 
 .toast[data-state='closed'] {
@@ -96,13 +65,8 @@
 /* Verdict toasts get the gold rim: "the jury has spoken". */
 .verdict {
   --_tone: var(--cc-color-highlight);
-  --_edge: var(--cc-color-frame-light);
-  filter: var(--cc-paper-drop-4);
-}
-
-.verdict::after {
-  outline: 1px solid color-mix(in srgb, var(--cc-color-frame-light) 80%, transparent);
-  outline-offset: -4px;
+  border-color: var(--cc-color-frame-light);
+  box-shadow: var(--cc-shadow-ring-highlight), var(--cc-shadow-3);
 }
 
 .icon {
@@ -135,6 +99,13 @@
   margin: calc(var(--cc-space-2) * -1) calc(var(--cc-space-2) * -1) 0 0;
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    translate: 0 1rem;
+  }
+}
+
 @keyframes fadeOut {
   to {
     opacity: 0;
@@ -148,15 +119,5 @@
 
   to {
     translate: 100% 0;
-  }
-}
-
-:global(:root[data-reduced-motion='true']) .toast {
-  animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :global(:root:not([data-reduced-motion])) .toast {
-    animation: none;
   }
 }

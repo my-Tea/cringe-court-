@@ -33,18 +33,6 @@
     },
     {
       "path": "../../packages/scene"
-    },
-    {
-      "path": "../../packages/modes-grand-jury"
-    },
-    {
-      "path": "../../packages/modes-solo"
-    },
-    {
-      "path": "../../packages/audio"
-    },
-    {
-      "path": "../../packages/modes-versus"
     }
   ]
 }

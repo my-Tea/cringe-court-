@@ -14,51 +14,21 @@
   animation: fadeOut var(--cc-duration-fast) var(--cc-ease-exit);
 }
 
-/*
- * The dialog is a sheet of card laid on the table: chamfered corners, a drop
- * shadow, a maroon fold across the head. It unfolds from its top edge.
- *   .content  unclipped wrapper (shadow, focus), the sheet is its ::before/::after
- */
 .content {
-  --_c: var(--cc-paper-cut-lg);
   position: fixed;
   top: 50%;
   left: 50%;
   z-index: var(--cc-z-modal);
-  isolation: isolate;
   display: flex;
   flex-direction: column;
   width: min(calc(100vw - 2rem), var(--_width, 32rem));
   max-height: calc(100dvh - 2rem);
   translate: -50% -50%;
-  border-radius: var(--cc-radius-xs);
-  background: none;
-  filter: var(--cc-paper-drop-4);
+  border: 3px solid var(--cc-color-frame);
+  border-radius: var(--cc-radius-xl);
+  background: var(--cc-color-surface-raised);
+  box-shadow: 0 0 0 1px var(--cc-color-frame-dark), var(--cc-shadow-bevel), var(--cc-shadow-4);
   color: var(--cc-color-text);
-  transform-origin: 50% 0;
-}
-
-.content::before,
-.content::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  clip-path: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
-}
-
-.content::before {
-  inset: 0;
-  z-index: -2;
-  background: var(--cc-color-frame);
-}
-
-.content::after {
-  inset: 3px;
-  background-color: var(--cc-color-surface-raised);
-  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
-  outline: 1px solid color-mix(in srgb, var(--cc-color-frame) 60%, transparent);
-  outline-offset: -6px;
 }
 
 .content:focus-visible {
@@ -66,11 +36,11 @@
 }
 
 .content[data-state='open'] {
-  animation: cc-paper-unfold var(--cc-duration-slower) var(--cc-ease-unfold) both;
+  animation: popIn var(--cc-duration-slow) var(--cc-ease-stamp);
 }
 
 .content[data-state='closed'] {
-  animation: popOut var(--cc-duration-fast) var(--cc-ease-exit) both;
+  animation: popOut var(--cc-duration-fast) var(--cc-ease-exit);
 }
 
 .sm {
@@ -87,8 +57,8 @@
   align-items: flex-start;
   gap: var(--cc-space-3);
   padding: var(--cc-space-6) var(--cc-space-6) var(--cc-space-2);
-  margin: 3px 3px 0;
-  border-top: 5px solid var(--cc-color-accent);
+  border-top: 4px solid var(--cc-color-accent);
+  border-radius: calc(var(--cc-radius-xl) - 3px) calc(var(--cc-radius-xl) - 3px) 0 0;
 }
 
 .danger .header {
@@ -146,22 +116,16 @@
   height: 100dvh;
   max-height: none;
   translate: none;
-  --_c: 0px;
-  transform-origin: 100% 50%;
+  border-width: 0 0 0 3px;
+  border-radius: 0;
 }
 
-.sheet::before {
-  clip-path: none;
-}
-
-.sheet::after {
-  clip-path: none;
-  inset: 0 0 0 3px;
-  outline: none;
+.sheet .header {
+  border-radius: 0;
 }
 
 .sheet[data-state='open'] {
-  animation: slideIn var(--cc-duration-slow) var(--cc-ease-emphasized) both;
+  animation: slideIn var(--cc-duration-slow) var(--cc-ease-emphasized);
 }
 
 .sheet[data-state='closed'] {
@@ -177,6 +141,13 @@
 @keyframes fadeOut {
   to {
     opacity: 0;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    scale: 0.94;
   }
 }
 
@@ -196,16 +167,5 @@
 @keyframes slideOut {
   to {
     translate: 100% 0;
-  }
-}
-
-/* The unfold is disabled for reduced motion (the duration tokens collapse too). */
-:global(:root[data-reduced-motion='true']) .content {
-  animation: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :global(:root:not([data-reduced-motion])) .content {
-    animation: none !important;
   }
 }
