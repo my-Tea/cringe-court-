@@ -7,9 +7,10 @@
  *   identity MockIdentity (stands in for World IDKit)
  * A real build swaps these for the 0G / Arc / World adapters behind the same ports.
  */
-import { monotonicUnixClock, usdc, type AudioPort, type Hex } from '@cringe-court/core';
+import { monotonicUnixClock, usdc, type AudioPort, type ChainPort, type Hex } from '@cringe-court/core';
 import { MemoryChain, MemorySaltVault, testAddress } from '@cringe-court/core/testing';
 import { createMockIdentity } from '@/platform/identity/mockIdentity';
+import { appLedger } from '@/platform/ledger';
 import { soloAudioPort } from './sound';
 import { DemoCounsel, NpcJury, SoloSession, TeaserQuota, fromJson, memoryQuotaStore, toJson, type QuotaStore, type SoloSnapshot } from '@cringe-court/modes-solo';
 
@@ -46,6 +47,9 @@ export interface DemoCourt {
   startSession(): SoloSession;
   dropSession(): void;
 }
+
+/** What the filing screens need from a court, in-browser or on Arc. */
+export type SoloCourt = Omit<DemoCourt, 'chain' | 'jury' | 'counsel'> & { chain: Pick<ChainPort, 'usdcBalance'> };
 
 export interface DemoCourtOptions {
   latencyMs?: number;
@@ -104,7 +108,36 @@ export function createDemoCourt(options: DemoCourtOptions = {}): DemoCourt {
 
 let current: DemoCourt | null = null;
 
-export function demoCourt(): DemoCourt {
+let arcCourt: SoloCourt | null = null;
+
+/** The court while a player stakes real test USDC from their own wallet. There are no NPC jurors on a real chain. */
+export function openArcCourt(filer: Hex): SoloCourt {
+  if (arcCourt?.filer === filer) return arcCourt;
+  const clock = new DemoClock();
+  const counsel = new DemoCounsel({ latencyMs: 900 });
+  const chain = appLedger().port;
+  const teasers = new TeaserQuota(browserStore(), clock.now);
+  const court: SoloCourt = {
+    clock,
+    chain,
+    filer,
+    teasers,
+    audio: soloAudioPort,
+    session: null,
+    startSession() {
+      court.session = new SoloSession({ counsel, chain, clock, jury: null, teasers }, { filer });
+      return court.session;
+    },
+    dropSession() {
+      court.session = null;
+    },
+  };
+  arcCourt = court;
+  return court;
+}
+
+export function demoCourt(): SoloCourt {
+  if (arcCourt) return arcCourt;
   current ??= createDemoCourt();
   return current;
 }

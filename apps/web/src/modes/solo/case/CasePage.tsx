@@ -16,6 +16,8 @@ import { CaseSounds } from './CaseSounds';
 import { VerdictPanel } from './VerdictPanel';
 import styles from './CasePage.module.css';
 import { cancelLabel, formatAmount, formatCaseNo } from '@/i18n/domain';
+import { appLedger } from '@/platform/ledger';
+import { ArcCaseStatus } from './ArcCaseStatus';
 import { LapsedNote } from './LapsedNote';
 
 const steps = () => [t('solo.case.steps.jury'), t('solo.case.steps.trial'), t('solo.case.steps.deliberation'), t('solo.case.steps.verdict'), t('solo.case.steps.share')];
@@ -28,6 +30,7 @@ const steps = () => [t('solo.case.steps.jury'), t('solo.case.steps.trial'), t('s
 export function CasePage() {
   const { trialId = '' } = useParams();
   const court = demoCourt();
+  const arc = appLedger().kind === 'arc-testnet';
   const session = court.session?.trial.id === trialId ? court.session : null;
   const live = useSessionSnapshot(session);
   const [stored] = useState(() => (session ? null : docketEntry(trialId)));
@@ -149,7 +152,9 @@ export function CasePage() {
         </section>
       )}
 
-      {inJury && !showTrial && session && live && live.trial.stage === 'jury' && <JuryStage session={session} snap={{ ...live, trial: live.trial }} clock={court.clock} />}
+      {inJury && !showTrial && live && live.trial.stage === 'jury' && arc && <ArcCaseStatus snap={live} />}
+
+      {inJury && !showTrial && session && live && live.trial.stage === 'jury' && !arc && <JuryStage session={session} snap={{ ...live, trial: live.trial }} clock={court.clock} />}
 
       {(tState.stage === 'verdict' || tState.stage === 'share') && <VerdictPanel snap={{ ...snap, trial: tState }} session={session} />}
 

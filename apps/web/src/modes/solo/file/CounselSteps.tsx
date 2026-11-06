@@ -4,6 +4,7 @@ import { cancelLabel, characterName, formatAmount, segmentTitle } from '@/i18n/d
 import { PASS_ENABLED, isDemoTerms, outcomePreviews, soloQuote, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
 import { Alert, Amount, Badge, Button, EmptyState, ErrorState, Icon, LoadingState, PaperButton, PaperPanel, PaperRibbon, Portrait, Switch, TestnetBadge } from '@/ds';
 import { tRich, t, type MessageKey } from '@/i18n';
+import { appLedger } from '@/platform/ledger';
 import styles from './FilePage.module.css';
 
 const DRAFTING_LINES = ['solo.drafting.line1', 'solo.drafting.line2', 'solo.drafting.line3', 'solo.drafting.line4'] as const satisfies readonly MessageKey[];
@@ -235,7 +236,7 @@ export function PayStep({ session, snap, balance }: { session: SoloSession; snap
         </Button>
         {balance !== null && (
           <p className={styles.small}>
-            {t('solo.pay.wallet')} <Amount value={balance} size="sm" /> {short && <Badge tone="danger">{t('solo.pay.shortBadge')}</Badge>}
+            {t(appLedger().kind === 'arc-testnet' ? 'solo.pay.walletReal' : 'solo.pay.wallet')} <Amount value={balance} size="sm" /> {short && <Badge tone="danger">{t('solo.pay.shortBadge')}</Badge>}
           </p>
         )}
       </div>

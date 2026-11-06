@@ -1,0 +1,65 @@
+.gate {
+  display: grid;
+  gap: var(--cc-space-4);
+  width: min(50rem, 100%);
+  margin-inline: auto;
+}
+
+.lede,
+.body,
+.done {
+  margin: 0;
+}
+
+/* The ribbon's tails hang below its box. */
+.lede {
+  margin-block-start: var(--cc-space-6);
+}
+
+.steps {
+  display: grid;
+  gap: var(--cc-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: var(--cc-space-3);
+  align-items: start;
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-family: var(--cc-font-display);
+  color: var(--cc-gold-100);
+  background: var(--cc-royal-900);
+}
+
+.step[data-done] .mark {
+  color: var(--cc-royal-900);
+  background: var(--cc-gold-300);
+}
+
+.stepBody {
+  display: grid;
+  justify-items: start;
+  gap: var(--cc-space-2);
+  min-width: 0;
+}
+
+.stepTitle {
+  margin: 0;
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-lg);
+}
+
+.link {
+  font-family: var(--cc-font-display);
+  color: inherit;
+}
