@@ -1,14 +1,14 @@
 .portrait {
   --_size: 4rem;
-  --_ring: var(--cc-color-border-strong);
+  --_ring: var(--cc-color-frame);
   position: relative;
   display: inline-block;
   flex-shrink: 0;
   width: var(--_size);
   height: var(--_size);
   border-radius: var(--cc-radius-md);
-  background: var(--cc-night-700);
-  box-shadow: 0 0 0 2px var(--_ring);
+  background: var(--cc-royal-900);
+  box-shadow: 0 0 0 2px var(--_ring), 0 0 0 3px var(--cc-color-frame-dark);
   overflow: hidden;
 }
 
@@ -56,7 +56,7 @@
 .anonymous {
   display: inline-grid;
   place-items: center;
-  color: var(--cc-purple-400);
+  color: var(--cc-teal-700);
 }
 
 .anonymous svg {

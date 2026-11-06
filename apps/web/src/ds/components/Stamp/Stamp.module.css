@@ -14,7 +14,7 @@
   border-radius: 0.22em;
   box-shadow: inset 0 0 0 0.07em var(--cc-color-canvas), inset 0 0 0 0.12em var(--_tone);
   color: var(--_tone);
-  font-family: var(--cc-font-display);
+  font-family: var(--cc-font-pixel);
   font-size: var(--_size, var(--cc-text-2xl));
   font-weight: var(--cc-weight-bold);
   line-height: 1;
@@ -23,7 +23,7 @@
   white-space: nowrap;
   rotate: var(--_rotate);
   /* Worn ink: a fine speckle mask, so it reads as a stamp and not a button. */
-  mask-image: radial-gradient(circle at 30% 40%, #000 60%, rgb(0 0 0 / 0.82) 61%), radial-gradient(#000 0.5px, transparent 0.6px);
+  mask-image: radial-gradient(circle at 30% 40%, var(--cc-neutral-900) 60%, color-mix(in srgb, var(--cc-neutral-900) 82%, transparent) 61%), radial-gradient(var(--cc-neutral-900) 0.5px, transparent 0.6px);
   mask-size: 100% 100%, 5px 5px;
   mask-composite: add;
 }
@@ -65,7 +65,7 @@
 }
 
 .caseNumber {
-  --_tone: var(--cc-color-highlight);
+  --_tone: var(--cc-color-highlight-shadow);
   --_rotate: -3deg;
 }
 

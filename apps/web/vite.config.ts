@@ -29,8 +29,6 @@ export default defineConfig({
           groups: [
             { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler|react-router)[\\/]/ },
             { name: 'radix', test: /node_modules[\\/](@radix-ui|@floating-ui)[\\/]/ },
-            // three.js + R3F only load with the courtroom; one long-lived chunk.
-            { name: 'three', test: /node_modules[\\/](three|@react-three|its-fine|zustand|suspend-react|react-use-measure)[\\/]/ },
           ],
         },
       },

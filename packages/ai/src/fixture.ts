@@ -63,21 +63,11 @@ function benchLines(name: string, task: Obj, data: Obj): unknown[] {
       });
     });
   }
-  // Each bench has its own voice, so a fixture trial reads like two lawyers, not one.
-  const theirs = snip(str(opp.publicStory), 70);
   if (segments.includes('rebuttal')) {
-    lines.push(
-      bench === 0
-        ? { segment: 'rebuttal', beat: 'objection', text: `${name}: OBJECTION. "Context" is not a defence, it is a cope. The record says it plainly: "${theirs}"` }
-        : { segment: 'rebuttal', beat: 'point', text: `${name}: my learned colleague read "${theirs}" and heard a crime. I heard a cry for help, and also a bit.` },
-    );
+    lines.push({ segment: 'rebuttal', beat: 'objection', text: `${name}: they say "${snip(str(opp.publicStory), 80)}" and I say that is a lot of confidence for one story.` });
   }
   if (segments.includes('closing')) {
-    lines.push(
-      bench === 0
-        ? { segment: 'closing', beat: 'desk-slam', text: `Members of the jury: the ratio is undeniable. Vote ${label}, and let the record show the cringe.` }
-        : { segment: 'closing', beat: 'laugh', text: `Members of the jury: we have all been there. Vote ${label}. Let bro cook.` },
-    );
+    lines.push({ segment: 'closing', beat: 'point', text: `Members of the jury: ${label}. Let the record show the cringe. Let bro cook.` });
   }
   return lines;
 }

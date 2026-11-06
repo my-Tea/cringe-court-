@@ -15,8 +15,6 @@ export class SpriteActor {
   #frame: string | null = null;
   #punch = 0;
   #tint = 1;
-  #opacity = 1;
-  #targetOpacity = 1;
 
   constructor(
     readonly actor: string,
@@ -57,22 +55,7 @@ export class SpriteActor {
     this.#tint = value;
   }
 
-  /** Fade toward an opacity (camera occlusion). */
-  fadeTo(opacity: number): void {
-    this.#targetOpacity = opacity;
-  }
-
-  get opacity(): number {
-    return this.#opacity;
-  }
-
   apply(frame: AnimatorFrame, dt: number): void {
-    this.#opacity += (this.#targetOpacity - this.#opacity) * Math.min(1, dt * 8);
-    const faded = this.#opacity < 0.99;
-    this.#mesh.material.opacity = this.#opacity;
-    this.#mesh.material.alphaTest = faded ? 0.01 : 0.5;
-    this.#mesh.material.depthWrite = !faded;
-    this.#shadow.visible = this.#opacity > 0.5;
     const pose = this.atlas.frames[frame.pose] ? frame.pose : 'idle';
     const f = this.atlas.frames[pose]!;
     if (pose !== this.#frame) this.#setFrame(pose, f);
