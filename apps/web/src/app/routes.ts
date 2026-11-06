@@ -5,6 +5,8 @@ import type { MessageKey } from '@/i18n';
 export const paths = {
   /** The landing: sign-in panel and the courtroom hero. */
   home: '/',
+  /** The arrival run: verify, dress, pick a trial, walk into the courthouse. */
+  play: '/play',
   /** The courts lobby: pick Solo, Versus or Grand Jury. */
   court: '/court',
   leaderboard: '/leaderboard',
@@ -19,7 +21,7 @@ export const paths = {
 
 /** Paths that live under "The court" tab (the lobby and every courtroom). */
 export const isCourtPath = (pathname: string) =>
-  pathname === paths.court || ['/solo', '/versus', '/grand-jury', paths.courtroom, paths.walk, paths.town].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  pathname === paths.court || pathname === paths.play || ['/solo', '/versus', '/grand-jury', paths.courtroom, paths.walk, paths.town].some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 /** The reference's four paper tabs. */
 export const NAV_ITEMS: ReadonlyArray<{ to: string; labelKey: MessageKey; icon: 'home' | 'scales' | 'trophy' | 'book'; activeFor?: (pathname: string) => boolean }> = [
