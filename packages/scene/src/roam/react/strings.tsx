@@ -85,6 +85,7 @@ export const DEFAULT_ROAM_STRINGS: RoamStrings = {
     'defendant-table': "Defendant's table",
     'prosecution-table': 'Prosecution table',
     'witness-stand': 'Witness stand',
+    'jury-box': 'Jury box',
   },
   zoneFallback: 'Courthouse',
 

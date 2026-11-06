@@ -74,6 +74,7 @@ export const trial = {
   'hud.zone.defendantTable': "Defendant's table",
   'hud.zone.prosecutionTable': 'Prosecution table',
   'hud.zone.witnessStand': 'Witness stand',
+  'hud.zone.juryBox': 'Jury box',
   'hud.zone.none': 'Courthouse',
 
   // Roam HUD: frame
