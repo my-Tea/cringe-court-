@@ -71,7 +71,7 @@ const SENTENCES: Readonly<Record<'guilty' | 'not-cooked' | 'none', readonly stri
     'NOT COOKED. Case dismissed. The court reminds the defendant that this was very close.',
     'NOT COOKED. Let bro cook. The court will be watching the kitchen.',
   ],
-  none: ['MISTRIAL. The jury could not agree, so every coin goes back where it came from.'],
+  none: ['MISTRIAL. Not enough jurors finished voting in time, so every coin goes back where it came from.'],
 };
 
 export class DemoCounsel implements AiCounselPort {

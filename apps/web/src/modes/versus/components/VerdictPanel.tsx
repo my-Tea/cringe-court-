@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { t, tRich } from '@/i18n';
 import { type CaseNumber, type Hex } from '@cringe-court/core';
 import { formatAmount, sideLabel } from '@/i18n/domain';
-import { claimable, claimedBy, disclose, receiptFor, roleLabel, seatsOf, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
+import { claimable, claimedBy, disclose, mistrialCause, receiptFor, roleLabel, seatsOf, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { Alert, Badge, Button, Card, CardBody, CardHeader, CardTitle, DialogueBox, Icon, Portrait, Receipt, Spinner, Stamp } from '@/ds';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
@@ -66,11 +66,13 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
   const d = disclose(s.settlement, s.terms.jurySize);
   const missed = s.terms.jurySize - v.completedDuty;
   const seats = seatsOf(c);
+  const cause = mistrialCause(v);
+  const needed = s.terms.threshold;
 
   return (
     <div className={styles.stack}>
       <PaperSection as="section" padding="lg" tone="maroon" aria-labelledby="verdict-title" bodyClassName={styles.verdict} data-outcome={winner ?? 'none'}>
-        <p className={styles.eyebrow}>{t('versus.verdict.spoken')}</p>
+        <p className={styles.eyebrow}>{winner ? t('versus.verdict.spoken') : t('versus.verdict.spoken.none')}</p>
         <h2 id="verdict-title" className="cc-visually-hidden">
           {t('versus.verdict.heading', {
             result: winner ? t('versus.verdict.wins', { label: winner === 'a' ? labelA : labelB }) : t('versus.verdict.none'),
@@ -97,7 +99,7 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
               {youWon ? t('versus.verdict.youWon') : youLost ? t('versus.verdict.youLost') : ''}
             </>
           ) : (
-            t('versus.verdict.noVerdictLine')
+            cause === 'no-shows' ? t('versus.verdict.noVerdictLine.noShows') : t('versus.verdict.noVerdictLine.split', { needed })
           )}
         </p>
         <div className={styles.tallyBars} aria-hidden>
@@ -116,7 +118,10 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
         <p className={styles.fineOnWood}>{t('versus.verdict.duty', { completed: v.completedDuty, appointed: v.appointed })}</p>
       </PaperSection>
 
-      {s.sentence ? (
+      {!winner ? (
+        // A mistrial has nothing to sentence; the judge says why, in the court's own words.
+        <DialogueBox speaker="judge" expression="neutral" text={cause === 'no-shows' ? t('versus.verdict.judge.noShows') : t('versus.verdict.judge.split', { needed })} />
+      ) : s.sentence ? (
         <DialogueBox speaker="judge" expression="smug" text={s.sentence.text} />
       ) : (
         <p className={styles.thinkingLine} role="status">

@@ -11,6 +11,7 @@
 import {
   caseNumber as toCaseNumber,
   keccak256,
+  monotonicUnixClock,
   seededRandom,
   usdc,
   type BallotChoice,
@@ -29,14 +30,20 @@ import { DEMO_CASE_FILES } from './fixtures/docket';
 import { MemoryGalleryStore } from './gallery';
 import { MemoryStorage, StorageSaltVault, type KeyValueStorage } from './salts';
 
-/** Shortened demo windows (seconds). Production: 48 h / 30 min / 20 min / 10 min. */
-export const DEMO_DEADLINES = { preTrial: 45 * 60, recruitment: 15 * 60, commit: 4 * 60, reveal: 3 * 60 } as const;
+/**
+ * Shortened demo windows (seconds). Production: 48 h / 30 min / 20 min / 10 min.
+ * The commit window opens with the hearing, so it must outlast it: the
+ * first-person hearing runs about 3 min (174 s in the playtest) and a juror
+ * then needs time to decide (UX evaluation B2, same rule as Versus).
+ */
+export const DEMO_DEADLINES = { preTrial: 45 * 60, recruitment: 15 * 60, commit: 6 * 60, reveal: 3 * 60 } as const;
 
 /** A clock that can be pinned (while seeding history) and skipped forward (demo control). Unix seconds. */
 export class DemoClock {
   #pinned: number | null = null;
   #offset = 0;
-  constructor(private readonly realNow: () => number = () => Date.now() / 1000) {}
+  /** Default: the wall clock once, then monotonic (B19), so a device clock jump does not expire windows. */
+  constructor(private readonly realNow: () => number = monotonicUnixClock()) {}
 
   now = (): number => this.#pinned ?? Math.floor(this.realNow() + this.#offset);
 
@@ -98,16 +105,7 @@ export interface DemoCourtOptions {
   files?: readonly CaseFile[];
   /** The human player's identity (e.g. real World IDKit). Default: a mock keyed to the viewer. */
   identity?: (viewer: Hex) => IdentityPort;
-  /**
-   * How simulated jurors take seats. `fill` (default, one visitor): they fill
-   * every seat but one until a human is sworn in, then the rest. `late` (a
-   * shared court): humans get first pick, and simulated jurors only fill empty
-   * seats in the last third of the recruiting window. `off`: humans only.
-   */
-  npcJurors?: NpcJurorPolicy;
 }
-
-export type NpcJurorPolicy = 'fill' | 'late' | 'off';
 
 export interface DemoCourt {
   court: GrandJuryCourt;
@@ -116,11 +114,6 @@ export interface DemoCourt {
   chain: MemoryChain;
   viewer: Hex;
   identity: IdentityPort;
-  /** Shared pieces, for a server that builds one court per visitor over the same world. */
-  docket: Docket;
-  gallery: MemoryGalleryStore;
-  jury: MockJury;
-  counsel: ScriptedCounsel;
   /** Testnet faucet stand-in: mints test USDC to the viewer. */
   faucet(amount?: Usdc): void;
   dispose(): void;
@@ -143,7 +136,7 @@ export async function createDemoCourt(o: DemoCourtOptions = {}): Promise<DemoCou
   const viewerChain = root.as(viewer);
   root.mint(viewer, o.startingBalance ?? usdc('25.00'));
 
-  const sim = new DemoSimulation(root, docket, gallery, clock, viewer, o.npcJurors);
+  const sim = new DemoSimulation(root, docket, gallery, clock, viewer);
   sim.fundNpcs();
 
   const court = new GrandJuryCourt({ docket, ports: { chain: viewerChain, identity, salts, jury, counsel }, gallery, clock: clock.now, offerSeconds: 180 });
@@ -160,10 +153,6 @@ export async function createDemoCourt(o: DemoCourtOptions = {}): Promise<DemoCou
     chain: root,
     viewer,
     identity,
-    docket,
-    gallery,
-    jury,
-    counsel,
     faucet: (amount = usdc('10.00')) => root.mint(viewer, amount),
     dispose: () => {
       detach();
@@ -338,16 +327,8 @@ export class DemoSimulation {
     private readonly docket: Docket,
     private readonly gallery: MemoryGalleryStore,
     private readonly clock: DemoClock,
-    // The visitor is told apart by wallet: the simulation only ever acts for its own NPC wallets.
-    _viewer: Hex,
-    private readonly npcJurors: NpcJurorPolicy = 'fill',
+    private readonly viewer: Hex,
   ) {}
-
-  /** Simulated wallets only: the simulation never acts for a human juror. */
-  #isNpc(account: Hex): boolean {
-    const a = account.toLowerCase();
-    return this.#npcs.some((n) => n.toLowerCase() === a);
-  }
 
   fundNpcs(): void {
     for (const a of this.#npcs) this.root.mint(a, usdc('50.00'));
@@ -376,7 +357,7 @@ export class DemoSimulation {
   /** Fix NPC votes in seat order (viewer seats skipped); `absent` are indexes into that list who never reveal. */
   async scriptVotes(n: CaseNumber, choices: readonly BallotChoice[], absent: readonly number[], commitAt: number): Promise<void> {
     const c = (await this.root.getCase(n))!;
-    const npcs = c.seats.filter((s) => this.#isNpc(s.juror));
+    const npcs = c.seats.filter((s) => s.juror.toLowerCase() !== this.viewer);
     npcs.forEach((s, i) => {
       const salt = keccak256(`npc-salt:${n}:${s.juror}`);
       this.#ballots.set(`${n}:${s.juror.toLowerCase()}`, { choice: choices[i] ?? 0, salt, commitAt: commitAt + i * 9, revealAt: absent.includes(i) ? null : 0 });
@@ -389,7 +370,7 @@ export class DemoSimulation {
     const c = await this.root.getCase(n);
     if (!c) return;
     {
-      const npcs = c.seats.filter((s) => this.#isNpc(s.juror));
+      const npcs = c.seats.filter((s) => s.juror.toLowerCase() !== this.viewer);
       npcs.forEach((s, i) => {
         const k = `${n}:${s.juror.toLowerCase()}`;
         if (this.#ballots.has(k)) return;
@@ -473,23 +454,21 @@ export class DemoSimulation {
         if (!plan.npcFunding || now - last < 30) return;
         const left = c.terms.target - c.raised;
         const pick = (['0.10', '0.25', '0.50', '0.50', '1.00'] as const)[Math.floor(this.#rand() * 5)]!;
-        const amount = (usdc(pick) > left ? left : usdc(pick)) as Usdc;
-        if (amount <= 0n) return;
+        const min = c.terms.funding.kind === 'crowdfund' ? c.terms.funding.minContribution : 0n;
+        let amount = (usdc(pick) > left ? left : usdc(pick)) as Usdc;
+        // Never leave a remainder smaller than the minimum (nobody could fill it but an exact top-up): close it instead.
+        if (left - amount > 0n && left - amount < min) amount = left as Usdc;
+        // Below the minimum only an exact final top-up is allowed (the contract's rule).
+        if (amount <= 0n || (amount < min && amount !== left)) return;
         this.#lastAction.set(n, now);
         await this.root.as(this.npc()).fund(n, amount);
         return;
       }
       case 'recruiting': {
-        if (this.npcJurors === 'off') return;
-        if (this.npcJurors === 'late') {
-          // Humans first: simulated jurors only fill what is left in the last third of the window.
-          const ends = c.deadlines.recruitment;
-          if (ends === null || now < ends - Math.floor(c.terms.deadlines.recruitment / 3)) return;
-        }
-        const humanSeated = c.seats.some((s) => !this.#isNpc(s.juror));
-        // Leave the last seat for a visitor unless one is already sworn in.
-        const cap = c.terms.jurySize - (humanSeated || this.npcJurors === 'late' ? 0 : 1);
-        if (c.seats.length >= cap || now - last < (this.npcJurors === 'late' ? 6 : 25)) return;
+        const viewerSeated = c.seats.some((s) => s.juror.toLowerCase() === this.viewer);
+        // Leave the last seat for a visitor unless they are already sworn in.
+        const cap = c.terms.jurySize - (viewerSeated ? 0 : 1);
+        if (c.seats.length >= cap || now - last < 25) return;
         this.#lastAction.set(n, now);
         await this.seatNpc(n);
         if (c.seats.length + 1 === c.terms.jurySize) await this.planVotes(n, now);

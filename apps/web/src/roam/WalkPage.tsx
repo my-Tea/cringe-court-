@@ -2,12 +2,14 @@ import { Courtroom, useCourtroom } from '@cringe-court/scene/react';
 import { BASE_MODES } from '@cringe-court/core';
 import { BEAT_IDS, MockRemotePlayers, QUALITY_LEVELS, type BeatId, type QualityLevel, type RoamController, type SpawnId, type VerdictKind } from '@cringe-court/scene/roam';
 import { RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { Alert, Button, Spinner, useReducedMotion } from '@/ds';
+import { paths } from '@/app/routes';
+import { Alert, Button, EmptyState, PaperButtonLink, Spinner, useReducedMotion } from '@/ds';
 import { t, type MessageKey } from '@/i18n';
 import { appAudio } from '@/platform/audio';
 import { roamStrings } from '@/trial/roamStrings';
+import { canRoam } from '@/trial/trialView';
 import styles from './WalkPage.module.css';
 
 const VERDICTS: ReadonlyArray<{ id: VerdictKind; label: MessageKey }> = [
@@ -70,8 +72,57 @@ function MenuView({ onBack }: { onBack: () => void }) {
   );
 }
 
+class WalkBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  override state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  override render() {
+    return this.state.error ? <CannotWalk details={this.state.error.message} /> : this.props.children;
+  }
+}
+
+/** B7: no WebGL2 (or the 3D court failed): say so and point to where trials still play. */
+function CannotWalk({ details }: { details?: string }) {
+  return (
+    <div className={styles.page}>
+      <EmptyState
+        title={t('trial.walk.noWebgl.title')}
+        headingLevel={1}
+        character="clerk"
+        expression="shocked"
+        actions={
+          <>
+            <PaperButtonLink to={paths.court}>{t('trial.walk.noWebgl.court')}</PaperButtonLink>
+            <PaperButtonLink to={paths.howToPlay} variant="maroon">
+              {t('trial.walk.noWebgl.howTo')}
+            </PaperButtonLink>
+          </>
+        }
+      >
+        {t('trial.walk.noWebgl.body')}
+        {details && <span className={styles.details}>{t('trial.walk.noWebgl.details', { details })}</span>}
+      </EmptyState>
+    </div>
+  );
+}
+
+/**
+ * /court/walk: the walkable courtroom sandbox. Needs WebGL2; without it (or if
+ * the 3D court fails) the page explains and points to the classic stages,
+ * instead of the route's crash page.
+ */
 export function WalkPage() {
   useDocumentTitle(t('trial.walk.title'));
+  if (!canRoam()) return <CannotWalk />;
+  return (
+    <WalkBoundary>
+      <WalkSandbox />
+    </WalkBoundary>
+  );
+}
+
+function WalkSandbox() {
   const params = useMemo(() => initialParams(), []);
   const audio = appAudio();
   const remotes = useMemo(() => new MockRemotePlayers(), []);

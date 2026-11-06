@@ -25,8 +25,14 @@ const MIN = 60;
  * Demo-speed deadlines (D14: "demo builds may use shorter windows, labelled as
  * such"). The production windows are MODES.versus.deadlines: 24 h consent and
  * funding, 30 / 20 / 10 min recruitment, commit and reveal.
+ *
+ * The commit window opens with the hearing, so it must outlast it (B2): the
+ * first-person hearing runs about 3 min (174 s in the playtest), then a juror
+ * needs time to decide and seal. Six minutes covers both with room to spare,
+ * and costs no waiting: the demo clerk closes a window as soon as every
+ * seated juror has acted in it (`VersusDesk.tick`).
  */
-export const VERSUS_DEMO_DEADLINES: Deadlines = { preTrial: 15 * MIN, recruitment: 10 * MIN, commit: 3 * MIN, reveal: 2 * MIN };
+export const VERSUS_DEMO_DEADLINES: Deadlines = { preTrial: 15 * MIN, recruitment: 10 * MIN, commit: 6 * MIN, reveal: 2 * MIN };
 
 /** Each side brings at most this many exhibits (the trial caps the case at `maxExhibits`). */
 export const EXHIBITS_PER_SIDE = 3;

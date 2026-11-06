@@ -4,10 +4,10 @@
  * the JSON codec every adapter uses; the web app adds a localStorage +
  * BroadcastChannel store so two browser tabs can be the two sides.
  *
- * The networked adapter (`RemoteFactStore` in `@cringe-court/net`, served by
- * `apps/server`) implements the same three methods. Its `append` is async, and
- * the server keeps each side's private notes away from the other side's device
- * by redacting the log per viewer (docs/BACKEND.md).
+ * A networked adapter (relay server, or a contract event log) implements the
+ * same three methods. It must keep each side's private notes away from the other
+ * side's device, which the browser-local demo store cannot (both sides share one
+ * browser there); see docs in the PR.
  */
 import type { Fact } from './world';
 
@@ -18,10 +18,9 @@ export interface FactStore {
   /**
    * Append facts if the log still has `expectedLength` entries (optimistic
    * concurrency). Returns false if someone else wrote first; the caller rebuilds
-   * and retries. A networked store answers asynchronously, and throws when the
-   * court refuses the facts (with the court's message).
+   * and retries.
    */
-  append(facts: readonly Fact[], expectedLength: number): boolean | Promise<boolean>;
+  append(facts: readonly Fact[], expectedLength: number): boolean;
   subscribe(listener: () => void): Unsubscribe;
 }
 

@@ -92,6 +92,16 @@ describe('prepareBriefing', () => {
     expect(p.redactions.nickname.map((h) => h.kind)).toEqual(['ens']);
   });
 
+  it('keeps a chosen nickname that looks like a first name, and agrees with itself on re-read (B10, B11)', () => {
+    const first = prepareBriefing({ ...good, happened: `${good.happened} Ask Priya or call 555-123-4567.`, nickname: 'Priya the Pirate' });
+    expect(first.patch.nickname).toBe('Priya the Pirate');
+    expect(first.patch.story).toContain('Ask [name removed] or call [number removed].');
+    expect(first.redactions.story.map((h) => h.kind).sort()).toEqual(['name', 'phone']);
+    // The case room re-prepares the already-redacted stored story: same report.
+    const again = prepareBriefing({ ...good, happened: first.patch.story, why: '', nickname: 'Priya the Pirate' });
+    expect(again.redactions.story.map((h) => h.kind).sort()).toEqual(['name', 'phone']);
+  });
+
   it('turns an empty angle or nickname into null', () => {
     const p = prepareBriefing({ ...good, angle: '   ', nickname: '' });
     expect(p.patch.angle).toBeNull();

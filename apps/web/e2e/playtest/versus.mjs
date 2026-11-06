@@ -45,7 +45,7 @@ async function fileAsA(A, rec) {
   return link.replace(/^https?:\/\/[^/]+/, base);
 }
 
-export async function playVersus(browser, rec, profile, { plan = 'reliable' } = {}) {
+export async function playVersus(browser, rec, profile, { plan = 'reliable', watchHearing = false } = {}) {
   const ctx = await browser.newContext({ ...PROFILES[profile] });
   // A controlled clock that flows at real speed but is immune to host wall-clock jumps.
   await ctx.clock.install();
@@ -147,7 +147,25 @@ export async function playVersus(browser, rec, profile, { plan = 'reliable' } = 
   await rec.shot(J, `J-trial-${view}`);
   await rec.frames(J, `J-trial-${view}`, { count: 8, interval: 250 });
   if (view === 'classic') await clickText(J, 'Play the trial').catch(() => {});
-  // How much of the 3-minute demo commit window is left once the juror has looked at the trial?
+  if (watchHearing) {
+    // B2: sit through the whole hearing (about 174 s in first person) before voting. Page time is
+    // fast-forwarded explicitly (never past ~35 s before the deadline), so the proof does not depend
+    // on this host's speed; the window's age comes from the HUD countdown (360 s demo window).
+    const hudText = async () => (await J.getByRole('region', { name: 'Your ballot' }).innerText().catch(() => '(no ballot HUD)')).replace(/\s+/g, ' ');
+    const leftOf = (text) => {
+      const m = text.match(/(\d+):(\d\d)/);
+      return m ? Number(m[1]) * 60 + Number(m[2]) : 0;
+    };
+    for (const [label, seconds] of [['60s', 60], ['150s', 90], ['200s', 50], ['last-minute', 999]]) {
+      const left = leftOf(await hudText());
+      await J.clock.fastForward(Math.max(0, Math.min(seconds, left - 35)) * 1000);
+      await sleep(1500);
+      const hud = await hudText();
+      rec.time('J-trial', `ballot_hud_${label}`, 0, `window open ${360 - leftOf(hud)}s · ${hud.slice(0, 160)}`);
+      await rec.shot(J, `J-watching-${label}`);
+    }
+  }
+  // How much of the demo commit window is left once the juror has looked at the trial?
   const left = await J.evaluate(() => document.body.innerText.match(/(?:closes|sealed) in\s*(\d+:\d+)/i)?.[1] ?? document.body.innerText.match(/(\d+:\d\d)/)?.[1] ?? '?');
   rec.time('J-trial', 'commit_window_left_after_frames', 0, left);
   await rec.shot(J, 'J-trial-later', { fullPage: true });
@@ -160,7 +178,10 @@ export async function playVersus(browser, rec, profile, { plan = 'reliable' } = 
   await A.goto(caseUrl, { waitUntil: 'networkidle' });
   await sleep(4000);
   await rec.shot(A, 'A-deliberating', { fullPage: true });
-  await clickText(A, 'Skip to the deadline', 'button', 8000).catch(() => rec.issue('A: no "Skip to the deadline" after sealing (case already moved on)'));
+  // Once every juror has sealed, the demo clerk closes the window itself (B2); the skip button is only needed before that.
+  // Skipping now would cut the juror's reveal window short.
+  if (await hasText(A, 'Scrolls must be sealed in')) await clickText(A, 'Skip to the deadline', 'button', 8000).catch(() => rec.issue('A: no "Skip to the deadline" while scrolls are still being sealed'));
+  else rec.time('A-deliberating', 'skip_not_needed', 0, 'the clerk already closed the commit window');
   await J.bringToFront();
   const canOpen = await waitText(J, 'Open my scroll', 20000).then(() => true).catch(() => false);
   rec.time('J-reveal', 'open_scroll_offered', 0, String(canOpen));
@@ -210,6 +231,7 @@ export async function playVersusExpiry(browser, rec, profile) {
 export const VERSUS_VARIANTS = [
   { variant: 'desktop', profile: 'desktop', kind: 'full' },
   { variant: 'desktop-mistrial', profile: 'desktop', kind: 'full', plan: 'two-no-shows' },
+  { variant: 'desktop-juror-watches-hearing', profile: 'desktop', kind: 'full', watchHearing: true },
   { variant: 'desktop-B-never-joins', profile: 'desktop', kind: 'expiry' },
   { variant: 'mobile', profile: 'mobile', kind: 'full' },
   { variant: 'reduced-motion', profile: 'reduced', kind: 'full' },
@@ -223,7 +245,7 @@ export async function runVersus(srv, only) {
     rec.base = srv.base;
     let ok = true;
     try {
-      if (v.kind === 'full') await playVersus(browser, rec, v.profile, { plan: v.plan });
+      if (v.kind === 'full') await playVersus(browser, rec, v.profile, { plan: v.plan, watchHearing: v.watchHearing });
       else await playVersusExpiry(browser, rec, v.profile);
     } catch (e) {
       ok = false;

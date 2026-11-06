@@ -242,3 +242,44 @@ describe('DemoClock', () => {
   });
 });
 
+
+describe('simulated crowd funding', () => {
+  it('never throws when the remainder is below the minimum contribution (B9)', async () => {
+    const { d, advance, bySlug } = await demo();
+    const e = await bySlug('cereal-is-soup');
+    const n = e.caseNumber;
+    const c = (await d.chain.getCase(n))!;
+    const left = c.terms.target - c.raised;
+    const dust = usdc('0.05');
+    const res = await d.court.contribute(n, (left - dust) as typeof dust);
+    expect(res.ok).toBe(true);
+    advance(120);
+    await expect(d.sim.tick()).resolves.toBeUndefined();
+    const after = (await d.chain.getCase(n))!;
+    expect(after.phase).not.toBe('pre-trial');
+    d.dispose();
+  });
+});
+
+describe('DemoClock and wall-clock jumps (B19)', () => {
+  it('does not jump when the device clock does', () => {
+    const realNow = Date.now;
+    const clock = new DemoClock();
+    const before = clock.now();
+    try {
+      Date.now = () => realNow() + 3_549_000;
+      expect(clock.now() - before).toBeLessThan(5);
+    } finally {
+      Date.now = realNow;
+    }
+    clock.skip(60);
+    expect(clock.now() - before).toBeGreaterThanOrEqual(60);
+  });
+});
+
+describe('demo commit window vs the hearing (B2)', () => {
+  it('outlasts a ~174 s first-person hearing plus two minutes to decide', async () => {
+    const { DEMO_DEADLINES } = await import('../demo');
+    expect(DEMO_DEADLINES.commit).toBeGreaterThanOrEqual(174 + 120);
+  });
+});

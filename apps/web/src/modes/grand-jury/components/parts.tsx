@@ -23,6 +23,7 @@ export function CourtPanel({
   elevation = 2,
   backing = 'none',
   unfold,
+  focusableTitle,
   className,
   children,
   ...rest
@@ -38,6 +39,8 @@ export function CourtPanel({
   elevation?: 0 | 1 | 2 | 3 | 4;
   backing?: 'none' | 'gold' | 'maroon' | 'cream';
   unfold?: boolean;
+  /** The heading can take programmatic focus (tabIndex -1), e.g. to announce a result that just appeared. */
+  focusableTitle?: boolean;
   className?: string;
   children: ReactNode;
   'data-outcome'?: string;
@@ -58,7 +61,7 @@ export function CourtPanel({
       <header className={styles.panelHead}>
         <div className={styles.panelHeadText}>
           {eyebrow && <p className={styles.panelEyebrow}>{eyebrow}</p>}
-          <h2 id={id} className={styles.panelTitle}>
+          <h2 id={id} className={styles.panelTitle} tabIndex={focusableTitle ? -1 : undefined}>
             {icon && <Icon name={icon} className={styles.panelTitleIcon} />}
             {title}
           </h2>

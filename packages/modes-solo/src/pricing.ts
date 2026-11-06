@@ -50,7 +50,7 @@ export function soloQuote(terms: CaseTerms): SoloQuote {
       amount: terms.juryPool,
     },
     { id: 'protocol-fee', label: 'Court fee', detail: 'Kept only if the jury reaches a verdict', amount: terms.protocolFee },
-    { id: 'ai-fee', label: 'AI counsel', detail: 'Both lawyers, same model, same budget (D1)', amount: terms.aiFee },
+    { id: 'ai-fee', label: 'AI counsel', detail: 'Both lawyers, same model, same budget', amount: terms.aiFee },
   ];
   const sum = addUsdc(...lines.map((l) => l.amount));
   if (sum !== total) throw new Error(`Quote lines ${sum} do not add up to the payer share ${total}`);

@@ -1,9 +1,9 @@
 import { ballotLabel, formatAmount } from '@/i18n/domain';
 import { parseCaseParam, type CaseDetail } from '@cringe-court/modes-grand-jury';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Link, useParams } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { Countdown, EmptyState, ErrorState, Icon, PaperButtonLink, PaperPanel, PhaseStepper, Skeleton, SkeletonText } from '@/ds';
+import { Countdown, EmptyState, ErrorState, Icon, PaperButtonLink, PaperPanel, PhaseStepper, Skeleton, SkeletonText, useReducedMotion } from '@/ds';
 import { t } from '@/i18n';
 import { beatsFromLines, type PlannedVerdict } from '@/trial/beats';
 import { TrialViewFrame } from '@/trial/TrialViewFrame';
@@ -15,7 +15,7 @@ import { Benches, CourtPanel, StatusBadge } from '../components/parts';
 import { SharePanel } from '../components/SharePanel';
 import { TrialView } from '../components/TrialView';
 import { VerdictPanel } from '../components/VerdictPanel';
-import { categoryLabel, deadlineLabel, hearingLines, isClosed, paths, steps, stepOf } from '../lib';
+import { topicLabel, topicOf, deadlineLabel, hearingLines, isClosed, paths, steps, stepOf } from '../lib';
 import { useCase, useCourtNow } from '../state/hooks';
 import styles from '../GrandJury.module.css';
 
@@ -93,7 +93,7 @@ function CaseHeader({ detail }: { detail: CaseDetail }) {
       <div className={styles.caseHeaderTop}>
         <span className={styles.caseLabelLg}>{detail.label}</span>
         <StatusBadge status={detail.status} />
-        <span className={styles.caseCategory}>{categoryLabel(detail.file.category)}</span>
+        <span className={styles.caseCategory}>{topicLabel(topicOf(detail.file))}</span>
       </div>
       <p className={styles.caseEyebrow}>{detail.file.title}</p>
       <h1 className={styles.caseQuestion}>{detail.file.question}</h1>
@@ -176,6 +176,22 @@ export function CasePage() {
   const now = useCourtNow();
   const detail = c.state === 'ready' ? c.data : null;
   useDocumentTitle(detail ? t('grandJury.case.docTitle', { label: detail.label, question: detail.file.question }) : t('grandJury.case.docTitleFallback'));
+
+  // A live settle reveals the verdict far above the action that triggered it: bring it into view and announce it.
+  // A case that is already decided when the page loads is left alone.
+  const reduced = useReducedMotion();
+  const wasClosed = useRef<{ n: number | null; closed: boolean } | null>(null);
+  const closedNow = detail ? isClosed(detail.status) : null;
+  useEffect(() => {
+    if (closedNow === null) return;
+    const prev = wasClosed.current;
+    wasClosed.current = { n, closed: closedNow };
+    if (!prev || prev.n !== n || prev.closed || !closedNow) return;
+    const heading = document.getElementById('verdict-title');
+    heading?.closest('section')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    heading?.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a closed-state transition should scroll
+  }, [closedNow, n]);
 
   if (n === null || (c.state === 'ready' && !detail)) {
     return (

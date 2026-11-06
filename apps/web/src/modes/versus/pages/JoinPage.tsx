@@ -2,7 +2,7 @@ import { cancelLabel, categoryLabel, formatAmount } from '@/i18n/domain';
 import { parseInviteCode, sideCharges, viewerOf } from '@cringe-court/modes-versus';
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { t, tRich } from '@/i18n';
+import { t, tRich, type MessageKey } from '@/i18n';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import {
   Alert,
@@ -25,7 +25,6 @@ import { PageHead } from '../components/PageHead';
 import { WorldIdDialog } from '../components/WorldIdDialog';
 import { versusPaths } from '../mode';
 import { useVersus } from '../runtime/context';
-import { useInviteAccess } from '../runtime/useInvite';
 import styles from '../versus.module.css';
 import { PaperSection } from '../components/PaperSection';
 
@@ -72,8 +71,6 @@ export function JoinPage() {
   useDocumentTitle(t('versus.join.docTitle'));
   const { snapshot, persona, desk, run, now } = useVersus();
   const navigate = useNavigate();
-  const early = raw ? parseInviteCode(raw) : null;
-  const access = useInviteAccess(early?.ok ? early.code : null);
 
   if (!raw) {
     return (
@@ -89,11 +86,12 @@ export function JoinPage() {
   }
 
   const parsed = parseInviteCode(raw);
-  const head = <PageHead eyebrow={t('versus.join.eyebrow')} title={t('versus.join.title.summoned')} />;
+  const headFor = (title: MessageKey) => <PageHead eyebrow={t('versus.join.eyebrow')} title={t(title)} />;
+  const head = headFor('versus.join.title.summoned');
   if (!parsed.ok) {
     return (
       <>
-        {head}
+        {headFor('versus.join.title.enter')}
         <div className={styles.page}>
           <PaperSection as="div" padding="lg" className={styles.narrow}>
             <CodeForm initial={raw} error={parsed.message} />
@@ -102,33 +100,12 @@ export function JoinPage() {
       </>
     );
   }
-  if (access.state === 'error') {
+  if (!snapshot) {
     return (
       <>
         {head}
         <div className={styles.page}>
-          <Alert
-            tone="danger"
-            live="assertive"
-            title={t('backend.invite.error.title')}
-            actions={
-              <PaperButton size="sm" onClick={access.retry}>
-                {t('backend.gate.retry')}
-              </PaperButton>
-            }
-          >
-            {access.message}
-          </Alert>
-        </div>
-      </>
-    );
-  }
-  if (!snapshot || access.state === 'pending') {
-    return (
-      <>
-        {head}
-        <div className={styles.page}>
-          <LoadingState title={access.state === 'pending' ? t('backend.invite.loading') : t('versus.join.loading')} />
+          <LoadingState title={t('versus.join.loading')} />
         </div>
       </>
     );
@@ -138,7 +115,7 @@ export function JoinPage() {
   if (!c) {
     return (
       <>
-        {head}
+        {headFor('versus.join.title.missing')}
         <div className={styles.page}>
           <EmptyState
             title={t('versus.join.missing.title')}
@@ -164,7 +141,7 @@ export function JoinPage() {
   if (viewer === 'a' || viewer === 'b') {
     return (
       <>
-        {head}
+        {headFor(viewer === 'a' ? 'versus.join.title.own' : 'versus.join.title.joined')}
         <div className={styles.page}>
           <EmptyState
             title={viewer === 'a' ? t('versus.join.own.title') : t('versus.join.joined.title')}
@@ -182,7 +159,7 @@ export function JoinPage() {
     const closed = s.stage === 'closed';
     return (
       <>
-        {head}
+        {headFor(closed ? 'versus.join.title.closed' : 'versus.join.title.taken')}
         <div className={styles.page}>
           <EmptyState
             title={closed ? t('versus.join.closed.title') : t('versus.join.taken.title')}

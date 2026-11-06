@@ -1,4 +1,5 @@
 import { createBrowserRouter, type RouteObject } from 'react-router';
+import { LoadingState } from '@/ds';
 import { HomePage } from '@/pages/HomePage';
 import { HowToPlayPage } from '@/pages/HowToPlayPage';
 import { LeaderboardPage } from '@/pages/LeaderboardPage';
@@ -15,6 +16,8 @@ export const routes: RouteObject[] = [
   {
     element: <AppShell />,
     errorElement: <RouteError />,
+    // A deep link to a lazy page (/solo/case/…, /court/walk) loads its chunk before the first render.
+    hydrateFallbackElement: <LoadingState />,
     children: [
       { path: 'court', element: <HomePage /> },
       { path: 'leaderboard', element: <LeaderboardPage /> },

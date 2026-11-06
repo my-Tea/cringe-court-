@@ -47,8 +47,27 @@ export function stepOf(status: DocketStatus): number {
   }
 }
 
-/** Display name of a case category (the core table is English-only; labels come from the catalog). */
-export { categoryLabel } from '@/i18n/domain';
+/**
+ * Grand Jury topics. The core `category` is Solo's crime table (a display label only), so public cases are
+ * grouped by their own topic, derived from the case file's tags; the data and pricing are untouched.
+ */
+export const GRAND_JURY_TOPICS = ['food', 'etiquette', 'tech', 'style', 'life'] as const;
+export type GrandJuryTopic = (typeof GRAND_JURY_TOPICS)[number];
+
+const TOPIC_BY_TAG: Readonly<Record<string, GrandJuryTopic>> = { food: 'food', etiquette: 'etiquette', code: 'tech', internet: 'tech', fashion: 'style' };
+const TOPIC_TAG_PRIORITY = ['food', 'etiquette', 'code', 'internet', 'fashion'] as const;
+
+export function topicOf(file: { tags: readonly string[] }): GrandJuryTopic {
+  const tag = TOPIC_TAG_PRIORITY.find((x) => file.tags.includes(x));
+  return tag ? TOPIC_BY_TAG[tag]! : 'life';
+}
+
+export const isTopic = (v: string | null): v is GrandJuryTopic => v !== null && (GRAND_JURY_TOPICS as readonly string[]).includes(v);
+
+/** Display name of a Grand Jury topic (from the catalog). */
+export function topicLabel(topic: GrandJuryTopic): string {
+  return t(`grandJury.topic.${topic}` as MessageKey);
+}
 
 /** Docket status badge text (the package table is English-only). */
 export function statusLabel(s: DocketStatus): string {

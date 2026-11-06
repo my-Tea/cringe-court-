@@ -53,6 +53,16 @@ function clip(text: string, max: number): string {
   return t.length > max ? `${t.slice(0, max - 1).replace(/\s+\S*$/, '')}…` : t;
 }
 
+/** A quoted sentence keeps its own end punctuation inside the quotes ("cold." not "cold.".). */
+function quoted(text: string): string {
+  return `“${/[.!?…]$/.test(text) ? text : `${text}.`}”`;
+}
+
+/** The same quote mid-sentence: no end punctuation to collide with what follows. */
+function quotedInline(text: string): string {
+  return `“${text.replace(/[.!?…]+$/, '')}”`;
+}
+
 function pick<T>(rand: () => number, items: readonly T[]): T {
   return items[Math.floor(rand() * items.length) % items.length]!;
 }
@@ -112,10 +122,11 @@ export class VersusCounsel implements AiCounselPort {
   async suggestAngles(request: AngleRequest, signal?: AbortSignal): Promise<readonly AngleSuggestion[]> {
     await this.#wait(signal);
     const first = sentences(request.story)[0] ?? 'this';
-    const topic = clip(first.replace(/[.!?…]+$/, ''), 60);
+    // Single curly quotes: the angle is shown inside double quotes, so no nesting.
+    const topic = clip(first.replace(/[.!?…]+$/, '').replace(/[“”"]/g, ''), 60);
     const rand = seededRandom(`angles:${request.trialId}:${request.story.length}`);
     const pool = [
-      `A deal is a deal, and “${topic}” broke it.`,
+      `A deal is a deal, and ‘${topic}’ broke it.`,
       'Intent matters more than outcome, and my intent was pure.',
       'Any reasonable person in the group chat would have done the same.',
       'The other side is arguing vibes. I am arguing facts.',
@@ -183,8 +194,8 @@ export class VersusCounsel implements AiCounselPort {
         }
       }
       lines.push(
-        { id: id(), speaker: 'side-a', bench: 0, segment: 'rebuttal', beat: 'objection', text: `${pick(ra, REBUTTALS_A)} Side B says “${quoteB}”. Listen to that again.` },
-        { id: id(), speaker: 'side-b', bench: 1, segment: 'rebuttal', beat: 'objection', text: unbalanced ? 'Hm.' : `${pick(rb, REBUTTALS_B)} “${quoteA}” is not the whole story, and they know it.` },
+        { id: id(), speaker: 'side-a', bench: 0, segment: 'rebuttal', beat: 'objection', text: `${pick(ra, REBUTTALS_A)} Side B says ${quoted(quoteB)} Listen to that again.` },
+        { id: id(), speaker: 'side-b', bench: 1, segment: 'rebuttal', beat: 'objection', text: unbalanced ? 'Hm.' : `${pick(rb, REBUTTALS_B)} ${quotedInline(quoteA)} is not the whole story, and they know it.` },
         { id: id(), speaker: 'judge', segment: 'rebuttal', beat: 'dramatic-pause', text: 'The court notes that both sides arrived with receipts. Continue.' },
         { id: id(), speaker: 'side-a', bench: 0, segment: 'closing', beat: 'point', text: `${A.notes} ${A.closing}` },
         { id: id(), speaker: 'side-b', bench: 1, segment: 'closing', beat: 'laugh', text: unbalanced ? B.closing : `${B.notes} ${B.closing}` },
@@ -226,7 +237,7 @@ export class VersusCounsel implements AiCounselPort {
     const label = request.verdictLabel;
     let text: string;
     if (label === 'NO VERDICT') {
-      text = 'MISTRIAL. The jury could not agree, so both sides get their money back and the argument continues at dinner.';
+      text = 'MISTRIAL. No verdict was reached, so both sides get their money back and the argument continues at dinner.';
     } else {
       const loser = label.startsWith('SIDE A') ? 'Side B' : 'Side A';
       text = `The jury finds for ${label}. ${loser} is sentenced to admit it in the group chat within the hour. Court is adjourned.`;
