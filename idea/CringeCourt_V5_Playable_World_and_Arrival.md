@@ -14,7 +14,7 @@ V4 imagined an anime courtroom you watch. The build became a voxel world you wal
 
 ## 2. The arrival run (replaces the forms)
 
-Route `/play`. Sign-in and "Play as guest" on the landing both lead here.
+Route `/play`, reached from the title screen's Play button.
 
 | Stop | What the player does | What it replaces |
 |---|---|---|
@@ -27,6 +27,17 @@ Route `/play`. Sign-in and "Play as guest" on the landing both lead here.
 - A small "Your way in" tracker shows the four steps and a one-line hint for the current one.
 - Progress is remembered on the device: look, verified flag (the screening nullifier only, never a name), and chosen mode. A returning player finds the seals already open and can skip straight to the courthouse.
 - Nothing about money moves here. Fees, consent and funding stay in each mode's own flow (V4 §6, D1–D14).
+
+## 2b. Console-style shell: the game is the whole app
+
+The website layout is gone for players. The app opens like a console game:
+
+- **Title screen (`/`):** the logo and a short menu (Play or Continue, New game, How to play, Settings) over the live world, which circles the courthouse slowly. Play glides the camera down into the player's view with no page load.
+- **In the game, only the game.** No header, nav bar or footer. Leaderboard, My cases, the three courts, How to play, Settings and Quit to title live in the game menu (Esc, or the Menu button).
+- **Panels over a frozen world.** Menu screens and every case-filing step (Solo filing, a new Versus case, the Grand Jury docket) open over the paused, blurred world, each with "Back to the game" and "Menu". Escape steps back on menu screens only; on a filing step it does nothing, so a half-written story is never lost.
+- **Hearings play full screen,** with the background world suspended.
+- Walking through the courthouse doors with a trial chosen opens that court's first step.
+- Developer sandboxes (`/gallery`, `/town`, `/court/walk`, `/courtroom`) keep the old site shell.
 
 ## 3. Camera and controls
 
