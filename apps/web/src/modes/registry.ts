@@ -19,8 +19,8 @@ export interface WebModeModule {
   definition: ModeDefinition;
   /** Child routes under `/<mode id>/`. */
   routes?: RouteObject[];
-  /** The landing page's main call to action once the mode is playable (e.g. `{ label: 'Open the docket', to: '/grand-jury/docket' }`). */
-  cta?: { label: string; to: string };
+  /** The landing page's call to action once the mode can file cases (replaces "Filing opens soon"). */
+  start?: { to: string; label: string; secondary?: { to: string; label: string } };
 }
 
 const discovered = import.meta.glob<WebModeModule>('./*/mode.{ts,tsx}', { eager: true, import: 'default' });
@@ -43,6 +43,11 @@ export function loadWebModes(files: Record<string, WebModeModule> = discovered):
 }
 
 export const { registry: modeRegistry, modules: webModes } = loadWebModes();
+
+/** The landing-page call to action a mode registered, if any. */
+export function modeStart(id: ModeId): WebModeModule['start'] {
+  return webModes.get(id)?.start;
+}
 
 /** Child routes every registered mode contributes, keyed by mode path. */
 export function modeChildRoutes(id: ModeId): RouteObject[] {

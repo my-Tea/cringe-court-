@@ -128,6 +128,7 @@ describe("Terms, pricing and marketing cap", () => {
   describe("setTerms validation", () => {
     const bad = async (mut: Record<string, unknown>, why: string, mode: 0 | 1 | 2 = MODE.Solo) => {
       const w = await loadFixture(fx);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deliberately malformed terms
       await expect(w.court.setTerms(mode, { ...buildTerms(mode), ...mut } as any))
         .to.be.revertedWithCustomError(w.court, "InvalidTerms")
         .withArgs(why);

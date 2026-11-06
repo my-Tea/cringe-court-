@@ -12,6 +12,7 @@ const fx = () => deployWorld();
 const fxNoReserve = () => deployWorld({ reserve: 0n });
 const fxSmallReserve = () => deployWorld({ reserve: usdc(1) });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ethers tx/promise union in tests
 async function blockTime(txp: Promise<any> | any): Promise<number> {
   const tx = await txp;
   const r = await tx.wait();

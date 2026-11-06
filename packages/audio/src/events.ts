@@ -3,23 +3,14 @@
  * decides what it sounds like. `cuesForEvent` is pure so the mapping can be
  * tested and documented without a browser.
  *
- * `CourtPhase` mirrors `CasePhase` from `@cringe-court/core` (v3/p3-app-shell)
- * as a structural copy, so this package does not depend on core. The two are
- * assignable to each other; `test/events.test.ts` pins the list.
+ * `CourtPhase` is `CasePhase` from `@cringe-court/core`, re-exported under the
+ * audio package's name.
  */
+import type { CasePhase } from '@cringe-court/core';
 import type { AmbiencePreset } from './ambience.ts';
 import type { CueId } from './cues.ts';
 
-export type CourtPhase =
-  | 'draft'
-  | 'pre-trial'
-  | 'recruiting'
-  | 'preparing'
-  | 'commit'
-  | 'reveal'
-  | 'finalizing'
-  | 'settled'
-  | 'cancelled';
+export type CourtPhase = CasePhase;
 
 /** Who is speaking; used for stereo placement (prosecution left, defense right). */
 export type Bench = 'prosecution' | 'defense' | 'side-a' | 'side-b' | 'judge' | 'gallery';

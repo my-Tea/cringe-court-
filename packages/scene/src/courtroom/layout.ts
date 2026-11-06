@@ -54,19 +54,22 @@ export interface MarkSpec {
 }
 
 /**
- * Where each mark stands. ANIMATION-GUIDE §7 positions; the seven jury seats fan
- * out along the jury box (x = 84, facing −X). Juror y lifts them onto the box bench.
+ * Where each mark stands. ANIMATION-GUIDE §7 positions, adjusted so counsel stand
+ * behind their desks. Seats 1–3 are the jury box's three velvet seats (box at
+ * x = 84, rot 270, scale 1.3); a 7-person Grand Jury adds four standing jurors in front.
  */
 export const STAGE_MARKS: Readonly<Record<StageMark, MarkSpec>> = {
   bench: { pos: [0, 21, -62], yaw: 0 },
-  prosecution: { pos: [-56, 0, -22], yaw: 0 },
-  defense: { pos: [56, 0, -22], yaw: 0 },
-  witness: { pos: [-30, 0, -38], yaw: 0 },
-  bailiff: { pos: [-18, 0, 8], yaw: 0 },
-  clerk: { pos: [-30, 0, -6], yaw: 0 },
-  'jury-1': { pos: [80, 4, -52], yaw: -Math.PI / 2 },
-  'jury-2': { pos: [80, 4, -40], yaw: -Math.PI / 2 },
-  'jury-3': { pos: [80, 4, -28], yaw: -Math.PI / 2 },
+  // Counsel stand behind their desks (desk instances sit at z = −22).
+  prosecution: { pos: [-50, 0, -34], yaw: 0 },
+  defense: { pos: [50, 0, -34], yaw: 0 },
+  witness: { pos: [-30, 0, -45], yaw: 0 },
+  // By the bar on the prosecution side, clear of the entrance sightline.
+  bailiff: { pos: [-74, 0, 4], yaw: 0 },
+  clerk: { pos: [30, 0, -50], yaw: 0 },
+  'jury-1': { pos: [83, 6, -58], yaw: -Math.PI / 2 },
+  'jury-2': { pos: [83, 6, -40], yaw: -Math.PI / 2 },
+  'jury-3': { pos: [83, 6, -22], yaw: -Math.PI / 2 },
   'jury-4': { pos: [68, 0, -58], yaw: -Math.PI / 2 },
   'jury-5': { pos: [68, 0, -46], yaw: -Math.PI / 2 },
   'jury-6': { pos: [68, 0, -34], yaw: -Math.PI / 2 },
@@ -79,11 +82,11 @@ export const STAGE_MARKS: Readonly<Record<StageMark, MarkSpec>> = {
 
 /** Engine close-ups, composed for the marks above (eye level ≈ 48–62, never inside the jury box). */
 export const CLOSE_UPS: Readonly<Record<Extract<CameraShot, `close_${string}`>, CameraPreset>> = {
-  close_judge: { pos: [0, 62, -14], target: [0, 52, -62], fov: 40 },
-  close_prosecution: { pos: [-26, 50, 18], target: [-56, 36, -22], fov: 44 },
-  close_defense: { pos: [26, 50, 18], target: [56, 36, -22], fov: 44 },
-  close_jury: { pos: [30, 56, -6], target: [78, 38, -40], fov: 50 },
-  close_witness: { pos: [-6, 50, -2], target: [-30, 36, -38], fov: 44 },
+  close_judge: { pos: [0, 70, -12], target: [0, 64, -62], fov: 42 },
+  close_prosecution: { pos: [-20, 54, 22], target: [-50, 44, -34], fov: 42 },
+  close_defense: { pos: [20, 54, 22], target: [50, 44, -34], fov: 42 },
+  close_jury: { pos: [30, 56, 8], target: [82, 30, -40], fov: 50 },
+  close_witness: { pos: [0, 54, 10], target: [-30, 42, -38], fov: 44 },
 };
 
 export function cameraFor(layout: CourtroomLayout, shot: CameraShot): CameraPreset {
