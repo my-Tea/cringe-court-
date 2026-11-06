@@ -10,23 +10,39 @@ export interface IdkitRequestLike {
 }
 export interface IdkitRuntime {
   IDKit: {
-    request(config: { app_id: `app_${string}`; action: string; rp_context: unknown; allow_legacy_proofs: boolean }): {
+    request(config: {
+      app_id: `app_${string}`;
+      action: string;
+      rp_context: unknown;
+      allow_legacy_proofs: boolean;
+      environment?: 'staging' | 'production';
+    }): {
       preset(preset: unknown, options?: { signal?: AbortSignal }): Promise<IdkitRequestLike>;
     };
   };
+  proofOfHuman(opts?: { signal?: string }): unknown;
   orbLegacy(opts?: { signal?: string }): unknown;
   deviceLegacy(opts?: { signal?: string }): unknown;
 }
+
+/** One app-wide World action. Nullifiers are scoped to it, so every seat uses the same one. */
+export const WORLD_ACTION = 'cringecourt-juror';
 
 export type ConnectHandler = (connectorURI: string, cancel: () => void) => void | (() => void);
 
 export interface IdkitIdentityOptions {
   appId: `app_${string}`;
   backendUrl: string;
+  /** World action signed into rp_context. Default `cringecourt-juror`. The caller's purpose stays app-side. */
+  action?: string;
+  /** Staging for the simulator, production for World App. */
+  environment?: 'staging' | 'production';
   /** Called with the World App link as soon as the request exists. May return a cleanup run when the request settles. */
   onConnect?: ConnectHandler;
   /** Wallet forwarded to the verifier backend (for attestation). */
   wallet?: () => string | undefined;
+  /** Court-server session. The proof is bound to this device, not to a wallet the page invents. */
+  token?: () => string | null | undefined;
   fetch?: typeof fetch;
   /** Default: lazy `import('@worldcoin/idkit-core')`, so IDKit stays out of the main bundle. */
   idkit?: IdkitRuntime | (() => Promise<IdkitRuntime>);
@@ -35,14 +51,14 @@ export interface IdkitIdentityOptions {
 const JUROR_ACTIONS: ReadonlySet<IdentityAction> = new Set(['join-jury-pool', 'accept-jury-seat', 'gallery-vote']);
 
 const CANCEL_CODES = new Set(['user_rejected', 'verification_rejected', 'cancelled']);
-const NOT_VERIFIED_CODES = new Set(['credential_unavailable', 'identity_attributes_not_matched']);
+const NOT_VERIFIED_CODES = new Set(['credential_unavailable', 'identity_attributes_not_matched', 'world_id_4_not_available']);
 
 /** Map an IDKit error code to a core ProofResult failure. */
 export function mapIdkitError(code: string): Extract<ProofResult, { ok: false }> {
   if (CANCEL_CODES.has(code)) return { ok: false, reason: 'cancelled', message: screeningCopy('cancelled') };
   if (NOT_VERIFIED_CODES.has(code)) return { ok: false, reason: 'not-verified', message: screeningCopy('ineligible_level') };
   if (code === 'timeout' || /expired|timestamp/.test(code)) return { ok: false, reason: 'error', message: screeningCopy('expired') };
-  if (code === 'connection_failed') return { ok: false, reason: 'error', message: screeningCopy('network') };
+  if (code === 'connection_failed' || code === 'inclusion_proof_pending') return { ok: false, reason: 'error', message: screeningCopy('network') };
   return { ok: false, reason: 'error', message: t('shell.identity.error.generic', { code }) };
 }
 
@@ -140,7 +156,13 @@ export class IdkitIdentityPort implements IdentityPort {
   }
 
   #fetch(): typeof fetch {
-    return this.#o.fetch ?? ((...a) => globalThis.fetch(...a));
+    const base = this.#o.fetch ?? ((...a) => globalThis.fetch(...a));
+    return (input, init) => {
+      const headers = new Headers(init?.headers);
+      const token = this.#o.token?.();
+      if (token) headers.set('authorization', `Bearer ${token}`);
+      return base(input, { ...init, headers });
+    };
   }
 
   async requestProof(request: ProofRequest, signal?: AbortSignal): Promise<ProofResult> {
@@ -150,21 +172,28 @@ export class IdkitIdentityPort implements IdentityPort {
     signal?.addEventListener('abort', abort, { once: true });
     let cleanup: void | (() => void) = undefined;
     try {
-      let rpContext: unknown;
+      let rawContext: Record<string, unknown>;
       try {
-        const q = new URLSearchParams({ action: request.action, signal: request.signal });
-        const res = await this.#fetch()(`${this.#o.backendUrl}/rp-context?${q}`, { signal: own.signal });
+        const res = await this.#fetch()(`${this.#o.backendUrl}/rp-context`, { signal: own.signal });
         if (!res.ok) return { ok: false, reason: 'error', message: screeningCopy('network') };
-        rpContext = await res.json();
+        const parsed: unknown = await res.json();
+        if (!rec(parsed)) return { ok: false, reason: 'error', message: screeningCopy('malformed') };
+        rawContext = parsed;
       } catch {
         return own.signal.aborted ? mapIdkitError('cancelled') : { ok: false, reason: 'error', message: screeningCopy('network') };
       }
-      if (!rec(rpContext)) return { ok: false, reason: 'error', message: screeningCopy('malformed') };
+      const { signal: serverSignal, ...rpContext } = rawContext;
+      const signal = typeof serverSignal === 'string' ? serverSignal : request.signal;
 
       const runtime = await this.#loadRuntime();
-      const juror = JUROR_ACTIONS.has(request.action);
-      const preset = juror || request.minLevel === 'orb' ? runtime.orbLegacy({ signal: request.signal }) : runtime.deviceLegacy({ signal: request.signal });
-      const req = await runtime.IDKit.request({ app_id: this.#o.appId, action: request.action, rp_context: rpContext, allow_legacy_proofs: true }).preset(preset, {
+      const preset = runtime.proofOfHuman({ signal });
+      const req = await runtime.IDKit.request({
+        app_id: this.#o.appId,
+        action: this.#o.action ?? WORLD_ACTION,
+        rp_context: rpContext,
+        allow_legacy_proofs: false,
+        environment: this.#o.environment ?? 'staging',
+      }).preset(preset, {
         signal: own.signal,
       });
       cleanup = this.#o.onConnect?.(req.connectorURI, abort);

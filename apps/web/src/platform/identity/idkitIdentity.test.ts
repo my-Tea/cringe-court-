@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { IdkitIdentityPort, mapIdkitError, type IdkitRuntime } from './idkitIdentity';
 import { JUROR_SCREENING_COPY } from './screeningCopy';
 
-const RP = { rp_id: 'rp_1', nonce: 'n', created_at: 1, expires_at: 2, signature: 's' };
+const RP = { rp_id: 'rp_1', nonce: 'n', created_at: 1, expires_at: 2, signature: 's', signal: 'wallet:0xabc' };
 const RESULT = { protocol_version: '3.0', nonce: 'n', responses: [{ identifier: 'orb', nullifier: '0x' + 'ab'.repeat(32), proof: '0x01', merkle_root: '0x02' }] };
 const jsonRes = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
 
-function setup(opts: { completion?: unknown; verifyBody?: unknown; verifyStatus?: number; rpStatus?: number } = {}) {
+function setup(opts: { completion?: unknown; verifyBody?: unknown; verifyStatus?: number; rpStatus?: number; token?: string } = {}) {
   const calls: string[] = [];
   const fetchFn = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
     const u = String(url);
@@ -34,11 +34,20 @@ function setup(opts: { completion?: unknown; verifyBody?: unknown; verifyStatus?
         };
       },
     },
+    proofOfHuman: (o) => ({ kind: 'human', ...o }),
     orbLegacy: (o) => ({ kind: 'orb', ...o }),
     deviceLegacy: (o) => ({ kind: 'device', ...o }),
   };
   const onConnect = vi.fn(() => vi.fn());
-  const port = new IdkitIdentityPort({ appId: 'app_x', backendUrl: 'https://api.test/', fetch: fetchFn as unknown as typeof fetch, idkit, onConnect, wallet: () => '0xabc' });
+  const port = new IdkitIdentityPort({
+    appId: 'app_x',
+    backendUrl: 'https://api.test/',
+    fetch: fetchFn as unknown as typeof fetch,
+    idkit,
+    onConnect,
+    wallet: () => '0xabc',
+    ...(opts.token ? { token: () => opts.token } : {}),
+  });
   return { port, calls, presets, configs, onConnect, fetchFn };
 }
 
@@ -49,18 +58,25 @@ describe('IdkitIdentityPort', () => {
     const t = setup();
     const r = await t.port.requestProof(seat);
     expect(r.ok).toBe(true);
-    expect(t.calls[0]).toBe('GET https://api.test/rp-context?action=accept-jury-seat&signal=case%3A1%3Aseat');
-    expect(t.presets[0]).toMatchObject({ kind: 'orb', signal: 'case:1:seat' });
-    expect(t.configs[0]).toMatchObject({ app_id: 'app_x', action: 'accept-jury-seat', rp_context: RP, allow_legacy_proofs: true });
+    expect(t.calls[0]).toBe('GET https://api.test/rp-context');
+    expect(t.presets[0]).toMatchObject({ kind: 'human', signal: 'wallet:0xabc' });
+    expect(t.configs[0]).toMatchObject({
+      app_id: 'app_x',
+      action: 'cringecourt-juror',
+      rp_context: { rp_id: 'rp_1', nonce: 'n', created_at: 1, expires_at: 2, signature: 's' },
+      allow_legacy_proofs: false,
+      environment: 'staging',
+    });
     expect(t.onConnect).toHaveBeenCalledWith('https://world.org/verify?t=abc', expect.any(Function));
     const cleanup = t.onConnect.mock.results[0]!.value as ReturnType<typeof vi.fn>;
     expect(cleanup).toHaveBeenCalled();
   });
 
-  it('uses the device preset for case-party', async () => {
+  it('uses proof of human for a party too', async () => {
     const t = setup();
     await t.port.requestProof({ action: 'case-party', signal: 's' });
-    expect(t.presets[0]).toMatchObject({ kind: 'device' });
+    expect(t.presets[0]).toMatchObject({ kind: 'human', signal: 'wallet:0xabc' });
+    expect(t.configs[0]).toMatchObject({ action: 'cringecourt-juror', allow_legacy_proofs: false });
   });
 
   it('maps IDKit errors', async () => {
@@ -68,6 +84,15 @@ describe('IdkitIdentityPort', () => {
     expect(await setup({ completion: { success: false, error: 'credential_unavailable' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'not-verified' });
     expect(await setup({ completion: { success: false, error: 'generic_error' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'error' });
     expect(mapIdkitError('timeout')).toMatchObject({ reason: 'error', message: JUROR_SCREENING_COPY.expired });
+    expect(mapIdkitError('world_id_4_not_available')).toMatchObject({ reason: 'not-verified' });
+    expect(mapIdkitError('inclusion_proof_pending')).toMatchObject({ reason: 'error', message: JUROR_SCREENING_COPY.network });
+  });
+
+  it('sends the court session on the verifier calls', async () => {
+    const t = setup({ token: 'sess-1' });
+    await t.port.requestProof(seat);
+    const headers = new Headers(t.fetchFn.mock.calls[0]?.[1]?.headers);
+    expect(headers.get('authorization')).toBe('Bearer sess-1');
   });
 
   it('reports a backend failure without touching IDKit', async () => {
