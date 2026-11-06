@@ -9,8 +9,8 @@ import type { Aabb, Vec3 } from './types';
 export const BODY = {
   /** Half-width of the square footprint. */
   radius: 4.5,
-  height: 52,
-  eye: 48,
+  height: 50,
+  eye: 44,
   /** Highest ledge walked up without jumping (the dais is 7.6 above the carpet). */
   step: 9,
   walk: 58,
@@ -90,7 +90,7 @@ function blocks(s: Aabb, feet: number): boolean {
 }
 
 /** Highest standable surface under the footprint, at or below `feet + step`. */
-export function groundUnder(index: SolidIndex, x: number, z: number, feet: number, r = BODY.radius): number {
+export function groundUnder(index: SolidIndex, x: number, z: number, feet: number, r: number = BODY.radius): number {
   let ground = -Infinity;
   for (const s of index.query(x - r, z - r, x + r, z + r)) {
     const top = s.max[1];
@@ -100,7 +100,7 @@ export function groundUnder(index: SolidIndex, x: number, z: number, feet: numbe
 }
 
 /** True if the body's footprint at (x, z) intersects any blocking solid. */
-export function overlaps(index: SolidIndex, x: number, z: number, feet: number, r = BODY.radius): boolean {
+export function overlaps(index: SolidIndex, x: number, z: number, feet: number, r: number = BODY.radius): boolean {
   for (const s of index.query(x - r, z - r, x + r, z + r)) {
     if (blocks(s, feet) && s.max[0] > x - r + EPS && s.min[0] < x + r - EPS && s.max[2] > z - r + EPS && s.min[2] < z + r - EPS) return true;
   }
