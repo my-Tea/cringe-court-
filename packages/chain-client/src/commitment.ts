@@ -39,7 +39,7 @@ export function randomSalt(): Hex {
  * copyable string, so a lost tab never costs a bond (V4 §7 UX safeguard).
  * It contains the choice, so it must stay private until the reveal.
  */
-export interface Scroll extends CommitmentInput {}
+export type Scroll = CommitmentInput;
 
 const SCROLL_PREFIX = "ccscroll1:";
 
