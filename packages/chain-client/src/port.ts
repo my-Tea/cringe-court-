@@ -52,6 +52,10 @@ export interface ChainPort {
   // writes, as `account`
   approveUsdc(amount: bigint): Promise<TxResult>;
   fileSolo(p: { contentHash: Hex; usePass?: boolean }): Promise<TxResult & { caseId: bigint }>;
+  /** Arc only: a Solo case with a jury of 3, 5 or 7. */
+  fileSoloJury?(p: { contentHash: Hex; jurors: number }): Promise<TxResult & { caseId: bigint }>;
+  /** Arc only: what that jury costs the filer, and what a juror stakes and earns. */
+  soloPrice?(jurors: number): Promise<{ price: bigint; bond: bigint; successBonus: bigint }>;
   openVersus(p: { sideB: Address; contentHash: Hex; usePass?: boolean }): Promise<TxResult & { caseId: bigint }>;
   joinVersus(caseId: bigint, usePass?: boolean): Promise<TxResult>;
   withdrawInvite(caseId: bigint): Promise<TxResult>;

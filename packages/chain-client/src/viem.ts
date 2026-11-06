@@ -141,6 +141,14 @@ export function createViemChainPort(cfg: ViemChainPortConfig): ChainPort {
       const r = await courtWrite("fileSolo", [p.contentHash, !!p.usePass]);
       return { txHash: r.txHash, caseId: find(r.events, "CaseCreated").caseId as bigint };
     },
+    async fileSoloJury(p) {
+      const r = await courtWrite("fileSoloJury", [p.contentHash, p.jurors]);
+      return { txHash: r.txHash, caseId: find(r.events, "CaseCreated").caseId as bigint };
+    },
+    async soloPrice(jurors) {
+      const [price, bond, successBonus] = await read<readonly [bigint, bigint, bigint]>("soloPrice", [jurors]);
+      return { price, bond, successBonus };
+    },
     async openVersus(p) {
       const r = await courtWrite("openVersus", [p.sideB, p.contentHash, !!p.usePass]);
       return { txHash: r.txHash, caseId: find(r.events, "CaseCreated").caseId as bigint };

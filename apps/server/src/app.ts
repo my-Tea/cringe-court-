@@ -28,7 +28,8 @@ import { FAUCET_MAX, GrandJuryHall, type GjCommand } from './gj/hall';
 import { RateLimiter } from './ratelimit';
 import { InviteSigner, SessionFull, Sessions, type Session } from './sessions';
 import { FileStorage, MemoryStorage, type Storage } from './store';
-import { arcHumanWriter, attestWallet, type HumanWriter } from './chain/attest';
+import { ARC_COURT, arcHumanWriter, attestWallet, type HumanWriter } from './chain/attest';
+import { arcStakeReader, courtWriter, createSoloTrials, screenConfession } from './solo/trial';
 import { createWorldService, seatGate, type WorldService } from './world/routes';
 import { HumanStore } from './world/humans';
 import { MAX_BATCH, BadFact, Forbidden, authorize, checkShape } from './versus/validate';
@@ -56,6 +57,8 @@ export interface ServerDeps {
   log?: (line: string) => void;
   /** Test stand-in. Production builds the IDKit verifier from config.world. */
   worldVerifier?: IdentityVerifier;
+  /** Test stand-in. Production writes with the configured model after reading the stake from Arc. */
+  soloTrials?: ReturnType<typeof createSoloTrials>;
   /** Test stand-in. Production signs with ARC_RELAYER_KEY from the environment. */
   humanWriter?: HumanWriter | null;
 }
@@ -118,6 +121,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     onChange: broadcastGj,
   });
 
+  const soloTrials = deps.soloTrials ?? createSoloTrials({ writer: courtWriter(process.env, log), stakes: arcStakeReader(process.env, (process.env.ARC_COURT?.trim() || ARC_COURT) as `0x${string}`) });
   const humanWriter = deps.humanWriter !== undefined ? deps.humanWriter : arcHumanWriter(process.env, clockMs);
   const world: WorldService | null = config.world
     ? createWorldService({
@@ -280,6 +284,19 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       return json(res, 200, result);
     }
 
+    if (path === `${API}/solo/screen` && method === 'POST') {
+      const b = await body<{ title?: unknown; story?: unknown }>(req);
+      return json(res, 200, screenConfession(b.title, b.story));
+    }
+    if (path === `${API}/solo/trial` && method === 'POST') {
+      limit(limits.world, sid, 'Too many requests. Wait a minute.');
+      const b = await body<{ txHash?: unknown; title?: unknown; story?: unknown }>(req);
+      const r = await soloTrials.trial(b.txHash, b.title, b.story);
+      if (r.ok) return json(res, 200, r);
+      if (r.reason === 'bad-request') throw new HttpError(400, 'bad-request', r.message);
+      if (r.reason === 'not-a-stake' || r.reason === 'wrong-confession') throw new HttpError(403, 'forbidden', r.message);
+      throw new HttpError(503, 'disabled', r.message);
+    }
     if (path === `${API}/chain/grand-jury/publish` && method === 'POST') {
       limit(limits.world, sid, 'Too many requests. Wait a minute.');
       await body(req);

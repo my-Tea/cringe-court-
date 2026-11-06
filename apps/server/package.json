@@ -9,6 +9,7 @@
     "dev": "tsx watch src/main.ts"
   },
   "dependencies": {
+    "@cringe-court/ai": "*",
     "@cringe-court/core": "*",
     "@cringe-court/engine": "*",
     "@cringe-court/modes-grand-jury": "*",
