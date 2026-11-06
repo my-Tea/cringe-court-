@@ -50,4 +50,6 @@ export function I18nProvider({ children, locale: forced }: { children: ReactNode
   );
 }
 
-export const useLocale = () => useContext(I18nContext);
+export function useLocale(): I18nContextValue {
+  return useContext(I18nContext);
+}

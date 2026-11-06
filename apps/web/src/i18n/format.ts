@@ -19,7 +19,10 @@ function parse(src: string): Node[] {
     while (i < src.length) {
       const ch = src[i];
       if (ch === '{') {
-        if (text) out.push(text), (text = '');
+        if (text) {
+          out.push(text);
+          text = '';
+        }
         i++;
         out.push(parseArg());
       } else if (ch === '}' && closer) {
