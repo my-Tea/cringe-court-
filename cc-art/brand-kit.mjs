@@ -1,7 +1,6 @@
 // Brand kit — voxel wordmark, social share card, collectible case card.
-// The wordmark is real geometry: each font pixel becomes a maroon-faced voxel
-// with a gold highlight row and a dark-brown extrusion, rendered through the
-// character renderer. Frames follow the parchment / maroon / gold style guide.
+// The wordmark is real geometry: each font pixel becomes a cream-faced voxel
+// with a purple extrusion, rendered through the character renderer.
 import { Pen, mix } from './pen3.mjs';
 import { Canvas } from './core.mjs';
 import { renderCharacter } from './char-render.mjs';
@@ -11,10 +10,12 @@ import fs from 'node:fs';
 const OUT = './dist/brand';
 
 const B = {
-  parch: '#FFF2C7', cream: '#FFF9ED', tan: '#DCC8B0', taupe: '#A9917D',
-  gold: '#D9A046', goldLt: '#F6C75B', goldDk: '#B77D3A', goldDeep: '#8B5E2A',
-  burg: '#A32D3F', burgLt: '#CE4A44', burgDk: '#7A1C2E',
-  ink: '#4A3A32', inkSoft: '#7B645A',
+  night: '#140E1A', nightLt: '#2A1636',
+  neon: '#FF4FB8', neonLt: '#FFA8D8', neonDk: '#8E2A6E',
+  purple: '#6B4CA8', purpleSh: '#452F75',
+  cream: '#FFF6E4', creamSh: '#E8D6BC',
+  gold: '#D9A046', goldLt: '#F6C75B',
+  burg: '#6E1B2A', burgLt: '#8E2A3C', ink: '#3A2A24', inkSoft: '#6B5646',
 };
 
 /* ─────────────────────────────── wordmark ─────────────────────────────── */
@@ -37,9 +38,8 @@ function wordBoxes(lines, depth = 4) {
           while (run < 5 && g[gy][run] === '1') run++;
           const x0 = ci * 6 + gx - lineW / 2, x1 = ci * 6 + run - lineW / 2;
           const y1 = yTop - gy, y0 = y1 - 1;
-          // maroon face, gold highlight on the top row, darker maroon at the base
-          out.push({ f: [x0, y0, -0.6], t: [x1, y1, 0], m: gy === 0 ? B.goldLt : gy > 4 ? B.burgDk : B.burg });
-          out.push({ f: [x0, y0, 0], t: [x1, y1, depth], m: B.ink });
+          out.push({ f: [x0, y0, -0.6], t: [x1, y1, 0], m: B.cream });
+          out.push({ f: [x0, y0, 0], t: [x1, y1, depth], m: gy > 4 ? B.purpleSh : B.purple });
           gx = run;
         }
       }
@@ -111,17 +111,15 @@ function scaleDown(img, f) {
 
 /* ─────────────────────────────── frames ─────────────────────────────── */
 
-/** Ornate parchment frame: soft gold glow, maroon rule, gold inlay, cream field. */
-function goldFrame(p, x, y, w, h, r, field = B.parch) {
+/** Neon double rule with soft glow, the brand's frame language. */
+function neonFrame(p, x, y, w, h, r) {
   for (let i = 6; i >= 1; i--) {
-    const c = mix(B.parch, B.goldLt, 1 - i / 7);
+    const c = mix(B.night, B.neonDk, 1 - i / 7);
     p.roundRect(x - i, y - i, w + i * 2, h + i * 2, r + i, [c, c]);
   }
-  p.roundRect(x, y, w, h, r, [B.burgDk, B.burgDk]);
-  p.roundRect(x + 3, y + 3, w - 6, h - 6, r - 2, [B.gold, B.gold]);
-  p.roundRect(x + 6, y + 6, w - 12, h - 12, r - 3, [B.burg, B.burg]);
-  p.roundRect(x + 8, y + 8, w - 16, h - 16, r - 4, [B.goldLt, B.goldLt]);
-  p.roundRect(x + 10, y + 10, w - 20, h - 20, r - 5, [field, field]);
+  p.roundRect(x, y, w, h, r, [B.neon, B.neon]);
+  p.roundRect(x + 3, y + 3, w - 6, h - 6, r - 2, [B.neonLt, B.neonLt]);
+  p.roundRect(x + 5, y + 5, w - 10, h - 10, r - 3, [B.night, B.night]);
 }
 
 /** Dashed slot outline marking where runtime content drops in. */
@@ -143,7 +141,7 @@ function silhouette(p, cx, by, s, col) {
   p.roundRect(cx - 34 * s, by - 46 * s, 68 * s, 46 * s, 22 * s, [col, col]);       // shoulders
   p.roundRect(cx - 9 * s, by - 56 * s, 18 * s, 14 * s, 0, [col, col]);           // neck
   p.roundRect(cx - 24 * s, by - 100 * s, 48 * s, 48 * s, 10 * s, [col, col]);     // cubic head
-  drawText(p, '?', cx, by - 76 * s, Math.round(4 * s), B.ink);
+  drawText(p, '?', cx, by - 76 * s, Math.round(4 * s), B.night);
 }
 
 function corner(p, x, y, sx, sy, col) {
@@ -170,24 +168,24 @@ function build() {
   {
     const W = 1200, H = 630;
     const p = new Pen(W, H);
-    p.roundRect(0, 0, W, H, 0, [B.parch, B.parch]);
-    goldFrame(p, 24, 24, W - 48, H - 48, 18);
+    p.roundRect(0, 0, W, H, 0, [B.night, B.night]);
+    neonFrame(p, 24, 24, W - 48, H - 48, 18);
     // defendant portrait slot (left)
-    p.roundRect(70, 150, 300, 380, 14, [B.tan, B.tan]);
-    silhouette(p, 220, 500, 2, B.taupe);
-    slot(p, 70, 150, 300, 380, B.inkSoft, null);
-    drawText(p, 'DEFENDANT', 220, 175, 2, B.burgDk);
+    p.roundRect(70, 150, 300, 380, 14, [B.nightLt, B.nightLt]);
+    silhouette(p, 220, 500, 2, B.purpleSh);
+    slot(p, 70, 150, 300, 380, B.purple, null);
+    drawText(p, 'DEFENDANT', 220, 175, 2, B.neonLt);
     // verdict slot (right) sized for card_* verdict cards at 1.5x (540x300)
-    slot(p, 600, 150, 540, 300, B.goldDk, 'VERDICT CARD');
-    drawText(p, 'THE HUMAN JURY HAS SPOKEN', 870, 132, 2, B.burgDk);
+    slot(p, 600, 150, 540, 300, B.gold, 'VERDICT CARD');
+    drawText(p, 'THE HUMAN JURY HAS SPOKEN', 870, 132, 2, B.cream);
     // fact rows: labels only, runtime fills the values
     for (const [i, label] of ['CASE', 'JURY', 'CATEGORY'].entries()) {
       const x = 600 + i * 184;
-      p.roundRect(x, 470, 172, 60, 8, [B.tan, B.tan]);
-      p.roundRect(x, 470, 172, 3, 1, [B.burg, B.burg]);
-      drawText(p, label, x + 86, 488, 2, B.burgDk);
+      p.roundRect(x, 470, 172, 60, 8, [B.nightLt, B.nightLt]);
+      p.roundRect(x, 470, 172, 3, 1, [B.neon, B.neon]);
+      drawText(p, label, x + 86, 488, 2, B.neonLt);
     }
-    drawText(p, 'THE AI PERFORMS. HUMANS DECIDE.', W / 2, 572, 2, B.inkSoft);
+    drawText(p, 'THE AI PERFORMS. HUMANS DECIDE.', W / 2, 572, 2, B.creamSh);
     for (const [x, y, sx, sy] of [[44, 44, 1, 1], [W - 44, 44, -1, 1], [44, H - 44, 1, -1], [W - 44, H - 44, -1, -1]]) corner(p, x, y, sx, sy, B.gold);
     const card = p.done();
     const small = scaleDown(wm, 0.4);
@@ -200,28 +198,26 @@ function build() {
   {
     const W = 360, H = 500;
     const p = new Pen(W, H);
-    p.roundRect(0, 0, W, H, 18, [B.burgDk, B.burgDk]);
-    p.roundRect(4, 4, W - 8, H - 8, 15, [B.gold, B.gold]);
-    p.roundRect(8, 8, W - 16, H - 16, 12, [B.goldLt, B.goldLt]);
-    p.roundRect(11, 11, W - 22, H - 22, 10, [B.parch, B.parch]);
-    // header banner
-    p.roundRect(18, 18, W - 36, 44, 8, [B.burgDk, B.burgDk, B.burg, B.burg, B.burg]);
-    p.roundRect(18, 18, W - 36, 3, 2, [B.goldLt, B.goldLt]);
+    p.roundRect(0, 0, W, H, 18, [B.gold, B.gold]);
+    p.roundRect(6, 6, W - 12, H - 12, 14, [B.goldLt, B.goldLt]);
+    p.roundRect(10, 10, W - 20, H - 20, 12, [B.night, B.night]);
+    // header
+    p.roundRect(18, 18, W - 36, 44, 8, [B.burg, B.burg, B.burgLt, B.burgLt, B.burgLt]);
     drawText(p, 'CASE FILE', 104, 40, 3, B.goldLt);
     slot(p, 196, 26, 140, 28, B.goldLt, null);
     // art window with a spotlight cone
-    p.roundRect(18, 72, W - 36, 220, 10, [B.tan, B.tan]);
-    p.poly([[W / 2 - 18, 72], [W / 2 + 18, 72], [W / 2 + 110, 292], [W / 2 - 110, 292]], [mix(B.tan, B.cream, 0.55), mix(B.tan, B.cream, 0.55)]);
-    silhouette(p, W / 2, 288, 1.5, B.taupe);
-    p.roundRect(18, 72, W - 36, 3, 1, [B.burg, B.burg]);
+    p.roundRect(18, 72, W - 36, 220, 10, [B.nightLt, B.nightLt]);
+    p.poly([[W / 2 - 18, 72], [W / 2 + 18, 72], [W / 2 + 110, 292], [W / 2 - 110, 292]], [mix(B.nightLt, B.cream, 0.10), mix(B.nightLt, B.cream, 0.10)]);
+    silhouette(p, W / 2, 288, 1.5, B.purpleSh);
+    p.roundRect(18, 72, W - 36, 3, 1, [B.neon, B.neon]);
     // stat rows
     for (const [i, label] of ['CHARGE', 'CATEGORY', 'JURY', 'VERDICT'].entries()) {
       const y = 306 + i * 36;
-      p.roundRect(18, y, W - 36, 30, 6, [B.cream, B.cream]);
-      p.roundRect(18, y, 4, 30, 2, [B.gold, B.gold]);
-      drawText(p, label, 18 + 12 + (label.length * 6 - 1), y + 15, 2, B.burgDk);
+      const row = mix(B.nightLt, B.cream, 0.08);
+      p.roundRect(18, y, W - 36, 30, 6, [row, row]);
+      drawText(p, label, 18 + 12 + (label.length * 6 - 1), y + 15, 2, B.neonLt);
     }
-    drawText(p, 'CRINGECOURT', W / 2, H - 28, 2, B.burgDk);
+    drawText(p, 'CRINGECOURT', W / 2, H - 28, 2, B.gold);
     p.done().save(`${OUT}/case_card.png`);
     made.push('case_card');
   }
@@ -232,6 +228,6 @@ function build() {
 const made = build();
 console.log('Brand assets:', made.length);
 fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
-  note: 'Voxel wordmark (maroon face, gold highlight, dark-brown extrusion, transparent), 1200x630 parchment share card and 360x500 case card. Card slots are templates: dashed outlines and labels mark where runtime content drops in.',
+  note: 'Voxel wordmark (cream face, purple extrusion, transparent), 1200x630 share card and 360x500 case card. Card slots are templates: dashed outlines and labels mark where runtime content drops in.',
   assets: made,
 }, null, 2));
