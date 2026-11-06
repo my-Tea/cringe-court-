@@ -21,7 +21,7 @@ export function viewFor(pathname: string): GameView {
 export interface GameState {
   profile: PlayerProfile;
   save: (next: PlayerProfile) => void;
-  /** Start over: a freshly rolled look, nothing verified, no trial chosen. */
+  /** Start over: a freshly rolled look and no trial chosen. World ID verification stays. */
   reset: () => void;
 }
 

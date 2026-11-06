@@ -34,6 +34,11 @@ function toPepperBytes(pepper: Uint8Array | string): Uint8Array {
  * Node-only (node:crypto). The pepper is a backend secret; without it the id
  * cannot be linked back to a World ID nullifier.
  */
+/** A returning person proves a World session rather than a one-time nullifier. The id stays stable across their visits. */
+export function deriveSessionHumanId(sessionId: string, pepper: Uint8Array | string): `0x${string}` {
+  return `0x${createHmac('sha256', toPepperBytes(pepper)).update(sessionId).digest('hex')}`;
+}
+
 export function deriveHumanId(nullifier: string | bigint, pepper: Uint8Array | string): `0x${string}` {
   const n = canonicalNullifier(nullifier);
   const msg = Buffer.from(n.toString(16).padStart(64, '0'), 'hex');

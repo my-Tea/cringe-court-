@@ -12,7 +12,7 @@ const rec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' 
 
 export interface WorldService {
   humans: HumanStore;
-  rpContext(session: Session): {
+  rpContext(session: Session, kind?: 'uniqueness' | 'session'): {
     rp_id: string;
     nonce: string;
     created_at: number;
@@ -55,8 +55,9 @@ export function createWorldService(o: { config: WorldServerConfig; humans: Human
     });
   return {
     humans: o.humans,
-    rpContext(session) {
-      const signed = signRequest({ signingKeyHex: o.config.signingKey, action: o.config.action });
+    rpContext(session, kind = 'uniqueness') {
+      // Session proofs have no action, so their request is signed without one.
+      const signed = signRequest(kind === 'session' ? { signingKeyHex: o.config.signingKey } : { signingKeyHex: o.config.signingKey, action: o.config.action });
       return {
         rp_id: o.config.rpId,
         nonce: signed.nonce,

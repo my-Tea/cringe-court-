@@ -147,6 +147,17 @@ function RunOverlay({ controller, station }: { controller: RoamController; stati
         return;
       }
     }
+    // The court may already know this person, and World would refuse to verify them twice.
+    if (platformConfig.backend) {
+      const known = await backendClient(platformConfig.backend)
+        .connection.get<{ verified: boolean }>('/api/v1/chain/human')
+        .catch(() => ({ verified: false }));
+      if (known.verified) {
+        commit({ ...profile, verified: { nullifier: 'known-to-court', at: Date.now() } });
+        toast({ tone: 'success', title: t('play.verify.ok.title'), description: t('play.verify.ok.body') });
+        return;
+      }
+    }
     const request = { action: 'accept-jury-seat' as const, signal: 'cringecourt:juror', minLevel: 'orb' as const };
     const proof = await identity.requestProof(request);
     if (!proof.ok) {

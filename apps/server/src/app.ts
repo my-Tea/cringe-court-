@@ -275,7 +275,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     if (path === `${API}/world/rp-context` && method === 'GET') {
       if (!world) throw new HttpError(503, 'disabled', 'World ID is not configured on this server.');
       limit(limits.world, sid, 'Too many verification requests. Wait a minute.');
-      return json(res, 200, world.rpContext(session));
+      return json(res, 200, world.rpContext(session, url.searchParams.get('kind') === 'session' ? 'session' : 'uniqueness'));
     }
     if (path === `${API}/world/verify` && method === 'POST') {
       if (!world) throw new HttpError(503, 'disabled', 'World ID is not configured on this server.');

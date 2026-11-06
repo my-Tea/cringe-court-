@@ -53,6 +53,43 @@ function setup(opts: { completion?: unknown; verifyBody?: unknown; verifyStatus?
 
 const seat = { action: 'accept-jury-seat', signal: 'case:1:seat' } as const;
 
+describe('a person World already knows', () => {
+  const SESSION = { protocol_version: '4.0', session_id: 'session_abc', responses: [{ identifier: 'proof_of_human', session_nullifier: ['0x1', '0x2'], proof: ['0x0'] }] };
+
+  function runtime(firstError: string | null) {
+    const log: string[] = [];
+    const flow = (done: unknown) => ({ preset: async () => ({ connectorURI: 'https://world.org/verify?t=x', pollUntilCompletion: async () => done }) });
+    const idkit = {
+      IDKit: {
+        request: () => { log.push('uniqueness'); return flow(firstError ? { success: false, error: firstError } : { success: true, result: RESULT }); },
+        createSession: () => { log.push('createSession'); return flow({ success: true, result: SESSION }); },
+        proveSession: (id: string) => { log.push(`proveSession:${id}`); return flow({ success: true, result: SESSION }); },
+      },
+      proofOfHuman: () => ({}),
+      orbLegacy: () => ({}),
+      deviceLegacy: () => ({}),
+    } as unknown as IdkitRuntime;
+    const port = new IdkitIdentityPort({ appId: 'app_x', backendUrl: 'https://court.test', idkit, fetch: vi.fn(async (u: string | URL | Request) => { log.push(String(u).includes('kind=session') ? 'rp:session' : 'rp:uniqueness'); return jsonRes(RP); }) as unknown as typeof fetch });
+    return { port, log };
+  }
+  const seat = { action: 'accept-jury-seat', signal: 's' } as Parameters<IdkitIdentityPort['requestProof']>[0];
+
+  it('falls back to a session proof when World refuses a second uniqueness proof', async () => {
+    window.localStorage.removeItem('cc:world:session');
+    const { port, log } = runtime('nullifier_replayed');
+    expect(await port.requestProof(seat)).toMatchObject({ ok: true });
+    expect(log).toEqual(['rp:uniqueness', 'uniqueness', 'rp:session', 'createSession']);
+  });
+
+  it('proves the saved session next time, without trying the one-time proof', async () => {
+    window.localStorage.setItem('cc:world:session', 'session_abc');
+    const { port, log } = runtime(null);
+    expect(await port.requestProof(seat)).toMatchObject({ ok: true });
+    expect(log).toEqual(['rp:session', 'proveSession:session_abc']);
+    window.localStorage.removeItem('cc:world:session');
+  });
+});
+
 describe('IdkitIdentityPort', () => {
   it('fetches rp-context, surfaces the link, and returns a proof', async () => {
     const t = setup();
@@ -83,8 +120,7 @@ describe('IdkitIdentityPort', () => {
     expect(await setup({ completion: { success: false, error: 'user_rejected' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'cancelled' });
     expect(await setup({ completion: { success: false, error: 'credential_unavailable' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'not-verified' });
     expect(await setup({ completion: { success: false, error: 'generic_error' } }).port.requestProof(seat)).toMatchObject({ ok: false, reason: 'error' });
-    const replayed = await setup({ completion: { success: false, error: 'nullifier_replayed' } }).port.requestProof(seat);
-    expect(replayed).toMatchObject({ ok: false, message: expect.stringContaining('only allows that once') });
+    expect(mapIdkitError('nullifier_replayed').message).toContain('only allows that once');
     expect(mapIdkitError('timeout')).toMatchObject({ reason: 'error', message: JUROR_SCREENING_COPY.expired });
     expect(mapIdkitError('world_id_4_not_available')).toMatchObject({ reason: 'not-verified' });
     expect(mapIdkitError('inclusion_proof_pending')).toMatchObject({ reason: 'error', message: JUROR_SCREENING_COPY.network });

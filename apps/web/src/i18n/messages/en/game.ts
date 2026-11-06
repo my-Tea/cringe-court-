@@ -6,7 +6,7 @@ export const game = {
   'title.play': 'Play',
   'title.continue': 'Continue',
   'title.newGame': 'New game',
-  'title.newGame.confirm': 'Start over? Your look, World ID check and chosen trial on this device are cleared.',
+  'title.newGame.confirm': 'Start over? Your look and chosen trial on this device are cleared. You stay verified.',
   'title.newGame.yes': 'Start over',
   'title.newGame.no': 'Keep my progress',
   'title.howToPlay': 'How to play',

@@ -37,12 +37,16 @@ export function GameShell() {
     setProfile(next);
   }, []);
   const reset = useCallback(() => {
+    const { verified } = readProfile();
     try {
       window.localStorage.removeItem('cc:player');
     } catch {
       /* private mode */
     }
-    setProfile(readProfile());
+    // A new game is a new run, not a new person: World would refuse to verify them twice.
+    const fresh = { ...readProfile(), verified };
+    writeProfile(fresh);
+    setProfile(fresh);
     setRun((n) => n + 1);
   }, []);
   const state = useMemo(() => ({ profile, save, reset }), [profile, save, reset]);

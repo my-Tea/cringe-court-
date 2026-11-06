@@ -8,6 +8,15 @@ export interface IdkitRequestLike {
   readonly connectorURI: string;
   pollUntilCompletion(options?: { signal?: AbortSignal; pollInterval?: number; timeout?: number }): Promise<{ success: true; result: unknown } | { success: false; error: string }>;
 }
+interface IdkitBuilderLike {
+  preset(preset: unknown, options?: { signal?: AbortSignal }): Promise<IdkitRequestLike>;
+}
+interface IdkitSessionConfig {
+  app_id: `app_${string}`;
+  rp_context: unknown;
+  environment?: 'staging' | 'production';
+}
+
 export interface IdkitRuntime {
   IDKit: {
     request(config: {
@@ -16,9 +25,9 @@ export interface IdkitRuntime {
       rp_context: unknown;
       allow_legacy_proofs: boolean;
       environment?: 'staging' | 'production';
-    }): {
-      preset(preset: unknown, options?: { signal?: AbortSignal }): Promise<IdkitRequestLike>;
-    };
+    }): IdkitBuilderLike;
+    createSession?(config: IdkitSessionConfig): IdkitBuilderLike;
+    proveSession?(sessionId: `session_${string}`, config: IdkitSessionConfig): IdkitBuilderLike;
   };
   proofOfHuman(opts?: { signal?: string }): unknown;
   orbLegacy(opts?: { signal?: string }): unknown;
@@ -52,6 +61,27 @@ const JUROR_ACTIONS: ReadonlySet<IdentityAction> = new Set(['join-jury-pool', 'a
 
 const CANCEL_CODES = new Set(['user_rejected', 'verification_rejected', 'cancelled']);
 const NOT_VERIFIED_CODES = new Set(['credential_unavailable', 'identity_attributes_not_matched', 'world_id_4_not_available']);
+
+const REPLAY_CODES = new Set(['nullifier_replayed', 'max_verifications_reached']);
+/** World's id for this person's returning session. It outlives a new game. */
+const SESSION_KEY = 'cc:world:session';
+
+function storedSession(): `session_${string}` | null {
+  try {
+    const v = window.localStorage.getItem(SESSION_KEY);
+    return v?.startsWith('session_') ? (v as `session_${string}`) : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeSession(id: unknown): void {
+  try {
+    if (typeof id === 'string') window.localStorage.setItem(SESSION_KEY, id);
+  } catch {
+    /* private mode: they will scan again next time */
+  }
+}
 
 /** Map an IDKit error code to a core ProofResult failure. */
 export function mapIdkitError(code: string): Extract<ProofResult, { ok: false }> {
@@ -87,7 +117,7 @@ function toWorldIdProof(result: unknown): WorldIdProof | null {
   if (!rec(result) || !Array.isArray(result.responses)) return null;
   let best: { level: IdentityLevel; item: Record<string, unknown> } | null = null;
   for (const item of result.responses) {
-    if (!rec(item) || typeof item.nullifier !== 'string') continue;
+    if (!rec(item) || (typeof item.nullifier !== 'string' && !Array.isArray(item.session_nullifier))) continue;
     const level = levelFromCredential(typeof item.identifier === 'string' ? item.identifier : '');
     if (!best || level > best.level) best = { level, item };
   }
@@ -95,7 +125,7 @@ function toWorldIdProof(result: unknown): WorldIdProof | null {
   const p = best.item.proof;
   const merkle = best.item.merkle_root;
   return {
-    nullifierHash: toHex32(best.item.nullifier as string),
+    nullifierHash: toHex32((best.item.nullifier ?? (best.item.session_nullifier as string[])[0]) as string),
     merkleRoot: toHex32(typeof merkle === 'string' ? merkle : '0'),
     proof: toHex32(typeof p === 'string' ? p : '0'),
     verificationLevel: VERIFICATION[best.level],
@@ -167,7 +197,16 @@ export class IdkitIdentityPort implements IdentityPort {
     };
   }
 
+  /**
+   * World gives one uniqueness proof per person per action, ever. A person World
+   * already knows proves a session instead, so a new browser is not a dead end.
+   */
   async requestProof(request: ProofRequest, signal?: AbortSignal): Promise<ProofResult> {
+    const first = await this.#prove(request, signal, storedSession() ? 'session' : 'uniqueness');
+    return first === 'replayed' ? this.#prove(request, signal, 'session').then((r) => (r === 'replayed' ? mapIdkitError('nullifier_replayed') : r)) : first;
+  }
+
+  async #prove(request: ProofRequest, signal: AbortSignal | undefined, kind: 'uniqueness' | 'session'): Promise<ProofResult | 'replayed'> {
     if (signal?.aborted) return mapIdkitError('cancelled');
     const own = new AbortController();
     const abort = () => own.abort();
@@ -176,7 +215,7 @@ export class IdkitIdentityPort implements IdentityPort {
     try {
       let rawContext: Record<string, unknown>;
       try {
-        const res = await this.#fetch()(`${this.#o.backendUrl}/rp-context`, { signal: own.signal });
+        const res = await this.#fetch()(`${this.#o.backendUrl}/rp-context${kind === 'session' ? '?kind=session' : ''}`, { signal: own.signal });
         if (!res.ok) return { ok: false, reason: 'error', message: screeningCopy('network') };
         const parsed: unknown = await res.json();
         if (!rec(parsed)) return { ok: false, reason: 'error', message: screeningCopy('malformed') };
@@ -189,18 +228,23 @@ export class IdkitIdentityPort implements IdentityPort {
 
       const runtime = await this.#loadRuntime();
       const preset = runtime.proofOfHuman({ signal });
-      const req = await runtime.IDKit.request({
-        app_id: this.#o.appId,
-        action: this.#o.action ?? WORLD_ACTION,
-        rp_context: rpContext,
-        allow_legacy_proofs: false,
-        environment: this.#o.environment ?? 'staging',
-      }).preset(preset, {
-        signal: own.signal,
-      });
+      const environment = this.#o.environment ?? 'staging';
+      const session = { app_id: this.#o.appId, rp_context: rpContext, environment };
+      const saved = storedSession();
+      const { createSession, proveSession } = runtime.IDKit;
+      if (kind === 'session' && !createSession) return mapIdkitError('nullifier_replayed');
+      const builder =
+        kind === 'uniqueness'
+          ? runtime.IDKit.request({ app_id: this.#o.appId, action: this.#o.action ?? WORLD_ACTION, rp_context: rpContext, allow_legacy_proofs: false, environment })
+          : saved && proveSession
+            ? proveSession.call(runtime.IDKit, saved, session)
+            : createSession!.call(runtime.IDKit, session);
+      const req = await builder.preset(preset, { signal: own.signal });
       cleanup = this.#o.onConnect?.(req.connectorURI, abort);
       const done = await req.pollUntilCompletion({ signal: own.signal });
+      if (!done.success && REPLAY_CODES.has(done.error) && kind === 'uniqueness') return 'replayed';
       if (!done.success) return mapIdkitError(own.signal.aborted ? 'cancelled' : done.error);
+      if (rec(done.result)) storeSession(done.result.session_id);
       const proof = toWorldIdProof(done.result);
       if (!proof) return { ok: false, reason: 'error', message: screeningCopy('malformed') };
       this.#raw.set(`${request.action}:${request.signal}:${proof.nullifierHash.toLowerCase()}`, done.result);

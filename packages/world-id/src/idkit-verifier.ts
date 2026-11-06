@@ -1,5 +1,5 @@
 import { hashSignal } from '@worldcoin/idkit-core/hashing';
-import { deriveHumanId } from './human-id.js';
+import { deriveHumanId, deriveSessionHumanId } from './human-id.js';
 import { levelFromCredential } from './level.js';
 import {
   IdentityLevel,
@@ -65,9 +65,12 @@ function extract(proof: unknown): Extracted | undefined {
   if (!isRecord(proof) || !Array.isArray(proof.responses)) return undefined;
   let best: Extracted | undefined;
   for (const r of proof.responses) {
-    if (!isRecord(r) || typeof r.nullifier !== 'string' || typeof r.identifier !== 'string') continue;
+    if (!isRecord(r) || typeof r.identifier !== 'string') continue;
+    // A session proof carries [session nullifier, generated action] instead of one nullifier.
+    const nullifier = typeof r.nullifier === 'string' ? r.nullifier : Array.isArray(r.session_nullifier) ? r.session_nullifier[0] : undefined;
+    if (typeof nullifier !== 'string') continue;
     const level = levelFromCredential(r.identifier);
-    if (!best || level > best.level) best = { nullifier: r.nullifier, level };
+    if (!best || level > best.level) best = { nullifier, level };
   }
   return best;
 }
@@ -146,8 +149,9 @@ export class IdkitVerifier implements IdentityVerifier {
       return fail('invalid_proof', 'This proof was made for a different wallet.');
     }
 
+    const sessionId = typeof proof.session_id === 'string' && !('action' in proof) ? proof.session_id : null;
     const portalNullifier = nullifierFromPortal(body);
-    if (portalNullifier && portalNullifier !== found.nullifier) {
+    if (!sessionId && portalNullifier && portalNullifier !== found.nullifier) {
       return fail('invalid_proof', 'The verification service reported a different person.');
     }
     const nullifier = portalNullifier ?? found.nullifier;
@@ -158,7 +162,7 @@ export class IdkitVerifier implements IdentityVerifier {
 
     let humanId: `0x${string}`;
     try {
-      humanId = deriveHumanId(nullifier, this.o.pepper);
+      humanId = sessionId ? deriveSessionHumanId(sessionId, this.o.pepper) : deriveHumanId(nullifier, this.o.pepper);
     } catch {
       return fail('malformed', 'Proof nullifier is not in a recognised format.');
     }
