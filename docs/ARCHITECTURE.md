@@ -47,12 +47,11 @@ apps/
   web/                    @cringe-court/web — the Vite SPA
     index.html            sets the motion preference before first paint
     scripts/gen-tokens.ts tokens.ts → tokens.css (with --check)
-    scripts/gen-guide-art.py  style-guide crops → src/art/guide/*.webp (with --check)
     src/
       main.tsx            fonts, reset, tokens, base CSS, <App/>
       app/                providers, router, AppShell (header/nav/footer), route error boundary
-      art/art.ts          typed access to cc-art/dist (portraits, poses, UI icons, brand) and the style-guide crops
-      ds/                 the design system (see docs/DESIGN-SYSTEM.md; identity in docs/STYLE-GUIDE.md)
+      art/art.ts          typed access to cc-art/dist (portraits, poses, UI icons, brand)
+      ds/                 the design system (see docs/DESIGN-SYSTEM.md)
         tokens.ts         single source of truth for every token
         tokens.css        generated; committed; checked in CI
         styles/           reset, base, fonts
@@ -63,7 +62,7 @@ apps/
       gallery/            /gallery: every token, component and state
 
 cc-art/, judge/, …        the art pipeline (unchanged by this phase)
-docs/                     decisions, economics, architecture, design system, STYLE-GUIDE.md (canonical identity)
+docs/                     decisions, economics, architecture, design system
 ```
 
 Later phases add, without moving anything above:
@@ -226,10 +225,8 @@ npm run build               # vite production build
 npm run check               # all of the above, in that order
 ```
 
-The contrast of every semantic text/UI pair is a unit test on both surfaces
-(parchment and wood), so a palette change that breaks WCAG AA fails CI rather
-than a user. Colours are restricted to the 30 style-guide swatches
-(docs/STYLE-GUIDE.md); a test rejects raw colours outside the token layer.
+The contrast of every semantic text/UI pair is a unit test on both surfaces, so
+a palette change that breaks WCAG AA fails CI rather than a user.
 
 ---
 

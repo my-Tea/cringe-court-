@@ -5,6 +5,7 @@
     { "path": "./packages/ai" },
     { "path": "./packages/scene" },
     { "path": "./packages/engine" },
+    { "path": "./packages/modes-solo" },
     { "path": "./apps/web" },
     { "path": "./apps/web/tsconfig.node.json" }
   ]

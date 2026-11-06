@@ -19,7 +19,7 @@ for (let f = 0; f < 4; f++) {
     pts.push([80 + Math.cos(a) * r, 80 + Math.sin(a) * r]);
   }
   p.poly(pts, ['#FFF2C7', '#F6C75B', '#D9A046', '#D9A046', '#D9A046']);
-  p.ellipse(80, 80, 30 * k, 30 * k, ['#FFFFFF', '#FFF9ED', '#FFF9ED', '#FFF9ED', '#FFF9ED']);
+  p.ellipse(80, 80, 30 * k, 30 * k, ['#FFFFFF', '#FFF6E4', '#FFF6E4', '#FFF6E4', '#FFF6E4']);
   p.done().save(`${OUT}/impact_${f}.png`);
   made.push(`impact_${f}`);
 }
@@ -71,7 +71,7 @@ for (let f = 0; f < 4; f++) {
 {
   const p = new Pen(48, 48);
   p.poly([[24, 2], [28, 20], [46, 24], [28, 28], [24, 46], [20, 28], [2, 24], [20, 20]],
-    ['#FFF2C7', '#F6C75B', '#FFF9ED', '#FFFFFF', '#FFFFFF']);
+    ['#FFF2C7', '#F6C75B', '#FFF6E4', '#FFFFFF', '#FFFFFF']);
   p.done().save(`${OUT}/sparkle.png`);
   made.push('sparkle');
 }

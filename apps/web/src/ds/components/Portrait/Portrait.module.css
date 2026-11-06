@@ -1,6 +1,6 @@
 .portrait {
   --_size: 4rem;
-  --_ring: var(--cc-color-frame);
+  --_ring: var(--cc-color-border-strong);
   position: relative;
   display: inline-block;
   flex-shrink: 0;
@@ -8,7 +8,7 @@
   height: var(--_size);
   border-radius: var(--cc-radius-md);
   background: var(--cc-royal-900);
-  box-shadow: 0 0 0 2px var(--_ring), 0 0 0 3px var(--cc-color-frame-dark);
+  box-shadow: 0 0 0 2px var(--_ring);
   overflow: hidden;
 }
 

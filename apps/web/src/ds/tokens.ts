@@ -249,10 +249,8 @@ export const contrastPairs: ReadonlyArray<{ fg: ColorRole; bg: ColorRole; min: 3
 /* ── Typography ─────────────────────────────────────────────────────────── */
 
 export const fontFamily = {
-  /** Display serif: the soft, heavy old-style of the style-guide title ("CringeCourt", "Your Honor, Bro Is Cooked."). Headings. */
-  display: "'Fraunces Variable', 'Iowan Old Style', Georgia, serif",
-  /** Pixel face: echoes the pixel art. Eyebrows, badges, stamps, impact text, counters. */
-  pixel: "'Pixelify Sans', 'Space Grotesk Variable', system-ui, sans-serif",
+  /** Pixel display face: echoes the voxel wordmark and the UI-kit pixel font. Headings and stamps only. */
+  display: "'Pixelify Sans', 'Space Grotesk Variable', system-ui, sans-serif",
   /** Body face: geometric, quirky, very readable. */
   body: "'Space Grotesk Variable', system-ui, -apple-system, 'Segoe UI', sans-serif",
   /** Numbers that carry money or time: tabular, unambiguous. */
@@ -273,7 +271,7 @@ export const fontSize = {
   '5xl': 'clamp(2.75rem, 1.9rem + 3.8vw, 4.75rem)', // 44 → 76
 } as const;
 
-export const fontWeight = { regular: '400', medium: '500', semibold: '600', bold: '700', black: '800' } as const;
+export const fontWeight = { regular: '400', medium: '500', semibold: '600', bold: '700' } as const;
 
 export const lineHeight = { tight: '1.1', snug: '1.25', normal: '1.5', relaxed: '1.65' } as const;
 
@@ -406,7 +404,6 @@ export function toCss(): string {
     ...paletteVars,
     ...surfaceVars('parchment'),
     'font-display': fontFamily.display,
-    'font-pixel': fontFamily.pixel,
     'font-body': fontFamily.body,
     'font-mono': fontFamily.mono,
     ...scaleVars('text', fontSize),

@@ -9,7 +9,7 @@
   border-radius: var(--cc-radius-sm);
   background: color-mix(in srgb, var(--_tone) 14%, transparent);
   color: var(--_tone);
-  font-family: var(--cc-font-pixel);
+  font-family: var(--cc-font-display);
   font-size: var(--cc-text-xs);
   font-weight: var(--cc-weight-medium);
   letter-spacing: var(--cc-tracking-caps);
@@ -55,7 +55,7 @@
 }
 
 .highlight {
-  --_tone: var(--cc-color-highlight-shadow);
+  --_tone: var(--cc-color-highlight);
 }
 
 .success {
@@ -78,34 +78,12 @@
   --_tone: var(--cc-color-side-b);
 }
 
-/* Side colours are mark colours (3:1); solid labels need 4.5:1, so they sit
-   on the deeper teal / maroon roles instead. */
-.sideA.solid {
-  background: var(--cc-color-secondary);
-  border-color: var(--cc-color-secondary);
-  color: var(--cc-color-canvas);
-}
-
-.sideB.solid {
-  background: var(--cc-color-danger);
-  border-color: var(--cc-color-danger);
-  color: var(--cc-color-on-danger);
-}
-
-/* The permanent TESTNET badge (D14): a gold hazard-striped plate with maroon
-   type, so it never reads as decoration. */
+/* The permanent TESTNET badge (D14): hazard-striped so it never reads as decoration. */
 .testnet {
-  --_tone: var(--cc-color-on-highlight);
-  border: 1px solid var(--cc-gold-900);
+  --_tone: var(--cc-color-highlight);
+  border: 1px solid var(--cc-color-highlight);
   background:
-    repeating-linear-gradient(-45deg, var(--cc-gold-500) 0 5px, transparent 5px 10px),
-    var(--cc-gold-300);
-  box-shadow: 0 2px 0 var(--cc-gold-900);
-  color: var(--cc-royal-900);
-  font-weight: var(--cc-weight-bold);
-  text-shadow:
-    1px 0 var(--cc-gold-300),
-    -1px 0 var(--cc-gold-300),
-    0 1px var(--cc-gold-300),
-    0 -1px var(--cc-gold-300);
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--cc-gold-300) 22%, transparent) 0 6px, transparent 6px 12px),
+    color-mix(in srgb, var(--cc-gold-300) 8%, transparent);
+  color: var(--cc-color-highlight);
 }
