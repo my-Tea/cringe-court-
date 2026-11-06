@@ -5,7 +5,6 @@ import type { WebModeModule } from '../registry';
 const mode: WebModeModule = {
   definition: soloMode,
   landing: { label: 'File a confession', to: '/solo/file' },
-  docket: { label: 'Solo docket', to: '/solo/docket' },
   routes: [
     { path: 'file', lazy: async () => ({ Component: (await import('./file/FilePage')).FilePage }) },
     { path: 'case/:trialId', lazy: async () => ({ Component: (await import('./case/CasePage')).CasePage }) },

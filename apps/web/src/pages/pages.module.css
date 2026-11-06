@@ -580,20 +580,3 @@
 .sectionHead .sectionLede {
   margin-top: var(--cc-space-2);
 }
-
-/* ── Lobby: your cases ── */
-.mine {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.mineList {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--cc-space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}

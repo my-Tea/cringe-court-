@@ -44,16 +44,17 @@ export interface ExhibitPlacement {
   color: string;
 }
 
-export const EVIDENCE_TABLE = { x0: -15, x1: 15, z0: -12, z1: -3, top: 14 } as const;
+/** In the well, clear of the dais step (z −16.8) by a body width so both sides stay walkable. */
+export const EVIDENCE_TABLE = { x0: -15, x1: 15, z0: -7, z1: 2, top: 14 } as const;
 
 export const EXHIBITS: readonly ExhibitPlacement[] = [
-  { id: 'exhibit-a', letter: 'A', at: [-9, EVIDENCE_TABLE.top, -7.5], color: RED },
-  { id: 'exhibit-b', letter: 'B', at: [0, EVIDENCE_TABLE.top, -7.5], color: GOLD },
-  { id: 'exhibit-c', letter: 'C', at: [9, EVIDENCE_TABLE.top, -7.5], color: BLUE },
+  { id: 'exhibit-a', letter: 'A', at: [-9, EVIDENCE_TABLE.top, -2.5], color: RED },
+  { id: 'exhibit-b', letter: 'B', at: [0, EVIDENCE_TABLE.top, -2.5], color: GOLD },
+  { id: 'exhibit-c', letter: 'C', at: [9, EVIDENCE_TABLE.top, -2.5], color: BLUE },
 ];
 
 /** Where the defendant's chair stands (in front of the defence desk, facing the bench). */
-export const DEFENDANT_CHAIR = { x: 56, z: -4, seat: 10 } as const;
+export const DEFENDANT_CHAIR = { x: 56, z: -2, seat: 10 } as const;
 
 /** A closed folder lying flat, label facing up (+Y), with its letter in pixel type. */
 function folder(out: Box[], cx: number, y: number, cz: number, color: string, letter: string | null, tilt = 0): void {
@@ -97,8 +98,8 @@ function evidenceTable(out: Box[]): void {
   for (const s of [-1, 1]) out.push(box([s * 2.2 - 0.9, top - 4.2, z1 + 0.35], [s * 2.2 + 0.9, top - 3.4, z1 + 0.5], GOLD_LT));
   for (const e of EXHIBITS) folder(out, e.at[0], e.at[1] + 0.15, e.at[2], e.color, e.letter, e.letter === 'B' ? 0.3 : 0);
   // A cold coffee nobody admits to.
-  out.push(box([11.5, top, -11], [13.5, top + 2.6, -9], CREAM));
-  out.push(box([13.5, top + 0.8, -10.4], [14.2, top + 1.9, -9.6], CREAM));
+  out.push(box([11.5, top, z0 + 1], [13.5, top + 2.6, z0 + 3], CREAM));
+  out.push(box([13.5, top + 0.8, z0 + 1.6], [14.2, top + 1.9, z0 + 2.4], CREAM));
 }
 
 /** Folder stacks and a pen pot on a counsel desk (top at y = 28.6). */
@@ -225,7 +226,7 @@ export function dressingBoxes(): Box[] {
   deskProps(out, 56, -22, 1);
   defendantChair(out);
   plant(out, -85, -1);
-  plant(out, -34, -9);
-  globe(out, 74, 9);
+  plant(out, -62, 7.5);
+  globe(out, -66, -56);
   return out;
 }

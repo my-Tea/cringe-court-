@@ -17,7 +17,6 @@ import {
   type CaseNumber,
   type ChainCase,
   type Hex,
-  type IdentityPort,
   type Usdc,
 } from '@cringe-court/core';
 import { MemoryChain, MockIdentity, MockJury, testAddress } from '@cringe-court/core/testing';
@@ -96,8 +95,6 @@ export interface DemoCourtOptions {
   storage?: KeyValueStorage;
   startingBalance?: Usdc;
   files?: readonly CaseFile[];
-  /** The human player's identity (e.g. real World IDKit). Default: a mock keyed to the viewer. */
-  identity?: (viewer: Hex) => IdentityPort;
 }
 
 export interface DemoCourt {
@@ -106,7 +103,7 @@ export interface DemoCourt {
   clock: DemoClock;
   chain: MemoryChain;
   viewer: Hex;
-  identity: IdentityPort;
+  identity: MockIdentity;
   /** Testnet faucet stand-in: mints test USDC to the viewer. */
   faucet(amount?: Usdc): void;
   dispose(): void;
@@ -123,7 +120,7 @@ export async function createDemoCourt(o: DemoCourtOptions = {}): Promise<DemoCou
   const detach = docket.attach(root);
   const counsel = new ScriptedCounsel(catalog);
   const gallery = new MemoryGalleryStore();
-  const identity = o.identity ? o.identity(viewer) : new MockIdentity({ human: `demo-human:${viewer}` });
+  const identity = new MockIdentity({ human: `demo-human:${viewer}` });
   const salts = new StorageSaltVault(o.storage ?? new MemoryStorage());
   const jury = new MockJury(clock.now);
   const viewerChain = root.as(viewer);

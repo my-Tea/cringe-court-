@@ -1,12 +1,10 @@
-import type { AudioEngine } from '@cringe-court/audio';
+import { createAudioEngine, type AudioEngine } from '@cringe-court/audio';
 import { ZERO_USDC, type AiCounselPort, type IdentityPort, type SaltVault } from '@cringe-court/core';
+import { MockIdentity } from '@cringe-court/core/testing';
 import { VersusCounsel, VersusDesk, VersusError, World, type FactStore, type Persona, type WorldSnapshot } from '@cringe-court/modes-versus';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { VersusContext, type VersusRuntime } from './context';
 import { useToast } from '@/ds';
-import { platformConfig } from '@/platform/config';
-import { identityFor } from '@/platform/identity/createIdentity';
-import { appAudio } from '@/platform/audio';
 import { LocalFactStore } from './localStore';
 import { createPersona, listPersonas, secureRandom, switchTabPersona, tabPersona } from './personas';
 import { LocalSaltVault, clearSalts } from './saltVault';
@@ -25,13 +23,19 @@ export interface VersusProviderProps {
   tickMs?: number;
 }
 
+let sharedAudio: AudioEngine | null = null;
+function defaultAudio(): AudioEngine {
+  sharedAudio ??= createAudioEngine();
+  return sharedAudio;
+}
+
 export function VersusProvider({ children, store: storeProp, persona: personaProp, counsel: counselProp, identity, salts: saltsProp, clock: clockProp, audio: audioProp, tickMs = 1000 }: VersusProviderProps) {
   const { toast } = useToast();
   const store = useMemo(() => storeProp ?? new LocalFactStore(), [storeProp]);
   const clock = useMemo(() => clockProp ?? (() => Math.floor(Date.now() / 1000)), [clockProp]);
   const counsel = useMemo(() => counselProp ?? new VersusCounsel({ latencyMs: 1400 }), [counselProp]);
   const salts = useMemo(() => saltsProp ?? new LocalSaltVault(), [saltsProp]);
-  const audio = audioProp ?? appAudio();
+  const audio = audioProp ?? defaultAudio();
   const [persona, setPersona] = useState<Persona>(() => personaProp ?? tabPersona());
   const [personas, setPersonas] = useState<readonly Persona[]>(() => (personaProp ? [personaProp] : listPersonas()));
 
@@ -41,7 +45,7 @@ export function VersusProvider({ children, store: storeProp, persona: personaPro
         store,
         persona,
         counsel,
-        identity: identity ? identity(persona) : identityFor(platformConfig, persona.id),
+        identity: identity ? identity(persona) : new MockIdentity({ human: persona.id, appId: 'app_staging_cringecourt_demo' }),
         salts,
         clock,
         random: secureRandom,
@@ -105,8 +109,7 @@ export function VersusProvider({ children, store: storeProp, persona: personaPro
     return () => window.clearInterval(id);
   }, [desk, tickMs]);
 
-  // The shared app engine already unlocks on the document; an injected engine (tests) needs its own.
-  useEffect(() => (audioProp ? audioProp.attachUnlock() : undefined), [audioProp]);
+  useEffect(() => audio.attachUnlock(), [audio]);
 
   const run = useCallback(
     async (action: () => Promise<unknown>, options: { success?: string; quiet?: boolean } = {}) => {

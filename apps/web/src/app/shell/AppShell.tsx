@@ -11,14 +11,12 @@ import {
   PaperNavBar,
   PaperPanel,
   PaperTab,
-  RoundIconLink,
   TestnetBadge,
   Tooltip,
 } from '@/ds';
 import { COURT_LINKS, NAV_ITEMS, paths } from '../routes';
 import styles from './AppShell.module.css';
 import { MotionToggle } from './MotionToggle';
-import { SoundButton } from '@/platform/SoundSettings';
 
 /** Moves focus to <main> after client-side navigation, so screen readers start at the new page. */
 function useFocusMainOnNavigate() {
@@ -66,10 +64,6 @@ export function AppShell() {
                   <TestnetBadge />
                 </button>
               </Tooltip>
-              <SoundButton />
-              <Tooltip content="Settings">
-                <RoundIconLink to={paths.settings} label="Settings" icon="gear" className={styles.gear} />
-              </Tooltip>
               <PaperButtonLink to={paths.court} size="sm" iconStart={<Icon name="gavel" />} className={styles.cta}>
                 Enter court
               </PaperButtonLink>
@@ -106,14 +100,6 @@ export function AppShell() {
                         </NavLink>
                       </li>
                     ))}
-                  </ul>
-                  <ul className={styles.mobileNav} role="list">
-                    <li>
-                      <NavLink to={paths.settings} className={styles.menuLink} onClick={close}>
-                        <Icon name="gear" />
-                        Settings
-                      </NavLink>
-                    </li>
                   </ul>
                   <div className={styles.sheetSection}>
                     <TestnetBadge />
@@ -161,9 +147,6 @@ export function AppShell() {
               </li>
               <li>
                 <Link to={paths.leaderboard}>Leaderboard</Link>
-              </li>
-              <li>
-                <Link to={paths.settings}>Settings</Link>
               </li>
               <li>
                 <Link to={paths.gallery}>Design gallery</Link>

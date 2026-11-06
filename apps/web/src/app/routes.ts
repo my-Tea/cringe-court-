@@ -8,15 +8,15 @@ export const paths = {
   court: '/court',
   leaderboard: '/leaderboard',
   howToPlay: '/how-to-play',
-  settings: '/settings',
   mode: (id: ModeId) => `/${id}`,
   courtroom: '/courtroom',
+  walk: '/court/walk',
   gallery: '/gallery',
 } as const;
 
 /** Paths that live under "The court" tab (the lobby and every courtroom). */
 export const isCourtPath = (pathname: string) =>
-  pathname === paths.court || ['/solo', '/versus', '/grand-jury', paths.courtroom].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  pathname === paths.court || ['/solo', '/versus', '/grand-jury', paths.courtroom, paths.walk].some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 /** The reference's four paper tabs. */
 export const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; icon: 'home' | 'scales' | 'trophy' | 'book'; activeFor?: (pathname: string) => boolean }> = [
@@ -32,4 +32,5 @@ export const COURT_LINKS: ReadonlyArray<{ to: string; label: string }> = [
   { to: paths.mode('versus'), label: 'Versus' },
   { to: paths.mode('grand-jury'), label: 'Grand Jury' },
   { to: paths.courtroom, label: 'Demo court' },
+  { to: paths.walk, label: 'Walk the court' },
 ];

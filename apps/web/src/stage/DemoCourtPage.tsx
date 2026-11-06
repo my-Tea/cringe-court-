@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Alert, Button, Card, CardBody, CardHeader, CardTitle, EmptyState, Icon, PhaseStepper, Receipt, Spinner, cx, useReducedMotion } from '@/ds';
 import { SAMPLE_CASES, runDemoCourt, type DemoUpdate, type JuryPlan, type SampleCase } from './demoCourt';
-import { appAudioPort } from '@/platform/audio';
+import { silentAudio } from './silentAudio';
 import { TrialStage } from './TrialStage';
 import styles from './DemoCourtPage.module.css';
 
@@ -38,7 +38,7 @@ export function DemoCourtPage() {
   const [error, setError] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
 
-  const player = useMemo(() => (court.state === 'ready' ? new ShowPlayer({ scene: court.port, audio: appAudioPort }) : null), [court]);
+  const player = useMemo(() => (court.state === 'ready' ? new ShowPlayer({ scene: court.port, audio: silentAudio }) : null), [court]);
 
   // Stage the Solo cast as soon as the room is ready, so the idle court is alive.
   useEffect(() => {
@@ -66,7 +66,7 @@ export function DemoCourtPage() {
     setError(null);
     setUpdate(null);
     try {
-      await runDemoCourt({ sample, plan, scene: court.port, audio: appAudioPort, player, onUpdate: setUpdate, signal: ctrl.signal });
+      await runDemoCourt({ sample, plan, scene: court.port, audio: silentAudio, player, onUpdate: setUpdate, signal: ctrl.signal });
     } catch (err) {
       if (!(err instanceof DOMException && err.name === 'AbortError')) setError(err instanceof Error ? err.message : String(err));
     } finally {

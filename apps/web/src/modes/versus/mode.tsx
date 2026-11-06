@@ -13,7 +13,6 @@ export const versusPaths = {
 const mode: WebModeModule = {
   definition: versusMode,
   landing: { to: versusPaths.newCase, label: 'Start a Versus case', secondary: { to: versusPaths.join, label: 'I have an invite code' } },
-  docket: { label: 'Versus cases', to: versusPaths.cases },
   routes: [
     {
       lazy: async () => ({ Component: (await import('./VersusLayout')).VersusLayout }),
