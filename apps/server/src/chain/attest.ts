@@ -3,7 +3,8 @@
  * court contract accepts their stake. The player signs to prove the wallet is
  * theirs; the relayer pays and sends the attestation. Testnet only.
  */
-import { createPublicClient, createWalletClient, http, isAddress, keccak256, parseAbi, stringToBytes, verifyMessage, type Address, type Hex } from 'viem';
+import { GRAND_JURY_QUESTIONS } from '@cringe-court/net';
+import { createPublicClient, createWalletClient, http, isAddress, keccak256, parseAbi, stringToBytes, verifyMessage, zeroAddress, type Address, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import type { HumanRecord } from '../world/humans';
 
@@ -15,6 +16,10 @@ const REGISTRY_ABI = parseAbi([
 const ARC_RPC = 'https://rpc.testnet.arc.network';
 const ARC_CHAIN_ID = 5042002;
 const ARC_REGISTRY: Address = '0x7DecbE8467F1A4319d33B0e41ED0ab14123f9657';
+const ARC_COURT: Address = '0x587B216A0d8E52967CE9cd2af4146b9F0907695D';
+/** The contract allows 40 unsponsored cases in all, so a caller cannot burn them quickly. */
+const PUBLISH_COOLDOWN_MS = 5 * 60 * 1000;
+const COURT_ABI = parseAbi(['function publishGrandJury(bytes32 contentHash, address sponsor, uint128 sponsorAmount) returns (uint256)', 'function caseCount() view returns (uint256)']);
 const ATTESTATION_SECONDS = 30 * 24 * 60 * 60;
 
 /** What the player signs. Tied to their session, so a signature cannot be replayed by someone else. */
@@ -30,6 +35,8 @@ export function chainHumanId(humanId: string): Hex {
 export interface HumanWriter {
   levelOf(wallet: Address): Promise<number>;
   attest(wallet: Address, humanId: Hex, level: number): Promise<Hex>;
+  /** Curator role: put the next question on Arc. Returns the transaction, or null if a publish just ran. */
+  publishNextCase(): Promise<Hex | null>;
 }
 
 export type AttestFailure = 'bad-wallet' | 'bad-signature' | 'not-verified' | 'disabled';
@@ -41,11 +48,18 @@ export function arcHumanWriter(env: Readonly<Record<string, string | undefined>>
   if (!key || !/^0x[0-9a-fA-F]{64}$/.test(key)) return null;
   const rpc = env.ARC_RPC_URL?.trim() || ARC_RPC;
   const registry = (env.ARC_REGISTRY?.trim() || ARC_REGISTRY) as Address;
+  const court = (env.ARC_COURT?.trim() || ARC_COURT) as Address;
+  let lastPublish = -Infinity;
   const chain = { id: ARC_CHAIN_ID, name: 'Arc Testnet', nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 }, rpcUrls: { default: { http: [rpc] } } };
   const client = createPublicClient({ chain, transport: http(rpc) });
   const wallet = createWalletClient({ chain, transport: http(rpc), account: privateKeyToAccount(key as Hex) });
   // One relayer, one nonce: attestations go out one at a time.
   let queue: Promise<unknown> = Promise.resolve();
+  const inTurn = <T>(send: () => Promise<T>): Promise<T> => {
+    const run = queue.then(send, send);
+    queue = run.catch(() => undefined);
+    return run;
+  };
   return {
     async levelOf(address) {
       const [, level] = await client.readContract({ address: registry, abi: REGISTRY_ABI, functionName: 'humanOf', args: [address] });
@@ -59,9 +73,20 @@ export function arcHumanWriter(env: Readonly<Record<string, string | undefined>>
         if (receipt.status !== 'success') throw new Error('The attestation reverted.');
         return hash;
       };
-      const run = queue.then(send, send);
-      queue = run.catch(() => undefined);
-      return run;
+      return inTurn(send);
+    },
+    publishNextCase() {
+      if (clockMs() - lastPublish < PUBLISH_COOLDOWN_MS) return Promise.resolve(null);
+      lastPublish = clockMs();
+      return inTurn(async () => {
+        const count = await client.readContract({ address: court, abi: COURT_ABI, functionName: 'caseCount' });
+        const question = GRAND_JURY_QUESTIONS[Number(count) % GRAND_JURY_QUESTIONS.length]!;
+        const contentHash = keccak256(stringToBytes(question));
+        const hash = await wallet.writeContract({ address: court, abi: COURT_ABI, functionName: 'publishGrandJury', args: [contentHash, zeroAddress, 0n] });
+        const receipt = await client.waitForTransactionReceipt({ hash });
+        if (receipt.status !== 'success') throw new Error('Publishing the case reverted.');
+        return hash;
+      });
     },
   };
 }

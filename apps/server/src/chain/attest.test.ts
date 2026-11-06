@@ -8,7 +8,7 @@ const stranger = privateKeyToAccount('0x5de4111afa1a4b94908f83103eb1f1706367c2e6
 const human: HumanRecord = { humanId: 'abc123', wallet: '0x0000000000000000000000000000000000000001', level: 2, verifiedAt: 1 };
 
 function writer(level = 0): HumanWriter & { attest: ReturnType<typeof vi.fn> } {
-  return { levelOf: async () => level, attest: vi.fn(async () => '0xfeed' as const) };
+  return { levelOf: async () => level, attest: vi.fn(async () => '0xfeed' as const), publishNextCase: async () => null };
 }
 const signed = (by = player) => by.signMessage({ message: ownershipMessage('p-1', player.address) });
 

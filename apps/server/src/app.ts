@@ -280,6 +280,12 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       return json(res, 200, result);
     }
 
+    if (path === `${API}/chain/grand-jury/publish` && method === 'POST') {
+      limit(limits.world, sid, 'Too many requests. Wait a minute.');
+      await body(req);
+      if (!humanWriter) throw new HttpError(503, 'disabled', 'This server has no Arc relayer.');
+      return json(res, 200, { txHash: await humanWriter.publishNextCase() });
+    }
     if (path === `${API}/chain/human` && method === 'GET') {
       return json(res, 200, { verified: !!world?.humans.byWallet(session.persona.account) });
     }
