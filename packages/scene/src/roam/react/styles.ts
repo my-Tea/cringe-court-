@@ -42,8 +42,8 @@ export const ROAM_CSS = `
 .ccr-callout--jury-out{background:var(--cc-teal-700,#2E5F73)}
 @keyframes ccr-pop{0%{transform:translateX(-50%) rotate(-3deg) scale(.4)}100%{transform:translateX(-50%) rotate(-3deg) scale(1)}}
 .ccr-beat{position:absolute;left:12px;top:56px;padding:6px 8px 6px 10px;font-size:13px;color:#FFF9ED;background:rgb(122 28 46 / .9);border:2px solid var(--cc-color-frame,#D9A046);display:flex;gap:10px;align-items:center;pointer-events:auto}
-.ccr-legend{position:absolute;right:12px;top:64px;width:min(300px,calc(100% - 24px));padding:12px 14px;font-size:14px;pointer-events:auto}
-.ccr-legend--inline{position:static;width:auto;padding:10px 0 0;border-top:2px dashed #A9917D}
+.ccr-legend{position:absolute;right:12px;top:64px;width:min(300px,calc(100% - 24px));max-height:calc(100% - 76px);overflow:auto;overscroll-behavior:contain;padding:12px 14px;font-size:14px;pointer-events:auto}
+.ccr-legend--inline{position:static;width:auto;max-height:none;overflow:visible;padding:10px 0 0;border-top:2px dashed #A9917D}
 .ccr-legend h2,.ccr-modal h2{margin:0 0 8px;font-size:16px;font-weight:400;color:var(--cc-color-accent,#7A1C2E)}
 .ccr-legend ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
 .ccr-legend li{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
