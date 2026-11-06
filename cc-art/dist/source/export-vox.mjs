@@ -1,6 +1,6 @@
 // Voxel character export — realistic proportions, 8 expressions + 10 poses each.
 // Renders via char-render.mjs (orthographic, supersampled, two-light rig).
-import { CHARS, CHAR_IDS } from './vox-chars.mjs';
+import { CHARS, CHAR_IDS, JUROR_VARIANTS } from './vox-chars.mjs';
 import { renderCharacter, boundsOf } from './char-render.mjs';
 import { POSE_IDS } from './vox-base.mjs';
 import { Canvas } from './core.mjs';
@@ -108,6 +108,21 @@ for (const id of CHAR_IDS) {
   console.log(`${id}: done`);
 }
 
+// juror variants — background cast, so a master sprite each plus a sheet
+const variantDir = `${OUT}/juror/variants`;
+fs.mkdirSync(variantDir, { recursive: true });
+const variants = [];
+const variantImgs = [CHARS.juror, ...Object.values(JUROR_VARIANTS)].map((v) =>
+  trim(renderCharacter(v.parts('idle', 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6 })));
+Object.keys(JUROR_VARIANTS).forEach((k, i) => {
+  const img = variantImgs[i + 1];
+  img.save(`${variantDir}/${k}.png`);
+  img.scale(2).save(`${variantDir}/${k}@2x.png`);
+  variants.push({ id: k, label: JUROR_VARIANTS[k].label });
+});
+sheet(variantImgs, 7, 190, 300, `${OUT}/juror/_variants.png`);
+console.log(`juror variants: ${variants.length}`);
+
 // lineup
 const lineup = CHAR_IDS.map((id) => trim(renderCharacter(CHARS[id].parts('idle', 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6 })));
 sheet(lineup, 4, 300, 420, `${OUT}/_previews/lineup.png`);
@@ -119,6 +134,7 @@ fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
   expressions: Object.keys(EXPR),
   poses: POSE,
   characters: report,
+  jurorVariants: variants.map((v) => ({ ...v, file: `juror/variants/${v.id}.png` })),
 }, null, 2));
 
 console.log(`\nTOTAL: ${count} sprites`);

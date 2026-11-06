@@ -74,9 +74,10 @@ function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral
   out.push(b([-w + 1, hi - 3, -d + 2], [w - 1, hi, d - 2], skin));
   out.push(b([-w + 1, lo, -d + 2], [w - 1, lo + 2, d - 2], skin));   // jaw
   // side shading (right side darker = volume)
+  const skinSh = skin === C.skin ? C.skinSh : shadeHex(skin, 0.88);
   out.push(b([w - 3, lo + 2, -d + 1], [w, hi - 3, d - 1], skin === C.skin ? C.skinSh : skin));
-  // ears
-  out.push(...pair([w - 0.5, H.eyeY - 6, -2], [w + 1.5, H.eyeY + 2, 2], C.skinSh));
+  // ears (shaded from the actual skin tone, not always the default)
+  out.push(...pair([w - 0.5, H.eyeY - 6, -2], [w + 1.5, H.eyeY + 2, 2], skinSh));
 
   // face plate (front of the head, slightly proud)
   const fz = -d - 0.6;

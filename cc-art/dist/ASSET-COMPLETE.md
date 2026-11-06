@@ -94,6 +94,18 @@ swapped mid-animation. Verified by hash: all 10 pose PNGs differ for every chara
 
 ---
 
+## Juror variants (`characters/juror/variants/`)
+
+Six background-cast jurors, `a`–`f`, each a master `sprite` + `@2x`, with
+`juror/_variants.png` showing the base juror beside them. They differ by
+silhouette first (long hair + beanie, afro, bun, buzz cut + cap, long blonde,
+silver + beanie), then clothing colour and skin tone (player palette). Built by
+`juror(variant)` in `vox-chars.mjs`; listed in `characters/manifest.json` under
+`jurorVariants`. Variants ship the master only; poses/expressions use the base
+juror's set.
+
+---
+
 ## UI kit (`ui/`)
 
 | Asset | Size | Notes |

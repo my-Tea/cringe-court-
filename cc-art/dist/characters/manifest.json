@@ -78,5 +78,37 @@
       "expressions": 8,
       "poses": 10
     }
+  ],
+  "jurorVariants": [
+    {
+      "id": "a",
+      "label": "Juror A — long hair, beanie",
+      "file": "juror/variants/a.png"
+    },
+    {
+      "id": "b",
+      "label": "Juror B — afro, no hat",
+      "file": "juror/variants/b.png"
+    },
+    {
+      "id": "c",
+      "label": "Juror C — bun, glasses",
+      "file": "juror/variants/c.png"
+    },
+    {
+      "id": "d",
+      "label": "Juror D — buzz cut, cap",
+      "file": "juror/variants/d.png"
+    },
+    {
+      "id": "e",
+      "label": "Juror E — blonde, long",
+      "file": "juror/variants/e.png"
+    },
+    {
+      "id": "f",
+      "label": "Juror F — silver, beanie",
+      "file": "juror/variants/f.png"
+    }
   ]
 }

@@ -307,49 +307,94 @@ function screenFace(expr, cy) {
 }
 
 /* ═══════════════════════════════ JUROR ═════════════════════════════════════ */
-export const JUROR = {
-  id: 'juror', label: 'Juror / Voter',
-  parts: (pose = 'idle', expr = 'neutral') => {
+/** Juror builder. The defaults are the base juror; variants change hair,
+ *  skin, clothing colour, headwear and props so a jury of three (and the
+ *  gallery) never looks cloned. */
+function juror(v = {}) {
+  const {
+    skin = C.skin, hair = C.hairBr, hairSh = C.hairBrSh, hairStyle = 'short',
+    top = C.blue, topSh = C.blueSh, topLt = C.blueLt, style = 'hoodie',
+    legs: legCol = C.navy, hat = 'cap', glasses = true, phones = true, popcorn = true,
+  } = v;
+  return (pose = 'idle', expr = 'neutral') => {
     const out = [];
     const hw = H.headW;
-    const Br = C.hairBr, Bsh = C.hairBrSh;
+    const Br = hair, Bsh = hairSh;
 
-    out.push(b([-hw - 1, H.headBot + 8, -hw + 3], [hw + 1, H.headTop + 2, hw + 1], Br));   // mass sits behind the face plane
-    for (let i = 0; i < 5; i++) {
-      out.push(b([-hw + i * 4.6, H.eyeY + 6, -hw - 1.3], [-hw + 4.2 + i * 4.6, H.headTop + 1, -hw + 2], i % 2 ? Br : Bsh));
+    if (hairStyle === 'buzz') {
+      out.push(b([-hw - 0.4, H.headBot + 12, -hw + 2], [hw + 0.4, H.headTop + 0.8, hw + 0.6], Bsh));
+    } else {
+      // mass sits behind the face plane (skin front is -hw + 1) so the face reads
+      out.push(b([-hw - 1, H.headBot + 8, -hw + 3], [hw + 1, H.headTop + 2, hw + 1], Br));
+      for (let i = 0; i < 5; i++) {
+        out.push(b([-hw + i * 4.6, H.eyeY + 6, -hw - 1.3], [-hw + 4.2 + i * 4.6, H.headTop + 1, -hw + 2], i % 2 ? Br : Bsh));
+      }
+    }
+    if (hairStyle === 'long') {
+      // falls past the shoulders at the back and sides
+      out.push(b([-hw - 1.6, H.headBot - 14, hw - 5], [hw + 1.6, H.headBot + 10, hw + 2], Bsh));
+      out.push(...pair([-hw - 1.8, H.headBot - 8, -hw + 4], [-hw + 0.4, H.headBot + 10, hw - 2], Br));
+    } else if (hairStyle === 'bun') {
+      out.push(b([-5, H.headTop + 1, hw - 5], [5, H.headTop + 9, hw + 2], Bsh));
+    } else if (hairStyle === 'afro') {
+      out.push(b([-hw - 4, H.headBot + 8, -hw + 4], [hw + 4, H.headTop + 8, hw + 4], Br));
+      out.push(b([-hw - 2.6, H.headTop + 6, -hw + 2], [hw + 2.6, H.headTop + 10, hw + 2], Bsh));
     }
 
-    out.push(...head({ eyeStyle: 'round', mouth: expr === 'shocked' ? 'shout' : expr === 'laughing' || expr === 'happy' ? 'grin' : expr === 'crying' || expr === 'confused' ? 'frown' : 'neutral', hair: Br, expr }));
-    // oversized round glasses
-    for (const sx of [-1, 1]) {
-      const ex = sx * H.eyeX;
-      out.push(...rims(ex, H.eyeY + 0.4, 4, 3.8, -hw - 2.1, C.hairBrSh));
+    out.push(...head({ skin, eyeStyle: 'round', mouth: expr === 'shocked' ? 'shout' : expr === 'laughing' || expr === 'happy' ? 'grin' : expr === 'crying' || expr === 'confused' ? 'frown' : 'neutral', hair: Br, expr }));
+    if (glasses) {
+      // oversized round glasses (open rims, so the eyes behind stay readable)
+      for (const sx of [-1, 1]) {
+        const ex = sx * H.eyeX;
+        out.push(...rims(ex, H.eyeY + 0.4, 4, 3.8, -hw - 2.1, C.hairBrSh));
+      }
+      out.push(b([-3.2, H.eyeY - 0.6, -hw - 2.1], [3.2, H.eyeY + 0.6, -hw - 1.3], C.hairBrSh));
     }
-    out.push(b([-3.2, H.eyeY - 0.6, -hw - 2.1], [3.2, H.eyeY + 0.6, -hw - 1.3], C.hairBrSh));
 
-    // cap
-    out.push(b([-hw - 2, H.headTop, -hw - 1], [hw + 2, H.headTop + 4, hw + 1], C.blue));
-    out.push(b([-hw - 2.4, H.headTop + 4, -hw - 1.4], [hw + 2.4, H.headTop + 5.4, hw + 1.4], C.blueLt));
-    out.push(b([-hw - 2, H.headTop - 1.4, -hw - 4], [hw - 1, H.headTop + 1, -hw + 1], C.blueSh));
-    out.push(b([-2, H.headTop + 1, -hw - 2], [2, H.headTop + 3.4, -hw], C.cyan));
+    if (hat === 'cap') {
+      out.push(b([-hw - 2, H.headTop, -hw - 1], [hw + 2, H.headTop + 4, hw + 1], top));
+      out.push(b([-hw - 2.4, H.headTop + 4, -hw - 1.4], [hw + 2.4, H.headTop + 5.4, hw + 1.4], topLt));
+      out.push(b([-hw - 2, H.headTop - 1.4, -hw - 4], [hw - 1, H.headTop + 1, -hw + 1], topSh));
+      out.push(b([-2, H.headTop + 1, -hw - 2], [2, H.headTop + 3.4, -hw], C.cyan));
+    } else if (hat === 'beanie') {
+      out.push(b([-hw - 1.6, H.headTop - 3, -hw - 1.4], [hw + 1.6, H.headTop + 5, hw + 1.6], topLt));
+      out.push(b([-hw - 2, H.headTop - 4, -hw - 1.8], [hw + 2, H.headTop - 1, hw + 2], topSh));  // cuff
+      out.push(b([-2, H.headTop + 5, -2], [2, H.headTop + 8, 2], C.cream));                     // pompom
+    }
 
-    // headphones
-    out.push(...pair([-hw - 4.4, H.headBot + 2, -5], [-hw - 1.6, H.headBot + 14, 5], C.ink));
-    out.push(...pair([-hw - 4.6, H.headBot + 4, -4], [-hw - 2.6, H.headBot + 12, 4], C.cyan));
+    if (phones) {
+      out.push(...pair([-hw - 4.4, H.headBot + 2, -5], [-hw - 1.6, H.headBot + 14, 5], C.ink));
+      out.push(...pair([-hw - 4.6, H.headBot + 4, -4], [-hw - 2.6, H.headBot + 12, 4], C.cyan));
+    }
     tag('head', out);
 
-    out.push(...torso({ col: C.blue, colSh: C.blueSh, style: 'hoodie' }));
-    out.push(...arms({ col: C.blue, colSh: C.blueSh, cuff: C.blueSh }));
-    out.push(...legs({ col: C.navy, shoe: C.ink }));
+    out.push(...torso({ col: top, colSh: topSh, style }));
+    out.push(...arms({ col: top, colSh: topSh, cuff: topSh, hand: skin }));
+    out.push(...legs({ col: legCol, shoe: C.ink }));
 
-    // popcorn
-    out.push(b([-H.torsoW - 12, H.armBot + 2, -5], [-H.torsoW - 2, H.armBot + 13, -1], C.cream));
-    out.push(b([-H.torsoW - 12, H.armBot + 10, -5.4], [-H.torsoW - 2, H.armBot + 13, -0.6], C.burg));
-    for (let i = 0; i < 4; i++) out.push(b([-H.torsoW - 11 + i * 2.6, H.armBot + 13, -4], [-H.torsoW - 9.4 + i * 2.6, H.armBot + 16, -1.6], i % 2 ? C.goldLt : C.cream));
-    tag('armL', out.slice(-6));
+    if (popcorn) {
+      out.push(b([-H.torsoW - 12, H.armBot + 2, -5], [-H.torsoW - 2, H.armBot + 13, -1], C.cream));
+      out.push(b([-H.torsoW - 12, H.armBot + 10, -5.4], [-H.torsoW - 2, H.armBot + 13, -0.6], C.burg));
+      for (let i = 0; i < 4; i++) out.push(b([-H.torsoW - 11 + i * 2.6, H.armBot + 13, -4], [-H.torsoW - 9.4 + i * 2.6, H.armBot + 16, -1.6], i % 2 ? C.goldLt : C.cream));
+      tag('armL', out.slice(-6));   // the bucket follows the left hand
+    }
     return posed(out, pose);
-  },
+  };
+}
+
+export const JUROR = { id: 'juror', label: 'Juror / Voter', parts: juror() };
+
+/** Background-cast variants: distinct silhouettes first (hair + headwear),
+ *  then colour. Skin tones match the player palette. */
+export const JUROR_VARIANTS = {
+  a: { label: 'Juror A — long hair, beanie', skin: '#F5D2B4', hair: '#1A1A1A', hairSh: '#0E0E0E', hairStyle: 'long', top: '#3E7F50', topSh: '#2A5A37', topLt: '#6EBF73', style: 'suit', legs: C.ink, hat: 'beanie', glasses: false, phones: false, popcorn: false },
+  b: { label: 'Juror B — afro, no hat', skin: '#7C5842', hair: '#1A1A1A', hairSh: '#2A2422', hairStyle: 'afro', top: C.gold, topSh: C.goldDk, topLt: C.goldLt, style: 'hoodie', legs: C.navy, hat: 'none', glasses: false, phones: true, popcorn: true },
+  c: { label: 'Juror C — bun, glasses', skin: '#C49A7A', hair: '#6B4226', hairSh: '#4E2F1A', hairStyle: 'bun', top: C.purple, topSh: C.purpleSh, topLt: '#8E72C8', style: 'blouse', legs: C.ink, hat: 'none', glasses: true, phones: false, popcorn: false },
+  d: { label: 'Juror D — buzz cut, cap', skin: '#A87B5C', hair: '#2A2422', hairSh: '#1A1A1A', hairStyle: 'buzz', top: '#C0392B', topSh: '#7A1D14', topLt: '#E05C48', style: 'hoodie', legs: C.navySh, hat: 'cap', glasses: false, phones: false, popcorn: true },
+  e: { label: 'Juror E — blonde, long', skin: '#FBE0C8', hair: '#E6D08A', hairSh: '#C4AE68', hairStyle: 'long', top: C.pink, topSh: C.pinkSh, topLt: '#FFB4D8', style: 'suit', legs: C.navy, hat: 'none', glasses: true, phones: true, popcorn: false },
+  f: { label: 'Juror F — silver, beanie', skin: '#E8C4A8', hair: '#DCD9D3', hairSh: '#B8B4AC', hairStyle: 'short', top: C.cyan, topSh: '#3A9AA6', topLt: C.cyanLt, style: 'suit', legs: C.ink, hat: 'beanie', glasses: true, phones: false, popcorn: false },
 };
+for (const [id, v] of Object.entries(JUROR_VARIANTS)) JUROR_VARIANTS[id] = { id: `juror-${id}`, label: v.label, parts: juror(v) };
 
 /* ══════════════════════════════ CREATOR / DEFENDANT ════════════════════════ */
 export const CREATOR = {
