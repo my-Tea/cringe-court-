@@ -8,12 +8,13 @@
  * hearing), Highlights, or Full; Fast-forward and Skip to the verdict sit in the
  * bar. Nothing skips the verdict beat itself.
  */
-import { HEARING_PACES, type AvatarSpec, type HearingPace, type PlayerRole, type RemotePlayerFeed, type SpawnId } from '@cringe-court/scene/roam';
+import { HEARING_PACES, type AvatarSpec, type HearingPace, type PerspectiveChoice, type PlayerRole, type RemotePlayerFeed, type SpawnId } from '@cringe-court/scene/roam';
 import { RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Icon, Spinner } from '@/ds';
 import { t } from '@/i18n';
 import { appAudio } from '@/platform/audio';
+import { readPerspective, writePerspective } from '@/roam/perspectivePref';
 import { playBeats, type PlannedBeat } from './beats';
 import { setHearingPace, useHearingPace } from './hearingPace';
 import { roamStrings } from './roamStrings';
@@ -65,6 +66,7 @@ function RoamTrialRoom({
   onDone,
 }: RoamTrialProps) {
   const pace = useHearingPace();
+  const [perspective, setPerspective] = useState<PerspectiveChoice>(() => readPerspective());
   const roam = useRoamCourtroom({ audio: appAudio(), role, spawn: spawn ?? ROLE_SPAWN[role], avatar, jurors, pace, ...(remotes ? { remotes } : {}) });
   const [fast, setFast] = useState(false);
   const skipping = useRef(false);
@@ -136,7 +138,19 @@ function RoamTrialRoom({
   };
   return (
     <div className={styles.roam} ref={box}>
-      <RoamCourtroom controller={roam.controller} data={roam.data} onExit={onExit} label={label} strings={strings} className={styles.canvas} />
+      <RoamCourtroom
+        controller={roam.controller}
+        data={roam.data}
+        onExit={onExit}
+        label={label}
+        strings={strings}
+        className={styles.canvas}
+        perspective={perspective}
+        onPerspectiveChange={(p) => {
+          writePerspective(p);
+          setPerspective(p);
+        }}
+      />
       <div className={styles.roamBar} data-surface="wood">
         <p className={styles.roamStatus} aria-live="polite">
           {beat ? (
