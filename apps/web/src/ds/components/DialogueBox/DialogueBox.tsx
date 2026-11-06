@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { t } from '@/i18n';
 import type { CharacterId, Expression } from '../../../art/art';
 import { CHARACTERS } from '../../../art/art';
 import { useReducedMotion } from '../../motion/MotionProvider';
@@ -55,7 +56,7 @@ export function DialogueBox({ speaker, expression = 'neutral', speakerName, text
       </blockquote>
       {!done && (
         <Button size="sm" variant="ghost" className={styles.skip} onClick={() => setTyped({ text, count: text.length })}>
-          Skip
+          {t('ds.dialogue.skip')}
         </Button>
       )}
     </figure>

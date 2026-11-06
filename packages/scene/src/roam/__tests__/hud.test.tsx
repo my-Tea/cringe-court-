@@ -5,6 +5,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { RoamController } from '../controller';
 import type { RoamWorld } from '../types';
 import { ControlLegend, ExhibitPanel, PauseMenu, Prompt, TopBar, Dialogue } from '../react/Hud';
+import { DEFAULT_ROAM_STRINGS, RoamStringsProvider, resolveRoamStrings } from '../react/strings';
 import { TouchControls } from '../react/TouchControls';
 import { roamData } from './fixtures';
 
@@ -95,5 +96,20 @@ describe('roam HUD', () => {
     });
     expect(screen.getByRole('button', { name: 'Interact: Sit in the gallery' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
+  });
+});
+
+describe('roam HUD strings', () => {
+  it('uses custom strings passed through the provider, and the English defaults otherwise', () => {
+    const c = new RoamController(world, { spawn: 'lobby' });
+    const strings = resolveRoamStrings({ pause: 'Pausa', zoneLabels: { ...DEFAULT_ROAM_STRINGS.zoneLabels, lobby: 'Vestíbulo' } });
+    render(
+      <RoamStringsProvider strings={strings}>
+        <TopBar snap={c.snapshot()} onPause={() => undefined} legendOpen onToggleLegend={() => undefined} />
+      </RoamStringsProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Pausa' })).toBeInTheDocument();
+    expect(screen.getByText('Vestíbulo')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hide controls' })).toBeInTheDocument();
   });
 });

@@ -3,6 +3,7 @@ import { join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { duration, easing, loop, stagger, toCss } from '../tokens';
 
+
 /**
  * One motion language (docs/STYLE-GUIDE.md "Motion"): every duration, delay and
  * easing in the app comes from a --cc-duration / --cc-loop / --cc-stagger /
@@ -58,15 +59,13 @@ describe('motion tokens', () => {
     }
   });
 
-  it('the roaming courtroom HUD stylesheet follows the same rule', () => {
-    let files: string[] = [];
-    try {
-      files = walk(SCENE);
-    } catch {
-      return;
+  it('the roaming courtroom HUD stylesheet takes its timing from the same tokens', () => {
+    const hud = readFileSync(join(SCENE, 'roam/react/styles.ts'), 'utf8');
+    for (const m of hud.matchAll(/(?:animation|transition):([^;}]+)/g)) {
+      if (m[1]!.trim() === 'none') continue;
+      expect(m[1], 'HUD motion must read --cc-duration-* / --cc-ease-* (fallbacks allowed)').toMatch(/var\(--cc-duration-[a-z]+,[^)]*\) var\(--cc-ease-[a-z]+,/);
     }
-    const offenders = motionOffenders(files, SCENE);
-    expect(offenders, offenders.join('\n')).toEqual([]);
+    expect(hud).toMatch(/data-reduced-motion="true"\] \.ccr-callout\{animation:none\}/);
   });
 
   it('the global stylesheet stops loops and delays under reduced motion', () => {

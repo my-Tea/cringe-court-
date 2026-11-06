@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { t } from '@/i18n';
 import type { CharacterId, Expression } from '../../../art/art';
 import { cx } from '../../lib/cx';
 import { Button } from '../Button/Button';
@@ -39,7 +40,7 @@ export function EmptyState({ character = 'clerk', expression = 'neutral', ...pro
 }
 
 /** Waiting on something slow (0G arguments, a transaction). Announced politely. */
-export function LoadingState({ title = 'One moment…', character = 'ai-narrator', expression = 'neutral', children, ...props }: Partial<StateProps>) {
+export function LoadingState({ title = t('ds.state.loading'), character = 'ai-narrator', expression = 'neutral', children, ...props }: Partial<StateProps>) {
   return (
     <Frame role="status" aria-live="polite" aria-busy title={<span className={styles.loadingRow}><Spinner label={null} />{title}</span>} character={character} expression={expression} {...props}>
       {children}
@@ -55,7 +56,7 @@ export interface ErrorStateProps extends StateProps {
 }
 
 /** Something failed. Says what happened, what it means for money, and how to recover. */
-export function ErrorState({ character = 'judge', expression = 'shocked', onRetry, retryLabel = 'Try again', details, actions, children, ...props }: ErrorStateProps) {
+export function ErrorState({ character = 'judge', expression = 'shocked', onRetry, retryLabel = t('ds.state.retry'), details, actions, children, ...props }: ErrorStateProps) {
   return (
     <Frame
       role="alert"
@@ -78,7 +79,7 @@ export function ErrorState({ character = 'judge', expression = 'shocked', onRetr
       {children}
       {details && (
         <details className={styles.details}>
-          <summary>Technical details</summary>
+          <summary>{t('ds.state.details')}</summary>
           <pre>{details}</pre>
         </details>
       )}

@@ -36,7 +36,7 @@ export const ROAM_CSS = `
 .ccr-name{position:absolute;top:-17px;left:14px;padding:5px 10px;font-size:14px;color:#FFF9ED;background:var(--cc-color-accent,#7A1C2E);border:3px solid #4A3A32;box-shadow:2px 2px 0 #4A3A32}
 .ccr-line{margin:0;font-size:17px;line-height:1.45;min-height:2.9em}
 .ccr-more{display:block;text-align:right;margin-top:4px;font-size:12px;color:var(--cc-color-text-muted,#7B645A)}
-.ccr-callout{position:absolute;left:50%;top:9%;transform:translateX(-50%) rotate(-3deg);padding:8px 20px;font-size:clamp(24px,5vw,46px);line-height:1;color:#FFF9ED;background:var(--cc-color-accent,#7A1C2E);border:4px solid #4A3A32;box-shadow:inset 0 0 0 3px var(--cc-color-highlight,#F6C75B),6px 6px 0 #4A3A32;white-space:nowrap;animation:ccr-pop .32s steps(4,end)}
+.ccr-callout{position:absolute;left:50%;top:9%;transform:translateX(-50%) rotate(-3deg);padding:8px 20px;font-size:clamp(24px,5vw,46px);line-height:1;color:#FFF9ED;background:var(--cc-color-accent,#7A1C2E);border:4px solid #4A3A32;box-shadow:inset 0 0 0 3px var(--cc-color-highlight,#F6C75B),6px 6px 0 #4A3A32;white-space:nowrap;animation:ccr-pop var(--cc-duration-slow,320ms) var(--cc-ease-pixel,steps(4,end))}
 .ccr-callout--verdict{background:var(--cc-color-highlight,#F6C75B);color:#4A3A32;box-shadow:inset 0 0 0 3px var(--cc-color-accent,#7A1C2E),6px 6px 0 #4A3A32}
 .ccr-callout--order{background:#4A3A32;color:var(--cc-color-highlight,#F6C75B)}
 .ccr-callout--jury-out{background:var(--cc-teal-700,#2E5F73)}
@@ -74,7 +74,8 @@ export const ROAM_CSS = `
 .ccr-act{min-width:84px!important;min-height:84px!important;border-radius:0}
 .ccr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .ccr-loading{position:absolute;inset:0;display:grid;place-items:center;color:#FFF9ED;font-size:18px}
-@media (prefers-reduced-motion: reduce){.ccr-callout{animation:none}}
+@media (prefers-reduced-motion: reduce){:root:not([data-reduced-motion]) .ccr-callout{animation:none}}
+:root[data-reduced-motion="true"] .ccr-callout{animation:none}
 @media (max-width:560px){.ccr-top{left:8px;right:8px;top:8px}.ccr-zone{font-size:12px}.ccr-btn--sm{font-size:12px;padding:6px 8px}.ccr-dialogue{bottom:auto;top:58px}.ccr-line{font-size:15px}.ccr-prompt{top:auto;bottom:122px}}
 `;
 

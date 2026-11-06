@@ -1,3 +1,4 @@
+import { formatDateTime, t } from '@/i18n';
 import { cx } from '../../lib/cx';
 import { useNow } from '../../lib/useNow';
 import { Icon } from '../Icon/Icon';
@@ -17,8 +18,6 @@ export interface CountdownProps {
   className?: string;
 }
 
-const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-
 export function Countdown({ label, startsAt, endsAt, now: fixedNow, compact, className }: CountdownProps) {
   const liveNow = useNow(1000, fixedNow !== undefined);
   const now = fixedNow ?? liveNow;
@@ -26,7 +25,7 @@ export function Countdown({ label, startsAt, endsAt, now: fixedNow, compact, cla
   const total = endsAt - startsAt;
   const urgency = urgencyOf(remaining, total);
   const left = total > 0 ? Math.min(1, Math.max(0, remaining / total)) : 0;
-  const deadline = timeFmt.format(endsAt);
+  const deadline = formatDateTime(endsAt, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
 
   return (
     <div className={cx(styles.countdown, urgency !== 'calm' && styles[urgency], compact && styles.compact, className)}>
@@ -36,14 +35,14 @@ export function Countdown({ label, startsAt, endsAt, now: fixedNow, compact, cla
           {label}
         </span>
         {/* role="timer" is not live by default, so screen readers are not spammed every second. */}
-        <span role="timer" aria-label={`${label}: ${urgency === 'ended' ? 'ended' : `${speakRemaining(remaining)} left`}, deadline ${deadline}`} className={styles.time}>
-          {urgency === 'ended' ? 'Ended' : formatRemaining(remaining)}
+        <span role="timer" aria-label={urgency === 'ended' ? t('ds.countdown.aria.ended', { label, deadline }) : t('ds.countdown.aria.left', { label, remaining: speakRemaining(remaining), deadline })} className={styles.time}>
+          {urgency === 'ended' ? t('ds.countdown.ended') : formatRemaining(remaining)}
         </span>
       </div>
       <div className={styles.track} aria-hidden>
         <div className={styles.fill} style={{ ['--_left' as string]: left }} />
       </div>
-      <p className={styles.deadline}>Deadline {deadline}. Fixed for this case.</p>
+      <p className={styles.deadline}>{t('ds.countdown.deadline', { deadline })}</p>
     </div>
   );
 }

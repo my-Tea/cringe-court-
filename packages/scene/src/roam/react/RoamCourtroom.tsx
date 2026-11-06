@@ -8,6 +8,7 @@ import { AutoQuality, QUALITY, type QualityLevel } from '../quality';
 import { RoamRenderer } from '../three/renderer';
 import { BeatChip, Callout, ControlLegend, Dialogue, ExhibitPanel, PauseMenu, Prompt, TopBar } from './Hud';
 import { ensureRoamStyles } from './styles';
+import { RoamStringsProvider, resolveRoamStrings, type RoamStrings } from './strings';
 import { TouchControls } from './TouchControls';
 import { useRoamSnapshot } from './useRoamCourtroom';
 
@@ -25,8 +26,10 @@ export interface RoamCourtroomProps {
   touch?: boolean | 'auto';
   /** "Skip to menu view": switch to the non-roam view. Omit to hide the button. */
   onExit?: () => void;
-  /** Accessible name for the 3D view. */
+  /** Accessible name for the 3D view. Defaults to `strings.roomLabel`. */
   label?: string;
+  /** Overrides for the HUD copy (translations); anything omitted stays English. */
+  strings?: Partial<RoamStrings>;
   className?: string;
   style?: CSSProperties;
   /** Extra overlay content (e.g. a mode's beats panel), drawn above the HUD. */
@@ -85,13 +88,15 @@ export function RoamCourtroom({
   pixelated: initialPixelated = true,
   touch = 'auto',
   onExit,
-  label = 'First-person courtroom. Walk with W A S D or the arrow keys, interact with E.',
+  label,
+  strings,
   className,
   style,
   children,
   onRenderer,
 }: RoamCourtroomProps) {
   ensureRoamStyles();
+  const S = resolveRoamStrings(strings);
   const root = useRef<HTMLDivElement>(null);
   const snap = useRoamSnapshot(controller);
   const [quality, setQuality] = useState<QualityLevel>(initialQuality);
@@ -204,8 +209,8 @@ export function RoamCourtroom({
       style={style}
       tabIndex={0}
       role="application"
-      aria-label={label}
-      aria-roledescription="first-person courtroom"
+      aria-label={label ?? S.roomLabel}
+      aria-roledescription={S.roomRoleDescription}
       data-roam-zone={snap.zone ?? ''}
       data-roam-control={snap.control}
       onPointerDown={(e) => {
@@ -231,61 +236,61 @@ export function RoamCourtroom({
             renderer={renderer}
             pixelated={pixelated}
             auto={auto}
-            onDowngrade={(q) => changeQuality(q, `Quality lowered to ${q} to keep the frame rate up.`)}
+            onDowngrade={(q) => changeQuality(q, S.autoQualityNote(q))}
           />
         </Canvas>
       </div>
 
-      <div className="ccr-hud">
-        {!snap.paused && snap.control !== 'cinematic' && !snap.exhibit ? <div className={`ccr-cross${snap.focus ? ' ccr-cross--on' : ''}`} aria-hidden="true" /> : null}
-        <TopBar snap={snap} touch={isTouch} onExit={onExit} onPause={() => controller.setPaused(true)} legendOpen={legend} onToggleLegend={() => setLegend((v) => !v)} />
-        <BeatChip snap={snap} onSkip={() => controller.skipBeat()} />
-        {legend && !snap.paused ? <ControlLegend touch={isTouch} onClose={() => setLegend(false)} /> : null}
-        <Prompt snap={snap} touch={isTouch} />
-        <Callout snap={snap} />
-        <Dialogue snap={snap} touch={isTouch} />
-        {isTouch && !snap.paused && !snap.exhibit ? <TouchControls controller={controller} prompt={snap.focus?.prompt ?? null} /> : null}
-        {showCapture ? (
-          <div className="ccr-capture">
-            <div className="ccr-panel ccr-capture-card">
-              <div className="ccr-capture-title ccr-pixel">Step into the courtroom</div>
-              <p>Click to look around with the mouse. Esc gives the mouse back and pauses.</p>
-              <p>
-                Keyboard only? Press any movement key: arrows walk and turn, <kbd className="ccr-key">E</kbd> interacts.
-              </p>
-              <div className="ccr-modal-row" style={{ justifyContent: 'center' }}>
-                <button type="button" className="ccr-btn" onClick={capture}>
-                  Click to look around
-                </button>
-                <button
-                  type="button"
-                  className="ccr-btn ccr-btn--ghost"
-                  onClick={() => {
-                    setEngaged(true);
-                    focusRoot();
-                  }}
-                >
-                  Use keyboard only
-                </button>
+      <RoamStringsProvider strings={S}>
+        <div className="ccr-hud">
+          {!snap.paused && snap.control !== 'cinematic' && !snap.exhibit ? <div className={`ccr-cross${snap.focus ? ' ccr-cross--on' : ''}`} aria-hidden="true" /> : null}
+          <TopBar snap={snap} touch={isTouch} onExit={onExit} onPause={() => controller.setPaused(true)} legendOpen={legend} onToggleLegend={() => setLegend((v) => !v)} />
+          <BeatChip snap={snap} onSkip={() => controller.skipBeat()} />
+          {legend && !snap.paused ? <ControlLegend touch={isTouch} onClose={() => setLegend(false)} /> : null}
+          <Prompt snap={snap} touch={isTouch} />
+          <Callout snap={snap} />
+          <Dialogue snap={snap} touch={isTouch} />
+          {isTouch && !snap.paused && !snap.exhibit ? <TouchControls controller={controller} prompt={snap.focus?.prompt ?? null} /> : null}
+          {showCapture ? (
+            <div className="ccr-capture">
+              <div className="ccr-panel ccr-capture-card">
+                <div className="ccr-capture-title ccr-pixel">{S.captureTitle}</div>
+                <p>{S.captureMouse}</p>
+                <p>{S.captureKeyboard((cap) => <kbd className="ccr-key">{cap}</kbd>)}</p>
+                <div className="ccr-modal-row" style={{ justifyContent: 'center' }}>
+                  <button type="button" className="ccr-btn" onClick={capture}>
+                    {S.captureClick}
+                  </button>
+                  <button
+                    type="button"
+                    className="ccr-btn ccr-btn--ghost"
+                    onClick={() => {
+                      setEngaged(true);
+                      focusRoot();
+                    }}
+                  >
+                    {S.captureKeyboardOnly}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : null}
-        <ExhibitPanel snap={snap} controller={controller} restoreFocus={focusRoot} />
-        <PauseMenu
-          snap={snap}
-          controller={controller}
-          touch={isTouch}
-          quality={quality}
-          onQuality={(q) => changeQuality(q)}
-          pixelated={pixelated}
-          onPixelated={setPixelated}
-          onExit={onExit}
-          restoreFocus={focusRoot}
-          autoNote={autoNote}
-        />
-        {children}
-      </div>
+          ) : null}
+          <ExhibitPanel snap={snap} controller={controller} restoreFocus={focusRoot} />
+          <PauseMenu
+            snap={snap}
+            controller={controller}
+            touch={isTouch}
+            quality={quality}
+            onQuality={(q) => changeQuality(q)}
+            pixelated={pixelated}
+            onPixelated={setPixelated}
+            onExit={onExit}
+            restoreFocus={focusRoot}
+            autoNote={autoNote}
+          />
+          {children}
+        </div>
+      </RoamStringsProvider>
     </div>
   );
 }

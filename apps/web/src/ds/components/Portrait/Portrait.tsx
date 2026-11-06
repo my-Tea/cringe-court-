@@ -1,4 +1,5 @@
 import { CHARACTERS, portrait, type CharacterId, type Expression } from '../../../art/art';
+import { t } from '@/i18n';
 import { cx } from '../../lib/cx';
 import styles from './Portrait.module.css';
 
@@ -34,7 +35,7 @@ export function Portrait({ character, expression = 'neutral', size = 'md', ring 
 }
 
 /** The anonymous defendant silhouette: who is on trial is never shown as a face. */
-export function AnonymousPortrait({ size = 'md', ring = 'neutral', label = 'Anonymous defendant', className }: Omit<PortraitProps, 'character' | 'expression' | 'alt'> & { label?: string }) {
+export function AnonymousPortrait({ size = 'md', ring = 'neutral', label = t('ds.portrait.anonymous'), className }: Omit<PortraitProps, 'character' | 'expression' | 'alt'> & { label?: string }) {
   return (
     <span role="img" aria-label={label} className={cx(styles.portrait, styles.anonymous, size !== 'md' && styles[size], ringClass[ring], className)}>
       <svg viewBox="0 0 12 12" fill="currentColor" shapeRendering="crispEdges" aria-hidden focusable="false">

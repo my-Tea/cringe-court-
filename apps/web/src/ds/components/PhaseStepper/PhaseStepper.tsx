@@ -1,4 +1,5 @@
 import { cx } from '../../lib/cx';
+import { t } from '@/i18n';
 import { Icon } from '../Icon/Icon';
 import styles from './PhaseStepper.module.css';
 
@@ -13,7 +14,7 @@ export interface PhaseStepperProps {
 }
 
 /** Trial progress. An ordered list; the current step carries aria-current="step". */
-export function PhaseStepper({ steps, current, label = 'Trial progress', orientation = 'horizontal', className }: PhaseStepperProps) {
+export function PhaseStepper({ steps, current, label = t('ds.stepper.label'), orientation = 'horizontal', className }: PhaseStepperProps) {
   return (
     <ol aria-label={label} className={cx(styles.stepper, orientation === 'vertical' && styles.vertical, className)}>
       {steps.map((step, i) => {
@@ -27,7 +28,7 @@ export function PhaseStepper({ steps, current, label = 'Trial progress', orienta
               </span>
               <span>
                 {step}
-                {state === 'done' && <span className="cc-visually-hidden"> (done)</span>}
+                {state === 'done' && <span className="cc-visually-hidden"> {t('ds.stepper.done')}</span>}
               </span>
             </span>
           </li>

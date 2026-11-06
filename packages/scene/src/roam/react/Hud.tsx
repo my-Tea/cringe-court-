@@ -2,77 +2,31 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import type { RoamController } from '../controller';
 import { EXHIBIT_CARDS } from '../dialogue';
 import { QUALITY_LEVELS, type QualityLevel } from '../quality';
-import type { BeatId, RoamSnapshot, ZoneId } from '../types';
+import type { BeatId, RoamSnapshot } from '../types';
+import { DEFAULT_ROAM_STRINGS, useRoamStrings } from './strings';
 
-export const BEAT_LABELS: Readonly<Record<BeatId, string>> = {
-  'all-rise': 'All rise',
-  opening: 'Opening statements',
-  'counsel-arguing': 'Counsel arguing',
-  'jury-deliberating': 'Jury deliberating',
-  verdict: 'The verdict',
-};
-
-const ZONE_LABELS: Readonly<Record<ZoneId, string>> = {
-  lobby: 'Lobby',
-  doorway: 'Courtroom doors',
-  gallery: 'Public gallery',
-  aisle: 'Centre aisle',
-  well: 'Well of the court',
-  dais: 'Before the bench',
-  'defendant-table': "Defendant's table",
-  'prosecution-table': 'Prosecution table',
-  'witness-stand': 'Witness stand',
-};
+/** English beat names; hosts localise through `RoamStrings.beatLabels`. */
+export const BEAT_LABELS: Readonly<Record<BeatId, string>> = DEFAULT_ROAM_STRINGS.beatLabels;
 
 export function Key({ children }: { children: ReactNode }) {
   return <kbd className="ccr-key">{children}</kbd>;
 }
 
 export function ControlLegend({ touch, onClose, inline = false }: { touch: boolean; onClose?: () => void; inline?: boolean }) {
+  const S = useRoamStrings();
+  const rows = touch ? S.legendTouchRows : S.legendKeyboardRows;
   return (
-    <section className={inline ? 'ccr-legend ccr-legend--inline' : 'ccr-panel ccr-legend'} aria-label="Controls">
-      <h2 className="ccr-pixel">Controls</h2>
-      {touch ? (
-        <ul>
-          <li>Left thumb: drag to walk (push past the ring to run)</li>
-          <li>Right side: drag to look around</li>
-          <li>
-            <Key>✋</Key> interact · <Key>⤒</Key> hop · <Key>II</Key> pause
-          </li>
-        </ul>
-      ) : (
-        <ul>
-          <li>
-            <Key>W</Key>
-            <Key>A</Key>
-            <Key>S</Key>
-            <Key>D</Key> walk · <Key>↑</Key>
-            <Key>↓</Key> walk
-          </li>
-          <li>
-            Mouse look (click the room) · <Key>←</Key>
-            <Key>→</Key> turn
-          </li>
-          <li>
-            <Key>R</Key>
-            <Key>F</Key> or <Key>PgUp</Key>
-            <Key>PgDn</Key> look up / down
-          </li>
-          <li>
-            <Key>Shift</Key> run · <Key>Space</Key> hop
-          </li>
-          <li>
-            <Key>E</Key> or <Key>Enter</Key> interact / continue
-          </li>
-          <li>
-            <Key>Tab</Key> skip a line · <Key>Esc</Key> pause
-          </li>
-        </ul>
-      )}
+    <section className={inline ? 'ccr-legend ccr-legend--inline' : 'ccr-panel ccr-legend'} aria-label={S.controlsTitle}>
+      <h2 className="ccr-pixel">{S.controlsTitle}</h2>
+      <ul>
+        {rows.map((row, i) => (
+          <li key={i}>{row((label) => <Key>{label}</Key>)}</li>
+        ))}
+      </ul>
       {onClose ? (
         <div className="ccr-modal-row" style={{ marginTop: 10 }}>
           <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" onClick={onClose}>
-            Hide controls
+            {S.controlsHide}
           </button>
         </div>
       ) : null}
@@ -81,24 +35,25 @@ export function ControlLegend({ touch, onClose, inline = false }: { touch: boole
 }
 
 export function TopBar({ snap, touch = false, onExit, onPause, legendOpen, onToggleLegend }: { snap: RoamSnapshot; touch?: boolean; onExit?: () => void; onPause: () => void; legendOpen: boolean; onToggleLegend: () => void }) {
+  const S = useRoamStrings();
   return (
     <div className="ccr-top">
       <div className="ccr-zone ccr-pixel" aria-live="polite">
         <b aria-hidden="true">◆</b>
-        <span>{snap.zone ? ZONE_LABELS[snap.zone] : 'Courthouse'}</span>
+        <span>{snap.zone ? S.zoneLabels[snap.zone] : S.zoneFallback}</span>
       </div>
       <div className="ccr-actions">
         <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" aria-expanded={legendOpen} onClick={onToggleLegend}>
-          {legendOpen ? 'Hide controls' : 'Controls'}
+          {legendOpen ? S.controlsHide : S.controlsShow}
         </button>
         {touch ? null : (
           <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" onClick={onPause}>
-            Pause
+            {S.pause}
           </button>
         )}
         {onExit ? (
           <button type="button" className="ccr-btn ccr-btn--gold ccr-btn--sm" onClick={onExit}>
-            Skip to menu view
+            {S.skipToMenuView}
           </button>
         ) : null}
       </div>
@@ -107,16 +62,18 @@ export function TopBar({ snap, touch = false, onExit, onPause, legendOpen, onTog
 }
 
 export function Prompt({ snap, touch }: { snap: RoamSnapshot; touch: boolean }) {
+  const S = useRoamStrings();
   if (!snap.focus || snap.exhibit || snap.paused || snap.control === 'cinematic') return null;
   return (
     <div className="ccr-panel ccr-prompt ccr-pixel" role="status">
-      <Key>{touch ? '✋' : 'E'}</Key>
+      <Key>{touch ? '✋' : S.keyInteract}</Key>
       {snap.focus.prompt}
     </div>
   );
 }
 
 export function Dialogue({ snap, touch }: { snap: RoamSnapshot; touch: boolean }) {
+  const S = useRoamStrings();
   const d = snap.dialogue;
   if (!d) return null;
   const done = d.shown >= d.text.length;
@@ -128,7 +85,7 @@ export function Dialogue({ snap, touch }: { snap: RoamSnapshot; touch: boolean }
         <span className="ccr-sr">{d.text}</span>
       </p>
       <span className="ccr-more ccr-pixel" aria-hidden="true">
-        {done ? `▶ ${touch ? 'tap ✋' : 'E'} to continue` : '…'}
+        {done ? (touch ? S.continueTouch : S.continueKey) : '…'}
       </span>
     </div>
   );
@@ -145,15 +102,13 @@ export function Callout({ snap }: { snap: RoamSnapshot }) {
 }
 
 export function BeatChip({ snap, onSkip }: { snap: RoamSnapshot; onSkip: () => void }) {
+  const S = useRoamStrings();
   if (!snap.beat) return null;
   return (
     <div className="ccr-beat ccr-pixel" role="status">
-      <span>
-        ● {BEAT_LABELS[snap.beat.id]}
-        {snap.control === 'cinematic' ? ' · cinematic' : ''}
-      </span>
+      <span>{S.beatChip(S.beatLabels[snap.beat.id], snap.control === 'cinematic')}</span>
       <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" onClick={onSkip}>
-        Skip beat
+        {S.skipBeat}
       </button>
     </div>
   );
@@ -192,7 +147,9 @@ function useModalFocus(open: boolean, returnTo: () => void) {
 }
 
 export function ExhibitPanel({ snap, controller, restoreFocus }: { snap: RoamSnapshot; controller: RoamController; restoreFocus: () => void }) {
-  const card = snap.exhibit ? EXHIBIT_CARDS[snap.exhibit] : null;
+  const S = useRoamStrings();
+  const base = snap.exhibit ? EXHIBIT_CARDS[snap.exhibit] : null;
+  const card = base ? { ...base, ...S.exhibitCard(base) } : null;
   const ref = useModalFocus(!!card, restoreFocus);
   if (!card) return null;
   return (
@@ -205,11 +162,11 @@ export function ExhibitPanel({ snap, controller, restoreFocus }: { snap: RoamSna
         <div className="ccr-exhibit-body">
           <p>{card.body}</p>
           <span className="ccr-stamp ccr-pixel" aria-hidden="true">
-            ENTERED INTO EVIDENCE
+            {S.exhibitStamp}
           </span>
           <div className="ccr-modal-row">
             <button type="button" className="ccr-btn" data-autofocus onClick={() => controller.closeExhibit()}>
-              Put it back
+              {S.exhibitPutBack}
             </button>
           </div>
         </div>
@@ -232,17 +189,18 @@ export interface PauseMenuProps {
 }
 
 export function PauseMenu({ snap, controller, touch, quality, onQuality, pixelated, onPixelated, onExit, restoreFocus, autoNote }: PauseMenuProps) {
+  const S = useRoamStrings();
   const ref = useModalFocus(snap.paused, restoreFocus);
   if (!snap.paused) return null;
   return (
     <div className="ccr-scrim" ref={ref} onKeyDown={(e) => e.key === 'Escape' && (e.stopPropagation(), controller.setPaused(false))}>
       <div className="ccr-panel ccr-modal" role="dialog" aria-modal="true" aria-labelledby="ccr-pause-title">
         <h2 id="ccr-pause-title" className="ccr-pixel" style={{ fontSize: 22 }}>
-          Court in recess
+          {S.pauseTitle}
         </h2>
         <div className="ccr-modal-row">
           <button type="button" className="ccr-btn" data-autofocus onClick={() => controller.setPaused(false)}>
-            Resume
+            {S.pauseResume}
           </button>
           <button
             type="button"
@@ -253,31 +211,31 @@ export function PauseMenu({ snap, controller, touch, quality, onQuality, pixelat
               controller.setPaused(false);
             }}
           >
-            Back to the lobby
+            {S.pauseBackToLobby}
           </button>
           {onExit ? (
             <button type="button" className="ccr-btn ccr-btn--gold" onClick={onExit}>
-              Skip to menu view
+              {S.skipToMenuView}
             </button>
           ) : null}
         </div>
         <label className="ccr-field">
-          <span>Graphics quality</span>
+          <span>{S.pauseGraphicsQuality}</span>
           <select value={quality} onChange={(e) => onQuality(e.target.value as QualityLevel)}>
             {QUALITY_LEVELS.map((q) => (
               <option key={q} value={q}>
-                {q[0]!.toUpperCase() + q.slice(1)}
+                {S.qualityLevel(q)}
               </option>
             ))}
           </select>
         </label>
         {autoNote ? <p style={{ margin: 0, fontSize: 13, color: 'var(--cc-color-text-muted,#7B645A)' }}>{autoNote}</p> : null}
         <label className="ccr-field">
-          <span>Chunky pixels (low-res render)</span>
+          <span>{S.pauseChunkyPixels}</span>
           <input type="checkbox" checked={pixelated} onChange={(e) => onPixelated(e.target.checked)} />
         </label>
         <label className="ccr-field">
-          <span>Reduce motion (no head-bob or shake)</span>
+          <span>{S.pauseReduceMotion}</span>
           <input type="checkbox" checked={snap.reducedMotion} onChange={(e) => controller.setReducedMotion(e.target.checked)} />
         </label>
         <ControlLegend touch={touch} inline />
