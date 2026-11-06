@@ -46,9 +46,8 @@ export const JUROR_SCREENING_COPY = {
     'This check confirms you are one human. It does not prove you are impartial. That part is on you, the bailiff, and a lot of random draws.',
   success: 'Screening passed. The bench has a seat with your name on it. Well, a pseudonym.',
   not_verified: 'The court could not confirm you are human this time. No harm done, you can try again.',
-  ineligible_level:
-    'Jury duty needs the strongest human check. Your current check is fine for filing or joining a case, but not for sitting on the jury.',
-  is_party: 'You are part of this case, so the court cannot seat you on its jury. Conflict of interest, objection sustained.',
+  ineligible_level: 'A paid seat needs Proof of Human. You can still watch and vote.',
+  is_party: 'You cannot judge your own case.',
   already_seated: 'You already hold a seat on this case. One person, one ballot.',
   cancelled: 'Screening cancelled. Your seat stays open whenever you are ready.',
   expired: 'That screening request timed out. Start a fresh one.',
