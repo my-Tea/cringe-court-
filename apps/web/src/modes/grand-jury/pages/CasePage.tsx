@@ -161,8 +161,7 @@ function Hearing({ detail }: { detail: CaseDetail }) {
         beats,
         label: t('grandJury.case.courtroom', { label: detail.label }),
         role: juror ? 'juror' : 'spectator',
-        spawn: juror ? 'jury-box' : 'aisle',
-        jurors: 7,
+        spawn: juror ? 'jury-view' : 'aisle',
         avatar: { model: 'creator', name: t('grandJury.case.you') },
       }}
     />

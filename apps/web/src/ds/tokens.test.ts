@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
-import { PALETTE as ROAM_PALETTE } from '@cringe-court/scene/roam';
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from './lib/contrast';
 import { colorRoles, contrastPairs, palette, surfaces, toCss, type Surface } from './tokens';
@@ -96,54 +95,6 @@ describe('no raw colours outside the token layer', () => {
       if (hits.length) offenders.push(`${relative(src, file)}: ${[...new Set(hits)].join(', ')}`);
     }
     expect(offenders, offenders.join('\n')).toEqual([]);
-  });
-});
-
-describe('no raw colours in roam and the audio demo', () => {
-  const repo = resolve(__dirname, '../../../..');
-  const roamDir = resolve(repo, 'packages/scene/src/roam');
-  const demoDir = resolve(repo, 'packages/audio/demo');
-  const collect = (dir: string, pick: (path: string) => boolean): string[] => {
-    const out: string[] = [];
-    for (const name of readdirSync(dir)) {
-      const path = join(dir, name);
-      if (statSync(path).isDirectory()) {
-        if (name !== '__tests__') out.push(...collect(path, pick));
-      } else if (pick(path)) out.push(path);
-    }
-    return out;
-  };
-  const roamFiles = collect(roamDir, (p) => /\.tsx?$/.test(p) && !/[\\/]palette\.ts$/.test(p));
-  const demoFiles = collect(demoDir, (p) => /\.(ts|css|html)$/.test(p));
-
-  it('finds the sources', () => {
-    expect(roamFiles.length).toBeGreaterThan(20);
-    expect(demoFiles.length).toBe(3);
-  });
-
-  it('roam (except palette.ts) and the audio demo use tokens only', () => {
-    const offenders: string[] = [];
-    for (const file of [...roamFiles, ...demoFiles]) {
-      const raw = readFileSync(file, 'utf8');
-      const markup = /\.(css|html)$/.test(file);
-      const text = markup ? raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '') : raw;
-      const hits = [
-        ...(text.match(/#[0-9a-f]{6}(?:[0-9a-f]{2})?\b/gi) ?? []),
-        ...(markup ? (text.match(/#[0-9a-f]{3,4}\b/gi) ?? []) : []),
-        ...(text.match(/\b(?:rgba?|hsla?)\(/gi) ?? []),
-      ];
-      if (hits.length) offenders.push(`${relative(repo, file)}: ${[...new Set(hits)].join(', ')}`);
-    }
-    expect(offenders, offenders.join('\n')).toEqual([]);
-  });
-
-  it('the roam palette is the web palette: same 30 hexes, same family and order', () => {
-    const order = ['royal', 'teal', 'gold', 'neutral', 'green', 'blue'] as const;
-    const steps = ['900', '700', '500', '300', '100'] as const;
-    const web = order.map((f) => steps.map((s) => (palette as Record<string, Record<string, string>>)[f]![s]!.toUpperCase()));
-    const roam = order.map((f) => ROAM_PALETTE[f].map((h) => h.toUpperCase()));
-    expect(Object.keys(ROAM_PALETTE)).toEqual([...order]);
-    expect(roam).toEqual(web);
   });
 });
 

@@ -4,4 +4,3 @@ export { BEAT_LABELS, ControlLegend } from './Hud';
 export { TouchControls } from './TouchControls';
 export { DEFAULT_ROAM_STRINGS, RoamStringsProvider, resolveRoamStrings, useRoamStrings, type KeyCap, type LegendRow, type RoamStrings } from './strings';
 export { ROAM_CSS, ensureRoamStyles } from './styles';
-export { ONBOARDED_STORAGE_KEY } from './onboarding';

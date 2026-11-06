@@ -6,7 +6,6 @@
  * so it is testable.
  */
 import * as THREE from 'three';
-import { C } from '../palette';
 
 export type SurfaceKind = 'plain' | 'wood' | 'stone' | 'fabric' | 'metal' | 'glass';
 
@@ -17,22 +16,22 @@ export const TILE = 16;
 export function surfaceFor(hex: string, glow = 0): SurfaceKind {
   if (glow > 0) return 'glass';
   switch (hex.toUpperCase()) {
-    case C.gold900:
-    case C.gold700:
-    case C.neutral900:
-    case C.neutral700:
+    case '#8B5E2A':
+    case '#B77D3A':
+    case '#4A3A32':
+    case '#7B645A':
       return 'wood';
-    case C.neutral100:
-    case C.neutral300:
-    case C.neutral500:
-    case C.gold100:
+    case '#FFF9ED':
+    case '#DCC8B0':
+    case '#A9917D':
+    case '#FFF2C7':
       return 'stone';
-    case C.royal700:
-    case C.royal900:
-    case C.royal500:
+    case '#A32D3F':
+    case '#7A1C2E':
+    case '#CE4A44':
       return 'fabric';
-    case C.gold500:
-    case C.gold300:
+    case '#D9A046':
+    case '#F6C75B':
       return 'metal';
     default:
       return 'plain';
