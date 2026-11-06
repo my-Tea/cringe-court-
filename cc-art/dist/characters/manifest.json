@@ -77,6 +77,18 @@
       "label": "Creator / Defendant",
       "expressions": 8,
       "poses": 10
+    },
+    {
+      "id": "side-a",
+      "label": "Side A (Versus)",
+      "expressions": 8,
+      "poses": 10
+    },
+    {
+      "id": "side-b",
+      "label": "Side B (Versus)",
+      "expressions": 8,
+      "poses": 10
     }
   ],
   "jurorVariants": [

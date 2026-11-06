@@ -38,6 +38,14 @@ as blocking. Both are now filled:
 
 ---
 
+## Versus mode: Side A / Side B
+
+`characters/side-a/` (teal, quiff) and `characters/side-b/` (orange, ponytail):
+the two consenting parties in Versus Court. They wear domino masks and a chest
+letter, so the entertainment UI never shows a real face or name (idea md §4B).
+Each has the standard 8 expressions + 10 poses. Like every character on `main`,
+their 10 pose PNGs are identical until the pose rig (`feat/voxel-poses`) lands.
+
 ## Expressions
 
 Every character now has all 8, verified on disk:

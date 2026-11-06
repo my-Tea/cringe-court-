@@ -427,5 +427,66 @@ export const CREATOR = {
   },
 };
 
-export const CHARS = { judge: JUDGE, prosecutor: PROSECUTOR, defense: DEFENSE, bailiff: BAILIFF, clerk: CLERK, 'ai-narrator': NARRATOR, juror: JUROR, creator: CREATOR };
+/* ═══════════════════════════ VERSUS: SIDE A / SIDE B ═════════════════════════ */
+/** Pixel letter for the chest badge (5x7, same shapes as the UI font). */
+const BADGE = {
+  A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+  B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+};
+
+/** Versus-mode parties. Pseudonymous by design (idea md 4B): a domino mask
+ *  and a team letter instead of a face and a name, colour-coded so the two
+ *  sides never read as the same person. */
+function side({ id, label, letter, team, teamSh, teamLt, hair, hairSh, hairStyle, skin }) {
+  return {
+    id, label,
+    parts: (pose = 'idle', expr = 'neutral') => {
+      const out = [];
+      const hw = H.headW;
+      // hair: mass behind the face plane, fringe above the brow
+      out.push(b([-hw - 1, H.headBot + 8, -hw + 3], [hw + 1, H.headTop + 2, hw + 1], hair));
+      for (let i = 0; i < 5; i++) {
+        out.push(b([-hw + i * 4.6, H.eyeY + 6, -hw - 1.3], [-hw + 4.2 + i * 4.6, H.headTop + 1, -hw + 2], i % 2 ? hair : hairSh));
+      }
+      if (hairStyle === 'ponytail') {
+        out.push(b([-3, H.headTop - 4, hw], [3, H.headTop + 1, hw + 4], hairSh));
+        out.push(b([-2.4, H.headBot - 10, hw + 2], [2.4, H.headTop - 3, hw + 5], hair));
+      } else {
+        // swept quiff
+        out.push(b([-hw + 2, H.headTop + 1, -hw + 1], [hw - 4, H.headTop + 5, hw - 4], hairSh));
+      }
+      out.push(...head({ skin, eyeStyle: 'round', mouth: expr === 'shocked' ? 'shout' : expr === 'laughing' || expr === 'happy' ? 'grin' : expr === 'crying' || expr === 'confused' ? 'frown' : 'neutral', hair: hairSh, expr }));
+      // domino mask, built AROUND the eyes (not one slab behind them) so no
+      // draw order can bury an eye
+      const fz = -hw - 0.6, my0 = H.eyeY - 2.6, my1 = H.eyeY + 3.4, mz = [fz + 0.2, -hw + 0.2];
+      for (const [x0, x1] of [[-hw + 0.4, -H.eyeX - 2.2], [-H.eyeX + 2.2, H.eyeX - 2.2], [H.eyeX + 2.2, hw - 0.4]]) {
+        out.push(b([x0, my0, mz[0]], [x1, my1, mz[1]], teamSh));
+      }
+      for (const sx of [-1, 1]) {
+        out.push(b([sx * H.eyeX - 2.2, my0, mz[0]], [sx * H.eyeX + 2.2, H.eyeY - 1.2, mz[1]], teamSh));
+        out.push(b([sx * H.eyeX - 2.2, H.eyeY + 3, mz[0]], [sx * H.eyeX + 2.2, my1, mz[1]], teamSh));
+      }
+      out.push(...pair([-hw - 0.6, H.eyeY - 0.6, fz + 0.3], [-hw + 0.6, H.eyeY + 1.6, hw - 2], teamSh)); // strap
+      tag('head', out);
+
+      out.push(...torso({ col: team, colSh: teamSh, style: 'hoodie' }));
+      out.push(...arms({ col: team, colSh: teamSh, cuff: teamLt, hand: skin }));
+      out.push(...legs({ col: C.navySh, shoe: C.white }));
+
+      // team letter on the chest
+      const td = Math.round(H.torsoW * 0.62);
+      const g = BADGE[letter], px = 1.6, x0 = -2.5 * px, y0 = H.torsoBot + 26;
+      out.push(b([x0 - 1.4, y0 - 7 * px - 1.4, -td - 0.8], [x0 + 5 * px + 1.4, y0 + 1.4, -td - 0.3], C.cream));
+      g.forEach((row, gy) => [...row].forEach((on, gx) => {
+        if (on === '1') out.push(b([x0 + gx * px, y0 - (gy + 1) * px, -td - 2.2], [x0 + (gx + 1) * px, y0 - gy * px, -td - 1.4], teamSh));
+      }));
+      return posed(out, pose);
+    },
+  };
+}
+
+export const SIDE_A = side({ id: 'side-a', label: 'Side A (Versus)', letter: 'A', team: '#3FB8C9', teamSh: '#1F6F7C', teamLt: '#A8F0F8', hair: '#232A44', hairSh: '#151A2C', hairStyle: 'quiff', skin: '#C49A7A' });
+export const SIDE_B = side({ id: 'side-b', label: 'Side B (Versus)', letter: 'B', team: '#F08A3C', teamSh: '#A8521C', teamLt: '#FFC890', hair: '#8B5A34', hairSh: '#6B4226', hairStyle: 'ponytail', skin: '#F5D2B4' });
+
+export const CHARS = { judge: JUDGE, prosecutor: PROSECUTOR, defense: DEFENSE, bailiff: BAILIFF, clerk: CLERK, 'ai-narrator': NARRATOR, juror: JUROR, creator: CREATOR, 'side-a': SIDE_A, 'side-b': SIDE_B };
 export const CHAR_IDS = Object.keys(CHARS);
