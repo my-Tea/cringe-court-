@@ -13,6 +13,7 @@ export * from './dialogue';
 export * from './beats';
 export * from './remote';
 export * from './quality';
+export * from './perspective';
 export * from './audio';
 export * from './controller';
 export * from './load';
