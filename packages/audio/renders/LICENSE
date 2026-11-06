@@ -1,0 +1,3 @@
+The audio files in this directory were synthesised by packages/audio/scripts/render.ts
+from the code in packages/audio/src. They are dedicated to the public domain under
+CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
