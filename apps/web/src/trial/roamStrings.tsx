@@ -1,4 +1,4 @@
-import type { BeatId, QualityLevel, ZoneId } from '@cringe-court/scene/roam';
+import type { BeatId, PerspectiveChoice, QualityLevel, ZoneId } from '@cringe-court/scene/roam';
 import type { LegendRow, RoamStrings } from '@cringe-court/scene/roam/react';
 import { t, tRich, type MessageKey } from '@/i18n';
 
@@ -88,6 +88,8 @@ export function roamStrings(): RoamStrings {
     pauseResume: t('trial.hud.pause.resume'),
     pauseBackToLobby: t('trial.hud.pause.lobby'),
     pauseGraphicsQuality: t('trial.hud.pause.quality'),
+    pausePerspective: t('trial.hud.pause.perspective'),
+    perspectiveLabel: (choice: PerspectiveChoice) => t(choice === 'first' ? 'trial.hud.perspective.first' : 'trial.hud.perspective.auto'),
     qualityLevel: (level) => t(QUALITY_KEYS[level]),
     autoQualityNote: (level) => t('trial.hud.quality.lowered', { level: t(QUALITY_NAME_KEYS[level]) }),
     pauseChunkyPixels: t('trial.hud.pause.pixels'),
