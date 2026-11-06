@@ -20,7 +20,7 @@ Verified against the filesystem.
 | **Player parts** | **58** + default, voxel | ✅ Matches cast proportions (4.5 heads) |
 | **UI kit** | **34** assets (47 with @2x icons) | ✅ |
 | **FX sprites** | **10** | ✅ |
-| **Props** | 94 (47 props @1x + @4x) | ✅ |
+| **Props** | 106 (53 props @1x + @4x) | ✅ |
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
 | **3D models** | `.bbmodel` (995 elements) | ✅ |
@@ -100,6 +100,20 @@ The pixel font is a **built-in 5×7 bitmap** in `ui-kit.mjs` — no font file to
 Defined in `props.mjs`, exported by `node export.mjs` (writes `out/props/`; copy to
 `dist/sprites/props/`). **Not yet in `models/CringeCourt_Props.bbmodel`**: that file
 was built through Blockbench and nothing in `cc-art/` regenerates it.
+
+---
+
+## Character props (`sprites/props/`)
+
+`judge_gavel`, `judge_gavel_raised`, `judge_gavel_strike`, `exhibit_a_paper`,
+`popcorn_bucket`, `papers_stack` — the held items baked into the judge, defense,
+juror and clerk (GAP-ANALYSIS #12), as standalone sprites. Geometry and colours live in
+`held-props.mjs` and are called by BOTH `vox-chars.mjs` and `props.mjs`, so the prop
+and the character cannot drift (character PNGs are byte-identical after the refactor).
+Manifest entries add `holdAnchor` (grip point, prop space) and `heldBy`
+(`character`, `hand`, `handOffset` = hand joint minus grip as baked on the character).
+The two posed gavels are the same boxes rotated 35 / 125 degrees and re-voxelised, and
+are drawn with `keepOrder` (see `render.mjs`).
 
 ---
 
