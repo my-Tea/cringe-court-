@@ -303,7 +303,7 @@ export const JUROR = {
 
     out.push(...torso({ col: C.blue, colSh: C.blueSh, style: 'hoodie' }));
     out.push(...arms({ col: C.blue, colSh: C.blueSh, cuff: C.blueSh }));
-    out.push(...legs({ col: C.navy, shoe: C.ink }));
+    out.push(...legs({ col: C.navy, shoe: C.ink, seat: pose === 'seated' }));
 
     // popcorn
     out.push(b([-H.torsoW - 12, H.armBot + 2, -5], [-H.torsoW - 2, H.armBot + 13, -1], C.cream));
