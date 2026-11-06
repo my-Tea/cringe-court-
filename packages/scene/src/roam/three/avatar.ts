@@ -5,6 +5,7 @@
  */
 import * as THREE from 'three';
 import { buildCastMeshes, CAST_SCALE, PIVOTS, type CastFile, type GroupMesh, type RigGroup } from '../cast';
+import { C } from '../palette';
 import type { NpcPose } from '../types';
 
 const geometryCache = new WeakMap<CastFile, Map<string, Record<RigGroup, THREE.BufferGeometry>>>();
@@ -31,7 +32,14 @@ function geometries(cast: CastFile, model: string, posture: 'stand' | 'sit'): Re
   let hit = perCast.get(key);
   if (!hit) {
     const meshes = buildCastMeshes(cast, model, posture);
-    hit = { body: toGeometry(meshes.body), head: toGeometry(meshes.head), armR: toGeometry(meshes.armR), armL: toGeometry(meshes.armL) };
+    hit = {
+      body: toGeometry(meshes.body),
+      head: toGeometry(meshes.head),
+      armR: toGeometry(meshes.armR),
+      armL: toGeometry(meshes.armL),
+      legR: toGeometry(meshes.legR),
+      legL: toGeometry(meshes.legL),
+    };
     perCast.set(key, hit);
   }
   return hit;
@@ -52,6 +60,9 @@ export class VoxelAvatar {
   readonly #head = new THREE.Group();
   readonly #armR = new THREE.Group();
   readonly #armL = new THREE.Group();
+  readonly #legR = new THREE.Group();
+  readonly #legL = new THREE.Group();
+  readonly #fx: AvatarFx | null;
   readonly #seated: boolean;
   #walk = 0;
   #t = Math.random() * 10;
@@ -63,6 +74,7 @@ export class VoxelAvatar {
     readonly model: string,
     seated: boolean,
     name = model,
+    effect: string = 'none',
   ) {
     this.#seated = seated && !!cast.models[model]?.sit;
     const posture = this.#seated ? 'sit' : 'stand';
@@ -82,8 +94,14 @@ export class VoxelAvatar {
     this.#armR.add(mesh(g.armR, 'armR'));
     this.#armL.position.set(...pivots.armL);
     this.#armL.add(mesh(g.armL, 'armL'));
-    this.#rig.add(this.#head, this.#armR, this.#armL);
+    this.#legR.position.set(...pivots.legR);
+    this.#legR.add(mesh(g.legR, 'legR'));
+    this.#legL.position.set(...pivots.legL);
+    this.#legL.add(mesh(g.legL, 'legL'));
+    this.#rig.add(this.#head, this.#armR, this.#armL, this.#legR, this.#legL);
     this.object.add(this.#rig);
+    this.#fx = effect !== 'none' ? new AvatarFx(effect) : null;
+    if (this.#fx) this.object.add(this.#fx.group);
     this.object.name = `avatar:${name}`;
   }
 
@@ -109,12 +127,16 @@ export class VoxelAvatar {
     let lz = 0;
     let bodyY = 0;
     const speed = s.speed ?? 0;
+    let legs = 0;
     if (speed > 1 && !this.#seated) {
-      this.#walk += dt * speed * 0.18;
-      const sw = Math.sin(this.#walk) * 0.7 * calm;
+      // Minecraft gait: legs and the opposite arms swing together, harder when running.
+      this.#walk += dt * speed * 0.12;
+      const reach = Math.min(1, speed / 60) * 0.85;
+      const sw = Math.sin(this.#walk) * reach * calm;
       rx = sw;
       lx = -sw;
-      bodyY = Math.abs(Math.cos(this.#walk)) * 1.6 * calm;
+      legs = sw;
+      bodyY = Math.abs(Math.cos(this.#walk)) * 1.2 * calm;
     } else {
       // Idle: breathe.
       bodyY = Math.sin(t * 1.7) * 0.4 * calm;
@@ -156,6 +178,74 @@ export class VoxelAvatar {
     }
     this.#armR.rotation.set(rx, 0, rz);
     this.#armL.rotation.set(lx, 0, lz);
+    this.#legR.rotation.set(-legs, 0, 0);
+    this.#legL.rotation.set(legs, 0, 0);
     this.#rig.position.y = bodyY;
+    this.#fx?.update(dt, reducedMotion);
+  }
+
+  dispose(): void {
+    this.#fx?.dispose();
+  }
+}
+
+/**
+ * Wardrobe effects: small glowing voxels around the avatar, bright enough to
+ * catch the bloom. World units (the avatar group is unscaled; the rig is not).
+ */
+class AvatarFx {
+  readonly group = new THREE.Group();
+  readonly #bits: THREE.Mesh[] = [];
+  readonly #geo = new THREE.BoxGeometry(1, 1, 1);
+  readonly #mat: THREE.MeshBasicMaterial;
+  #t = 0;
+
+  constructor(readonly kind: string) {
+    const color = new THREE.Color(kind === 'embers' ? C.royal500 : kind === 'sparkles' ? C.gold100 : C.gold300).multiplyScalar(1.8);
+    this.#mat = new THREE.MeshBasicMaterial({ color, transparent: kind === 'embers' || kind === 'sparkles', depthWrite: false });
+    const count = kind === 'aura' ? 14 : kind === 'halo' ? 12 : kind === 'sparkles' ? 7 : 9;
+    for (let i = 0; i < count; i++) {
+      const m = new THREE.Mesh(this.#geo, this.#mat);
+      const s = kind === 'aura' ? 2.2 : kind === 'halo' ? 1.5 : 1.3;
+      m.scale.setScalar(s);
+      this.#bits.push(m);
+      this.group.add(m);
+    }
+    this.group.name = `fx:${kind}`;
+    this.update(0, false);
+  }
+
+  update(dt: number, reduced: boolean): void {
+    this.#t += reduced ? 0 : dt;
+    const t = this.#t;
+    const n = this.#bits.length;
+    this.#bits.forEach((m, i) => {
+      const a = (i / n) * Math.PI * 2;
+      switch (this.kind) {
+        case 'aura':
+          m.position.set(Math.cos(a + t * 0.8) * 15, 1 + Math.sin(t * 3 + i) * 0.6, Math.sin(a + t * 0.8) * 15);
+          break;
+        case 'halo':
+          m.position.set(Math.cos(a + t) * 7, 57 + Math.sin(t * 2) * 0.8, Math.sin(a + t) * 7);
+          break;
+        case 'sparkles': {
+          const h = (i * 0.37 + t * 0.12) % 1;
+          m.position.set(Math.cos(a + t * 1.4) * (13 + i), 8 + h * 48, Math.sin(a + t * 1.4) * (13 + i));
+          m.scale.setScalar(0.6 + Math.abs(Math.sin(t * 5 + i)) * 1.1);
+          break;
+        }
+        default: {
+          const h = (i / n + t * 0.35) % 1;
+          m.position.set(Math.cos(a * 3) * 9, h * 44, Math.sin(a * 3) * 9 - 2);
+          m.scale.setScalar(1.4 * (1 - h) + 0.3);
+        }
+      }
+    });
+    if (this.kind === 'embers' || this.kind === 'sparkles') this.#mat.opacity = 0.85;
+  }
+
+  dispose(): void {
+    this.#geo.dispose();
+    this.#mat.dispose();
   }
 }

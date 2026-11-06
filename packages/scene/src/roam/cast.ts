@@ -11,9 +11,16 @@ import type { Vec3 } from './types';
 export const CAST_GROUPS = ['body', 'head', 'armR', 'armL', 'legR', 'legL', 'shinR', 'shinL'] as const;
 export type CastGroup = (typeof CAST_GROUPS)[number];
 
-/** The groups the renderer animates separately; legs and shins render with the body. */
-export type RigGroup = 'body' | 'head' | 'armR' | 'armL';
-export const RIG_GROUPS: readonly RigGroup[] = ['body', 'head', 'armR', 'armL'];
+/**
+ * The groups the renderer animates separately. Legs swing at the hip; shins
+ * ride their leg. The generated cast keeps legs inside `body`, so a standing
+ * body box that sits wholly below the hip on one side is treated as that leg.
+ */
+export type RigGroup = 'body' | 'head' | 'armR' | 'armL' | 'legR' | 'legL';
+export const RIG_GROUPS: readonly RigGroup[] = ['body', 'head', 'armR', 'armL', 'legR', 'legL'];
+
+/** Hip height in model units: anything wholly below it, on one side, is a leg. */
+export const HIP = 38.5;
 
 /** World units per voxel: a 100-voxel character stands 48 tall: chibi cast at desk scale (desks are 28.6), the player's eye (44) just above their heads. */
 export const CAST_SCALE = 0.48;
@@ -38,8 +45,8 @@ export interface CastFile {
 
 /** Joint pivots in model units, per posture (the seated pose drops the body 13 voxels). */
 export const PIVOTS: Readonly<Record<'stand' | 'sit', Readonly<Record<Exclude<RigGroup, 'body'>, Vec3>>>> = {
-  stand: { head: [0, 71, 0], armR: [19, 66, 0], armL: [-19, 66, 0] },
-  sit: { head: [0, 58, 0], armR: [19, 53, 0], armL: [-19, 53, 0] },
+  stand: { head: [0, 71, 0], armR: [19, 66, 0], armL: [-19, 66, 0], legR: [6.5, HIP, 0], legL: [-6.5, HIP, 0] },
+  sit: { head: [0, 58, 0], armR: [19, 53, 0], armL: [-19, 53, 0], legR: [6.5, HIP - 13, 0], legL: [-6.5, HIP - 13, 0] },
 };
 
 export class CastDataError extends Error {
@@ -110,11 +117,11 @@ export function buildCastMeshes(cast: CastFile, modelId: string, posture: 'stand
   if (!model) throw new CastDataError(`no model "${modelId}"`);
   const rows = (posture === 'sit' && model.sit) || model.stand;
   const pivots = PIVOTS[posture === 'sit' && model.sit ? 'sit' : 'stand'];
-  const byGroup: Record<RigGroup, CastRow[]> = { body: [], head: [], armR: [], armL: [] };
+  const seated = posture === 'sit' && !!model.sit;
+  const byGroup: Record<RigGroup, CastRow[]> = { body: [], head: [], armR: [], armL: [], legR: [], legL: [] };
   for (const r of rows) {
     const g = CAST_GROUPS[r[7]!]!;
-    const rig: RigGroup = g === 'head' || g === 'armR' || g === 'armL' ? g : 'body';
-    byGroup[rig].push(r);
+    byGroup[rigOf(g, r, seated)].push(r);
   }
   const rgb = cast.colors.map(hexToRgb01);
   const out = {} as Record<RigGroup, GroupMesh>;
@@ -160,6 +167,19 @@ export function buildCastMeshes(cast: CastFile, modelId: string, posture: 'stand
     out[g] = { positions, normals, colors, indices };
   }
   return out;
+}
+
+function rigOf(g: CastGroup, r: CastRow, seated: boolean): RigGroup {
+  if (g === 'head' || g === 'armR' || g === 'armL') return g;
+  if (seated) return 'body';
+  if (g === 'legR' || g === 'shinR') return 'legR';
+  if (g === 'legL' || g === 'shinL') return 'legL';
+  // A plain (unposed) body box below the hip, clear of the centre line: a leg.
+  if (r.length === 8 && r[4]! <= HIP + 0.01) {
+    if (r[0]! >= -0.01) return 'legR';
+    if (r[3]! <= 0.01) return 'legL';
+  }
+  return 'body';
 }
 
 export function castModelIds(cast: CastFile): string[] {
