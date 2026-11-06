@@ -1,4 +1,5 @@
-import { ZERO_USDC, addUsdc, formatUsdc, type Usdc } from '@cringe-court/core';
+import { ZERO_USDC, addUsdc, type Usdc } from '@cringe-court/core';
+import { ballotLabel, caseLabel, formatAmount } from '@/i18n/domain';
 import type { CaseDetail } from '@cringe-court/modes-grand-jury';
 import { Link } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
@@ -23,11 +24,51 @@ function todosOf(cases: readonly CaseDetail[]): Todo[] {
   const out: Todo[] = [];
   for (const d of cases) {
     const v = d.viewer;
-    if (v.offer) out.push({ detail: d, icon: 'gavel', title: t('grandJury.duty.todo.offer.title'), body: t('grandJury.duty.todo.offer.body', { bond: formatUsdc(d.terms.bondPerJuror) }), cta: t('grandJury.duty.todo.offer.cta'), urgent: true });
-    if (v.seat !== null && d.phase === 'commit' && !v.committed) out.push({ detail: d, icon: 'lock', title: t('grandJury.duty.todo.seal.title', { n: v.seat }), body: t('grandJury.duty.todo.seal.body'), cta: t('grandJury.ballot.seal'), urgent: true });
-    if (v.seat !== null && d.phase === 'reveal' && v.committed && !v.revealed) out.push({ detail: d, icon: 'unlock', title: t('grandJury.duty.todo.open.title', { n: v.seat }), body: t('grandJury.duty.todo.open.body'), cta: t('grandJury.reveal.open'), urgent: true });
-    if (d.phase === 'finalizing' && (v.seat !== null || v.contributed > 0n)) out.push({ detail: d, icon: 'scales', title: t('grandJury.duty.todo.settle.title'), body: t('grandJury.duty.todo.settle.body'), cta: t('grandJury.juror.settle.title'), urgent: false });
-    if (v.claim && !v.claim.claimed && v.claim.amount > 0n) out.push({ detail: d, icon: 'sparkle', title: t('grandJury.duty.todo.collect.title', { amount: formatUsdc(v.claim.amount) }), body: v.claim.lines.some((l) => l.kind === 'refund') ? t('grandJury.duty.todo.collect.refund') : t('grandJury.duty.todo.collect.payout'), cta: t('grandJury.duty.todo.collect.cta'), urgent: false });
+    if (v.offer)
+      out.push({
+        detail: d,
+        icon: 'gavel',
+        title: t('grandJury.duty.todo.offer.title'),
+        body: t('grandJury.duty.todo.offer.body', { bond: formatAmount(d.terms.bondPerJuror) }),
+        cta: t('grandJury.duty.todo.offer.cta'),
+        urgent: true,
+      });
+    if (v.seat !== null && d.phase === 'commit' && !v.committed)
+      out.push({
+        detail: d,
+        icon: 'lock',
+        title: t('grandJury.duty.todo.seal.title', { n: v.seat }),
+        body: t('grandJury.duty.todo.seal.body'),
+        cta: t('grandJury.ballot.seal'),
+        urgent: true,
+      });
+    if (v.seat !== null && d.phase === 'reveal' && v.committed && !v.revealed)
+      out.push({
+        detail: d,
+        icon: 'unlock',
+        title: t('grandJury.duty.todo.open.title', { n: v.seat }),
+        body: t('grandJury.duty.todo.open.body'),
+        cta: t('grandJury.reveal.open'),
+        urgent: true,
+      });
+    if (d.phase === 'finalizing' && (v.seat !== null || v.contributed > 0n))
+      out.push({
+        detail: d,
+        icon: 'scales',
+        title: t('grandJury.duty.todo.settle.title'),
+        body: t('grandJury.duty.todo.settle.body'),
+        cta: t('grandJury.juror.settle.title'),
+        urgent: false,
+      });
+    if (v.claim && !v.claim.claimed && v.claim.amount > 0n)
+      out.push({
+        detail: d,
+        icon: 'sparkle',
+        title: t('grandJury.duty.todo.collect.title', { amount: formatAmount(v.claim.amount) }),
+        body: v.claim.lines.some((l) => l.kind === 'refund') ? t('grandJury.duty.todo.collect.refund') : t('grandJury.duty.todo.collect.payout'),
+        cta: t('grandJury.duty.todo.collect.cta'),
+        urgent: false,
+      });
   }
   return out.sort((a, b) => Number(b.urgent) - Number(a.urgent) || (a.detail.phaseEndsAt ?? Infinity) - (b.detail.phaseEndsAt ?? Infinity));
 }
@@ -41,7 +82,7 @@ function CaseRow({ d, nowMs, children }: { d: CaseDetail; nowMs: number; childre
   return (
     <li className={styles.dutyRow}>
       <div className={styles.dutyRowMain}>
-        <span className={styles.caseLabel}>{d.label}</span>
+        <span className={styles.caseLabel}>{caseLabel(d.label)}</span>
         <Link to={paths.case(d.caseNumber)} className={styles.dutyRowLink}>
           {d.file.question}
         </Link>
@@ -133,7 +174,7 @@ export function DutyPage() {
         <PaperPanel as="li" tone="cream" edge="cut" padding="sm" className={styles.stat}>
           <p className={styles.statLabel}>{t('grandJury.duty.stats.collected')}</p>
           <p className={styles.statValue}>
-            <Amount value={collected} size="lg" /> <span className={styles.statSub}>/ {formatUsdc(waiting)}</span>
+            <Amount value={collected} size="lg" /> <span className={styles.statSub}>/ {formatAmount(waiting)}</span>
           </p>
         </PaperPanel>
       </ul>
@@ -164,7 +205,7 @@ export function DutyPage() {
                     </span>
                     <div className={styles.todoText}>
                       <p className={styles.todoTitle}>
-                        {todo.title} <span className={styles.caseLabel}>{todo.detail.label}</span>
+                        {todo.title} <span className={styles.caseLabel}>{caseLabel(todo.detail.label)}</span>
                       </p>
                       <p className={styles.todoBody}>{todo.body}</p>
                     </div>
@@ -186,7 +227,10 @@ export function DutyPage() {
                 {seats.map((d) => (
                   <CaseRow key={d.caseNumber} d={d} nowMs={nowMs}>
                     <span className={styles.dutyNote}>
-                      {t('grandJury.duty.seatRow', { n: d.viewer.seat ?? 0, state: d.viewer.revealed ? t('grandJury.jury.seat.opened') : d.viewer.committed ? t('grandJury.jury.seat.sealed') : t('grandJury.jury.seat.sworn') })}
+                      {t('grandJury.duty.seatRow', {
+                        n: d.viewer.seat ?? 0,
+                        state: d.viewer.revealed ? t('grandJury.jury.seat.opened') : d.viewer.committed ? t('grandJury.jury.seat.sealed') : t('grandJury.jury.seat.sworn'),
+                      })}
                     </span>
                   </CaseRow>
                 ))}
@@ -199,7 +243,9 @@ export function DutyPage() {
               <ul className={styles.dutyList}>
                 {summoned.map((d) => (
                   <CaseRow key={d.caseNumber} d={d} nowMs={nowMs}>
-                    <span className={styles.dutyNote}>{d.viewer.isSponsor ? t('grandJury.duty.sponsor') : t('grandJury.duty.chippedIn', { amount: formatUsdc(d.viewer.contributed) })}</span>
+                    <span className={styles.dutyNote}>
+                      {d.viewer.isSponsor ? t('grandJury.duty.sponsor') : t('grandJury.duty.chippedIn', { amount: formatAmount(d.viewer.contributed) })}
+                    </span>
                   </CaseRow>
                 ))}
               </ul>
@@ -212,10 +258,12 @@ export function DutyPage() {
                 {calls.map((d) => (
                   <CaseRow key={d.caseNumber} d={d} nowMs={nowMs}>
                     <BallotChip bench={d.viewer.galleryVote!} size="sm">
-                      {d.ballot[d.viewer.galleryVote!]}
+                      {ballotLabel(d.ballot[d.viewer.galleryVote!])}
                     </BallotChip>
                     {d.verdict && d.verdict.kind !== 'no-verdict' && (
-                      <span className={styles.dutyNote}>{(d.verdict.kind === 'ballot-0' ? 0 : 1) === d.viewer.galleryVote ? t('grandJury.duty.calledIt') : t('grandJury.duty.differently')}</span>
+                      <span className={styles.dutyNote}>
+                        {(d.verdict.kind === 'ballot-0' ? 0 : 1) === d.viewer.galleryVote ? t('grandJury.duty.calledIt') : t('grandJury.duty.differently')}
+                      </span>
                     )}
                   </CaseRow>
                 ))}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { CHARACTER_NAMES, formatUsdc, type ClosedState, type CounselState, type Usdc } from '@cringe-court/core';
-import { PASS_ENABLED, SEGMENT_TITLES, isDemoTerms, outcomePreviews, soloQuote, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
-import { CANCEL_LABELS } from '@cringe-court/core';
+import { type ClosedState, type CounselState, type Usdc } from '@cringe-court/core';
+import { cancelLabel, characterName, formatAmount, segmentTitle } from '@/i18n/domain';
+import { PASS_ENABLED, isDemoTerms, outcomePreviews, soloQuote, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
 import { Alert, Amount, Badge, Button, EmptyState, ErrorState, Icon, LoadingState, PaperButton, PaperPanel, PaperRibbon, Portrait, Switch, TestnetBadge } from '@/ds';
 import { tRich, t, type MessageKey } from '@/i18n';
 import styles from './FilePage.module.css';
@@ -17,7 +17,13 @@ export function DraftingStep({ session, snap }: { session: SoloSession; snap: So
   }, []);
   if (snap.error) {
     return (
-      <ErrorState title={t('solo.drafting.error.title')} headingLevel={2} details={snap.error.message} onRetry={() => void session.retryDraft()} retryLabel={t('solo.drafting.error.retry')}>
+      <ErrorState
+        title={t('solo.drafting.error.title')}
+        headingLevel={2}
+        details={snap.error.message}
+        onRetry={() => void session.retryDraft()}
+        retryLabel={t('solo.drafting.error.retry')}
+      >
         {t('solo.drafting.error.body')}
       </ErrorState>
     );
@@ -34,8 +40,8 @@ function BalanceMeter({ scores }: { scores: readonly [number, number] }) {
     <div className={styles.balance}>
       {(['prosecutor', 'defense'] as const).map((c, b) => (
         <div key={c} className={styles.balanceRow}>
-          <span>{CHARACTER_NAMES[c]}</span>
-          <meter min={0} max={1} low={0.6} optimum={1} value={scores[b]} aria-label={t('solo.review.fairness.strength', { name: CHARACTER_NAMES[c] })}>
+          <span>{characterName(c)}</span>
+          <meter min={0} max={1} low={0.6} optimum={1} value={scores[b]} aria-label={t('solo.review.fairness.strength', { name: characterName(c) })}>
             {Math.round(scores[b]! * 100)}%
           </meter>
           <span className={styles.mono}>{Math.round(scores[b]! * 100)}%</span>
@@ -77,8 +83,8 @@ export function ReviewStep({ session, snap }: { session: SoloSession; snap: Solo
       )}
       <div className={styles.script}>
         {segments.map((seg) => (
-          <section key={seg} aria-label={SEGMENT_TITLES[seg]} className={styles.scriptSection}>
-            <h3 className={styles.scriptHead}>{SEGMENT_TITLES[seg]}</h3>
+          <section key={seg} aria-label={segmentTitle(seg)} className={styles.scriptSection}>
+            <h3 className={styles.scriptHead}>{segmentTitle(seg)}</h3>
             <ol role="list" className={styles.scriptLines}>
               {lines
                 .filter((l) => l.segment === seg)
@@ -88,7 +94,7 @@ export function ReviewStep({ session, snap }: { session: SoloSession; snap: Solo
                     <li key={l.id} className={styles.scriptLine} data-side={who}>
                       <Portrait character={who} size="sm" alt="" />
                       <div>
-                        <strong>{CHARACTER_NAMES[who]}</strong>
+                        <strong>{characterName(who)}</strong>
                         <p>{l.text}</p>
                       </div>
                     </li>
@@ -132,7 +138,11 @@ export function PayStep({ session, snap, balance }: { session: SoloSession; snap
           {t('solo.pay.title')} <TestnetBadge />
         </PaperRibbon>
         <p className={styles.lede}>
-          {tRich('solo.pay.fingerprint', { hash: (c) => <span className={styles.mono}>{c}</span> }, { hash: tState.transcript ? `${tState.transcript.hash.slice(0, 10)}…${tState.transcript.hash.slice(-6)}` : '—' })}
+          {tRich(
+            'solo.pay.fingerprint',
+            { hash: (c) => <span className={styles.mono}>{c}</span> },
+            { hash: tState.transcript ? `${tState.transcript.hash.slice(0, 10)}…${tState.transcript.hash.slice(-6)}` : '—' },
+          )}
         </p>
       </header>
       <div className={styles.payGrid}>
@@ -141,7 +151,7 @@ export function PayStep({ session, snap, balance }: { session: SoloSession; snap
             <header>
               <p className={styles.eyebrow}>{t('solo.pay.price.eyebrow')}</p>
               <h3 id="price-title" className={styles.panelTitle}>
-                {formatUsdc(quote.total)}
+                {formatAmount(quote.total)}
               </h3>
             </header>
             <dl className={styles.quote}>
@@ -177,7 +187,7 @@ export function PayStep({ session, snap, balance }: { session: SoloSession; snap
             <header>
               <p className={styles.eyebrow}>{t('solo.pay.outcomes.eyebrow')}</p>
               <h3 id="outcomes-title" className={styles.panelTitle}>
-                {t('solo.pay.outcomes.heading', { amount: formatUsdc(quote.total, { unit: false }) })}
+                {t('solo.pay.outcomes.heading', { amount: formatAmount(quote.total, { unit: false }) })}
               </h3>
             </header>
             <table className={styles.outcomes}>
@@ -218,7 +228,7 @@ export function PayStep({ session, snap, balance }: { session: SoloSession; snap
       )}
       <div className={styles.formActions}>
         <PaperButton size="lg" onClick={() => void session.pay()} loading={snap.busy === 'paying'} disabled={short}>
-          {t('solo.pay.cta', { amount: formatUsdc(quote.total) })}
+          {t('solo.pay.cta', { amount: formatAmount(quote.total) })}
         </PaperButton>
         <Button size="lg" variant="ghost" onClick={() => session.withdraw()}>
           {t('solo.review.withdraw')}
@@ -235,7 +245,7 @@ export function PayStep({ session, snap, balance }: { session: SoloSession; snap
 
 /** A case closed before payment (withdrawn, AI unfair/failed). Nothing was charged. */
 export function DismissedStep({ trial, onRestart }: { trial: ClosedState; onRestart: () => void }) {
-  const reason = CANCEL_LABELS[trial.reason];
+  const reason = cancelLabel(trial.reason);
   return (
     <EmptyState
       title={trial.reason === 'withdrawn' ? t('solo.dismissed.withdrawn') : t('solo.case.closed.title')}

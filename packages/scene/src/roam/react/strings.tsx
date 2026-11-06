@@ -138,7 +138,7 @@ export const DEFAULT_ROAM_STRINGS: RoamStrings = {
     ),
     (k) => (
       <>
-        {k('Tab')} skip a line · {k('Esc')} pause
+        {k('X')} skip a line · {k('Tab')} leave the room · {k('Esc')} pause
       </>
     ),
   ],

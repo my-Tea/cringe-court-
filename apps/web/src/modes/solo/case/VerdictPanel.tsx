@@ -1,14 +1,7 @@
 import { useEffect, useMemo } from 'react';
-import { formatUsdc, type ReceiptLine, type ShareState, type VerdictState } from '@cringe-court/core';
-import {
-  NPC_PERSONAS,
-  filerReceipt,
-  revenueDisclosure,
-  shareSummary,
-  verdictTone,
-  type SoloSession,
-  type SoloSnapshot,
-} from '@cringe-court/modes-solo';
+import { type ReceiptLine, type ShareState, type VerdictState } from '@cringe-court/core';
+import { ballotLabel, formatAmount, npcPersona, verdictLabel } from '@/i18n/domain';
+import { NPC_PERSONAS, filerReceipt, revenueDisclosure, shareSummary, verdictTone, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
 import { Alert, Amount, Badge, DialogueBox, PaperButton, PaperPanel, Stamp, type PaperPanelProps } from '@/ds';
 import { t } from '@/i18n';
 import { jurorArt } from '../lib/art';
@@ -18,11 +11,7 @@ import styles from './CasePage.module.css';
 import paper from './VerdictPanel.module.css';
 
 /** The hero's backing sheet follows the outcome. */
-const BACKING: Record<ReturnType<typeof verdictTone>, NonNullable<PaperPanelProps['backing']>> = {
-  guilty: 'maroon',
-  'not-cooked': 'gold',
-  'no-verdict': 'cream',
-};
+const BACKING: Record<ReturnType<typeof verdictTone>, NonNullable<PaperPanelProps['backing']>> = { guilty: 'maroon', 'not-cooked': 'gold', 'no-verdict': 'cream' };
 
 type Decided = VerdictState | ShareState;
 
@@ -39,14 +28,7 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
   const disclosure = revenueDisclosure(tState.settlement, tState.terms);
   const paid = tState.terms.payerShares[0] ?? tState.terms.target;
   const back = filerReceipt(tState.settlement, snap.filer);
-  const lines: ReceiptLine[] = [
-    {
-      kind: 'fee',
-      label: t('solo.verdict.paid'),
-      amount: paid,
-    },
-    ...back,
-  ];
+  const lines: ReceiptLine[] = [{ kind: 'fee', label: t('solo.verdict.paid'), amount: paid }, ...back];
   const refundDue = back.some((l) => l.kind === 'refund');
   // The verdict sting plays once, when the verdict is first shown live.
   const live = session !== null;
@@ -72,19 +54,19 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
         <div className={paper.heroInner}>
           <p className={styles.eyebrow}>{t('solo.verdict.eyebrow')}</p>
           <h2 id="verdict-title" className="cc-visually-hidden">
-            {t('solo.verdict.heading', { label: tState.verdict.label })}
+            {t('solo.verdict.heading', { label: verdictLabel(tState.verdict.label) })}
           </h2>
           <Stamp tone={tone} size="xl" animate sub={tone === 'no-verdict' ? t('solo.verdict.fullRefund') : summary.caseLabel}>
-            {tState.verdict.label}
+            {verdictLabel(tState.verdict.label)}
           </Stamp>
           <p className={styles.headline}>{summary.headline}</p>
           <p className={styles.tally}>
             <span>
-              {tState.terms.ballot[0]} <strong>{tState.verdict.tally[0]}</strong>
+              {ballotLabel(tState.terms.ballot[0])} <strong>{tState.verdict.tally[0]}</strong>
             </span>
             <span aria-hidden>·</span>
             <span>
-              {tState.terms.ballot[1]} <strong>{tState.verdict.tally[1]}</strong>
+              {ballotLabel(tState.terms.ballot[1])} <strong>{tState.verdict.tally[1]}</strong>
             </span>
             <span className={styles.tallyNote}>
               {t('solo.verdict.tallyNote', { completed: tState.verdict.completedDuty, appointed: tState.verdict.appointed, needed: tState.terms.threshold })}
@@ -95,13 +77,7 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
 
       {tState.sentence && (
         <PaperPanel tone="cream" edge="cut" elevation={3} backing="gold" padding="none">
-          <DialogueBox
-            className={paper.sentence}
-            speaker="judge"
-            expression={sentenceMood}
-            text={tState.sentence.text}
-            speakerName={t('solo.verdict.sentenceBy')}
-          />
+          <DialogueBox className={paper.sentence} speaker="judge" expression={sentenceMood} text={tState.sentence.text} speakerName={t('solo.verdict.sentenceBy')} />
         </PaperPanel>
       )}
 
@@ -110,23 +86,15 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
           const p = NPC_PERSONAS[i];
           const choice = seat.choice;
           return (
-            <PaperPanel
-              as="li"
-              key={seat.account}
-              tone="cream"
-              edge="cut"
-              elevation={2}
-              padding="sm"
-              backing={choice === undefined ? 'none' : 'gold'}
-            >
+            <PaperPanel as="li" key={seat.account} tone="cream" edge="cut" elevation={2} padding="sm" backing={choice === undefined ? 'none' : 'gold'}>
               <div className={paper.vote}>
                 {p && <img src={jurorArt(p.id)} alt="" data-pixel className={styles.voteSprite} />}
                 <div>
-                  <strong>{p?.name ?? t('solo.verdict.juror', { n: seat.seat })}</strong>
-                  <p>{choice !== undefined && p ? `“${p.says[choice]}”` : t('solo.verdict.noReveal')}</p>
+                  <strong>{p ? npcPersona(p.id).name : t('solo.verdict.juror', { n: seat.seat })}</strong>
+                  <p>{choice !== undefined && p ? `“${npcPersona(p.id).says[choice]}”` : t('solo.verdict.noReveal')}</p>
                 </div>
                 <Badge tone={choice === 0 ? 'danger' : choice === 1 ? 'success' : 'neutral'}>
-                  {choice !== undefined ? tState.terms.ballot[choice] : t('solo.verdict.noVote')}
+                  {choice !== undefined ? ballotLabel(tState.terms.ballot[choice]) : t('solo.verdict.noVote')}
                 </Badge>
               </div>
             </PaperPanel>
@@ -152,19 +120,15 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
               </div>
             ))}
           </dl>
-          {!refundDue && (
-            <p className={styles.small}>
-              {t('solo.verdict.money.paidNote', { pool: formatUsdc(tState.terms.juryPool), fees: formatUsdc(disclosure.fees) })}
-            </p>
-          )}
+          {!refundDue && <p className={styles.small}>{t('solo.verdict.money.paidNote', { pool: formatAmount(tState.terms.juryPool), fees: formatAmount(disclosure.fees) })}</p>}
           {refundDue &&
             (snap.claimed ? (
               <Alert tone="success" title={t('solo.verdict.refund.claimedTitle')} live="polite">
-                {t('solo.verdict.refund.claimedBody', { amount: formatUsdc(paid) })}
+                {t('solo.verdict.refund.claimedBody', { amount: formatAmount(paid) })}
               </Alert>
             ) : session ? (
               <PaperButton onClick={() => void session.claimRefund()} loading={snap.busy === 'claiming'}>
-                {t('solo.verdict.refund.claim', { amount: formatUsdc(paid) })}
+                {t('solo.verdict.refund.claim', { amount: formatAmount(paid) })}
               </PaperButton>
             ) : null)}
         </PaperPanel>
@@ -202,9 +166,7 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
               </dd>
             </div>
           </dl>
-          <p className={styles.small}>
-            {t('solo.verdict.kept.note', { completed: disclosure.attendance.completed, seats: disclosure.attendance.seats })}
-          </p>
+          <p className={styles.small}>{t('solo.verdict.kept.note', { completed: disclosure.attendance.completed, seats: disclosure.attendance.seats })}</p>
         </PaperPanel>
       </div>
 
@@ -218,7 +180,10 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
           <div>
             <dt>{t('solo.verdict.record.counsel')}</dt>
             <dd>
-              {t('solo.verdict.record.counselValue', { model: tState.transcript.model, provider: tState.transcript.provider === 'fixture' ? t('solo.verdict.record.fixture') : t('solo.verdict.record.compute') })}
+              {t('solo.verdict.record.counselValue', {
+                model: tState.transcript.model,
+                provider: tState.transcript.provider === 'fixture' ? t('solo.verdict.record.fixture') : t('solo.verdict.record.compute'),
+              })}
             </dd>
           </div>
           {Object.entries(snap.txs).map(([step, tx]) => (

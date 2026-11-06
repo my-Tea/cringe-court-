@@ -1,10 +1,11 @@
-import { CATEGORIES, activeDeadline, formatCaseNumber, type Deadline } from '@cringe-court/core';
+import { activeDeadline, type Deadline } from '@cringe-court/core';
 import { VERSUS_STEPS, nextStep, stepIndex, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { t, type MessageKey } from '@/i18n';
 import { useDeadlineCues } from '@/platform/audio';
 import { Badge, Countdown, PhaseStepper, Stamp } from '@/ds';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
+import { categoryLabel, formatCaseNo, versusStepLabel } from '@/i18n/domain';
 
 const DEADLINE_LABEL: Record<Deadline, MessageKey> = {
   consent: 'versus.header.deadline.consent',
@@ -39,7 +40,9 @@ export function CaseHeader({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
     <header className={styles.caseHead}>
       <div className={styles.caseHeadInner}>
         <div className={styles.caseHeadCopy}>
-          <p className={styles.eyebrow}>{t('common.mode.versus')} · {CATEGORIES[s.filing.category]}</p>
+          <p className={styles.eyebrow}>
+            {t('common.mode.versus')} · {categoryLabel(s.filing.category)}
+          </p>
           <h1 className={styles.caseTitle}>“{s.filing.title}”</h1>
           <div className={styles.caseMeta}>
             <Badge tone={badge.tone} solid={viewer === 'a' || viewer === 'b'}>
@@ -54,7 +57,7 @@ export function CaseHeader({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
         <div className={styles.caseHeadAside}>
           {c.caseNumber !== null ? (
             <Stamp tone="case-number" size="sm">
-              {formatCaseNumber(c.caseNumber)}
+              {formatCaseNo(c.caseNumber)}
             </Stamp>
           ) : (
             <Stamp tone="filed" size="sm" sub={t('versus.header.stamp.sub')}>
@@ -62,12 +65,18 @@ export function CaseHeader({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
             </Stamp>
           )}
           {deadline && deadline.deadline !== 'appeal' && (
-            <Countdown label={t(DEADLINE_LABEL[deadline.deadline])} startsAt={(deadline.endsAt - span(deadline.deadline)) * 1000} endsAt={deadline.endsAt * 1000} now={now * 1000} className={styles.headCountdown} />
+            <Countdown
+              label={t(DEADLINE_LABEL[deadline.deadline])}
+              startsAt={(deadline.endsAt - span(deadline.deadline)) * 1000}
+              endsAt={deadline.endsAt * 1000}
+              now={now * 1000}
+              className={styles.headCountdown}
+            />
           )}
         </div>
       </div>
       <div className={styles.caseStepper}>
-        <PhaseStepper steps={VERSUS_STEPS} current={stepIndex(s)} label={t('versus.header.progress')} />
+        <PhaseStepper steps={VERSUS_STEPS.map(versusStepLabel)} current={stepIndex(s)} label={t('versus.header.progress')} />
       </div>
     </header>
   );

@@ -1,4 +1,5 @@
-import { CATEGORIES, formatUsdc, type Category } from '@cringe-court/core';
+import { CATEGORIES, type Category } from '@cringe-court/core';
+import { formatAmount } from '@/i18n/domain';
 import { CURRENT_PRICING, FILTER_STATUSES, crowdSize, type DocketEntry, type DocketFilter } from '@cringe-court/modes-grand-jury';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
@@ -18,16 +19,7 @@ const FILTERS: readonly { value: DocketFilter; label: MessageKey; hint: MessageK
 ];
 
 /** Live cases first (soonest deadline), then open ones, then the archive (newest first). */
-const RANK: Record<DocketEntry['status'], number> = {
-  'opening-scrolls': 0,
-  'in-session': 1,
-  'settle-ready': 2,
-  seating: 3,
-  summoning: 4,
-  verdict: 5,
-  mistrial: 6,
-  cancelled: 7,
-};
+const RANK: Record<DocketEntry['status'], number> = { 'opening-scrolls': 0, 'in-session': 1, 'settle-ready': 2, seating: 3, summoning: 4, verdict: 5, mistrial: 6, cancelled: 7 };
 
 function sortDocket(list: readonly DocketEntry[]): DocketEntry[] {
   return [...list].sort((a, b) => RANK[a.status] - RANK[b.status] || (a.phaseEndsAt ?? Infinity) - (b.phaseEndsAt ?? Infinity) || b.caseNumber - a.caseNumber);
@@ -114,9 +106,7 @@ export function DocketPage() {
         <PaperRibbon as="h1" tone="maroon" size="lg" sparks className={styles.heroRibbon}>
           {t('grandJury.docket.title')}
         </PaperRibbon>
-        <p className={styles.heroLede}>
-          {t('grandJury.docket.lede')}
-        </p>
+        <p className={styles.heroLede}>{t('grandJury.docket.lede')}</p>
         <ol className={styles.howStrip} aria-label={t('grandJury.docket.how')}>
           {steps().map((s, i) => (
             <li key={s} className={styles.howStep} style={{ ['--_i' as string]: i }}>
@@ -129,12 +119,14 @@ export function DocketPage() {
         </ol>
         <p className={styles.heroFacts}>
           <span>
-            {tRich('grandJury.docket.facts.summon', { b: (chunk) => <strong>{chunk}</strong> }, { target: formatUsdc(p.target), people: crowdSize(p.target), ticket: formatUsdc(p.typicalTicket, { unit: false }) })}
+            {tRich(
+              'grandJury.docket.facts.summon',
+              { b: (chunk) => <strong>{chunk}</strong> },
+              { target: formatAmount(p.target), people: crowdSize(p.target), ticket: formatAmount(p.typicalTicket, { unit: false }) },
+            )}
           </span>
           <span aria-hidden>·</span>
-          <span>
-            {tRich('grandJury.docket.facts.jurors', { b: (chunk) => <strong>{chunk}</strong> }, { jurors: p.jurors, threshold: p.threshold })}
-          </span>
+          <span>{tRich('grandJury.docket.facts.jurors', { b: (chunk) => <strong>{chunk}</strong> }, { jurors: p.jurors, threshold: p.threshold })}</span>
           <span aria-hidden>·</span>
           <span>{t('grandJury.docket.facts.refund')}</span>
         </p>
@@ -196,7 +188,13 @@ export function DocketPage() {
               {t('grandJury.docket.topic.any')}
             </button>
             {(Object.keys(CATEGORIES) as Category[]).map((c) => (
-              <button key={c} type="button" className={cx(styles.topicChip, category === c && styles.topicChipOn)} aria-pressed={category === c} onClick={() => set('topic', category === c ? null : c)}>
+              <button
+                key={c}
+                type="button"
+                className={cx(styles.topicChip, category === c && styles.topicChipOn)}
+                aria-pressed={category === c}
+                onClick={() => set('topic', category === c ? null : c)}
+              >
                 {categoryLabel(c)}
               </button>
             ))}
@@ -219,7 +217,9 @@ export function DocketPage() {
         {all && (
           <>
             <p className={styles.resultCount} role="status" aria-live="polite">
-              {visible.length === all.length ? t('grandJury.docket.count.all', { count: all.length }) : t('grandJury.docket.count.some', { visible: visible.length, total: all.length })}
+              {visible.length === all.length
+                ? t('grandJury.docket.count.all', { count: all.length })
+                : t('grandJury.docket.count.some', { visible: visible.length, total: all.length })}
             </p>
             {visible.length > 0 ? (
               <ul className={styles.caseGrid}>
@@ -230,7 +230,11 @@ export function DocketPage() {
                 ))}
               </ul>
             ) : all.length === 0 ? (
-              <EmptyState title={t('grandJury.docket.empty.title')} character="clerk" actions={<PaperButtonLink to={paths.pricing}>{t('grandJury.docket.empty.action')}</PaperButtonLink>}>
+              <EmptyState
+                title={t('grandJury.docket.empty.title')}
+                character="clerk"
+                actions={<PaperButtonLink to={paths.pricing}>{t('grandJury.docket.empty.action')}</PaperButtonLink>}
+              >
                 {t('grandJury.docket.empty.body')}
               </EmptyState>
             ) : (

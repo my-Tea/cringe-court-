@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { CATEGORY_COPY, PRIVATE_NOTES_MAX, STORY_MAX, TITLE_MAX, categoryCopy, redact, validateDraft, type DraftErrors, type SoloDraft } from '@cringe-court/modes-solo';
+import { CATEGORY_COPY, PRIVATE_NOTES_MAX, STORY_MAX, TITLE_MAX, redact, validateDraft, type DraftErrors, type SoloDraft } from '@cringe-court/modes-solo';
 import { Alert, Button, Icon, PaperButton, PaperField, PaperRibbon, TextArea, cx } from '@/ds';
 import { t } from '@/i18n';
 import styles from './FilePage.module.css';
+import { soloCategoryExample } from '@/i18n/domain';
 
 export interface ConfessStepProps {
   draft: SoloDraft;
@@ -30,7 +31,7 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
     if (Object.keys(found).length === 0) onSubmit(draft);
   };
 
-  const example = draft.category ? categoryCopy(draft.category) : null;
+  const example = draft.category ? soloCategoryExample(draft.category) : null;
   const errorList = Object.entries(errors);
 
   return (
@@ -65,20 +66,23 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
       <fieldset className={styles.categories} aria-describedby={errors.category ? 'solo-category-error' : undefined}>
         <legend className={styles.legend}>{t('solo.confess.category.legend')}</legend>
         <div className={styles.categoryGrid}>
-          {CATEGORY_COPY.map((c, i) => (
-            <label key={c.id} className={cx(styles.category, draft.category === c.id && styles.categoryOn)}>
-              <input
-                id={i === 0 ? 'solo-category' : undefined}
-                type="radio"
-                name="category"
-                value={c.id}
-                checked={draft.category === c.id}
-                onChange={() => set({ category: c.id })}
-              />
-              <span className={styles.categoryName}>{c.name}</span>
-              <span className={styles.categoryBlurb}>{c.blurb}</span>
-            </label>
-          ))}
+          {CATEGORY_COPY.map((cc, i) => {
+            const c = { id: cc.id, ...soloCategoryExample(cc.id) };
+            return (
+              <label key={c.id} className={cx(styles.category, draft.category === c.id && styles.categoryOn)}>
+                <input
+                  id={i === 0 ? 'solo-category' : undefined}
+                  type="radio"
+                  name="category"
+                  value={c.id}
+                  checked={draft.category === c.id}
+                  onChange={() => set({ category: c.id })}
+                />
+                <span className={styles.categoryName}>{c.name}</span>
+                <span className={styles.categoryBlurb}>{c.blurb}</span>
+              </label>
+            );
+          })}
         </div>
         {errors.category && (
           <p id="solo-category-error" className={styles.fieldError}>
@@ -112,7 +116,13 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
       />
       {example && !draft.story && (
         <div>
-          <Button type="button" size="sm" variant="ghost" iconStart={<Icon name="sparkle" />} onClick={() => set({ story: example.example, title: draft.title || example.exampleTitle })}>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            iconStart={<Icon name="sparkle" />}
+            onClick={() => set({ story: example.example, title: draft.title || example.exampleTitle })}
+          >
             {t('solo.confess.example')}
           </Button>
         </div>
@@ -139,7 +149,12 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
         value={namesText}
         onChange={(e) => {
           setNamesText(e.target.value);
-          set({ hiddenNames: e.target.value.split(',').map((n) => n.trim()).filter(Boolean) });
+          set({
+            hiddenNames: e.target.value
+              .split(',')
+              .map((n) => n.trim())
+              .filter(Boolean),
+          });
         }}
         autoComplete="off"
       />

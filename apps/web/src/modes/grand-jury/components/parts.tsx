@@ -1,4 +1,5 @@
-import { formatUsdc, type Usdc } from '@cringe-court/core';
+import { type Usdc } from '@cringe-court/core';
+import { ballotLabel, formatAmount } from '@/i18n/domain';
 import { type DocketEntry, type DocketStatus } from '@cringe-court/modes-grand-jury';
 import type { ReactNode } from 'react';
 import { Badge, Icon, PaperPanel, Portrait, cx, type IconName, type PaperEdge, type PaperTone } from '@/ds';
@@ -42,7 +43,18 @@ export function CourtPanel({
   'data-outcome'?: string;
 }) {
   return (
-    <PaperPanel as="section" tone={tone} edge={edge} elevation={elevation} backing={backing} unfold={unfold} padding="md" aria-labelledby={id} className={cx(styles.panel, className)} {...rest}>
+    <PaperPanel
+      as="section"
+      tone={tone}
+      edge={edge}
+      elevation={elevation}
+      backing={backing}
+      unfold={unfold}
+      padding="md"
+      aria-labelledby={id}
+      className={cx(styles.panel, className)}
+      {...rest}
+    >
       <header className={styles.panelHead}>
         <div className={styles.panelHeadText}>
           {eyebrow && <p className={styles.panelEyebrow}>{eyebrow}</p>}
@@ -70,12 +82,12 @@ export function StatusBadge({ status, className }: { status: DocketStatus; class
 /** Crowdfund progress toward the frozen target (D9). */
 export function FundingMeter({ raised, target, summoners, compact }: { raised: Usdc; target: Usdc; summoners: number; compact?: boolean }) {
   const pct = target > 0n ? Math.min(100, Math.round((Number(raised) / Number(target)) * 100)) : 0;
-  const text = t('grandJury.meter.text', { raised: formatUsdc(raised), target: formatUsdc(target), summoners });
+  const text = t('grandJury.meter.text', { raised: formatAmount(raised), target: formatAmount(target), summoners });
   return (
     <div className={cx(styles.meter, compact && styles.meterCompact)}>
       <div className={styles.meterTop}>
-        <span className={styles.meterRaised}>{formatUsdc(raised, { unit: false })}</span>
-        <span className={styles.meterTarget}>/ {formatUsdc(target)}</span>
+        <span className={styles.meterRaised}>{formatAmount(raised, { unit: false })}</span>
+        <span className={styles.meterTarget}>/ {formatAmount(target)}</span>
         <span className={styles.meterPct}>{pct}%</span>
       </div>
       <div className={styles.meterTrack} role="progressbar" aria-label={t('grandJury.meter.label')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-valuetext={text}>
@@ -121,11 +133,19 @@ export function JuryBox({ entry, viewerSeat, compact }: { entry: Pick<DocketEntr
         {seats.map((s, i) => (
           <li key={i} className={styles.seat} data-state={s} data-you={viewerSeat === i + 1 || undefined}>
             <span className={styles.chair} aria-hidden>
-              {s === 'empty' ? <Icon name="plus" /> : s === 'opened' ? <Icon name="document" /> : s === 'sealed' ? <Icon name="lock" /> : s === 'absent' ? <Icon name="close" /> : <Icon name="user" />}
+              {s === 'empty' ? (
+                <Icon name="plus" />
+              ) : s === 'opened' ? (
+                <Icon name="document" />
+              ) : s === 'sealed' ? (
+                <Icon name="lock" />
+              ) : s === 'absent' ? (
+                <Icon name="close" />
+              ) : (
+                <Icon name="user" />
+              )}
             </span>
-            <span className="cc-visually-hidden">
-              {t(viewerSeat === i + 1 ? 'grandJury.jury.seatYou' : 'grandJury.jury.seatLine', { n: i + 1, state: label[s] })}
-            </span>
+            <span className="cc-visually-hidden">{t(viewerSeat === i + 1 ? 'grandJury.jury.seatYou' : 'grandJury.jury.seatLine', { n: i + 1, state: label[s] })}</span>
           </li>
         ))}
       </ol>
@@ -158,11 +178,9 @@ export function Benches({ entry }: { entry: Pick<DocketEntry, 'file' | 'ballot'>
         <article key={b} className={styles.bench} data-bench={b} aria-labelledby={`bench-${b}`}>
           <Portrait character={counsel[b]!.character} size="md" ring={b === 0 ? 'accent' : 'side-a'} alt="" />
           <div className={styles.benchText}>
-            <p className={styles.benchWho}>
-              {t(b === 0 ? 'grandJury.benches.arguesFor' : 'grandJury.benches.arguesAgainst', { name: counsel[b]!.name })}
-            </p>
+            <p className={styles.benchWho}>{t(b === 0 ? 'grandJury.benches.arguesFor' : 'grandJury.benches.arguesAgainst', { name: counsel[b]!.name })}</p>
             <h3 id={`bench-${b}`} className={styles.benchTitle}>
-              {entry.ballot[b]}
+              {ballotLabel(entry.ballot[b])}
             </h3>
             <p className={styles.benchSummary}>{entry.file.positions[b].summary}</p>
           </div>

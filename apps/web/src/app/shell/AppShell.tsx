@@ -1,19 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  Icon,
-  IconButton,
-  Logo,
-  PaperNavBar,
-  PaperPanel,
-  PaperTab,
-  RoundIconLink,
-  TestnetBadge,
-  Tooltip,
-} from '@/ds';
+import { Dialog, DialogContent, DialogTrigger, Icon, IconButton, Logo, PaperNavBar, PaperPanel, PaperTab, RoundIconLink, TestnetBadge, Tooltip } from '@/ds';
 import { t } from '@/i18n';
 import { COURT_LINKS, NAV_ITEMS, paths } from '../routes';
 import styles from './AppShell.module.css';
@@ -54,7 +41,9 @@ export function AppShell() {
           label={t('shell.nav.label')}
           className={styles.bar}
           start={
-            <Link to={paths.home} className={styles.brand} aria-label={t('shell.brand.home', { app: t('common.app.name') })}>
+            <Link to={paths.home} className={styles.brand}>
+              {/* Name from hidden text, not aria-label: the wordmark's drawn letters would not match a label (WCAG 2.5.3). */}
+              <span className="cc-visually-hidden">{t('shell.brand.home', { app: t('common.app.name') })}</span>
               <Logo layout="inline" title={null} className={styles.brandWide} />
               <Logo layout="mark" title={null} className={styles.brandMark} />
             </Link>
@@ -80,13 +69,7 @@ export function AppShell() {
                       const current = item.activeFor ? item.activeFor(pathname) : false;
                       return (
                         <li key={item.to}>
-                          <NavLink
-                            to={item.to}
-                            end={item.to === paths.home}
-                            className={styles.menuLink}
-                            onClick={close}
-                            {...(current ? { 'aria-current': 'page' as const } : {})}
-                          >
+                          <NavLink to={item.to} end={item.to === paths.home} className={styles.menuLink} onClick={close} {...(current ? { 'aria-current': 'page' as const } : {})}>
                             <Icon name={item.icon} />
                             {t(item.labelKey)}
                           </NavLink>
@@ -171,9 +154,7 @@ export function AppShell() {
               <MotionToggle />
             </div>
           </div>
-          <p className={styles.legal}>
-            {t('shell.footer.legal')}
-          </p>
+          <p className={styles.legal}>{t('shell.footer.legal')}</p>
           <p className={styles.signature}>
             <span>{t('shell.footer.testnetOnly')}</span>
             <span className="cc-diamond" aria-hidden />

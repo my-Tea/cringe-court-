@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import type { EvidenceState, PublicExhibit } from '@cringe-court/core';
-import { ANGLE_MAX, REDACTION_LABELS, soloMode, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
+import { ANGLE_MAX, soloMode, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
 import { Alert, Badge, Button, Icon, PaperButton, PaperField, PaperPanel, PaperRibbon, Portrait, Select, Skeleton, TextArea, cx } from '@/ds';
 import { t } from '@/i18n';
 import { Courtroom } from '../court/Courtroom';
 import styles from './FilePage.module.css';
+import { soloRedactionLabel } from '@/i18n/domain';
 
 export interface BriefStepProps {
   session: SoloSession;
@@ -64,7 +65,7 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
               <ul className={styles.redactions} role="list" aria-label={t('solo.brief.public.redactions')}>
                 {snap.redactions.map((r, i) => (
                   <li key={i}>
-                    <Badge tone="info">{REDACTION_LABELS[r.kind]}</Badge> {t('solo.brief.public.hidden')}
+                    <Badge tone="info">{soloRedactionLabel(r.kind)}</Badge> {t('solo.brief.public.hidden')}
                   </li>
                 ))}
               </ul>
@@ -94,7 +95,12 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
                       <strong>{x.title}</strong>
                       <p>{x.body}</p>
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => session.removeExhibit(x.id)} aria-label={t('solo.brief.exhibit.removeAria', { letter: String.fromCharCode(65 + i), title: x.title })}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => session.removeExhibit(x.id)}
+                      aria-label={t('solo.brief.exhibit.removeAria', { letter: String.fromCharCode(65 + i), title: x.title })}
+                    >
                       {t('solo.brief.exhibit.remove')}
                     </Button>
                   </li>
@@ -115,7 +121,13 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
                   ]}
                 />
                 <PaperField label={t('solo.brief.exhibit.titleField')} value={exhibit.title} maxLength={80} onChange={(e) => setExhibit({ ...exhibit, title: e.target.value })} />
-                <TextArea label={t('solo.brief.exhibit.bodyField')} value={exhibit.body} maxLength={400} rows={2} onChange={(e) => setExhibit({ ...exhibit, body: e.target.value })} />
+                <TextArea
+                  label={t('solo.brief.exhibit.bodyField')}
+                  value={exhibit.body}
+                  maxLength={400}
+                  rows={2}
+                  onChange={(e) => setExhibit({ ...exhibit, body: e.target.value })}
+                />
                 <Button type="submit" size="sm" variant="secondary" iconStart={<Icon name="plus" />}>
                   {t('solo.brief.exhibit.add')}
                 </Button>
@@ -165,12 +177,23 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
           </fieldset>
         )}
         {choice === OWN && (
-          <TextArea label={t('solo.brief.angle.ownLabel')} value={own} maxLength={ANGLE_MAX} rows={2} onChange={(e) => setOwn(e.target.value)} placeholder={t('solo.brief.angle.ownPlaceholder')} />
+          <TextArea
+            label={t('solo.brief.angle.ownLabel')}
+            value={own}
+            maxLength={ANGLE_MAX}
+            rows={2}
+            onChange={(e) => setOwn(e.target.value)}
+            placeholder={t('solo.brief.angle.ownPlaceholder')}
+          />
         )}
       </section>
 
       {snap.error && (
-        <Alert tone={snap.error.code === 'quota' ? 'warning' : 'danger'} title={snap.error.code === 'quota' ? t('solo.brief.error.quota') : t('solo.brief.error.generic')} live="assertive">
+        <Alert
+          tone={snap.error.code === 'quota' ? 'warning' : 'danger'}
+          title={snap.error.code === 'quota' ? t('solo.brief.error.quota') : t('solo.brief.error.generic')}
+          live="assertive"
+        >
           {snap.error.message}
         </Alert>
       )}
@@ -220,9 +243,7 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
             {teaserAllowance.remaining > 0 ? t('solo.brief.teaser.watch') : t('solo.brief.teaser.used')}
           </PaperButton>
         )}
-        <p className={styles.small}>
-          {t('solo.brief.teaser.count', { remaining: teaserAllowance.remaining, limit: teaserAllowance.limit })}
-        </p>
+        <p className={styles.small}>{t('solo.brief.teaser.count', { remaining: teaserAllowance.remaining, limit: teaserAllowance.limit })}</p>
       </div>
     </div>
   );

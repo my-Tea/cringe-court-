@@ -29,7 +29,17 @@ export interface RoamTrialProps {
   onDone?: () => void;
 }
 
-export function RoamTrial({ beats, label, role = 'defendant', spawn = 'defendant', avatar = { model: 'creator', name: t('trial.roam.you') }, remotes, onExit, onBeat, onDone }: RoamTrialProps) {
+export function RoamTrial({
+  beats,
+  label,
+  role = 'defendant',
+  spawn = 'defendant',
+  avatar = { model: 'creator', name: t('trial.roam.you') },
+  remotes,
+  onExit,
+  onBeat,
+  onDone,
+}: RoamTrialProps) {
   const roam = useRoamCourtroom({ audio: appAudio(), role, spawn, avatar, ...(remotes ? { remotes } : {}) });
   const [run, setRun] = useState(0);
   const [current, setCurrent] = useState<number | null>(null);
@@ -90,14 +100,11 @@ export function RoamTrial({ beats, label, role = 'defendant', spawn = 'defendant
   return (
     <div className={styles.roam} ref={box}>
       <RoamCourtroom controller={roam.controller} data={roam.data} onExit={onExit} label={label} strings={strings} className={styles.canvas} />
-      <div className={styles.roamBar}>
+      <div className={styles.roamBar} data-surface="wood">
         <p className={styles.roamStatus} aria-live="polite">
           {beat ? (
             <>
-              <span className={styles.roamStep}>
-                {t('trial.roam.beatOf', { current: current! + 1, total: beats.length })}
-              </span>{' '}
-              {strings.beatLabels[beat.id]}
+              <span className={styles.roamStep}>{t('trial.roam.beatOf', { current: current! + 1, total: beats.length })}</span> {strings.beatLabels[beat.id]}
             </>
           ) : done ? (
             t('trial.roam.over')

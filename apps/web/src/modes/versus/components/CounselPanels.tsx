@@ -1,4 +1,5 @@
-import { formatUsdc, usdc, type SideId } from '@cringe-court/core';
+import { usdc, type SideId } from '@cringe-court/core';
+import { formatAmount } from '@/i18n/domain';
 import { otherSide, sideCharges, sideStatus, type VersusCase } from '@cringe-court/modes-versus';
 import { t } from '@/i18n';
 import { Alert, Amount, Badge, Button, Dialog, DialogClose, DialogContent, DialogTrigger, Icon, PaperButton, Portrait, Spinner, TestnetBadge } from '@/ds';
@@ -70,7 +71,9 @@ export function DraftReviewPanel({ c, side }: { c: VersusCase; side: SideId }) {
             {t('versus.review.question', { agent: agentName(side) })}
           </h2>
           <p className={styles.muted}>
-            {t('versus.review.frozen', { status: themStatus.approvedDraft ? t('versus.review.themApproved', { side: letter(them) }) : t('versus.review.themPending', { side: letter(them) }) })}
+            {t('versus.review.frozen', {
+              status: themStatus.approvedDraft ? t('versus.review.themApproved', { side: letter(them) }) : t('versus.review.themPending', { side: letter(them) }),
+            })}
           </p>
           {s.balance && <BalanceMeter scores={s.balance.scores} ok={s.balance.ok} />}
         </div>
@@ -97,13 +100,19 @@ export function DraftReviewPanel({ c, side }: { c: VersusCase; side: SideId }) {
                         <PaperButton variant="ghost">{t('versus.redraft.keep')}</PaperButton>
                       </DialogClose>
                       <DialogClose asChild>
-                        <PaperButton onClick={() => void run(() => desk.requestRedraft(c.trialId, side), { success: t('versus.draft.redrafting', { agent: agentName(side) }) })}>{t('versus.redraft.confirm')}</PaperButton>
+                        <PaperButton onClick={() => void run(() => desk.requestRedraft(c.trialId, side), { success: t('versus.draft.redrafting', { agent: agentName(side) }) })}>
+                          {t('versus.redraft.confirm')}
+                        </PaperButton>
                       </DialogClose>
                     </>
                   }
                 />
               </Dialog>
-              <PaperButton size="lg" iconStart={<Icon name="check" />} onClick={() => void run(() => desk.approveDraft(c.trialId, side), { success: t('versus.review.approveSuccess') })}>
+              <PaperButton
+                size="lg"
+                iconStart={<Icon name="check" />}
+                onClick={() => void run(() => desk.approveDraft(c.trialId, side), { success: t('versus.review.approveSuccess') })}
+              >
                 {t('versus.review.approve')}
               </PaperButton>
             </>
@@ -174,7 +183,7 @@ export function FundingPanel({ c, side }: { c: VersusCase; side: SideId }) {
 
       {me.paid ? (
         <Alert tone="success" title={t('versus.fund.escrow')}>
-          {themStatus.paid ? t('versus.fund.bothIn') : t('versus.fund.waitingFor', { side: letter(them), amount: formatUsdc(mine.total) })}
+          {themStatus.paid ? t('versus.fund.bothIn') : t('versus.fund.waitingFor', { side: letter(them), amount: formatAmount(mine.total) })}
         </Alert>
       ) : (
         <div className={styles.payRow}>
@@ -186,8 +195,14 @@ export function FundingPanel({ c, side }: { c: VersusCase; side: SideId }) {
               {t('versus.fund.faucet')}
             </PaperButton>
           )}
-          <Button size="lg" variant="swear" disabled={short} iconStart={<Icon name="scales" />} onClick={() => void run(() => desk.fund(c.trialId), { success: t('versus.fund.paid', { amount: formatUsdc(mine.total) }) })}>
-            {t('versus.fund.pay', { amount: formatUsdc(mine.total) })}
+          <Button
+            size="lg"
+            variant="swear"
+            disabled={short}
+            iconStart={<Icon name="scales" />}
+            onClick={() => void run(() => desk.fund(c.trialId), { success: t('versus.fund.paid', { amount: formatAmount(mine.total) }) })}
+          >
+            {t('versus.fund.pay', { amount: formatAmount(mine.total) })}
           </Button>
         </div>
       )}

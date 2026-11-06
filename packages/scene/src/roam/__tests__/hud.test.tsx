@@ -29,7 +29,7 @@ describe('roam HUD', () => {
   it('control legend lists every keyboard control', () => {
     render(<ControlLegend touch={false} />);
     const legend = screen.getByRole('region', { name: 'Controls' });
-    for (const k of ['W', 'A', 'S', 'D', 'Shift', 'Space', 'E', 'Esc', 'Tab', 'PgUp']) expect(legend).toHaveTextContent(k);
+    for (const k of ['W', 'A', 'S', 'D', 'Shift', 'Space', 'E', 'Esc', 'Tab', 'X', 'PgUp']) expect(legend).toHaveTextContent(k);
   });
 
   it('top bar has a "Skip to menu view" button and a polite live zone label', () => {

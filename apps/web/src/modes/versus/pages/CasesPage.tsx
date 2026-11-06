@@ -1,4 +1,4 @@
-import { CATEGORIES, formatCaseNumber, formatUsdc } from '@cringe-court/core';
+import { categoryLabel, formatAmount, formatCaseNo, versusStepLabel } from '@/i18n/domain';
 import { VERSUS_STEPS, casesFor, jurorStake, nextStep, stepIndex, viewerOf, type VersusCase } from '@cringe-court/modes-versus';
 import { Link } from 'react-router';
 import { t } from '@/i18n';
@@ -18,10 +18,16 @@ function CaseCard({ c }: { c: VersusCase }) {
   const closed = s.stage === 'closed';
   return (
     <li className={styles.caseCard} data-your-move={step.yourMove || undefined} data-closed={closed || undefined}>
-      <Portrait character={viewer === 'b' ? 'side-b' : viewer === 'a' ? 'side-a' : 'juror'} size="sm" ring={viewer === 'b' ? 'side-b' : viewer === 'a' ? 'side-a' : 'highlight'} alt="" />
+      <Portrait
+        character={viewer === 'b' ? 'side-b' : viewer === 'a' ? 'side-a' : 'juror'}
+        size="sm"
+        ring={viewer === 'b' ? 'side-b' : viewer === 'a' ? 'side-a' : 'highlight'}
+        alt=""
+      />
       <div className={styles.caseCardBody}>
         <p className={styles.caseCardMeta}>
-          {c.caseNumber !== null ? formatCaseNumber(c.caseNumber) : t('versus.cases.private')} · {CATEGORIES[s.filing.category]} · {viewer === 'a' ? t('common.role.sideA') : viewer === 'b' ? t('common.role.sideB') : viewer === 'juror' ? t('common.role.juror') : t('versus.header.viewer.spectator')}
+          {c.caseNumber !== null ? formatCaseNo(c.caseNumber) : t('versus.cases.private')} · {categoryLabel(s.filing.category)} ·{' '}
+          {viewer === 'a' ? t('common.role.sideA') : viewer === 'b' ? t('common.role.sideB') : viewer === 'juror' ? t('common.role.juror') : t('versus.header.viewer.spectator')}
         </p>
         <h3 className={styles.caseCardTitle}>
           <Link to={versusPaths.case(c.trialId)} className={styles.stretched}>
@@ -33,9 +39,17 @@ function CaseCard({ c }: { c: VersusCase }) {
           {step.label}
         </p>
       </div>
-      <div className={styles.caseCardProgress} aria-label={closed ? t('versus.cases.closedAria') : t('versus.cases.stepAria', { n: index + 1, total: VERSUS_STEPS.length, label: VERSUS_STEPS[index]! })} role="img">
+      <div
+        className={styles.caseCardProgress}
+        aria-label={closed ? t('versus.cases.closedAria') : t('versus.cases.stepAria', { n: index + 1, total: VERSUS_STEPS.length, label: versusStepLabel(VERSUS_STEPS[index]!) })}
+        role="img"
+      >
         {VERSUS_STEPS.map((label, i) => (
-          <span key={label} data-done={i < index || (i === index && (s.stage === 'verdict' || s.stage === 'share')) || undefined} data-current={(i === index && !closed) || undefined} />
+          <span
+            key={label}
+            data-done={i < index || (i === index && (s.stage === 'verdict' || s.stage === 'share')) || undefined}
+            data-current={(i === index && !closed) || undefined}
+          />
         ))}
       </div>
       <Icon name="chevron-right" aria-hidden className={styles.caseCardChevron} />
@@ -135,7 +149,8 @@ export function CasesPage() {
                   <Portrait character="juror" size="sm" ring="highlight" alt="" />
                   <div className={styles.caseCardBody}>
                     <p className={styles.caseCardMeta}>
-                      {c.caseNumber !== null && formatCaseNumber(c.caseNumber)} · {c.state.stage === 'jury' ? t('versus.cases.duty.seats', { taken: c.state.seats.length, size: c.state.terms.jurySize }) : ''}
+                      {c.caseNumber !== null && formatCaseNo(c.caseNumber)} ·{' '}
+                      {c.state.stage === 'jury' ? t('versus.cases.duty.seats', { taken: c.state.seats.length, size: c.state.terms.jurySize }) : ''}
                     </p>
                     <h3 className={styles.caseCardTitle}>
                       <Link to={versusPaths.case(c.trialId)} className={styles.stretched}>
@@ -143,7 +158,7 @@ export function CasesPage() {
                       </Link>
                     </h3>
                     <p className={styles.caseCardStep}>
-                      {t('versus.cases.duty.stake', { bond: formatUsdc(jurorStake(c.state.terms).bond), reward: formatUsdc(jurorStake(c.state.terms).reward) })}
+                      {t('versus.cases.duty.stake', { bond: formatAmount(jurorStake(c.state.terms).bond), reward: formatAmount(jurorStake(c.state.terms).reward) })}
                     </p>
                   </div>
                   <Icon name="chevron-right" aria-hidden className={styles.caseCardChevron} />

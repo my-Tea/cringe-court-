@@ -5,6 +5,7 @@ import { Countdown, Icon, PaperPanel, Stamp, cx } from '@/ds';
 import { categoryLabel, deadlineLabel, isClosed, paths } from '../lib';
 import styles from '../GrandJury.module.css';
 import { BallotChip, FundingMeter, JuryBox, StatusBadge } from './parts';
+import { ballotLabel, caseLabel, verdictLabel } from '@/i18n/domain';
 
 /** One case on the docket. The whole card is the link; inner content stays plain text. */
 export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }) {
@@ -24,7 +25,7 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
       aria-labelledby={titleId}
     >
       <header className={styles.caseCardHead}>
-        <span className={styles.caseLabel}>{e.label}</span>
+        <span className={styles.caseLabel}>{caseLabel(e.label)}</span>
         <StatusBadge status={e.status} />
       </header>
       <p className={styles.caseCardEyebrow}>
@@ -38,13 +39,13 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
       <p className={styles.caseCardHook}>{e.file.hook}</p>
       <div className={styles.caseCardBallot} aria-label={t('grandJury.card.ballotLabel')}>
         <BallotChip bench={0} size="sm">
-          {e.ballot[0]}
+          {ballotLabel(e.ballot[0])}
         </BallotChip>
         <span className={styles.vs} aria-hidden>
           {t('grandJury.card.vs')}
         </span>
         <BallotChip bench={1} size="sm">
-          {e.ballot[1]}
+          {ballotLabel(e.ballot[1])}
         </BallotChip>
       </div>
 
@@ -54,11 +55,9 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
         {e.status === 'verdict' && e.verdict && (
           <div className={styles.caseCardVerdict}>
             <Stamp tone={e.verdict.kind === 'ballot-0' ? 'guilty' : 'side-a'} size="sm">
-              {e.verdict.label}
+              {verdictLabel(e.verdict.label)}
             </Stamp>
-            <span className={styles.tallyText}>
-              {t('grandJury.card.tally', { a: e.verdict.tally[0], b: e.verdict.tally[1], total: e.verdict.appointed })}
-            </span>
+            <span className={styles.tallyText}>{t('grandJury.card.tally', { a: e.verdict.tally[0], b: e.verdict.tally[1], total: e.verdict.appointed })}</span>
           </div>
         )}
         {e.status === 'mistrial' && (

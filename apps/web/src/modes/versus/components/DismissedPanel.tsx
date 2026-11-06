@@ -1,4 +1,5 @@
-import { CANCEL_LABELS, ZERO_USDC, addUsdc, formatUsdc } from '@cringe-court/core';
+import { ZERO_USDC, addUsdc } from '@cringe-court/core';
+import { cancelLabel, formatAmount } from '@/i18n/domain';
 import { claimable, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { t, type MessageKey } from '@/i18n';
 import { Icon, PaperButtonLink, Stamp } from '@/ds';
@@ -35,12 +36,12 @@ export function DismissedPanel({ c, viewer }: { c: VersusCase; viewer: Viewer })
           {t('versus.dismissed.stamp')}
         </Stamp>
         <h2 id="dismissed-title" className={styles.panelTitle}>
-          {CANCEL_LABELS[s.reason]}
+          {cancelLabel(s.reason)}
         </h2>
         <p className={styles.muted}>{t(WHY[s.reason] ?? 'versus.dismissed.why.default')}</p>
         {total > 0n && (
           <p className={styles.claimLine}>
-            <Icon name="sparkle" aria-hidden /> {t('versus.dismissed.refunds', { amount: formatUsdc(total), count: refunds.length })}
+            <Icon name="sparkle" aria-hidden /> {t('versus.dismissed.refunds', { amount: formatAmount(total), count: refunds.length })}
             {viewer !== 'spectator' && mine === 0n && ` ${t('versus.dismissed.yoursClaimed')}`}
           </p>
         )}

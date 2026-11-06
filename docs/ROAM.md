@@ -85,7 +85,8 @@ gives the same path at 30, 60 or 144 fps. The camera interpolates between steps.
 | Run | `Shift` | — | push the stick past its ring | L3 |
 | Hop | `Space` | — | `⤒` | A |
 | Interact / continue | `E` or `Enter` | — | `✋` | X |
-| Skip a line | `Tab` | — | `✋` | — |
+| Skip a line | `X` | — | `✋` | — |
+| Leave the room (move focus on) | `Tab` / `Shift+Tab` | — | — | — |
 | Pause / release mouse | `Esc` or `P` | — | `II` | Start |
 
 - **Click to capture the mouse.** `Esc` releases it, and losing the lock opens the

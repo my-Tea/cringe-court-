@@ -1,4 +1,5 @@
-import { formatUsdc, type Usdc } from '@cringe-court/core';
+import { type Usdc } from '@cringe-court/core';
+import { ballotLabel, caseLabel, formatAmount, verdictLabel } from '@/i18n/domain';
 import type { CaseDetail, Disclosure } from '@cringe-court/modes-grand-jury';
 import { Amount, Icon, Stamp } from '@/ds';
 import { t } from '@/i18n';
@@ -18,10 +19,10 @@ function TallyPips({ tally, appointed, ballot }: { tally: readonly [number, numb
       </ol>
       <figcaption className={styles.tallyLegend}>
         <span data-bench={0}>
-          {ballot[0]} <strong>{tally[0]}</strong>
+          {ballotLabel(ballot[0])} <strong>{tally[0]}</strong>
         </span>
         <span data-bench={1}>
-          {ballot[1]} <strong>{tally[1]}</strong>
+          {ballotLabel(ballot[1])} <strong>{tally[1]}</strong>
         </span>
         {absent > 0 && (
           <span data-bench="none">
@@ -61,9 +62,7 @@ export function DisclosureList({ d }: { d: Disclosure }) {
       ))}
       <div>
         <dt>{t('grandJury.disclosure.completed')}</dt>
-        <dd className={styles.disclosureCount}>
-          {t('grandJury.disclosure.completedCount', { completed: d.completed, appointed: d.appointed })}
-        </dd>
+        <dd className={styles.disclosureCount}>{t('grandJury.disclosure.completedCount', { completed: d.completed, appointed: d.appointed })}</dd>
       </div>
     </dl>
   );
@@ -78,20 +77,27 @@ export function VerdictPanel({ detail }: { detail: CaseDetail }) {
 
   if (detail.status === 'cancelled') {
     return (
-      <CourtPanel id="verdict-title" tone="cream" className={styles.verdictCard} data-outcome="cancelled" eyebrow={t('grandJury.verdict.cancelled.eyebrow')} title={t('grandJury.verdict.cancelled.title')}>
-          <div className={styles.verdictStamp} style={{ ['--_len' as string]: 14 }}>
-            <Stamp tone="no-verdict" size="lg" animate sub={t('grandJury.verdict.cancelled.sub')}>
-              {t('grandJury.verdict.cancelled.stamp')}
-            </Stamp>
-          </div>
-          <p className={styles.panelLede}>{t('grandJury.verdict.cancelled.lede')}</p>
-          {detail.disclosure && (
-            <details className={styles.breakdown}>
-              <summary>{t('grandJury.verdict.moneySummary')}</summary>
-              <DisclosureList d={detail.disclosure} />
-            </details>
-          )}
-    </CourtPanel>
+      <CourtPanel
+        id="verdict-title"
+        tone="cream"
+        className={styles.verdictCard}
+        data-outcome="cancelled"
+        eyebrow={t('grandJury.verdict.cancelled.eyebrow')}
+        title={t('grandJury.verdict.cancelled.title')}
+      >
+        <div className={styles.verdictStamp} style={{ ['--_len' as string]: 14 }}>
+          <Stamp tone="no-verdict" size="lg" animate sub={t('grandJury.verdict.cancelled.sub')}>
+            {t('grandJury.verdict.cancelled.stamp')}
+          </Stamp>
+        </div>
+        <p className={styles.panelLede}>{t('grandJury.verdict.cancelled.lede')}</p>
+        {detail.disclosure && (
+          <details className={styles.breakdown}>
+            <summary>{t('grandJury.verdict.moneySummary')}</summary>
+            <DisclosureList d={detail.disclosure} />
+          </details>
+        )}
+      </CourtPanel>
     );
   }
   if (!v) return null;
@@ -107,33 +113,38 @@ export function VerdictPanel({ detail }: { detail: CaseDetail }) {
       unfold
       className={styles.verdictCard}
       data-outcome={won === null ? 'none' : `bench-${won}`}
-      eyebrow={t('grandJury.verdict.eyebrow', { label: detail.label })}
+      eyebrow={t('grandJury.verdict.eyebrow', { label: caseLabel(detail.label) })}
       title={won === null ? t('grandJury.verdict.none') : t('grandJury.verdict.agreed', { winners, total: v.appointed })}
       icon="gavel"
     >
-        <div className={styles.verdictStamp} style={{ ['--_len' as string]: won === null ? 10 : v.label.length }}>
-          <Stamp tone={won === 0 ? 'guilty' : won === 1 ? 'side-a' : 'no-verdict'} size="lg" animate sub={won === null ? t('grandJury.verdict.needed', { threshold: detail.terms.threshold, total: v.appointed }) : t('grandJury.verdict.range', { a: v.tally[0], b: v.tally[1] })}>
-            {won === null ? t('grandJury.verdict.none') : v.label}
-          </Stamp>
-        </div>
-        <TallyPips tally={v.tally} appointed={v.appointed} ballot={detail.ballot} />
-        {detail.sentence && (
-          <blockquote className={styles.sentence}>
-            <p>{detail.sentence.text}</p>
-            <footer>{t('grandJury.verdict.sentencing')}</footer>
-          </blockquote>
-        )}
-        <p className={styles.panelLede}>
-          {won === null ? t('grandJury.verdict.lede.none', { threshold: detail.terms.threshold }) : t('grandJury.verdict.lede.verdict')}
-        </p>
-        {detail.disclosure && (
-          <details className={styles.breakdown}>
-            <summary>
-              <Icon name="scales" /> {t('grandJury.verdict.whereEvery', { amount: formatUsdc(detail.disclosure.totalIn, { unit: false }) })}
-            </summary>
-            <DisclosureList d={detail.disclosure} />
-          </details>
-        )}
+      <div className={styles.verdictStamp} style={{ ['--_len' as string]: won === null ? 10 : v.label.length }}>
+        <Stamp
+          tone={won === 0 ? 'guilty' : won === 1 ? 'side-a' : 'no-verdict'}
+          size="lg"
+          animate
+          sub={
+            won === null ? t('grandJury.verdict.needed', { threshold: detail.terms.threshold, total: v.appointed }) : t('grandJury.verdict.range', { a: v.tally[0], b: v.tally[1] })
+          }
+        >
+          {won === null ? t('grandJury.verdict.none') : verdictLabel(v.label)}
+        </Stamp>
+      </div>
+      <TallyPips tally={v.tally} appointed={v.appointed} ballot={detail.ballot} />
+      {detail.sentence && (
+        <blockquote className={styles.sentence}>
+          <p>{detail.sentence.text}</p>
+          <footer>{t('grandJury.verdict.sentencing')}</footer>
+        </blockquote>
+      )}
+      <p className={styles.panelLede}>{won === null ? t('grandJury.verdict.lede.none', { threshold: detail.terms.threshold }) : t('grandJury.verdict.lede.verdict')}</p>
+      {detail.disclosure && (
+        <details className={styles.breakdown}>
+          <summary>
+            <Icon name="scales" /> {t('grandJury.verdict.whereEvery', { amount: formatAmount(detail.disclosure.totalIn, { unit: false }) })}
+          </summary>
+          <DisclosureList d={detail.disclosure} />
+        </details>
+      )}
     </CourtPanel>
   );
 }

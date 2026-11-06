@@ -1,10 +1,26 @@
-import { CATEGORIES, CANCEL_LABELS, formatUsdc } from '@cringe-court/core';
+import { cancelLabel, categoryLabel, formatAmount } from '@/i18n/domain';
 import { parseInviteCode, sideCharges, viewerOf } from '@cringe-court/modes-versus';
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { t, tRich } from '@/i18n';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { Alert, Button, Countdown, Dialog, DialogClose, DialogContent, DialogTrigger, EmptyState, Icon, LoadingState, PaperButton, PaperButtonLink, Portrait, Stamp, TextField } from '@/ds';
+import {
+  Alert,
+  Button,
+  Countdown,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTrigger,
+  EmptyState,
+  Icon,
+  LoadingState,
+  PaperButton,
+  PaperButtonLink,
+  Portrait,
+  Stamp,
+  TextField,
+} from '@/ds';
 import { PageHead } from '../components/PageHead';
 import { WorldIdDialog } from '../components/WorldIdDialog';
 import { versusPaths } from '../mode';
@@ -131,9 +147,7 @@ export function JoinPage() {
             character={viewer === 'a' ? 'side-a' : 'side-b'}
             actions={<PaperButtonLink to={versusPaths.case(c.trialId)}>{t('versus.join.openCase')}</PaperButtonLink>}
           >
-            {viewer === 'a'
-              ? t('versus.join.own.body')
-              : t('versus.join.joined.body', { title })}
+            {viewer === 'a' ? t('versus.join.own.body') : t('versus.join.joined.body', { title })}
           </EmptyState>
         </div>
       </>
@@ -156,7 +170,7 @@ export function JoinPage() {
               </PaperButtonLink>
             }
           >
-            {closed ? t('versus.join.closed.body', { reason: CANCEL_LABELS[s.reason] }) : t('versus.join.taken.body')}
+            {closed ? t('versus.join.closed.body', { reason: cancelLabel(s.reason) }) : t('versus.join.taken.body')}
           </EmptyState>
         </div>
       </>
@@ -173,7 +187,7 @@ export function JoinPage() {
           <div className={styles.summonsTop}>
             <Portrait character="side-a" expression="smug" size="lg" ring="side-a" alt={t('common.role.sideA')} />
             <div>
-              <p className={styles.eyebrow}>{CATEGORIES[s.filing.category]}</p>
+              <p className={styles.eyebrow}>{categoryLabel(s.filing.category)}</p>
               <h2 id="summons-title" className={styles.summonsTitle}>
                 “{title}”
               </h2>
@@ -184,32 +198,26 @@ export function JoinPage() {
             </Stamp>
           </div>
 
-          {consentEnds !== null && <Countdown label={t('versus.join.answerBy')} startsAt={(consentEnds - (s.terms.deadlines.preTrial ?? 0)) * 1000} endsAt={consentEnds * 1000} now={now * 1000} />}
+          {consentEnds !== null && (
+            <Countdown label={t('versus.join.answerBy')} startsAt={(consentEnds - (s.terms.deadlines.preTrial ?? 0)) * 1000} endsAt={consentEnds * 1000} now={now * 1000} />
+          )}
 
           <ul className={styles.ruleList} role="list">
             <li>
               <Icon name="lock" aria-hidden />
-              <span>
-                {tRich('versus.join.rule.agent', { b: STRONG })}
-              </span>
+              <span>{tRich('versus.join.rule.agent', { b: STRONG })}</span>
             </li>
             <li>
               <Icon name="eye" aria-hidden />
-              <span>
-                {tRich('versus.join.rule.story', { b: STRONG })}
-              </span>
+              <span>{tRich('versus.join.rule.story', { b: STRONG })}</span>
             </li>
             <li>
               <Icon name="scales" aria-hidden />
-              <span>
-                {tRich('versus.join.rule.pay', { b: STRONG }, { amount: formatUsdc(share.total) })}
-              </span>
+              <span>{tRich('versus.join.rule.pay', { b: STRONG }, { amount: formatAmount(share.total) })}</span>
             </li>
             <li>
               <Icon name="star" aria-hidden />
-              <span>
-                {tRich('versus.join.rule.bragging', { b: STRONG })}
-              </span>
+              <span>{tRich('versus.join.rule.bragging', { b: STRONG })}</span>
             </li>
           </ul>
 
@@ -255,9 +263,7 @@ export function JoinPage() {
               }
             />
           </div>
-          <p className={styles.fine}>
-            {tRich('versus.join.notYou', { how: (chunk) => <Link to={versusPaths.landing}>{chunk}</Link> })}
-          </p>
+          <p className={styles.fine}>{tRich('versus.join.notYou', { how: (chunk) => <Link to={versusPaths.landing}>{chunk}</Link> })}</p>
         </PaperSection>
       </div>
     </>

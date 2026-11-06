@@ -1,5 +1,4 @@
 import type { CourtLine, Exhibit, Filing } from '@cringe-court/core';
-import { sideLabel } from '@cringe-court/modes-versus';
 import { t } from '@/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { stagePose } from '@/art/art';
@@ -8,6 +7,7 @@ import { cx, DialogueBox, Icon, type ImpactKind, ImpactText, PaperButton, Stamp,
 import { agentName } from '../copy';
 import { useVersus } from '../runtime/context';
 import styles from './Courtroom.module.css';
+import { sideLabel } from '@/i18n/domain';
 
 export interface CourtroomSeat {
   seat: number;
@@ -30,12 +30,7 @@ export interface CourtroomProps {
   className?: string;
 }
 
-const JUROR_TAG = {
-  empty: 'versus.court.jury.empty',
-  opened: 'versus.court.jury.opened',
-  sealed: 'versus.court.jury.sealed',
-  seated: 'versus.court.jury.seated',
-} as const;
+const JUROR_TAG = { empty: 'versus.court.jury.empty', opened: 'versus.court.jury.opened', sealed: 'versus.court.jury.sealed', seated: 'versus.court.jury.seated' } as const;
 
 function calloutFor(line: CourtLine, index: number): ImpactKind | null {
   if (index === 0) return 'order';
@@ -106,7 +101,12 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
   const exhibit = line.exhibitId ? exhibits.find((x) => x.id === line.exhibitId) : undefined;
   const nameA = sideLabel('a', filing.sides.a, { quotes: true });
   const nameB = sideLabel('b', filing.sides.b, { quotes: true });
-  const speakerName = who === 'side-a' ? t('versus.court.speaker', { agent: agentName('a'), name: nameA }) : who === 'side-b' ? t('versus.court.speaker', { agent: agentName('b'), name: nameB }) : t('versus.court.judge');
+  const speakerName =
+    who === 'side-a'
+      ? t('versus.court.speaker', { agent: agentName('a'), name: nameA })
+      : who === 'side-b'
+        ? t('versus.court.speaker', { agent: agentName('b'), name: nameB })
+        : t('versus.court.judge');
   const juryOut = line.segment === 'jury-out';
 
   const poseA = verdict === 'a' ? 'happy' : verdict === 'b' ? 'defeated' : who === 'side-a' && callout === 'objection' ? 'objection' : 'talking';
@@ -178,7 +178,13 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
       </div>
 
       <div aria-live="polite" className={styles.dialogue}>
-        <DialogueBox speaker={who} expression={callout === 'objection' ? 'shocked' : line.beat === 'smug' || line.beat === 'laugh' ? 'smug' : 'neutral'} speakerName={speakerName} text={line.text} onDone={onDone} />
+        <DialogueBox
+          speaker={who}
+          expression={callout === 'objection' ? 'shocked' : line.beat === 'smug' || line.beat === 'laugh' ? 'smug' : 'neutral'}
+          speakerName={speakerName}
+          text={line.text}
+          onDone={onDone}
+        />
       </div>
 
       <div className={styles.controls}>

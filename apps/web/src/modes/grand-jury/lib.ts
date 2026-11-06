@@ -1,17 +1,12 @@
 import type { CaseAudioEvent, VerdictOutcome } from '@cringe-court/audio';
 import { caseCue } from '@/platform/audio';
-import type { Category, CharacterId as CoreCharacterId, CourtLine } from '@cringe-court/core';
+import type { CharacterId as CoreCharacterId, CourtLine } from '@cringe-court/core';
 import type { CharacterId } from '@/art/art';
 import type { CaseDetail, DocketEntry, DocketStatus, SharePalette } from '@cringe-court/modes-grand-jury';
 import type { BadgeTone } from '@/ds';
 import { t, type MessageKey } from '@/i18n';
 
-export const paths = {
-  docket: '/grand-jury/docket',
-  duty: '/grand-jury/duty',
-  pricing: '/grand-jury/pricing',
-  case: (n: number) => `/grand-jury/case/${n}`,
-} as const;
+export const paths = { docket: '/grand-jury/docket', duty: '/grand-jury/duty', pricing: '/grand-jury/pricing', case: (n: number) => `/grand-jury/case/${n}` } as const;
 
 /** Statuses where the case is over and nothing more can happen except claims. */
 export function isClosed(status: DocketStatus): boolean {
@@ -53,16 +48,7 @@ export function stepOf(status: DocketStatus): number {
 }
 
 /** Display name of a case category (the core table is English-only; labels come from the catalog). */
-export function categoryLabel(c: Category): string {
-  return t(CATEGORY_KEYS[c]);
-}
-
-const CATEGORY_KEYS: Record<Category, MessageKey> = {
-  'crypto-crimes': 'grandJury.category.cryptoCrimes',
-  'dating-crimes': 'grandJury.category.datingCrimes',
-  'npc-behavior': 'grandJury.category.npcBehavior',
-  'internet-crimes': 'grandJury.category.internetCrimes',
-};
+export { categoryLabel } from '@/i18n/domain';
 
 /** Docket status badge text (the package table is English-only). */
 export function statusLabel(s: DocketStatus): string {

@@ -1,4 +1,5 @@
-import { formatUsdc, usdc } from '@cringe-court/core';
+import { usdc } from '@cringe-court/core';
+import { formatAmount } from '@/i18n/domain';
 import { NavLink, Outlet } from 'react-router';
 import { t, type MessageKey } from '@/i18n';
 import { Badge, Button, ErrorState, Icon, LoadingState, Tooltip, cx, useToast } from '@/ds';
@@ -29,7 +30,7 @@ function WalletChip() {
         <Icon name="star" /> {t('grandJury.layout.wallet.label')}
       </span>
       <span className={styles.walletBalance} aria-live="polite">
-        {balance === null ? '…' : formatUsdc(balance)}
+        {balance === null ? '…' : formatAmount(balance)}
       </span>
       <Tooltip content={t('grandJury.layout.faucet.tooltip')}>
         <Button size="sm" variant="ghost" onClick={topUp} iconStart={<Icon name="plus" />}>

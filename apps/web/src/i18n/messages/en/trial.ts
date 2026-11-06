@@ -97,7 +97,7 @@ export const trial = {
   'hud.legend.pitch': '<k>R</k><k>F</k> or <k>PgUp</k><k>PgDn</k> look up / down',
   'hud.legend.run': '<k>Shift</k> run · <k>Space</k> hop',
   'hud.legend.interact': '<k>E</k> or <k>Enter</k> interact / continue',
-  'hud.legend.skip': '<k>Tab</k> skip a line · <k>Esc</k> pause',
+  'hud.legend.skip': '<k>X</k> skip a line · <k>Tab</k> leave the room · <k>Esc</k> pause',
 
   // Roam HUD: exhibits
   'hud.exhibit.stamp': 'ENTERED INTO EVIDENCE',

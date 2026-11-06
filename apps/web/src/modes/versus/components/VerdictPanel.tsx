@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { t, tRich } from '@/i18n';
-import { formatUsdc, type CaseNumber, type Hex } from '@cringe-court/core';
-import { claimable, claimedBy, disclose, receiptFor, roleLabel, seatsOf, sideLabel, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
+import { type CaseNumber, type Hex } from '@cringe-court/core';
+import { formatAmount, sideLabel } from '@/i18n/domain';
+import { claimable, claimedBy, disclose, receiptFor, roleLabel, seatsOf, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { Alert, Badge, Button, Card, CardBody, CardHeader, CardTitle, DialogueBox, Icon, Portrait, Receipt, Spinner, Stamp } from '@/ds';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
@@ -31,15 +32,15 @@ export function ClaimCard({ c, caseNumber }: { c: VersusCase; caseNumber: CaseNu
             variant="swear"
             iconStart={<Icon name="sparkle" />}
             onClick={async () => {
-              const ok = await run(() => desk.claim(c.trialId), { success: t('versus.verdict.claimToast', { amount: formatUsdc(owed) }) });
+              const ok = await run(() => desk.claim(c.trialId), { success: t('versus.verdict.claimToast', { amount: formatAmount(owed) }) });
               if (ok) audio.handle({ type: 'settlement', kind: 'payout' });
             }}
           >
-            {t('versus.verdict.claim', { amount: formatUsdc(owed) })}
+            {t('versus.verdict.claim', { amount: formatAmount(owed) })}
           </Button>
         ) : claimed !== null ? (
           <Badge tone="success" dot>
-            {t('versus.verdict.claimed', { amount: formatUsdc(claimed) })}
+            {t('versus.verdict.claimed', { amount: formatAmount(claimed) })}
           </Badge>
         ) : (
           <p className={styles.muted}>{t('versus.verdict.nothingToClaim')}</p>
@@ -71,11 +72,20 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
       <PaperSection as="section" padding="lg" tone="maroon" aria-labelledby="verdict-title" bodyClassName={styles.verdict} data-outcome={winner ?? 'none'}>
         <p className={styles.eyebrow}>{t('versus.verdict.spoken')}</p>
         <h2 id="verdict-title" className="cc-visually-hidden">
-          {t('versus.verdict.heading', { result: winner ? t('versus.verdict.wins', { label: winner === 'a' ? labelA : labelB }) : t('versus.verdict.none'), a: v.tally[0]!, b: v.tally[1]! })}
+          {t('versus.verdict.heading', {
+            result: winner ? t('versus.verdict.wins', { label: winner === 'a' ? labelA : labelB }) : t('versus.verdict.none'),
+            a: v.tally[0]!,
+            b: v.tally[1]!,
+          })}
         </h2>
         <div className={styles.verdictStage} aria-hidden>
           <Portrait character="side-a" size="xl" ring="side-a" expression={winner === 'a' ? 'smug' : winner === 'b' ? 'defeated' : 'shocked'} alt="" />
-          <Stamp tone={winner === 'a' ? 'side-a' : winner === 'b' ? 'side-b' : 'no-verdict'} size="lg" animate sub={winner ? `${Math.max(...v.tally)}–${Math.min(...v.tally)}` : t('versus.verdict.fullRefund')}>
+          <Stamp
+            tone={winner === 'a' ? 'side-a' : winner === 'b' ? 'side-b' : 'no-verdict'}
+            size="lg"
+            animate
+            sub={winner ? `${Math.max(...v.tally)}–${Math.min(...v.tally)}` : t('versus.verdict.fullRefund')}
+          >
             {winner ? t('versus.verdict.sideWins', { side: winner.toUpperCase() }) : t('versus.verdict.mistrial')}
           </Stamp>
           <Portrait character="side-b" size="xl" ring="side-b" expression={winner === 'b' ? 'smug' : winner === 'a' ? 'defeated' : 'shocked'} alt="" />
@@ -103,9 +113,7 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
             </div>
           ))}
         </div>
-        <p className={styles.fineOnWood}>
-          {t('versus.verdict.duty', { completed: v.completedDuty, appointed: v.appointed })}
-        </p>
+        <p className={styles.fineOnWood}>{t('versus.verdict.duty', { completed: v.completedDuty, appointed: v.appointed })}</p>
       </PaperSection>
 
       {s.sentence ? (
@@ -130,24 +138,22 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
             <dl className={styles.breakdown}>
               <div>
                 <dt>{t('versus.verdict.disclosure.fees')}</dt>
-                <dd>{formatUsdc(d.fees)}</dd>
+                <dd>{formatAmount(d.fees)}</dd>
               </div>
               <div>
                 <dt>{t('versus.verdict.disclosure.forfeits')}</dt>
-                <dd>{formatUsdc(d.forfeits)}</dd>
+                <dd>{formatAmount(d.forfeits)}</dd>
               </div>
               <div>
                 <dt>{t('versus.verdict.disclosure.unearned')}</dt>
-                <dd>{formatUsdc(d.unearnedBonus)}</dd>
+                <dd>{formatAmount(d.unearnedBonus)}</dd>
               </div>
               <div className={styles.breakdownTotal}>
                 <dt>{t('common.total')}</dt>
-                <dd>{formatUsdc(d.total)}</dd>
+                <dd>{formatAmount(d.total)}</dd>
               </div>
             </dl>
-            <p className={styles.fine}>
-              {t('versus.verdict.disclosure.attendance', { completed: d.attendance.completed, appointed: d.attendance.appointed, missed })}
-            </p>
+            <p className={styles.fine}>{t('versus.verdict.disclosure.attendance', { completed: d.attendance.completed, appointed: d.attendance.appointed, missed })}</p>
           </CardBody>
         </Card>
       </div>
@@ -160,7 +166,17 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
 
       <details className={styles.replay} onToggle={(e) => setReplayOpen(e.currentTarget.open)}>
         <summary>{t('versus.verdict.replay')}</summary>
-        {replayOpen && <VersusTrialFrame viewer={viewer} lines={s.transcript.lines} exhibits={s.exhibits} filing={s.filing} seats={seats} jurySize={s.terms.jurySize} verdict={winner ?? 'none'} />}
+        {replayOpen && (
+          <VersusTrialFrame
+            viewer={viewer}
+            lines={s.transcript.lines}
+            exhibits={s.exhibits}
+            filing={s.filing}
+            seats={seats}
+            jurySize={s.terms.jurySize}
+            verdict={winner ?? 'none'}
+          />
+        )}
         <p className={styles.fine}>
           {tRich('versus.verdict.fingerprint', { code: (chunk) => <code>{chunk}</code> }, { hash: `${s.transcript.hash.slice(0, 18)}…`, model: s.transcript.model })}
         </p>

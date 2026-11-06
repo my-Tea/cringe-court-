@@ -1,4 +1,4 @@
-import { formatUsdc } from '@cringe-court/core';
+import { ballotLabel, formatAmount } from '@/i18n/domain';
 import { parseCaseParam, type CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router';
@@ -43,9 +43,7 @@ function CaseContext({ detail }: { detail: CaseDetail }) {
         <summary>
           <Icon name="shield" /> {t('grandJury.case.review.summary')}
         </summary>
-        <p>
-          {t('grandJury.case.review.body', { editor: f.review.editor, date: f.review.signedOff, minutes: f.review.minutes })}
-        </p>
+        <p>{t('grandJury.case.review.body', { editor: f.review.editor, date: f.review.signedOff, minutes: f.review.minutes })}</p>
         <ul className={styles.checks}>
           {f.review.checks.map((c) => (
             <li key={c}>
@@ -61,17 +59,25 @@ function CaseContext({ detail }: { detail: CaseDetail }) {
 function SummonerWall({ detail }: { detail: CaseDetail }) {
   if (detail.summonerList.length === 0 && !detail.sponsor) return null;
   return (
-    <CourtPanel id="summoners-title" tone="kraft" elevation={1} eyebrow={t('grandJury.case.summoners.eyebrow')} title={t('grandJury.case.summoners.title', { count: detail.summoners })} icon="crown">
+    <CourtPanel
+      id="summoners-title"
+      tone="kraft"
+      elevation={1}
+      eyebrow={t('grandJury.case.summoners.eyebrow')}
+      title={t('grandJury.case.summoners.title', { count: detail.summoners })}
+      icon="crown"
+    >
       {detail.sponsor && (
         <p className={styles.sponsorLine}>
-          <Icon name="star" /> {detail.sponsor.line} <span className={styles.sponsorAmount}>({t('grandJury.case.summoners.commitment', { amount: formatUsdc(detail.sponsor.amount) })})</span>
+          <Icon name="star" /> {detail.sponsor.line}{' '}
+          <span className={styles.sponsorAmount}>({t('grandJury.case.summoners.commitment', { amount: formatAmount(detail.sponsor.amount) })})</span>
         </p>
       )}
       <ul className={styles.summoners}>
         {detail.summonerList.map((s) => (
           <li key={s.label} className={styles.summoner} data-you={s.isViewer || undefined}>
             <span className={styles.summonerName}>{s.label}</span>
-            <span className={styles.summonerAmount}>{formatUsdc(s.amount, { unit: false })}</span>
+            <span className={styles.summonerAmount}>{formatAmount(s.amount, { unit: false })}</span>
           </li>
         ))}
       </ul>
@@ -137,7 +143,7 @@ function verdictOf(detail: CaseDetail): PlannedVerdict | undefined {
   if (!v) return undefined;
   if (v.kind === 'no-verdict') return { kind: 'mistrial', text: t('grandJury.case.noVerdictBeat') };
   const i = v.kind === 'ballot-0' ? 0 : 1;
-  return { kind: i === 0 ? 'side-a' : 'side-b', text: detail.ballot[i].toUpperCase() };
+  return { kind: i === 0 ? 'side-a' : 'side-b', text: ballotLabel(detail.ballot[i]).toUpperCase() };
 }
 
 /** The hearing: the roaming courtroom from the public gallery (or the jury box for a seated juror), the spotlight stage as fallback. */

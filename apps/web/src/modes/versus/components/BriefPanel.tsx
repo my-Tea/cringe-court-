@@ -1,14 +1,43 @@
 import type { Exhibit, SideId } from '@cringe-court/core';
-import { EMPTY_BRIEFING, EXHIBITS_PER_SIDE, otherSide, prepareBriefing, sideLabel, sideStatus, versusMode, visibleBrief, type BriefingDraft, type VersusCase } from '@cringe-court/modes-versus';
+import {
+  EMPTY_BRIEFING,
+  EXHIBITS_PER_SIDE,
+  otherSide,
+  prepareBriefing,
+  sideStatus,
+  versusMode,
+  visibleBrief,
+  type BriefingDraft,
+  type VersusCase,
+} from '@cringe-court/modes-versus';
 import { useState } from 'react';
 import { t } from '@/i18n';
-import { Alert, Badge, Button, Card, CardBody, CardHeader, CardTitle, Dialog, DialogClose, DialogContent, DialogTrigger, Icon, PaperButton, Portrait, Select, TextArea, TextField } from '@/ds';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTrigger,
+  Icon,
+  PaperButton,
+  Portrait,
+  Select,
+  TextArea,
+  TextField,
+} from '@/ds';
 import { letter } from '../copy';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
 import { BriefReview } from './BriefReview';
 import { BriefingChat } from './BriefingChat';
 import { PaperSection } from './PaperSection';
+import { sideLabel } from '@/i18n/domain';
 
 function draftFromFiling(c: VersusCase, side: SideId): BriefingDraft {
   const f = c.state.filing.sides[side];
@@ -16,7 +45,6 @@ function draftFromFiling(c: VersusCase, side: SideId): BriefingDraft {
   const [happened, ...rest] = f.story.split('\n\n');
   return { happened: happened ?? '', why: rest.join('\n\n'), privateNotes: f.privateNotes, angle: f.angle ?? '', nickname: f.nickname ?? '' };
 }
-
 
 /** Evidence stage for a side: brief your agent, add exhibits, read the other side's public story, approve. */
 export function BriefPanel({ c, side }: { c: VersusCase; side: SideId }) {
@@ -45,7 +73,13 @@ export function BriefPanel({ c, side }: { c: VersusCase; side: SideId }) {
 
   return (
     <div className={styles.stack}>
-      <PaperSection as="section" padding="lg" ribbon={t('versus.brief.ribbon', { label: sideLabel(side, c.state.filing.sides[side]) })} ribbonAs="h2" aria-label={t('versus.brief.aria.yours')}>
+      <PaperSection
+        as="section"
+        padding="lg"
+        ribbon={t('versus.brief.ribbon', { label: sideLabel(side, c.state.filing.sides[side]) })}
+        ribbonAs="h2"
+        aria-label={t('versus.brief.aria.yours')}
+      >
         <BriefReview
           side={side}
           value={draft}
@@ -72,9 +106,7 @@ export function BriefPanel({ c, side }: { c: VersusCase; side: SideId }) {
             )
           }
         />
-        {!dirty && me.briefed && !me.approvedBrief && !themStatus.briefed && (
-          <p className={styles.fine}>{t('versus.brief.approve.wait', { side: letter(them) })}</p>
-        )}
+        {!dirty && me.briefed && !me.approvedBrief && !themStatus.briefed && <p className={styles.fine}>{t('versus.brief.approve.wait', { side: letter(them) })}</p>}
       </PaperSection>
 
       <ExhibitsCard c={c} side={side} />
@@ -142,7 +174,12 @@ function ExhibitsCard({ c, side }: { c: VersusCase; side: SideId }) {
                   <p className={styles.exhibitBody}>{x.body}</p>
                 </div>
                 {x.submittedBy === side && (
-                  <PaperButton size="sm" variant="ghost" onClick={() => void run(() => desk.removeExhibit(c.trialId, side, x.id))} aria-label={t('versus.exhibits.removeAria', { title: x.title })}>
+                  <PaperButton
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => void run(() => desk.removeExhibit(c.trialId, side, x.id))}
+                    aria-label={t('versus.exhibits.removeAria', { title: x.title })}
+                  >
                     {t('versus.exhibits.remove')}
                   </PaperButton>
                 )}
@@ -170,7 +207,14 @@ function ExhibitsCard({ c, side }: { c: VersusCase; side: SideId }) {
             }}
             noValidate
           >
-            <TextField label={t('versus.exhibits.field.title')} maxLength={60} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('versus.exhibits.field.titlePlaceholder')} error={touched && !title.trim() ? t('versus.exhibits.field.titleError') : undefined} />
+            <TextField
+              label={t('versus.exhibits.field.title')}
+              maxLength={60}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={t('versus.exhibits.field.titlePlaceholder')}
+              error={touched && !title.trim() ? t('versus.exhibits.field.titleError') : undefined}
+            />
             <Select
               label={t('versus.exhibits.field.kind')}
               value={kind}
@@ -182,7 +226,15 @@ function ExhibitsCard({ c, side }: { c: VersusCase; side: SideId }) {
                 { value: 'link', label: t('versus.exhibits.kind.link') },
               ]}
             />
-            <TextArea label={t('versus.exhibits.field.body')} rows={2} maxLength={280} value={body} onChange={(e) => setBody(e.target.value)} placeholder={t('versus.exhibits.field.bodyPlaceholder')} error={touched && !body.trim() ? t('versus.exhibits.field.bodyError') : undefined} />
+            <TextArea
+              label={t('versus.exhibits.field.body')}
+              rows={2}
+              maxLength={280}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder={t('versus.exhibits.field.bodyPlaceholder')}
+              error={touched && !body.trim() ? t('versus.exhibits.field.bodyError') : undefined}
+            />
             <div className={styles.formActions}>
               <PaperButton type="submit" variant="maroon" iconStart={<Icon name="plus" />}>
                 {t('versus.exhibits.add')}
@@ -206,11 +258,7 @@ export function WithdrawButton({ c, side, paid = false }: { c: VersusCase; side:
       </DialogTrigger>
       <DialogContent
         title={t('versus.withdraw.title')}
-        description={
-          paid
-            ? t('versus.withdraw.description.paid')
-            : t('versus.withdraw.description.unpaid')
-        }
+        description={paid ? t('versus.withdraw.description.paid') : t('versus.withdraw.description.unpaid')}
         size="sm"
         tone="danger"
         footer={

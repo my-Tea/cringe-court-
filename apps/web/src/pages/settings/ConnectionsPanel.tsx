@@ -1,4 +1,4 @@
-import { formatUsdc } from '@cringe-court/core';
+import { formatAmount } from '@/i18n/domain';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Alert, Badge, Icon, PaperPanel, Spinner } from '@/ds';
 import { t, tRich } from '@/i18n';
@@ -38,9 +38,7 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
 
   return (
     <div>
-      <p className={styles.body}>
-        {t('shell.connections.intro')}
-      </p>
+      <p className={styles.body}>{t('shell.connections.intro')}</p>
 
       {config.warnings.map((w) => (
         <Alert key={w.key} tone="warning" title={t('shell.connections.warning.title')}>
@@ -71,9 +69,7 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
                 </div>
               </dl>
             ) : (
-              <p className={styles.serviceDetail}>
-                {t('shell.connections.ledger.demoBody')}
-              </p>
+              <p className={styles.serviceDetail}>{t('shell.connections.ledger.demoBody')}</p>
             )}
           </div>
         </PaperPanel>
@@ -85,9 +81,7 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
               <Badge tone={identity.kind === 'world-idkit' ? 'success' : 'info'}>{identity.label}</Badge>
             </div>
             <p className={styles.serviceDetail}>
-              {identity.kind === 'world-idkit'
-                ? t('shell.connections.screening.world', { detail: identity.detail })
-                : t('shell.connections.screening.demo')}
+              {identity.kind === 'world-idkit' ? t('shell.connections.screening.world', { detail: identity.detail }) : t('shell.connections.screening.demo')}
             </p>
           </div>
         </PaperPanel>
@@ -98,9 +92,7 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
               <h3 className={styles.serviceName}>{t('shell.connections.ai')}</h3>
               <Badge tone="info">{t('shell.connections.ai.badge')}</Badge>
             </div>
-            <p className={styles.serviceDetail}>
-              {t('shell.connections.ai.body')}
-            </p>
+            <p className={styles.serviceDetail}>{t('shell.connections.ai.body')}</p>
           </div>
         </PaperPanel>
       </ul>
@@ -121,9 +113,15 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
           <thead>
             <tr>
               <th scope="col">{t('shell.connections.terms.court')}</th>
-              <th scope="col" data-num>{t('shell.connections.terms.charge')}</th>
-              <th scope="col" data-num>{t('shell.connections.terms.bond')}</th>
-              <th scope="col" data-num>{t('shell.connections.terms.jurors')}</th>
+              <th scope="col" data-num>
+                {t('shell.connections.terms.charge')}
+              </th>
+              <th scope="col" data-num>
+                {t('shell.connections.terms.bond')}
+              </th>
+              <th scope="col" data-num>
+                {t('shell.connections.terms.jurors')}
+              </th>
               <th scope="col">{t('shell.connections.terms.check')}</th>
             </tr>
           </thead>
@@ -131,8 +129,8 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
             {probe.rows.map((r) => (
               <tr key={r.mode}>
                 <th scope="row">{t(COURT_LABEL_KEY[r.mode])}</th>
-                <td data-num>{formatUsdc(r.price)}</td>
-                <td data-num>{formatUsdc(r.jurorBond)}</td>
+                <td data-num>{formatAmount(r.price)}</td>
+                <td data-num>{formatAmount(r.jurorBond)}</td>
                 <td data-num>{r.seats}</td>
                 <td>
                   {r.matches ? (

@@ -1,4 +1,5 @@
-import { BASE_MODES, STAGE_LABELS, TRIAL_STAGES, formatUsdc, type TrialStage as Stage } from '@cringe-court/core';
+import { BASE_MODES, TRIAL_STAGES, type TrialStage as Stage } from '@cringe-court/core';
+import { formatAmount, stageLabel } from '@/i18n/domain';
 import { ShowPlayer } from '@cringe-court/engine';
 import { useCourtroom } from '@cringe-court/scene/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -93,9 +94,7 @@ export function DemoCourtPage() {
       <header className={styles.head}>
         <p className={styles.eyebrow}>{t('solo.stage.demo.eyebrow')}</p>
         <h1 className={styles.title}>{t('solo.stage.demo.heading')}</h1>
-        <p className={styles.lede}>
-          {t('solo.stage.demo.lede')}
-        </p>
+        <p className={styles.lede}>{t('solo.stage.demo.lede')}</p>
       </header>
 
       <div className={styles.layout}>
@@ -176,7 +175,7 @@ export function DemoCourtPage() {
               </CardTitle>
             </CardHeader>
             <CardBody>
-              <PhaseStepper steps={STEPS.map((s) => STAGE_LABELS[s])} current={update ? current : -1} orientation="vertical" label={t('solo.stage.demo.progress')} />
+              <PhaseStepper steps={STEPS.map((s) => stageLabel(s))} current={update ? current : -1} orientation="vertical" label={t('solo.stage.demo.progress')} />
               {update && (
                 <dl className={styles.facts}>
                   <div>
@@ -191,7 +190,7 @@ export function DemoCourtPage() {
                   </div>
                   <div>
                     <dt>{t('solo.stage.demo.charge')}</dt>
-                    <dd>{t('solo.stage.demo.chargeValue', { amount: formatUsdc(update.state.terms.target) })}</dd>
+                    <dd>{t('solo.stage.demo.chargeValue', { amount: formatAmount(update.state.terms.target) })}</dd>
                   </div>
                 </dl>
               )}

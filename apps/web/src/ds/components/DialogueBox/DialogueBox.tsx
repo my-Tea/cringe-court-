@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { t } from '@/i18n';
 import type { CharacterId, Expression } from '../../../art/art';
-import { CHARACTERS } from '../../../art/art';
+
 import { useReducedMotion } from '../../motion/MotionProvider';
 import { cx } from '../../lib/cx';
 import { Button } from '../Button/Button';
 import { Portrait } from '../Portrait/Portrait';
 import styles from './DialogueBox.module.css';
+import { characterName } from '@/i18n/domain';
 
 export interface DialogueBoxProps {
   speaker: CharacterId;
@@ -42,7 +43,7 @@ export function DialogueBox({ speaker, expression = 'neutral', speakerName, text
     return () => window.clearTimeout(id);
   }, [done, shown, speed, onDone]);
 
-  const name = speakerName ?? CHARACTERS[speaker];
+  const name = speakerName ?? characterName(speaker);
   return (
     <figure className={cx(styles.box, className)} data-surface="parchment">
       <figcaption className={styles.speaker}>{name}</figcaption>

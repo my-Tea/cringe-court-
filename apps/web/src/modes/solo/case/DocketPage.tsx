@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { CATEGORIES, formatCaseNumber } from '@cringe-court/core';
 import { verdictTone } from '@cringe-court/modes-solo';
 import { Link } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
@@ -8,6 +7,7 @@ import { t } from '@/i18n';
 import { demoCourt, readDocket } from '../lib/demoCourt';
 import { soloPaths } from '../lib/paths';
 import styles from './CasePage.module.css';
+import { categoryLabel, formatCaseNo, verdictLabel } from '@/i18n/domain';
 
 /** /solo/docket — decided Solo cases kept in this browser. */
 export function DocketPage() {
@@ -37,7 +37,7 @@ export function DocketPage() {
         <PaperPanel edge="cut" elevation={3} backing="gold">
           <p className={styles.eyebrow}>{t('solo.docket.inSession')}</p>
           <Link className={styles.docketLink} to={soloPaths.case(liveCase.id)}>
-            {t('solo.docket.live.link', { caseNumber: formatCaseNumber(liveCase.caseNumber), title: liveCase.filing.title })}
+            {t('solo.docket.live.link', { caseNumber: formatCaseNo(liveCase.caseNumber), title: liveCase.filing.title })}
           </Link>
         </PaperPanel>
       )}
@@ -64,20 +64,16 @@ export function DocketPage() {
               <PaperPanel as="li" key={id} edge="cut" elevation={2} className={styles.docketCard}>
                 <article className={styles.docketBody}>
                   <Stamp tone={verdictTone(tr)} size="sm">
-                    {tr.verdict.label}
+                    {verdictLabel(tr.verdict.label)}
                   </Stamp>
                   <div>
-                    <p className={styles.eyebrow}>
-                      {t('solo.docket.row.eyebrow', { caseNumber: formatCaseNumber(tr.caseNumber), category: CATEGORIES[tr.filing.category] })}
-                    </p>
+                    <p className={styles.eyebrow}>{t('solo.docket.row.eyebrow', { caseNumber: formatCaseNo(tr.caseNumber), category: categoryLabel(tr.filing.category) })}</p>
                     <h2 className={styles.docketTitle}>
                       <Link className={styles.docketLink} to={soloPaths.case(id)}>
                         {tr.filing.title}
                       </Link>
                     </h2>
-                    <p className={styles.small}>
-                      {t('solo.docket.row.summary', { a: tr.verdict.tally[0], b: tr.verdict.tally[1], sentence: tr.sentence?.text ?? '' })}
-                    </p>
+                    <p className={styles.small}>{t('solo.docket.row.summary', { a: tr.verdict.tally[0], b: tr.verdict.tally[1], sentence: tr.sentence?.text ?? '' })}</p>
                   </div>
                 </article>
               </PaperPanel>

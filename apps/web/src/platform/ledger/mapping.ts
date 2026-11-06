@@ -2,17 +2,7 @@
  * Translation tables between core's app-level ledger vocabulary and p5's
  * contract-shaped chain-client: ids, money, phases, terms and errors.
  */
-import {
-  CancelReason,
-  COURT_ERROR_COPY,
-  CourtError,
-  Mode as ChainMode,
-  Outcome,
-  Phase as ChainPhase,
-  Status,
-  type CaseView,
-  type Terms as ChainTerms,
-} from '@cringe-court/chain-client';
+import { CancelReason, CourtError, Mode as ChainMode, Outcome, Phase as ChainPhase, Status, type CaseView, type Terms as ChainTerms } from '@cringe-court/chain-client';
 import {
   ChainError,
   MODES,
@@ -28,6 +18,7 @@ import {
   type VerdictKind,
 } from '@cringe-court/core';
 import { t, type MessageKey } from '@/i18n';
+import { courtErrorCopy } from '@/i18n/domain';
 
 /* ── ids and money ── */
 
@@ -38,11 +29,7 @@ export const usdcOf = (amount: bigint): Usdc => micro(amount);
 
 /* ── modes ── */
 
-const MODE_TO_CHAIN: Readonly<Record<ModeId, ChainMode>> = {
-  solo: ChainMode.Solo,
-  versus: ChainMode.Versus,
-  'grand-jury': ChainMode.GrandJury,
-};
+const MODE_TO_CHAIN: Readonly<Record<ModeId, ChainMode>> = { solo: ChainMode.Solo, versus: ChainMode.Versus, 'grand-jury': ChainMode.GrandJury };
 export const chainModeOf = (mode: ModeId): ChainMode => MODE_TO_CHAIN[mode];
 export function modeIdOf(mode: ChainMode): ModeId {
   return mode === ChainMode.Solo ? 'solo' : mode === ChainMode.Versus ? 'versus' : 'grand-jury';
@@ -132,12 +119,7 @@ export function termsFromChain(mode: ModeId, t: ChainTerms, sponsorDeposit: bigi
       aiFee: micro(t.aiFeePerAgent * agents),
       incidentStipend: micro(t.incidentStipend),
     },
-    deadlines: {
-      preTrial: t.pendingWindow > 0 ? t.pendingWindow : null,
-      recruitment: t.recruitWindow,
-      commit: t.commitWindow,
-      reveal: t.revealWindow,
-    },
+    deadlines: { preTrial: t.pendingWindow > 0 ? t.pendingWindow : null, recruitment: t.recruitWindow, commit: t.commitWindow, reveal: t.revealWindow },
     funding: base.funding.kind === 'crowdfund' ? { kind: 'crowdfund', minContribution: micro(t.minContribution), sponsorDeposit: null } : base.funding,
   };
   return termsFor(config, { sponsorDeposit: sponsorDeposit === null ? null : micro(sponsorDeposit) });
@@ -215,14 +197,7 @@ const CODES: Readonly<Record<string, Code>> = {
   AlreadyRevealed: 'duplicate',
 };
 
-const NETWORK_NAMES = new Set([
-  'HttpRequestError',
-  'TimeoutError',
-  'WebSocketRequestError',
-  'TransportRequestTimeoutError',
-  'RpcRequestError',
-  'UrlRequiredError',
-]);
+const NETWORK_NAMES = new Set(['HttpRequestError', 'TimeoutError', 'WebSocketRequestError', 'TransportRequestTimeoutError', 'RpcRequestError', 'UrlRequiredError']);
 
 function chainOfCauses(e: unknown): unknown[] {
   const out: unknown[] = [];
@@ -234,7 +209,7 @@ function chainOfCauses(e: unknown): unknown[] {
 export function toChainError(e: unknown): ChainError {
   if (e instanceof ChainError) return e;
   if (e instanceof CourtError) {
-    const err = new ChainError(CODES[e.code] ?? 'rejected', COURT_ERROR_COPY[e.code] ?? e.message);
+    const err = new ChainError(CODES[e.code] ?? 'rejected', courtErrorCopy(e.code) ?? e.message);
     err.cause = e;
     return err;
   }

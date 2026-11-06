@@ -1,10 +1,11 @@
-import { CHARACTER_NAMES, SPEAKER_CHARACTER, type CourtLine } from '@cringe-court/core';
+import { SPEAKER_CHARACTER, type CourtLine } from '@cringe-court/core';
 import type { CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DialogueBox, ImpactText, PaperPanel, Portrait, RoundIconButton, cx, useMotion } from '@/ds';
 import { t } from '@/i18n';
 import { hearingLines, portraitOf, sound } from '../lib';
 import styles from '../GrandJury.module.css';
+import { ballotLabel, characterName } from '@/i18n/domain';
 
 /**
  * The seam where the hearing is staged. Today it is a papercraft "spotlight"
@@ -116,17 +117,31 @@ export function TrialView({ detail, startAt = 0, onBeat }: TrialViewProps) {
         <ul className={styles.risers} aria-hidden>
           {RISERS.map((r) => (
             <li key={r.key} className={cx(styles.riser, r.key === side && styles.riserLit)} data-riser={r.key}>
-              <Portrait character={r.character} expression={r.key === side ? expression : 'neutral'} size="lg" ring={r.bench === 0 ? 'accent' : r.bench === 1 ? 'side-a' : 'highlight'} alt="" />
+              <Portrait
+                character={r.character}
+                expression={r.key === side ? expression : 'neutral'}
+                size="lg"
+                ring={r.bench === 0 ? 'accent' : r.bench === 1 ? 'side-a' : 'highlight'}
+                alt=""
+              />
               <span className={styles.riserName}>
-                {CHARACTER_NAMES[r.character]}
-                {r.bench !== undefined && <span className={styles.riserSide}>{detail.ballot[r.bench]}</span>}
+                {characterName(r.character)}
+                {r.bench !== undefined && <span className={styles.riserSide}>{ballotLabel(detail.ballot[r.bench])}</span>}
               </span>
             </li>
           ))}
         </ul>
         {impact && !reduced && <ImpactText key={line.id} kind={impact} size="md" animate className={styles.trialImpact} />}
       </div>
-      <DialogueBox key={line.id} speaker={character} speakerName={CHARACTER_NAMES[speaker]} expression={expression} text={line.text} onDone={onDone} className={styles.trialDialogue} />
+      <DialogueBox
+        key={line.id}
+        speaker={character}
+        speakerName={characterName(speaker)}
+        expression={expression}
+        text={line.text}
+        onDone={onDone}
+        className={styles.trialDialogue}
+      />
       <div className={styles.trialControls}>
         <RoundIconButton label={t('grandJury.trial.prev')} icon="arrow-left" tone="gold" onClick={() => go(index - 1)} disabled={index === 0} />
         <RoundIconButton

@@ -1,4 +1,5 @@
-import { formatUsdc, type Usdc } from '@cringe-court/core';
+import { type Usdc } from '@cringe-court/core';
+import { formatAmount, pricingName } from '@/i18n/domain';
 import { CURRENT_PRICING, PRICING, crowdSize, marketingBudgetLeft, type PricingProfile } from '@cringe-court/modes-grand-jury';
 import type { ReactNode } from 'react';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
@@ -16,7 +17,7 @@ const share = (part: Usdc, whole: Usdc) => (whole > 0n ? (Number(part) / Number(
 /** Where one case's target goes, as a stacked paper strip. */
 function TargetSplit({ p }: { p: PricingProfile }) {
   const parts = [
-    { key: 'pool', label: t('grandJury.pricing.split.pool', { jurors: p.jurors, reward: formatUsdc(p.successBonus, { unit: false }) }), value: p.juryPool },
+    { key: 'pool', label: t('grandJury.pricing.split.pool', { jurors: p.jurors, reward: formatAmount(p.successBonus, { unit: false }) }), value: p.juryPool },
     { key: 'protocol', label: t('grandJury.pricing.protocolFee'), value: p.protocolFee },
     { key: 'ai', label: t('grandJury.pricing.aiCounselFee'), value: p.aiFee },
   ];
@@ -51,33 +52,47 @@ function TargetSplit({ p }: { p: PricingProfile }) {
 
 function PhaseColumn({ p, current }: { p: PricingProfile; current: boolean }) {
   return (
-    <PaperPanel as="article" tone={current ? 'cream' : 'kraft'} edge="cut" backing={current ? 'gold' : 'none'} elevation={current ? 3 : 1} padding="md" className={styles.phaseCol} aria-labelledby={`phase-${p.phase}`}>
+    <PaperPanel
+      as="article"
+      tone={current ? 'cream' : 'kraft'}
+      edge="cut"
+      backing={current ? 'gold' : 'none'}
+      elevation={current ? 3 : 1}
+      padding="md"
+      className={styles.phaseCol}
+      aria-labelledby={`phase-${p.phase}`}
+    >
       <p className={styles.panelEyebrow}>{p.phase === 'hackathon' ? t('grandJury.pricing.phase.hackathon') : t('grandJury.pricing.phase.launch')}</p>
       <h3 id={`phase-${p.phase}`} className={styles.panelTitle}>
-        {p.name} {current && <Badge tone="success">{t('grandJury.pricing.running')}</Badge>}
+        {pricingName(p.phase)} {current && <Badge tone="success">{t('grandJury.pricing.running')}</Badge>}
       </h3>
       <dl className={styles.terms}>
         <div>
           <dt>{t('grandJury.pricing.term.protocol')}</dt>
-          <dd>{formatUsdc(p.protocolFee)}</dd>
+          <dd>{formatAmount(p.protocolFee)}</dd>
         </div>
         <div>
           <dt>{t('grandJury.pricing.term.ai')}</dt>
-          <dd>{formatUsdc(p.aiFee)}</dd>
+          <dd>{formatAmount(p.aiFee)}</dd>
         </div>
         <div>
           <dt>{t('grandJury.pricing.target')}</dt>
           <dd>
-            {formatUsdc(p.target)} <span className={styles.termsNote}>{t('grandJury.pricing.term.people', { people: crowdSize(p.target), ticket: formatUsdc(p.typicalTicket, { unit: false }) })}</span>
+            {formatAmount(p.target)}{' '}
+            <span className={styles.termsNote}>{t('grandJury.pricing.term.people', { people: crowdSize(p.target), ticket: formatAmount(p.typicalTicket, { unit: false }) })}</span>
           </dd>
         </div>
         <div>
           <dt>{t('grandJury.pricing.term.sponsor')}</dt>
-          <dd>{p.sponsorRequired ? t('grandJury.pricing.term.sponsorRequired', { floor: formatUsdc(p.sponsorFloor!) }) : t('grandJury.pricing.term.sponsorOptional', { floor: formatUsdc(p.sponsorFloor!) })}</dd>
+          <dd>
+            {p.sponsorRequired
+              ? t('grandJury.pricing.term.sponsorRequired', { floor: formatAmount(p.sponsorFloor!) })
+              : t('grandJury.pricing.term.sponsorOptional', { floor: formatAmount(p.sponsorFloor!) })}
+          </dd>
         </div>
         <div>
           <dt>{t('grandJury.pricing.term.review')}</dt>
-          <dd>{t('grandJury.pricing.term.reviewBody', { cost: formatUsdc(p.reviewCost) })}</dd>
+          <dd>{t('grandJury.pricing.term.reviewBody', { cost: formatAmount(p.reviewCost) })}</dd>
         </div>
         <div>
           <dt>{t('grandJury.pricing.term.publication')}</dt>
@@ -114,16 +129,21 @@ export function PricingPage() {
         <PaperRibbon as="h1" tone="maroon" size="lg" sparks className={styles.heroRibbon}>
           {t('grandJury.pricing.title')}
         </PaperRibbon>
-        <p className={styles.heroLede}>
-          {t('grandJury.pricing.lede')}
-        </p>
+        <p className={styles.heroLede}>{t('grandJury.pricing.lede')}</p>
       </header>
 
       <div className={styles.pricingGrid}>
-        <CourtPanel id="split-title" tone="cream" backing="gold" eyebrow={t('grandJury.pricing.split.eyebrow')} title={t('grandJury.pricing.split.title', { amount: formatUsdc(p.target) })} icon="sparkle">
+        <CourtPanel
+          id="split-title"
+          tone="cream"
+          backing="gold"
+          eyebrow={t('grandJury.pricing.split.eyebrow')}
+          title={t('grandJury.pricing.split.title', { amount: formatAmount(p.target) })}
+          icon="sparkle"
+        >
           <TargetSplit p={p} />
           <p className={styles.panelLede}>
-            {t('grandJury.pricing.split.lede', { bond: formatUsdc(p.bond), reward: formatUsdc(p.successBonus), threshold: p.threshold, jurors: p.jurors })}
+            {t('grandJury.pricing.split.lede', { bond: formatAmount(p.bond), reward: formatAmount(p.successBonus), threshold: p.threshold, jurors: p.jurors })}
           </p>
         </CourtPanel>
 
@@ -175,25 +195,23 @@ export function PricingPage() {
             </div>
           </div>
           <p className={styles.panelLede}>
-            {t('grandJury.pricing.budget.lede', { budget: formatUsdc(p.marketingBudget), cap: p.marketingCap, each: p.modelledContribution.replace('-', ''), left: formatUsdc(left), next: p.marketingCap + 1 })}
+            {t('grandJury.pricing.budget.lede', {
+              budget: formatAmount(p.marketingBudget),
+              cap: p.marketingCap,
+              each: p.modelledContribution.replace('-', ''),
+              left: formatAmount(left),
+              next: p.marketingCap + 1,
+            })}
           </p>
         </CourtPanel>
       )}
 
       <CourtPanel id="why-title" tone="cream" edge="clean" eyebrow={t('grandJury.pricing.why.eyebrow')} title={t('grandJury.pricing.why.title')} icon="book">
         <ul className={styles.whyList}>
-          <li>
-            {tRich('grandJury.pricing.why.fee', bold)}
-          </li>
-          <li>
-            {tRich('grandJury.pricing.why.sponsor', bold)}
-          </li>
-          <li>
-            {tRich('grandJury.pricing.why.review', bold)}
-          </li>
-          <li>
-            {tRich('grandJury.pricing.why.blend', bold)}
-          </li>
+          <li>{tRich('grandJury.pricing.why.fee', bold)}</li>
+          <li>{tRich('grandJury.pricing.why.sponsor', bold)}</li>
+          <li>{tRich('grandJury.pricing.why.review', bold)}</li>
+          <li>{tRich('grandJury.pricing.why.blend', bold)}</li>
         </ul>
         <p className={styles.fineprint}>{t('grandJury.pricing.why.fineprint')}</p>
       </CourtPanel>

@@ -1,5 +1,6 @@
-import { formatUsdc, usdc } from '@cringe-court/core';
-import { jurorStake, seatsOf, sideLabel, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
+import { usdc } from '@cringe-court/core';
+import { formatAmount, sideLabel } from '@/i18n/domain';
+import { jurorStake, seatsOf, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { useEffect, useState } from 'react';
 import { t } from '@/i18n';
 import { Alert, Amount, Badge, Button, Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, RadioCards, Stamp, useToast } from '@/ds';
@@ -22,7 +23,15 @@ function SeatRow({ c }: { c: VersusCase }) {
         return (
           <li key={i} className={styles.seat} data-state={state}>
             <span className={styles.seatNo}>{t('versus.jury.seats.seat', { n: i + 1 })}</span>
-            <span className={styles.seatState}>{state === 'empty' ? t('versus.jury.seats.empty') : state === 'opened' ? t('versus.court.jury.opened') : state === 'sealed' ? t('versus.court.jury.sealed') : t('versus.jury.seats.posted')}</span>
+            <span className={styles.seatState}>
+              {state === 'empty'
+                ? t('versus.jury.seats.empty')
+                : state === 'opened'
+                  ? t('versus.court.jury.opened')
+                  : state === 'sealed'
+                    ? t('versus.court.jury.sealed')
+                    : t('versus.jury.seats.posted')}
+            </span>
             {demo && <Badge tone="info">{t('versus.jury.seats.simulated')}</Badge>}
           </li>
         );
@@ -45,25 +54,23 @@ export function RecruitingPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }
         <h2 id="jury-title" className={styles.panelTitle}>
           {viewer === 'juror' ? t('versus.jury.title.juror') : party ? t('versus.jury.title.party') : t('versus.jury.title.spectator')}
         </h2>
-        <p className={styles.muted}>
-          {t('versus.jury.intro', { threshold: c.state.terms.threshold })}
-        </p>
+        <p className={styles.muted}>{t('versus.jury.intro', { threshold: c.state.terms.threshold })}</p>
         <SeatRow c={c} />
         {party && (
           <Alert tone="info" title={t('versus.jury.where.title')}>
             {t('versus.jury.where.body')}
             <div className={styles.inlineActions}>
               <PaperButton
-        size="sm"
-        variant="maroon"
-        iconStart={<Icon name="copy" />}
-        onClick={() =>
-         void navigator.clipboard
-          .writeText(link)
-          .then(() => toast({ title: t('versus.jury.linkCopied'), tone: 'success' }))
-          .catch(() => toast({ title: t('versus.invite.copyFailed'), tone: 'warning' }))
-        }
-       >
+                size="sm"
+                variant="maroon"
+                iconStart={<Icon name="copy" />}
+                onClick={() =>
+                  void navigator.clipboard
+                    .writeText(link)
+                    .then(() => toast({ title: t('versus.jury.linkCopied'), tone: 'success' }))
+                    .catch(() => toast({ title: t('versus.invite.copyFailed'), tone: 'warning' }))
+                }
+              >
                 {t('versus.jury.copyLink')}
               </PaperButton>
             </div>
@@ -106,23 +113,27 @@ export function RecruitingPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }
               </li>
               <li>
                 <Icon name="clock" aria-hidden />
-                <span>{t('versus.jury.rule.miss', { bonus: formatUsdc(stake.failedTrialBonus) })}</span>
+                <span>{t('versus.jury.rule.miss', { bonus: formatAmount(stake.failedTrialBonus) })}</span>
               </li>
             </ul>
             <div className={styles.inlineActions}>
               {short && (
-                <PaperButton variant="maroon" iconStart={<Icon name="plus" />} onClick={() => void run(() => desk.faucet(usdc('5.00')), { success: t('versus.fund.faucetSuccess') })}>
+                <PaperButton
+                  variant="maroon"
+                  iconStart={<Icon name="plus" />}
+                  onClick={() => void run(() => desk.faucet(usdc('5.00')), { success: t('versus.fund.faucetSuccess') })}
+                >
                   {t('versus.jury.faucet')}
                 </PaperButton>
               )}
               <WorldIdDialog
                 title={t('versus.world.title')}
                 purpose={t('versus.jury.world.purpose')}
-                confirmLabel={t('versus.jury.world.confirm', { amount: formatUsdc(stake.bond) })}
+                confirmLabel={t('versus.jury.world.confirm', { amount: formatAmount(stake.bond) })}
                 onVerified={() => run(() => desk.takeSeat(c.trialId), { success: t('versus.jury.seated') })}
                 trigger={
                   <Button size="lg" variant="swear" disabled={short} iconStart={<Icon name="gavel" />}>
-                    {t('versus.jury.swear', { amount: formatUsdc(stake.bond) })}
+                    {t('versus.jury.swear', { amount: formatAmount(stake.bond) })}
                   </Button>
                 }
               />

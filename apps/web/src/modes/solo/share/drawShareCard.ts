@@ -5,13 +5,11 @@
 import type { ShareSummary, VerdictTone } from '@cringe-court/modes-solo';
 import { t } from '@/i18n';
 import { alpha, fontFamily, palette } from '@/ds/tokens';
+import { ballotLabel } from '@/i18n/domain';
 
 export type ShareFormat = 'landscape' | 'square';
 
-export const SHARE_SIZES: Readonly<Record<ShareFormat, { width: number; height: number }>> = {
-  landscape: { width: 1200, height: 630 },
-  square: { width: 1080, height: 1080 },
-};
+export const SHARE_SIZES: Readonly<Record<ShareFormat, { width: number; height: number }>> = { landscape: { width: 1200, height: 630 }, square: { width: 1080, height: 1080 } };
 
 export const shareFormatLabel = (format: ShareFormat): string => t(format === 'landscape' ? 'solo.share.format.landscape' : 'solo.share.format.square');
 
@@ -52,11 +50,7 @@ export type CardContext = Pick<
   imageSmoothingEnabled: boolean;
 };
 
-const TONE_COLOR: Readonly<Record<VerdictTone, string>> = {
-  guilty: palette.royal[700],
-  'not-cooked': palette.green[700],
-  'no-verdict': palette.neutral[700],
-};
+const TONE_COLOR: Readonly<Record<VerdictTone, string>> = { guilty: palette.royal[700], 'not-cooked': palette.green[700], 'no-verdict': palette.neutral[700] };
 
 const display = (px: number, weight = 700) => `${weight} ${px}px ${fontFamily.display}`;
 const body = (px: number, weight = 500) => `${weight} ${px}px ${fontFamily.body}`;
@@ -190,7 +184,7 @@ function tally(ctx: CardContext, s: ShareSummary, cx: number, y: number): void {
   ctx.fillText(`${s.tally[0]} – ${s.tally[1]}`, cx, y);
   ctx.font = mono(16);
   ctx.fillStyle = palette.neutral[700];
-  ctx.fillText(`${s.ballot[0]}  ·  ${s.ballot[1]}`, cx, y + 30);
+  ctx.fillText(`${ballotLabel(s.ballot[0])}  ·  ${ballotLabel(s.ballot[1])}`, cx, y + 30);
 }
 
 function jurors(ctx: CardContext, assets: ShareAssets, cx: number, y: number, size: number): void {

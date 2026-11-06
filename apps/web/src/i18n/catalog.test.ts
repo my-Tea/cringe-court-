@@ -36,11 +36,12 @@ describe('message catalog', () => {
 
   it('every key is used somewhere in the app', () => {
     const files: string[] = [];
-    const walk = (d: string) => readdirSync(d).forEach((n) => (statSync(join(d, n)).isDirectory() ? walk(join(d, n)) : /\.tsx?$/.test(n) && !/i18n\/messages/.test(join(d, n)) && files.push(join(d, n))));
+    const walk = (d: string) =>
+      readdirSync(d).forEach((n) => (statSync(join(d, n)).isDirectory() ? walk(join(d, n)) : /\.tsx?$/.test(n) && !/i18n\/messages/.test(join(d, n)) && files.push(join(d, n))));
     walk(SRC);
     const code = files.map((f) => readFileSync(f, 'utf8')).join('\n');
     // Keys built from a template (`grandJury.status.${s}`) count as used through their literal prefix.
-    const prefixes = [...code.matchAll(/[`'"]((?:common|shell|ds|trial|solo|versus|grandJury)\.[\w.]*)\$\{/g)].map((m) => m[1]!);
+    const prefixes = [...code.matchAll(/[`'"]((?:common|shell|ds|trial|solo|versus|grandJury|domain)\.[\w.]*)\$\{/g)].map((m) => m[1]!);
     const unused = keys.filter((k) => !code.includes(`'${k}'`) && !code.includes(`"${k}"`) && !code.includes(`\`${k}\``) && !prefixes.some((p) => k.startsWith(p)));
     expect(unused, unused.join('\n')).toEqual([]);
   });

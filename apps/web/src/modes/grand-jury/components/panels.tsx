@@ -1,20 +1,8 @@
-import { formatUsdc, subUsdc, usdc, type BallotChoice, type Usdc } from '@cringe-court/core';
+import { subUsdc, usdc, type BallotChoice, type Usdc } from '@cringe-court/core';
+import { ballotLabel, formatAmount } from '@/i18n/domain';
 import { galleryPercents, targetBreakdown, type CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useId, useState, type FormEvent } from 'react';
-import {
-  Alert,
-  Amount,
-  Button,
-  Countdown,
-  Dialog,
-  DialogContent,
-  Icon,
-  PaperButton,
-  Receipt,
-  TextArea,
-  PaperField,
-  useToast,
-} from '@/ds';
+import { Alert, Amount, Button, Countdown, Dialog, DialogContent, Icon, PaperButton, Receipt, TextArea, PaperField, useToast } from '@/ds';
 import { t, tRich } from '@/i18n';
 import { useCourtContext } from '../state/context';
 import { useAction, useCourtNowMs } from '../state/hooks';
@@ -58,9 +46,9 @@ export function FundingPanel({ detail }: { detail: CaseDetail }) {
     amount === null
       ? t('grandJury.fund.invalid.amount')
       : amount > remaining
-        ? t('grandJury.fund.invalid.max', { left: formatUsdc(remaining) })
+        ? t('grandJury.fund.invalid.max', { left: formatAmount(remaining) })
         : amount < min && amount !== remaining
-          ? t('grandJury.fund.invalid.min', { min: formatUsdc(min) })
+          ? t('grandJury.fund.invalid.min', { min: formatAmount(min) })
           : null;
 
   const submit = async (e: FormEvent) => {
@@ -70,7 +58,7 @@ export function FundingPanel({ detail }: { detail: CaseDetail }) {
     const r = await action.run(amount);
     if (r.ok) {
       sound({ type: 'bond.posted' });
-      toast({ tone: 'success', title: t('grandJury.fund.toast.title', { amount: formatUsdc(amount) }), description: t('grandJury.fund.toast.body') });
+      toast({ tone: 'success', title: t('grandJury.fund.toast.title', { amount: formatAmount(amount) }), description: t('grandJury.fund.toast.body') });
       setTouched(false);
     }
   };
@@ -83,80 +71,86 @@ export function FundingPanel({ detail }: { detail: CaseDetail }) {
 
   return (
     <CourtPanel id="summon-title" tone="cream" backing="gold" className={styles.actionCard} eyebrow={t('grandJury.fund.eyebrow')} title={t('grandJury.fund.title')}>
-        <FundingMeter raised={detail.raised} target={detail.target} summoners={detail.summoners} />
-        {detail.viewer.contributed > 0n && (
-          <p className={styles.youNote}>
-            <Icon name="check" /> {t('grandJury.fund.chipped', { amount: formatUsdc(detail.viewer.contributed) })}
-          </p>
-        )}
-        <form onSubmit={submit} className={styles.fundForm} noValidate>
-          <fieldset className={styles.quickAmounts}>
-            <legend className={styles.quickLegend}>{t('grandJury.fund.quick')}</legend>
-            {quick.map((q) => (
-              <Button key={q.label} type="button" size="sm" variant={raw === q.label ? 'primary' : 'secondary'} aria-pressed={raw === q.label} onClick={() => setRaw(q.label)}>
-                {q.label}
-              </Button>
-            ))}
-            <Button type="button" size="sm" variant={raw === formatUsdc(remaining, { unit: false }) ? 'primary' : 'secondary'} aria-pressed={raw === formatUsdc(remaining, { unit: false })} onClick={() => setRaw(formatUsdc(remaining, { unit: false }))}>
-              {t('grandJury.fund.fillRest')}
+      <FundingMeter raised={detail.raised} target={detail.target} summoners={detail.summoners} />
+      {detail.viewer.contributed > 0n && (
+        <p className={styles.youNote}>
+          <Icon name="check" /> {t('grandJury.fund.chipped', { amount: formatAmount(detail.viewer.contributed) })}
+        </p>
+      )}
+      <form onSubmit={submit} className={styles.fundForm} noValidate>
+        <fieldset className={styles.quickAmounts}>
+          <legend className={styles.quickLegend}>{t('grandJury.fund.quick')}</legend>
+          {quick.map((q) => (
+            <Button key={q.label} type="button" size="sm" variant={raw === q.label ? 'primary' : 'secondary'} aria-pressed={raw === q.label} onClick={() => setRaw(q.label)}>
+              {q.label}
             </Button>
-          </fieldset>
-          <PaperField
-            id={fieldId}
-            label={t('grandJury.fund.field')}
-            icon="sparkle"
-            inputMode="decimal"
-            autoComplete="off"
-            value={raw}
-            onChange={(e) => setRaw(e.target.value)}
-            onBlur={() => setTouched(true)}
-            hint={t('grandJury.fund.hint', { min: formatUsdc(min), left: formatUsdc(remaining) })}
-            error={touched ? (invalid ?? undefined) : undefined}
-          />
-          {action.error && (
-            <Alert tone="danger" title={t('grandJury.fund.error')} live="assertive">
-              {action.error}
-            </Alert>
-          )}
-          <PaperButton type="submit" fullWidth loading={action.pending} iconStart={<Icon name="gavel" />}>
-            {amount && !invalid ? t('grandJury.fund.submit', { amount: formatUsdc(amount) }) : t('grandJury.fund.submitDefault')}
-          </PaperButton>
-        </form>
-        <ul className={styles.promises}>
-          <li>
-            <Icon name="refresh" /> {fundingPromise('refund')}
-          </li>
-          <li>
-            <Icon name="star" /> {fundingPromise('summoner')}
-          </li>
-          <li>
-            <Icon name="scales" /> {fundingPromise('odds')}
-          </li>
-        </ul>
-        <details className={styles.breakdown}>
-          <summary>{t('grandJury.fund.breakdown.summary', { amount: formatUsdc(b.target) })}</summary>
-          <dl>
-            <div>
-              <dt>{t('grandJury.fund.breakdown.pool', { jurors: b.jurors, reward: formatUsdc(b.rewardPerJuror, { unit: false }) })}</dt>
-              <dd>
-                <Amount value={b.juryPool} size="sm" />
-              </dd>
-            </div>
-            <div>
-              <dt>{t('grandJury.fund.breakdown.protocol')}</dt>
-              <dd>
-                <Amount value={b.protocolFee} size="sm" />
-              </dd>
-            </div>
-            <div>
-              <dt>{t('grandJury.fund.breakdown.ai')}</dt>
-              <dd>
-                <Amount value={b.aiFee} size="sm" />
-              </dd>
-            </div>
-          </dl>
-          <p>{t('grandJury.fund.breakdown.note')}</p>
-        </details>
+          ))}
+          <Button
+            type="button"
+            size="sm"
+            variant={raw === formatAmount(remaining, { unit: false }) ? 'primary' : 'secondary'}
+            aria-pressed={raw === formatAmount(remaining, { unit: false })}
+            onClick={() => setRaw(formatAmount(remaining, { unit: false }))}
+          >
+            {t('grandJury.fund.fillRest')}
+          </Button>
+        </fieldset>
+        <PaperField
+          id={fieldId}
+          label={t('grandJury.fund.field')}
+          icon="sparkle"
+          inputMode="decimal"
+          autoComplete="off"
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          onBlur={() => setTouched(true)}
+          hint={t('grandJury.fund.hint', { min: formatAmount(min), left: formatAmount(remaining) })}
+          error={touched ? (invalid ?? undefined) : undefined}
+        />
+        {action.error && (
+          <Alert tone="danger" title={t('grandJury.fund.error')} live="assertive">
+            {action.error}
+          </Alert>
+        )}
+        <PaperButton type="submit" fullWidth loading={action.pending} iconStart={<Icon name="gavel" />}>
+          {amount && !invalid ? t('grandJury.fund.submit', { amount: formatAmount(amount) }) : t('grandJury.fund.submitDefault')}
+        </PaperButton>
+      </form>
+      <ul className={styles.promises}>
+        <li>
+          <Icon name="refresh" /> {fundingPromise('refund')}
+        </li>
+        <li>
+          <Icon name="star" /> {fundingPromise('summoner')}
+        </li>
+        <li>
+          <Icon name="scales" /> {fundingPromise('odds')}
+        </li>
+      </ul>
+      <details className={styles.breakdown}>
+        <summary>{t('grandJury.fund.breakdown.summary', { amount: formatAmount(b.target) })}</summary>
+        <dl>
+          <div>
+            <dt>{t('grandJury.fund.breakdown.pool', { jurors: b.jurors, reward: formatAmount(b.rewardPerJuror, { unit: false }) })}</dt>
+            <dd>
+              <Amount value={b.juryPool} size="sm" />
+            </dd>
+          </div>
+          <div>
+            <dt>{t('grandJury.fund.breakdown.protocol')}</dt>
+            <dd>
+              <Amount value={b.protocolFee} size="sm" />
+            </dd>
+          </div>
+          <div>
+            <dt>{t('grandJury.fund.breakdown.ai')}</dt>
+            <dd>
+              <Amount value={b.aiFee} size="sm" />
+            </dd>
+          </div>
+        </dl>
+        <p>{t('grandJury.fund.breakdown.note')}</p>
+      </details>
     </CourtPanel>
   );
 }
@@ -239,7 +233,7 @@ function BallotForm({ detail }: { detail: CaseDetail }) {
         {([0, 1] as const).map((b) => (
           <label key={b} className={styles.ballotOption} data-bench={b} data-checked={choice === b || undefined}>
             <input type="radio" name={name} value={b} checked={choice === b} onChange={() => setChoice(b)} />
-            <span className={styles.ballotOptionTitle}>{detail.ballot[b]}</span>
+            <span className={styles.ballotOptionTitle}>{ballotLabel(detail.ballot[b])}</span>
             <span className={styles.ballotOptionSummary}>{detail.file.positions[b].summary}</span>
           </label>
         ))}
@@ -304,23 +298,17 @@ function RevealForm({ detail }: { detail: CaseDetail }) {
     e.preventDefault();
     const r = await reveal.run(detail.viewer.hasSalt ? undefined : scroll);
     if (r.ok) {
-      toast({ tone: 'success', title: t('grandJury.reveal.opened'), description: t('grandJury.reveal.toastBody', { choice: detail.ballot[r.value] }) });
+      toast({ tone: 'success', title: t('grandJury.reveal.opened'), description: t('grandJury.reveal.toastBody', { choice: ballotLabel(detail.ballot[r.value]) }) });
     }
   };
   return (
     <form onSubmit={open} className={styles.ballotForm}>
       {detail.viewer.hasSalt ? (
         <p className={styles.sealedNote}>
-          <Icon name="lock" /> <SealedNote bench={detail.viewer.sealedChoice ?? 0} choice={detail.ballot[detail.viewer.sealedChoice ?? 0]} />
+          <Icon name="lock" /> <SealedNote bench={detail.viewer.sealedChoice ?? 0} choice={ballotLabel(detail.ballot[detail.viewer.sealedChoice ?? 0])} />
         </p>
       ) : (
-        <TextArea
-          label={t('grandJury.reveal.pasteLabel')}
-          hint={t('grandJury.reveal.pasteHint')}
-          value={scroll}
-          onChange={(e) => setScroll(e.target.value)}
-          rows={3}
-        />
+        <TextArea label={t('grandJury.reveal.pasteLabel')} hint={t('grandJury.reveal.pasteHint')} value={scroll} onChange={(e) => setScroll(e.target.value)} rows={3} />
       )}
       {reveal.error && (
         <Alert tone="danger" title={t('grandJury.reveal.error')} live="assertive">
@@ -349,7 +337,7 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
   const swear = async () => {
     const r = await accept.run();
     if (r.ok) {
-      toast({ tone: 'success', title: t('grandJury.juror.toast.title'), description: t('grandJury.juror.toast.body', { bond: formatUsdc(detail.terms.bondPerJuror) }) });
+      toast({ tone: 'success', title: t('grandJury.juror.toast.title'), description: t('grandJury.juror.toast.body', { bond: formatAmount(detail.terms.bondPerJuror) }) });
     }
   };
 
@@ -371,7 +359,7 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
             {tRich(
               'grandJury.juror.offer.lede',
               { b: (chunk) => <strong>{chunk}</strong> },
-              { bond: formatUsdc(detail.terms.bondPerJuror), reward: formatUsdc(detail.terms.successBonusPerJuror) },
+              { bond: formatAmount(detail.terms.bondPerJuror), reward: formatAmount(detail.terms.successBonusPerJuror) },
             )}
           </p>
           <Countdown label={t('grandJury.juror.offer.expires')} startsAt={(v.offer.expiresAt - 180) * 1000} endsAt={v.offer.expiresAt * 1000} now={nowMs} compact />
@@ -396,7 +384,7 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
       body = (
         <>
           <p className={styles.panelLede}>
-            {t('grandJury.juror.recruit.lede', { bond: formatUsdc(detail.terms.bondPerJuror), reward: formatUsdc(detail.terms.successBonusPerJuror) })}
+            {t('grandJury.juror.recruit.lede', { bond: formatAmount(detail.terms.bondPerJuror), reward: formatAmount(detail.terms.successBonusPerJuror) })}
           </p>
           <PaperButton fullWidth onClick={() => setScreening(true)} iconStart={<Icon name="user" />}>
             {t('grandJury.juror.recruit.volunteer')}
@@ -416,7 +404,7 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
         <>
           {v.sealedChoice !== null && (
             <p className={styles.sealedNote}>
-              <Icon name="lock" /> <SealedNote bench={v.sealedChoice} choice={detail.ballot[v.sealedChoice]} />
+              <Icon name="lock" /> <SealedNote bench={v.sealedChoice} choice={ballotLabel(detail.ballot[v.sealedChoice])} />
             </p>
           )}
           {v.scroll && <ScrollBox scroll={v.scroll} />}
@@ -461,8 +449,8 @@ export function JurorPanel({ detail }: { detail: CaseDetail }) {
 
   return (
     <CourtPanel id="duty-title" tone="cream" backing="gold" className={styles.actionCard} eyebrow={eyebrow} title={title}>
-        <JuryBox entry={detail} viewerSeat={v.seat} />
-        {body}
+      <JuryBox entry={detail} viewerSeat={v.seat} />
+      {body}
     </CourtPanel>
   );
 }
@@ -480,35 +468,41 @@ export function ClaimPanel({ detail }: { detail: CaseDetail }) {
     const r = await claim.run();
     if (r.ok) {
       sound({ type: 'settlement', kind: refund ? 'refund' : 'payout' });
-      toast({ tone: 'success', title: t('grandJury.claim.toast.title', { amount: formatUsdc(c.amount) }), description: t('grandJury.claim.toast.body') });
+      toast({ tone: 'success', title: t('grandJury.claim.toast.title', { amount: formatAmount(c.amount) }), description: t('grandJury.claim.toast.body') });
     }
   };
   return (
-    <CourtPanel id="claim-title" tone="cream" className={styles.actionCard} eyebrow={c.claimed ? t('grandJury.claim.eyebrow.done') : t('grandJury.claim.eyebrow.ready')} title={refund ? t('grandJury.claim.title.refund') : t('grandJury.claim.title.payout')}>
-        <Receipt
-          caseNumber={detail.caseNumber}
-          title={refund ? t('grandJury.claim.receipt.refund') : t('grandJury.claim.receipt.payout')}
-          lines={c.lines}
-          explorerUrl={explorer()}
-          note={refund ? t('grandJury.claim.note.refund') : t('grandJury.claim.note.payout')}
-        />
-        {c.amount > 0n &&
-          (c.claimed ? (
-            <p className={styles.youNote}>
-              <Icon name="check" /> {t('grandJury.claim.collected')}
-            </p>
-          ) : (
-            <>
-              {claim.error && (
-                <Alert tone="danger" title={t('grandJury.claim.error')} live="assertive">
-                  {claim.error}
-                </Alert>
-              )}
-              <PaperButton fullWidth loading={claim.pending} onClick={run} iconStart={<Icon name="sparkle" />}>
-                {t('grandJury.claim.button', { amount: formatUsdc(c.amount) })}
-              </PaperButton>
-            </>
-          ))}
+    <CourtPanel
+      id="claim-title"
+      tone="cream"
+      className={styles.actionCard}
+      eyebrow={c.claimed ? t('grandJury.claim.eyebrow.done') : t('grandJury.claim.eyebrow.ready')}
+      title={refund ? t('grandJury.claim.title.refund') : t('grandJury.claim.title.payout')}
+    >
+      <Receipt
+        caseNumber={detail.caseNumber}
+        title={refund ? t('grandJury.claim.receipt.refund') : t('grandJury.claim.receipt.payout')}
+        lines={c.lines}
+        explorerUrl={explorer()}
+        note={refund ? t('grandJury.claim.note.refund') : t('grandJury.claim.note.payout')}
+      />
+      {c.amount > 0n &&
+        (c.claimed ? (
+          <p className={styles.youNote}>
+            <Icon name="check" /> {t('grandJury.claim.collected')}
+          </p>
+        ) : (
+          <>
+            {claim.error && (
+              <Alert tone="danger" title={t('grandJury.claim.error')} live="assertive">
+                {claim.error}
+              </Alert>
+            )}
+            <PaperButton fullWidth loading={claim.pending} onClick={run} iconStart={<Icon name="sparkle" />}>
+              {t('grandJury.claim.button', { amount: formatAmount(c.amount) })}
+            </PaperButton>
+          </>
+        ))}
     </CourtPanel>
   );
 }
@@ -527,53 +521,53 @@ export function GalleryPanel({ detail }: { detail: CaseDetail }) {
   };
   return (
     <CourtPanel id="gallery-title" tone="kraft" elevation={1} eyebrow={t('grandJury.gallery.eyebrow')} title={t('grandJury.gallery.title')}>
-        {pct && tally ? (
-          <>
-            <p className={styles.panelLede}>{t('grandJury.gallery.says', { count: tally.total })}</p>
-            <div className={styles.galleryBars}>
-              {([0, 1] as const).map((b) => (
-                <div key={b} className={styles.galleryBar} data-bench={b}>
-                  <span className={styles.galleryBarLabel}>
-                    {detail.ballot[b]}
-                    {v.galleryVote === b && <span className={styles.yourPick}> {t('grandJury.gallery.yourCall')}</span>}
-                  </span>
-                  <span className={styles.galleryTrack} aria-hidden>
-                    <span className={styles.galleryFill} style={{ ['--_pct' as string]: `${pct[b]}%` }} />
-                  </span>
-                  <span className={styles.galleryPct}>{pct[b]}%</span>
-                </div>
-              ))}
-            </div>
-          </>
-        ) : v.galleryVote !== null ? (
-          <p className={styles.panelLede}>
-            {tRich(
-              'grandJury.gallery.called',
-              { chip: (chunk) => <BallotChip bench={v.galleryVote!}>{chunk}</BallotChip> },
-              { choice: detail.ballot[v.galleryVote], count: detail.gallery.total },
-            )}
-          </p>
-        ) : v.galleryBlocked ? (
-          <p className={styles.panelLede}>{v.galleryBlocked}</p>
-        ) : v.galleryOpen ? (
-          <>
-            <p className={styles.panelLede}>{t('grandJury.gallery.make')}</p>
-            <div className={styles.buttonRow}>
-              {([0, 1] as const).map((b) => (
-                <Button key={b} variant="secondary" onClick={() => void cast(b)} loading={vote.pending} className={styles.galleryButton} data-bench={b}>
-                  {detail.ballot[b]}
-                </Button>
-              ))}
-            </div>
-            {vote.error && (
-              <Alert tone="danger" title={t('grandJury.gallery.error')} live="assertive">
-                {vote.error}
-              </Alert>
-            )}
-          </>
-        ) : (
-          <p className={styles.panelLede}>{t('grandJury.gallery.closed')}</p>
-        )}
+      {pct && tally ? (
+        <>
+          <p className={styles.panelLede}>{t('grandJury.gallery.says', { count: tally.total })}</p>
+          <div className={styles.galleryBars}>
+            {([0, 1] as const).map((b) => (
+              <div key={b} className={styles.galleryBar} data-bench={b}>
+                <span className={styles.galleryBarLabel}>
+                  {ballotLabel(detail.ballot[b])}
+                  {v.galleryVote === b && <span className={styles.yourPick}> {t('grandJury.gallery.yourCall')}</span>}
+                </span>
+                <span className={styles.galleryTrack} aria-hidden>
+                  <span className={styles.galleryFill} style={{ ['--_pct' as string]: `${pct[b]}%` }} />
+                </span>
+                <span className={styles.galleryPct}>{pct[b]}%</span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : v.galleryVote !== null ? (
+        <p className={styles.panelLede}>
+          {tRich(
+            'grandJury.gallery.called',
+            { chip: (chunk) => <BallotChip bench={v.galleryVote!}>{chunk}</BallotChip> },
+            { choice: ballotLabel(detail.ballot[v.galleryVote]), count: detail.gallery.total },
+          )}
+        </p>
+      ) : v.galleryBlocked ? (
+        <p className={styles.panelLede}>{v.galleryBlocked}</p>
+      ) : v.galleryOpen ? (
+        <>
+          <p className={styles.panelLede}>{t('grandJury.gallery.make')}</p>
+          <div className={styles.buttonRow}>
+            {([0, 1] as const).map((b) => (
+              <Button key={b} variant="secondary" onClick={() => void cast(b)} loading={vote.pending} className={styles.galleryButton} data-bench={b}>
+                {ballotLabel(detail.ballot[b])}
+              </Button>
+            ))}
+          </div>
+          {vote.error && (
+            <Alert tone="danger" title={t('grandJury.gallery.error')} live="assertive">
+              {vote.error}
+            </Alert>
+          )}
+        </>
+      ) : (
+        <p className={styles.panelLede}>{t('grandJury.gallery.closed')}</p>
+      )}
     </CourtPanel>
   );
 }

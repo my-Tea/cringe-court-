@@ -6,10 +6,9 @@
  */
 import { t, type MessageKey } from '@/i18n';
 import { createFixtureCounsel } from '@cringe-court/ai';
-import { BASE_MODES, formatCaseNumber, trialId, usdc, type AudioPort, type BallotChoice, type CaseNumber, type Hex, type ReceiptLine, type ScenePort, type TrialState } from '@cringe-court/core';
+import { BASE_MODES, trialId, usdc, type AudioPort, type BallotChoice, type CaseNumber, type Hex, type ReceiptLine, type ScenePort, type TrialState } from '@cringe-court/core';
 import { ManualClock, MemoryChain, MemorySaltVault, MockIdentity, testAddress } from '@cringe-court/core/testing';
-import type {
-  ShowPlayer} from '@cringe-court/engine';
+import type { ShowPlayer } from '@cringe-court/engine';
 import {
   JurorSession,
   TrialEngine,
@@ -21,6 +20,7 @@ import {
   directTrial,
   directVerdict,
 } from '@cringe-court/engine';
+import { formatCaseNo } from '@/i18n/domain';
 
 /** Demo content: the text fields resolve through the catalog each time they are read, so they follow the active locale. */
 export interface SampleCase {
@@ -141,10 +141,10 @@ export async function runDemoCourt({ sample, plan, scene, player, onUpdate, sign
     await engine.fund();
     const caseNumber = engine.caseNumber as CaseNumber;
     phase = 'opening';
-    update(t('solo.stage.run.opened', { caseNumber: formatCaseNumber(caseNumber) }));
+    update(t('solo.stage.run.opened', { caseNumber: formatCaseNo(caseNumber) }));
 
     scene.setCast(mode.staging(engine.state.terms));
-    await play(directCaseOpened(formatCaseNumber(caseNumber)));
+    await play(directCaseOpened(formatCaseNo(caseNumber)));
 
     const s = engine.state;
     if (s.stage !== 'jury') throw new Error(`Expected the jury stage, got ${s.stage}`);

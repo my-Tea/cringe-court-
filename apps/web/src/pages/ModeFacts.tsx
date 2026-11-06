@@ -2,6 +2,7 @@ import { MODES, caseCharge, jurySize, verdictThreshold, type ModeId } from '@cri
 import { Amount } from '@/ds';
 import { t } from '@/i18n';
 import styles from './pages.module.css';
+import { ballotLabel } from '@/i18n/domain';
 
 const minutes = (s: number) => t('shell.facts.minutes', { count: Math.round(s / 60) });
 const hours = (s: number) => t('shell.facts.hours', { count: Math.round(s / 3600) });
@@ -14,14 +15,12 @@ export function ModeFacts({ id, detailed = false }: { id: ModeId; detailed?: boo
     <dl className={styles.facts}>
       <div>
         <dt>{t('shell.facts.jury')}</dt>
-        <dd>
-          {t('shell.facts.juryValue', { size: jurySize(mode), threshold: verdictThreshold(mode) })}
-        </dd>
+        <dd>{t('shell.facts.juryValue', { size: jurySize(mode), threshold: verdictThreshold(mode) })}</dd>
       </div>
       <div>
         <dt>{t('shell.facts.ballot')}</dt>
         <dd>
-          {ballot[0]} / {ballot[1]}
+          {ballotLabel(ballot[0])} / {ballotLabel(ballot[1])}
         </dd>
       </div>
       <div>

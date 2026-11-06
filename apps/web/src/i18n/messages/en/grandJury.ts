@@ -3,7 +3,7 @@ export const grandJury = {
   // ── Mode registration ──
   'mode.landing': 'Open the docket',
   'mode.docket': 'My court',
-  'backToDocket': 'Back to the docket',
+  backToDocket: 'Back to the docket',
 
   // ── Layout: navigation, wallet, demo ribbon ──
   'layout.nav.label': 'Grand Jury',
@@ -45,12 +45,9 @@ export const grandJury = {
   'status.verdict': 'Verdict',
   'status.mistrial': 'No verdict',
   'status.cancelled': 'Cancelled, refunded',
-  'category.cryptoCrimes': 'Crypto Crimes',
-  'category.datingCrimes': 'Dating Crimes',
-  'category.npcBehavior': 'NPC Behavior',
-  'category.internetCrimes': 'Internet Crimes',
   'promise.summoner': 'Summoners get a cosmetic credit on the case page. It is the same whatever the verdict.',
-  'promise.refund': 'Full refund, pro rata, if the target is not reached in time, the jury does not fill, the AI cannot prepare a fair case, the court cancels for safety, or the trial ends with NO VERDICT.',
+  'promise.refund':
+    'Full refund, pro rata, if the target is not reached in time, the jury does not fill, the AI cannot prepare a fair case, the court cancels for safety, or the trial ends with NO VERDICT.',
   'promise.sponsor': 'The sponsor has no say over case selection, content or the verdict. They get “Presented by” and nothing else.',
   'promise.odds': 'This is a ticket to a show, not a bet. Nothing a contributor gets depends on the outcome.',
 
@@ -233,13 +230,15 @@ export const grandJury = {
   'juror.sponsor.title': 'Sponsors can’t serve',
   'juror.sponsor.body': 'The sponsor of a case cannot sit on its jury.',
   'juror.offer.title': 'A seat is offered to you',
-  'juror.offer.lede': 'You were drawn from the verified pool. Accepting posts a <b>{bond}</b> bond. You get it back with a <b>{reward}</b> reward if you seal and open your ballot on time.',
+  'juror.offer.lede':
+    'You were drawn from the verified pool. Accepting posts a <b>{bond}</b> bond. You get it back with a <b>{reward}</b> reward if you seal and open your ballot on time.',
   'juror.offer.expires': 'Offer expires',
   'juror.offer.error': 'Seat not taken',
   'juror.offer.swear': 'I swear to show up',
   'juror.offer.decline': 'Decline (free)',
   'juror.full': 'All seven seats are taken.',
-  'juror.recruit.lede': 'Seven verified strangers decide. Pass a quick World ID check, take a random seat offer and post a {bond} bond. Show up for both windows and you earn {reward} on top of your bond.',
+  'juror.recruit.lede':
+    'Seven verified strangers decide. Pass a quick World ID check, take a random seat offer and post a {bond} bond. Show up for both windows and you earn {reward} on top of your bond.',
   'juror.recruit.volunteer': 'Volunteer for the jury',
   'juror.recruit.fineprint': 'Declining an offer never costs anything. Only an accepted seat can be forfeited, and only for not showing up.',
   'juror.commit.eyebrowSeat': 'Seat {n} · Secret ballot',
@@ -281,7 +280,8 @@ export const grandJury = {
   'gallery.title': 'The gallery',
   'gallery.says': 'THE GALLERY SAYS… ({count, plural, one {# call} other {# calls}})',
   'gallery.yourCall': '(your call)',
-  'gallery.called': 'You called it for <chip>{choice}</chip>. The gallery’s tally stays hidden until the jury’s reveal window closes, so it can’t sway the jurors. {count, plural, one {# call} other {# calls}} so far.',
+  'gallery.called':
+    'You called it for <chip>{choice}</chip>. The gallery’s tally stays hidden until the jury’s reveal window closes, so it can’t sway the jurors. {count, plural, one {# call} other {# calls}} so far.',
   'gallery.make': 'Make your call. It’s free, it doesn’t count toward the verdict, and the tally stays hidden until the jury has revealed.',
   'gallery.error': 'Not counted',
   'gallery.closed': 'The gallery is closed.',
@@ -316,7 +316,8 @@ export const grandJury = {
   'docket.docTitle': 'Grand Jury docket',
   'docket.kicker': 'Mode 3 · Public court',
   'docket.title': 'The Grand Jury docket',
-  'docket.lede': 'The internet’s oldest arguments, finally on trial. The crowd chips in to summon the court, seven verified strangers take a bonded seat, two AI lawyers argue it out, and the sealed ballots decide.',
+  'docket.lede':
+    'The internet’s oldest arguments, finally on trial. The crowd chips in to summon the court, seven verified strangers take a bonded seat, two AI lawyers argue it out, and the sealed ballots decide.',
   'docket.how': 'How a Grand Jury case runs',
   'docket.facts.summon': '<b>{target}</b> summons a court (about {people} people at {ticket})',
   'docket.facts.jurors': '<b>{jurors}</b> jurors, <b>{threshold}</b> to win',
@@ -390,14 +391,16 @@ export const grandJury = {
   'pricing.docTitle': 'Who pays: Grand Jury pricing',
   'pricing.kicker': 'Decision D10',
   'pricing.title': 'Who pays for a public trial',
-  'pricing.lede': 'A Grand Jury case is a show the crowd buys a ticket to. Nobody bets, nobody gets odds, and nothing a summoner gets depends on the verdict. Here is every number.',
+  'pricing.lede':
+    'A Grand Jury case is a show the crowd buys a ticket to. Nobody bets, nobody gets odds, and nothing a summoner gets depends on the verdict. Here is every number.',
   'pricing.protocolFee': 'Protocol fee',
   'pricing.aiCounselFee': 'AI counsel fee (0G Compute)',
   'pricing.target': 'Crowdfund target',
   'pricing.split.pool': 'Jury pool: {jurors} × {reward} rewards',
   'pricing.split.eyebrow': 'One case, today',
   'pricing.split.title': 'Where {amount} goes',
-  'pricing.split.lede': 'Jurors post a {bond} bond each and get it back with a {reward} reward for sealing and opening on time. {threshold} of {jurors} matching votes make a verdict.',
+  'pricing.split.lede':
+    'Jurors post a {bond} bond each and get it back with a {reward} reward for sealing and opening on time. {threshold} of {jurors} matching votes make a verdict.',
   'pricing.promise.eyebrow': 'What a summoner is promised',
   'pricing.promise.title': 'Refunds, credit, no odds',
   'pricing.phases': 'Two phases, both decided now',
@@ -428,6 +431,7 @@ export const grandJury = {
   'pricing.why.fee': '<b>Fee only</b> (protocol 2.97) works only if fans ignore a 34 % higher target, and charges them for a safety review they never see.',
   'pricing.why.sponsor': '<b>Sponsor only</b> (2.05) breaks even with 0.0053 to spare; one sponsor slipping sinks the case.',
   'pricing.why.review': '<b>Review only</b> (0.84) means cutting the safety review that keeps public-figure cases out of defamation territory.',
-  'pricing.why.blend': '<b>The Sponsored Docket</b> raises the fee by 0.50, asks a sponsor for about 1.00 per 1,000 views, and trims review through tooling. It is the only option that stays positive at every tested funding elasticity and with zero forfeit revenue.',
+  'pricing.why.blend':
+    '<b>The Sponsored Docket</b> raises the fee by 0.50, asks a sponsor for about 1.00 per 1,000 views, and trims review through tooling. It is the only option that stays positive at every tested funding elasticity and with zero forfeit revenue.',
   'pricing.why.fineprint': 'Numbers are modelled per published case (docs/DECISIONS.md D10). Before launch they are re-solved with measured funding, review time and views.',
 } as const;

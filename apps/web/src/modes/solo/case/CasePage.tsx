@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useParams } from 'react-router';
-import { CANCEL_LABELS, formatCaseNumber } from '@cringe-court/core';
 import { isDemoTerms, soloMode } from '@cringe-court/modes-solo';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { t } from '@/i18n';
@@ -15,6 +14,7 @@ import { useSessionSnapshot } from '../lib/useSession';
 import { CaseSounds } from './CaseSounds';
 import { VerdictPanel } from './VerdictPanel';
 import styles from './CasePage.module.css';
+import { cancelLabel, formatCaseNo } from '@/i18n/domain';
 
 const steps = () => [t('solo.case.steps.jury'), t('solo.case.steps.trial'), t('solo.case.steps.deliberation'), t('solo.case.steps.verdict'), t('solo.case.steps.share')];
 
@@ -33,7 +33,9 @@ export function CasePage() {
   const [watched, setWatched] = useState(false);
   const headingRef = useRef<HTMLDivElement>(null);
   const tState = snap?.trial;
-  useDocumentTitle(tState && 'caseNumber' in tState && tState.caseNumber ? t('solo.case.doc.numbered', { caseNumber: formatCaseNumber(tState.caseNumber) }) : t('solo.case.doc.default'));
+  useDocumentTitle(
+    tState && 'caseNumber' in tState && tState.caseNumber ? t('solo.case.doc.numbered', { caseNumber: formatCaseNo(tState.caseNumber) }) : t('solo.case.doc.default'),
+  );
 
   // The trial plays before the verdict exists (the jury beat ends it), so no verdict beat is planned.
   const lines = tState && 'transcript' in tState ? tState.transcript?.lines : undefined;
@@ -81,7 +83,7 @@ export function CasePage() {
 
   if (tState.stage === 'filing' || tState.stage === 'evidence' || tState.stage === 'counsel') return <Navigate to={soloPaths.file} replace />;
 
-  const caseNumber = 'caseNumber' in tState && tState.caseNumber ? formatCaseNumber(tState.caseNumber) : null;
+  const caseNumber = 'caseNumber' in tState && tState.caseNumber ? formatCaseNo(tState.caseNumber) : null;
   const inJury = tState.stage === 'jury';
   const showTrial = inJury && tState.step !== 'recruiting' && !watched && tState.step === 'commit' && tState.seats.every((s) => !s.committed);
   const current = tState.stage === 'jury' ? (tState.step === 'recruiting' ? 0 : showTrial ? 1 : 2) : tState.stage === 'verdict' ? 3 : tState.stage === 'share' ? 4 : 0;
@@ -126,7 +128,16 @@ export function CasePage() {
               avatar: { model: 'creator', name: t('solo.case.trial.you') },
               onDone: () => setWatched(true),
             }}
-            classic={<Courtroom lines={tState.transcript.lines} cast={soloMode.staging(tState.terms)} title={tState.filing.title} exhibits={tState.exhibits} audio={court.audio} onFinished={() => setWatched(true)} />}
+            classic={
+              <Courtroom
+                lines={tState.transcript.lines}
+                cast={soloMode.staging(tState.terms)}
+                title={tState.filing.title}
+                exhibits={tState.exhibits}
+                audio={court.audio}
+                onFinished={() => setWatched(true)}
+              />
+            }
             toolbar={
               <PaperButton size="sm" variant="maroon" onClick={() => setWatched(true)} iconEnd={<Icon name="arrow-right" />}>
                 {t('solo.case.trial.skip')}
@@ -141,8 +152,14 @@ export function CasePage() {
       {(tState.stage === 'verdict' || tState.stage === 'share') && <VerdictPanel snap={{ ...snap, trial: tState }} session={session} />}
 
       {tState.stage === 'closed' && (
-        <EmptyState title={t('solo.case.closed.title')} headingLevel={2} character="judge" expression="shocked" actions={<PaperButtonLink to={soloPaths.file}>{t('solo.case.closed.again')}</PaperButtonLink>}>
-          {t('solo.case.closed.body', { reason: CANCEL_LABELS[tState.reason] })}
+        <EmptyState
+          title={t('solo.case.closed.title')}
+          headingLevel={2}
+          character="judge"
+          expression="shocked"
+          actions={<PaperButtonLink to={soloPaths.file}>{t('solo.case.closed.again')}</PaperButtonLink>}
+        >
+          {t('solo.case.closed.body', { reason: cancelLabel(tState.reason) })}
         </EmptyState>
       )}
     </div>

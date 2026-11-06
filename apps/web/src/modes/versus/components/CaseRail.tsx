@@ -1,17 +1,6 @@
-import { formatUsdc, type SideId } from '@cringe-court/core';
-import {
-  OUTCOME_LABELS,
-  PREVIEW_OUTCOMES,
-  claimable,
-  claimedBy,
-  previewOutcome,
-  sideCharges,
-  sideLabel,
-  sideStatus,
-  type DemoJuryPlan,
-  type VersusCase,
-  type Viewer,
-} from '@cringe-court/modes-versus';
+import { type SideId } from '@cringe-court/core';
+import { formatAmount, outcomeLabel, sideLabel } from '@/i18n/domain';
+import { PREVIEW_OUTCOMES, claimable, claimedBy, previewOutcome, sideCharges, sideStatus, type DemoJuryPlan, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { useMemo, useState } from 'react';
 import { formatDateTime, t } from '@/i18n';
 import { Amount, Badge, Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, Portrait, RadioCards, TestnetBadge } from '@/ds';
@@ -93,13 +82,13 @@ function MoneyCard({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
         )}
         {!mine && (
           <p className={styles.muted}>
-            {t('versus.rail.money.jurors', { side: formatUsdc(charges[0].total), bond: formatUsdc(terms.bondPerJuror), bonus: formatUsdc(terms.successBonusPerJuror) })}
+            {t('versus.rail.money.jurors', { side: formatAmount(charges[0].total), bond: formatAmount(terms.bondPerJuror), bonus: formatAmount(terms.successBonusPerJuror) })}
           </p>
         )}
         {(owed > 0n || claimed !== null) && (
           <p className={styles.claimLine} data-claimed={claimed !== null || undefined}>
             <Icon name={claimed !== null ? 'check' : 'sparkle'} aria-hidden />
-            {claimed !== null ? t('versus.rail.money.claimed', { amount: formatUsdc(claimed) }) : t('versus.rail.money.owed', { amount: formatUsdc(owed) })}
+            {claimed !== null ? t('versus.rail.money.claimed', { amount: formatAmount(claimed) }) : t('versus.rail.money.owed', { amount: formatAmount(owed) })}
           </p>
         )}
         <details className={styles.outcomes}>
@@ -116,20 +105,18 @@ function MoneyCard({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
             <tbody>
               {previews.map((p) => (
                 <tr key={p.outcome}>
-                  <th scope="row">{OUTCOME_LABELS[p.outcome]}</th>
+                  <th scope="row">{outcomeLabel(p.outcome)}</th>
                   <td>
                     {p.sideCost[0] === p.sideCost[1]
-                      ? t('versus.rail.outcomes.same', { amount: formatUsdc(p.sideCost[0], { unit: false }) })
-                      : t('versus.rail.outcomes.split', { a: formatUsdc(p.sideCost[0], { unit: false }), b: formatUsdc(p.sideCost[1], { unit: false }) })}
+                      ? t('versus.rail.outcomes.same', { amount: formatAmount(p.sideCost[0], { unit: false }) })
+                      : t('versus.rail.outcomes.split', { a: formatAmount(p.sideCost[0], { unit: false }), b: formatAmount(p.sideCost[1], { unit: false }) })}
                   </td>
-                  <td>{formatUsdc(p.courtKeeps, { unit: false })}</td>
+                  <td>{formatAmount(p.courtKeeps, { unit: false })}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className={styles.fine}>
-            {t('versus.rail.outcomes.fine')}
-          </p>
+          <p className={styles.fine}>{t('versus.rail.outcomes.fine')}</p>
         </details>
       </CardBody>
     </Card>
@@ -168,7 +155,12 @@ function DemoControls({ c }: { c: VersusCase }) {
                 { value: 'two-no-shows', label: t('versus.rail.demo.plan.two'), description: t('versus.rail.demo.plan.twoHint') },
               ]}
             />
-            <PaperButton variant="maroon" fullWidth iconStart={<Icon name="user" />} onClick={() => void run(() => desk.seatDemoJurors(c.trialId, plan), { success: t('versus.rail.demo.seated') })}>
+            <PaperButton
+              variant="maroon"
+              fullWidth
+              iconStart={<Icon name="user" />}
+              onClick={() => void run(() => desk.seatDemoJurors(c.trialId, plan), { success: t('versus.rail.demo.seated') })}
+            >
               {t('versus.rail.demo.seat')}
             </PaperButton>
           </>

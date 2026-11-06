@@ -1,6 +1,6 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { AudioPort, CastMember, CourtLine, PublicExhibit } from '@cringe-court/core';
-import { SEGMENT_TITLES, directAll, type Shot, type StageActor } from '@cringe-court/modes-solo';
+import { directAll, type Shot, type StageActor } from '@cringe-court/modes-solo';
 import { stagePose } from '@/art/art';
 import { Button, DialogueBox, IconButton, ImpactText, PaperPanel, PaperRibbon, Stamp, cx, useReducedMotion, type ImpactKind } from '@/ds';
 import { t, type MessageKey } from '@/i18n';
@@ -9,6 +9,7 @@ import { SoloIcon } from '../lib/SoloIcon';
 import { SoundToggle } from '../lib/SoundToggle';
 import { voxelTrialView, type TrialView } from './TrialView';
 import styles from './Courtroom.module.css';
+import { segmentTitle } from '@/i18n/domain';
 
 /** WebGL 2 present (jsdom and very old browsers get the illustrated stage). */
 function webglAvailable(): boolean {
@@ -46,12 +47,7 @@ const SPEAKER_NAME_KEY: Readonly<Record<StageActor, MessageKey>> = {
 };
 const speakerName = (actor: StageActor): string => t(SPEAKER_NAME_KEY[actor]);
 
-const IMPACT: Partial<Record<NonNullable<Shot['callout']>['style'], ImpactKind>> = {
-  objection: 'objection',
-  counter: 'counter',
-  order: 'order',
-  'let-bro-cook': 'cook',
-};
+const IMPACT: Partial<Record<NonNullable<Shot['callout']>['style'], ImpactKind>> = { objection: 'objection', counter: 'counter', order: 'order', 'let-bro-cook': 'cook' };
 
 type Actor = Exclude<StageActor, 'defendant'> | 'defendant';
 
@@ -67,18 +63,7 @@ function actorArt(actor: Actor, pose: string): string {
  * Space/K play–pause, ←/→ previous/next line (while focus is in the courtroom).
  * Screen readers hear each line once, in full, from a polite live region.
  */
-export function Courtroom({
-  lines,
-  cast,
-  view: trialView = voxelTrialView,
-  title,
-  exhibits = [],
-  autoPlay = true,
-  onFinished,
-  audio,
-  actions,
-  className,
-}: CourtroomProps) {
+export function Courtroom({ lines, cast, view: trialView = voxelTrialView, title, exhibits = [], autoPlay = true, onFinished, audio, actions, className }: CourtroomProps) {
   const reduced = useReducedMotion();
   const shots = useMemo(() => directAll(lines), [lines]);
   const [index, setIndex] = useState(0);
@@ -168,28 +153,14 @@ export function Courtroom({
         {view === '3d' && cast && (
           <div className={styles.voxelLayer} aria-hidden>
             <Suspense fallback={null}>
-              <trialView.Component
-                line={shot.line}
-                index={index}
-                cast={cast}
-                audio={audio}
-                reducedMotion={reduced}
-                onError={onVoxelError}
-                onReady={onVoxelReady}
-              />
+              <trialView.Component line={shot.line} index={index} cast={cast} audio={audio} reducedMotion={reduced} onError={onVoxelError} onReady={onVoxelReady} />
             </Suspense>
           </div>
         )}
         <div key={`fx-${index}`} className={styles.camera} data-camera={shot.camera} data-fx={shot.fx ?? undefined} aria-hidden>
           <img className={styles.set} src={sceneArt(set)} alt="" data-pixel />
           <div className={styles.judgeBox}>
-            <img
-              className={styles.judge}
-              src={actorArt('judge', shot.poses.judge)}
-              alt=""
-              data-pixel
-              data-speaking={shot.speaker === 'judge' || undefined}
-            />
+            <img className={styles.judge} src={actorArt('judge', shot.poses.judge)} alt="" data-pixel data-speaking={shot.speaker === 'judge' || undefined} />
           </div>
           <img
             className={cx(styles.actor, styles.prosecutor)}
@@ -228,15 +199,13 @@ export function Courtroom({
         {exhibit && (
           <figure key={`ex-${index}`} className={styles.exhibit} aria-hidden>
             <PaperPanel tone="cream" edge="torn" elevation={3} backing="gold" padding="sm">
-              <figcaption>
-                {t('solo.courtroom.exhibit', { letter: exhibitLetter, title: exhibit.title })}
-              </figcaption>
+              <figcaption>{t('solo.courtroom.exhibit', { letter: exhibitLetter, title: exhibit.title })}</figcaption>
               <p>{exhibit.body}</p>
             </PaperPanel>
           </figure>
         )}
         <PaperRibbon as="div" tone="maroon" size="sm" className={styles.segmentTag} aria-hidden>
-          {SEGMENT_TITLES[shot.line.segment]}
+          {segmentTitle(shot.line.segment)}
         </PaperRibbon>
       </div>
 
@@ -259,14 +228,7 @@ export function Courtroom({
       <PaperPanel tone="maroon" edge="cut" elevation={2} padding="sm" className={styles.controlsSheet}>
         <div className={styles.controls}>
           <div className={styles.transport}>
-            <IconButton
-              size="sm"
-              variant="secondary"
-              label={t('solo.courtroom.prev')}
-              icon={<SoloIcon name="prev" />}
-              onClick={() => go(index - 1)}
-              disabled={index === 0}
-            />
+            <IconButton size="sm" variant="secondary" label={t('solo.courtroom.prev')} icon={<SoloIcon name="prev" />} onClick={() => go(index - 1)} disabled={index === 0} />
             <IconButton
               size="md"
               variant="gold"
@@ -280,36 +242,23 @@ export function Courtroom({
                 setPlaying((p) => !p);
               }}
             />
-            <IconButton
-              size="sm"
-              variant="secondary"
-              label={t('solo.courtroom.next')}
-              icon={<SoloIcon name="next" />}
-              onClick={() => go(index + 1)}
-              disabled={last}
-            />
+            <IconButton size="sm" variant="secondary" label={t('solo.courtroom.next')} icon={<SoloIcon name="next" />} onClick={() => go(index + 1)} disabled={last} />
           </div>
           <div className={styles.progress}>
-            <span className={styles.counter}>
-              {t('solo.courtroom.counter', { n: index + 1, total: shots.length })}
-            </span>
+            <span className={styles.counter}>{t('solo.courtroom.counter', { n: index + 1, total: shots.length })}</span>
             <div className={styles.chapters} role="group" aria-label={t('solo.courtroom.chapters')}>
               {segments.map((seg) => {
                 const first = lines.findIndex((l) => l.segment === seg);
                 const active = shot.line.segment === seg;
                 return (
                   <button key={seg} type="button" className={styles.chapter} aria-current={active ? 'step' : undefined} onClick={() => go(first)}>
-                    {SEGMENT_TITLES[seg]}
+                    {segmentTitle(seg)}
                   </button>
                 );
               })}
             </div>
             <div className={styles.bar} aria-hidden>
-              <span
-                style={{
-                  inlineSize: `${((index + (typed ? 1 : 0.5)) / shots.length) * 100}%`,
-                }}
-              />
+              <span style={{ inlineSize: `${((index + (typed ? 1 : 0.5)) / shots.length) * 100}%` }} />
             </div>
           </div>
           <div className={styles.extra}>
@@ -326,9 +275,7 @@ export function Courtroom({
           </div>
         </div>
       </PaperPanel>
-      <p className={styles.hint}>
-        {voxelFailed ? t('solo.courtroom.hintFailed', { label: trialView.label }) : t('solo.courtroom.hint')}
-      </p>
+      <p className={styles.hint}>{voxelFailed ? t('solo.courtroom.hintFailed', { label: trialView.label }) : t('solo.courtroom.hint')}</p>
 
       {showTranscript && (
         <ol className={styles.transcript} aria-label={t('solo.courtroom.transcript.label')} role="list">

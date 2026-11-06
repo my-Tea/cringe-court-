@@ -1,4 +1,5 @@
-import { CATEGORIES, formatUsdc, type Category } from '@cringe-court/core';
+import { CATEGORIES, type Category } from '@cringe-court/core';
+import { categoryLabel, formatAmount } from '@/i18n/domain';
 import { EMPTY_BRIEFING, OPEN_INVITE_LIMIT, prepareBriefing, sideCharges, versusMode, type BriefingDraft } from '@cringe-court/modes-versus';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -82,7 +83,12 @@ export function NewCasePage() {
     <>
       <PageHead eyebrow={t('versus.new.eyebrow')} title={t('versus.new.title')} lede={t('versus.new.lede')} />
       <div className={styles.page}>
-        <PhaseStepper steps={[t('versus.new.step.case'), t('versus.new.step.brief'), t('versus.new.step.review')]} current={draft.step} label={t('versus.new.steps')} className={styles.newStepper} />
+        <PhaseStepper
+          steps={[t('versus.new.step.case'), t('versus.new.step.brief'), t('versus.new.step.review')]}
+          current={draft.step}
+          label={t('versus.new.steps')}
+          className={styles.newStepper}
+        />
 
         {atLimit && (
           <Alert tone="warning" title={t('versus.new.limit.title', { count: OPEN_INVITE_LIMIT })}>
@@ -101,20 +107,27 @@ export function NewCasePage() {
               }}
               noValidate
             >
-              <TextField label={t('versus.new.field.title')} hint={t('versus.new.field.titleHint')} placeholder={t('versus.new.field.titlePlaceholder')} maxLength={80} value={draft.title} onChange={(e) => set({ title: e.target.value })} error={titleError} required />
+              <TextField
+                label={t('versus.new.field.title')}
+                hint={t('versus.new.field.titleHint')}
+                placeholder={t('versus.new.field.titlePlaceholder')}
+                maxLength={80}
+                value={draft.title}
+                onChange={(e) => set({ title: e.target.value })}
+                error={titleError}
+                required
+              />
               <RadioCards
                 legend={t('versus.new.field.category')}
                 name="category"
                 value={draft.category}
                 onValueChange={(v) => set({ category: v as Category })}
-                options={(Object.keys(CATEGORIES) as Category[]).map((c) => ({ value: c, label: CATEGORIES[c], description: t(CATEGORY_HINTS[c]) }))}
+                options={(Object.keys(CATEGORIES) as Category[]).map((c) => ({ value: c, label: categoryLabel(c), description: t(CATEGORY_HINTS[c]) }))}
                 error={categoryError}
               />
               <div className={styles.priceStrip}>
                 <Icon name="scales" aria-hidden />
-                <p>
-                  {tRich('versus.new.price', { b: (chunk) => <strong>{chunk}</strong> }, { amount: formatUsdc(share.total) })}
-                </p>
+                <p>{tRich('versus.new.price', { b: (chunk) => <strong>{chunk}</strong> }, { amount: formatAmount(share.total) })}</p>
               </div>
               <div className={styles.formActions}>
                 <PaperButton type="submit" size="lg" iconEnd={<Icon name="arrow-right" />} disabled={atLimit}>
@@ -127,7 +140,14 @@ export function NewCasePage() {
 
         {draft.step === 1 && (
           <PaperSection as="section" padding="lg" aria-label={t('versus.new.briefing')}>
-            <BriefingChat side="a" category={(draft.category || 'npc-behavior') as Category} trialId={`draft-${persona.id}`} value={draft.brief} onChange={(brief) => set({ brief })} onDone={() => set({ step: 2 })} />
+            <BriefingChat
+              side="a"
+              category={(draft.category || 'npc-behavior') as Category}
+              trialId={`draft-${persona.id}`}
+              value={draft.brief}
+              onChange={(brief) => set({ brief })}
+              onDone={() => set({ step: 2 })}
+            />
             <div className={styles.backRow}>
               <PaperButton variant="ghost" size="sm" iconStart={<Icon name="arrow-left" />} onClick={() => set({ step: 0 })}>
                 {t('versus.new.changeDetails')}
@@ -139,7 +159,7 @@ export function NewCasePage() {
         {draft.step === 2 && (
           <PaperSection as="section" padding="lg" ribbon={t('versus.new.step.review')} ribbonAs="h2" aria-label={t('versus.new.reviewAria')}>
             <p className={styles.caseLine}>
-              <span className={styles.caseLineTitle}>“{draft.title}”</span> · {draft.category ? CATEGORIES[draft.category] : ''}
+              <span className={styles.caseLineTitle}>“{draft.title}”</span> · {draft.category ? categoryLabel(draft.category) : ''}
             </p>
             <BriefReview
               side="a"

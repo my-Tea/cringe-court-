@@ -11,6 +11,7 @@ import { SoundToggle } from '../lib/SoundToggle';
 import { t, type MessageKey } from '@/i18n';
 import { JURY_PACING, JURY_PACING_FAST, useJuryDirector } from './useJuryDirector';
 import styles from './JuryStage.module.css';
+import { ballotLabel, npcPersona } from '@/i18n/domain';
 
 const STEPS = ['solo.jury.steps.seated', 'solo.jury.steps.scroll', 'solo.jury.steps.open', 'solo.jury.steps.verdict'] as const satisfies readonly MessageKey[];
 
@@ -34,25 +35,11 @@ function seatStatus(
   seat: JurySeat | undefined,
   step: JuryState['step'],
   ballot: readonly [string, string],
-): {
-  text: string;
-  tone: 'neutral' | 'info' | 'highlight' | 'danger' | 'success';
-} {
+): { text: string; tone: 'neutral' | 'info' | 'highlight' | 'danger' | 'success' } {
   if (!seat) return { text: t('solo.jury.seat.empty'), tone: 'neutral' };
-  if (seat.revealed && seat.choice !== undefined)
-    return {
-      text: ballot[seat.choice],
-      tone: seat.choice === 0 ? 'danger' : 'success',
-    };
-  if (seat.committed)
-    return {
-      text: step === 'reveal' ? t('solo.jury.seat.opening') : t('solo.jury.seat.sealed'),
-      tone: 'highlight',
-    };
-  return {
-    text: step === 'commit' ? t('solo.jury.seat.deciding') : t('solo.jury.seat.seated'),
-    tone: 'info',
-  };
+  if (seat.revealed && seat.choice !== undefined) return { text: ballotLabel(ballot[seat.choice]), tone: seat.choice === 0 ? 'danger' : 'success' };
+  if (seat.committed) return { text: step === 'reveal' ? t('solo.jury.seat.opening') : t('solo.jury.seat.sealed'), tone: 'highlight' };
+  return { text: step === 'commit' ? t('solo.jury.seat.deciding') : t('solo.jury.seat.seated'), tone: 'info' };
 }
 
 export interface JuryStageProps {
@@ -114,9 +101,7 @@ export function JuryStage({ session, snap, clock }: JuryStageProps) {
             {tState.step === 'finalizing' ? t('solo.jury.heading.counting') : t('solo.jury.heading.out')}
           </PaperRibbon>
         </div>
-        <p className={styles.stepNote}>
-          {t('solo.jury.stepNote', { n: current + 1, total: STEPS.length, name: t(STEPS[current]!) })}
-        </p>
+        <p className={styles.stepNote}>{t('solo.jury.stepNote', { n: current + 1, total: STEPS.length, name: t(STEPS[current]!) })}</p>
       </header>
 
       {demo && (
@@ -130,7 +115,7 @@ export function JuryStage({ session, snap, clock }: JuryStageProps) {
           {NPC_PERSONAS.map((p, i) => {
             const seat = tState.seats[i];
             const status = seatStatus(seat, tState.step, tState.terms.ballot);
-            const said = seat?.revealed && seat.choice !== undefined ? p.says[seat.choice] : null;
+            const said = seat?.revealed && seat.choice !== undefined ? npcPersona(p.id).says[seat.choice] : null;
             return (
               <li
                 key={p.id}
@@ -147,18 +132,11 @@ export function JuryStage({ session, snap, clock }: JuryStageProps) {
                   )}
                   {said && <p className={styles.bubble}>“{said}”</p>}
                 </div>
-                <PaperPanel
-                  tone="cream"
-                  edge="cut"
-                  elevation={seat ? 2 : 1}
-                  backing={seat?.revealed ? 'gold' : 'none'}
-                  padding="none"
-                  className={styles.plateSheet}
-                >
+                <PaperPanel tone="cream" edge="cut" elevation={seat ? 2 : 1} backing={seat?.revealed ? 'gold' : 'none'} padding="none" className={styles.plateSheet}>
                   <div className={styles.plate}>
                     <span className={styles.seatNo}>{t('solo.jury.seatNo', { n: i + 1 })}</span>
-                    <strong className={styles.name}>{p.name}</strong>
-                    <span className={styles.bio}>{p.bio}</span>
+                    <strong className={styles.name}>{npcPersona(p.id).name}</strong>
+                    <span className={styles.bio}>{npcPersona(p.id).bio}</span>
                     <Badge tone={status.tone} dot={status.tone === 'info' || status.tone === 'highlight' ? 'pulse' : undefined}>
                       {status.text}
                     </Badge>
