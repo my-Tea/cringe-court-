@@ -18,7 +18,22 @@ export interface Aabb {
 
 /* ── World ──────────────────────────────────────────────────────────────── */
 
-export type ZoneId = 'lobby' | 'gallery' | 'aisle' | 'well' | 'dais' | 'defendant-table' | 'prosecution-table' | 'witness-stand' | 'doorway' | 'jury-box' | 'outside';
+export type ZoneId =
+  | 'lobby'
+  | 'gallery'
+  | 'aisle'
+  | 'well'
+  | 'dais'
+  | 'defendant-table'
+  | 'prosecution-table'
+  | 'witness-stand'
+  | 'doorway'
+  | 'jury-box'
+  | 'outside'
+  // The arrival run south of the plaza: identity shrine, wardrobe, hall of trials.
+  | 'arrival'
+  | 'wardrobe'
+  | 'trials';
 
 export interface Zone {
   id: ZoneId;
@@ -45,7 +60,7 @@ export interface Seat {
   pitch?: number;
 }
 
-export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'prosecution' | 'witness' | 'jury-box' | 'jury-view' | 'bench-front' | 'outside';
+export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'prosecution' | 'witness' | 'jury-box' | 'jury-view' | 'bench-front' | 'outside' | 'arrival';
 
 export interface Spawn {
   pos: Vec3;
@@ -53,7 +68,26 @@ export interface Spawn {
   pitch: number;
 }
 
-export type InteractionKind = 'seat' | 'talk' | 'exhibit' | 'inspect' | 'door';
+export type InteractionKind = 'seat' | 'talk' | 'exhibit' | 'inspect' | 'door' | 'station';
+
+/**
+ * The arrival run's stops. Each opens a panel the host draws (World ID check,
+ * wardrobe, the three trial gates); finishing one opens the seal on the next
+ * bridge. `mode:*` are the three gates in the hall of trials.
+ */
+export type StationId = 'verify' | 'wardrobe' | 'mode:solo' | 'mode:versus' | 'mode:grand-jury';
+export type PanelId = 'verify' | 'wardrobe' | 'trials';
+
+/** Seals across the bridges, named for the station that opens them. */
+export type GateId = 'verify' | 'wardrobe' | 'trials';
+
+export interface GateSpec {
+  id: GateId;
+  /** Blocks the bridge while the seal is up. */
+  solid: Aabb;
+  /** The glowing seal itself (drawn apart from the static world so it can vanish). */
+  boxes: readonly (Box & { glow?: number })[];
+}
 
 export interface InteractableSpec {
   id: string;
@@ -70,6 +104,10 @@ export interface InteractableSpec {
   exhibit?: string;
   /** Bark pool for talk/inspect/door. */
   lines?: string;
+  /** Which arrival-run stop a `station` opens. */
+  station?: StationId;
+  /** A seal's interactable disappears once that gate is open. */
+  gate?: GateId;
 }
 
 export type NpcPose = 'stand' | 'sit' | 'talk' | 'gavel' | 'point' | 'cheer' | 'shock' | 'facepalm';
@@ -99,7 +137,7 @@ export interface RoamWorld {
   /** Collision boxes: the solid subset of `boxes` plus invisible barriers. */
   solids: readonly Aabb[];
   /** Hard outer limits per room (the player can never leave their union). */
-  rooms: ReadonlyArray<{ id: 'courtroom' | 'lobby' | 'doorway' | 'outside'; bounds: Aabb }>;
+  rooms: ReadonlyArray<{ id: 'courtroom' | 'lobby' | 'doorway' | 'outside' | 'arrival' | 'wardrobe' | 'trials' | 'bridge'; bounds: Aabb }>;
   zones: readonly Zone[];
   seats: Readonly<Record<SeatId, Seat>>;
   spawns: Readonly<Record<SpawnId, Spawn>>;
@@ -109,14 +147,29 @@ export interface RoamWorld {
   marks: Readonly<Record<string, Vec3>>;
   /** Light positions (sconces, windows) for the renderer. */
   lights: ReadonlyArray<{ pos: Vec3; kind: 'sconce' | 'window' | 'spot' }>;
+  /** Seals on the arrival run's bridges (absent in worlds without the run). */
+  gates?: readonly GateSpec[];
 }
 
 /* ── Player ─────────────────────────────────────────────────────────────── */
 
-/** A voxel avatar: a cast.json model id plus a display name. */
+/** A voxel avatar: a cast.json model id plus a display name, or a wardrobe look built at runtime. */
 export interface AvatarSpec {
   model: string;
   name: string;
+  /** When set, the avatar is built from this look (look.ts) instead of `model`. */
+  look?: PlayerLook;
+}
+
+/** One combination from the wardrobe (look.ts lists the options). */
+export interface PlayerLook {
+  skin: number;
+  hair: string;
+  hairColor: number;
+  outfit: string;
+  outfitColor: number;
+  accessory: string;
+  effect: string;
 }
 
 export type PlayerRole = 'defendant' | 'side-a' | 'side-b' | 'juror' | 'spectator';
@@ -220,6 +273,10 @@ export interface RoamSnapshot {
   dialogue: DialogueState | null;
   beat: { id: BeatId; step: number; steps: number } | null;
   exhibit: string | null;
+  /** An arrival-run panel the host is showing (movement is held while it is open). */
+  panel: PanelId | null;
+  /** Arrival-run seals that are open. */
+  gates: readonly GateId[];
   callout: { text: string; style: CalloutStyle; age: number } | null;
   mood: LightingMood;
   /** 0..1 screen-shake amount (always 0 with reduced motion). */
@@ -249,6 +306,10 @@ export type RoamEvent =
   | { type: 'cue'; cue: AudioCueId }
   | { type: 'mood'; mood: LightingMood }
   | { type: 'callout'; text: string; style: CalloutStyle }
-  | { type: 'pause'; paused: boolean };
+  | { type: 'pause'; paused: boolean }
+  | { type: 'station'; station: StationId }
+  | { type: 'panel'; panel: PanelId | null }
+  | { type: 'gate'; gate: GateId }
+  | { type: 'avatar'; avatar: AvatarSpec };
 
 export type Unsubscribe = () => void;

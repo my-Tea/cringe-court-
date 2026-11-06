@@ -15,7 +15,7 @@
 import type { Box } from '../../courtroom/geometry';
 import { EMISSIVE } from '../../courtroom/geometry';
 import { CAST_SCALE, type CastFile } from '../cast';
-import { ART, toPalette } from '../palette';
+import { ART, C, toPalette } from '../palette';
 import { BODY } from '../physics';
 import type { Aabb, InteractableSpec, NpcSpec, RoamWorld, Seat, SeatId, Spawn, SpawnId, Vec3, Zone } from '../types';
 import { aabb } from './boxes';
@@ -24,6 +24,8 @@ import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TA
 import { isOldJuryBox, JURY_BOX, JURY_SLOTS, juryBoxBoxes, PLAYER_JURY_SLOT } from './jury';
 import { ROOM_SCALE } from '../scale';
 import { LOBBY, lobbyBoxes } from './lobby';
+import { ARRIVAL_SPAWN, approachBoxes, approachGates, approachInteractables, approachRooms, approachZones } from './approach';
+import { FRONT } from './courthouse';
 import { GROUNDS, groundsBoxes, PLAZA_Y } from './plaza';
 
 export { ROOM_SCALE } from '../scale';
@@ -36,6 +38,8 @@ export { JURY_BOX, JURY_SLOTS, PLAYER_JURY_SLOT } from './jury';
 /** A world box: palette colour, plus an emissive strength for glass, flames and neon. */
 export interface RoamBox extends Box {
   glow?: number;
+  /** Always a walkable floor, whatever its height (stair treads and the terrace). */
+  walk?: boolean;
 }
 
 const GROUND_TOP = 2.7;
@@ -51,7 +55,17 @@ function isBenchGlass(b: Box): boolean {
 }
 
 /** Classify one box for collision. */
-export function solidFor(b: Box): Aabb | null {
+export function solidFor(b: RoamBox): Aabb | null {
+  if (b.walk) return aabb(b.f, b.t);
+  // Outdoors the ground is either the terrace (y 0, at the doors) or the sunken
+  // plaza and the islands (PLAZA_Y): floors and overhead are measured from there.
+  if ((b.f[2] + b.t[2]) / 2 > FRONT) {
+    const ground = b.f[1] >= -1.5 ? 0 : PLAZA_Y;
+    if (b.f[1] >= ground + OVERHEAD) return null;
+    if (b.t[1] <= ground + GROUND_TOP) return aabb(b.f, b.t);
+    if (b.t[0] - b.f[0] < 0.05 || b.t[2] - b.f[2] < 0.05) return null;
+    return aabb(b.f, [b.t[0], BARRIER_TOP, b.t[2]]);
+  }
   if (b.f[1] >= OVERHEAD) return null;
   if (b.t[1] <= GROUND_TOP) return aabb(b.f, b.t);
   const cx = (b.f[0] + b.t[0]) / 2;
@@ -87,6 +101,7 @@ const ZONES: readonly Zone[] = [
   { id: 'jury-box', label: 'Jury box', rects: [{ x0: JURY_BOX.x0, z0: JURY_BOX.z0, x1: COURT.x, z1: JURY_BOX.z1 }, { x0: 52, z0: -71, x1: JURY_BOX.x0, z1: -44 }] },
   { id: 'lobby', label: 'Lobby', rects: [{ x0: -LOBBY.x, z0: LOBBY.z0, x1: LOBBY.x, z1: LOBBY.z1 }] },
   { id: 'outside', label: 'Courthouse plaza', rects: [{ x0: -GROUNDS.x, z0: GROUNDS.z0, x1: GROUNDS.x, z1: GROUNDS.z1 }] },
+  ...approachZones(),
   { id: 'doorway', label: 'Courtroom doors', rects: [{ x0: -25, z0: 64, x1: 25, z1: LOBBY.z0 }] },
   { id: 'witness-stand', label: 'Witness stand', rects: [{ x0: WITNESS_STAND.x0, z0: WITNESS_STAND.z0, x1: WITNESS_STAND.x1, z1: WITNESS_STAND.z1 }] },
   { id: 'defendant-table', label: "Defendant's table", rects: [{ x0: 36, z0: -14, x1: 76, z1: 8 }] },
@@ -180,7 +195,7 @@ function interactables(list: readonly NpcSpec[], marks: Record<string, Vec3>): I
       range: 42,
     })),
     { id: 'street-doors', prompt: 'Try the doors', kind: 'door', at: [0, 32, LOBBY.z1 - 2], hull: aabb([-26, 0, LOBBY.z1 - 4.5], [26, 64, LOBBY.z1]), range: 36, lines: 'locked-doors' },
-    { id: 'return-inside', prompt: 'Go back inside', kind: 'door', at: [0, 32, GROUNDS.z0 + 4], hull: aabb([-22, 0, GROUNDS.z0], [22, 64, GROUNDS.z0 + 8]), range: 40 },
+    { id: 'return-inside', prompt: 'Enter the courthouse', kind: 'door', at: [0, 32, GROUNDS.z0 + 1], hull: aabb([-26, 0, GROUNDS.z0 - 4], [26, 64, GROUNDS.z0 + 2]), range: 40 },
     { id: 'bust', prompt: 'Inspect the bust', kind: 'inspect', at: [70, 49, 131], hull: aabb([63, 0, 129], [77, 57, 143]), range: 30, lines: 'bust' },
     { id: 'globe', prompt: 'Spin the globe', kind: 'inspect', at: [70, 34, 100], hull: aabb([63, 0, 93], [77, 42, 107]), range: 26, lines: 'globe' },
     { id: 'docket', prompt: 'Read the docket', kind: 'inspect', at: [-88, 40, 111], hull: aabb([-91, 22, 96], [-88, 58, 126]), range: 30, lines: 'docket' },
@@ -232,8 +247,9 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     ...dressingBoxes(),
     ...juryBoxBoxes(),
     ...stainedGlass(),
-    ...lobbyBoxes().map((b) => (b.m === '#FFD79A' ? { ...b, glow: 0.9 } : b.m === '#BFD7F5' ? { ...b, glow: 0.55 } : b)),
-    ...groundsBoxes().map((b) => (b.m === '#FFD79A' ? { ...b, glow: 0.9 } : b.m === '#BFD7F5' ? { ...b, glow: 0.45 } : b)),
+    ...lobbyBoxes().map((b) => (b.m === C.royal100 ? { ...b, glow: 0.9 } : b.m === C.blue300 ? { ...b, glow: 0.55 } : b)),
+    ...groundsBoxes(),
+    ...approachBoxes(),
   ];
   const boxes: RoamBox[] = raw.map((b) => ({ ...b, m: toPalette(b.m) }));
 
@@ -274,14 +290,18 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     'jury-box': { pos: seatMap['jury-box'].pos, yaw: seatMap['jury-box'].yaw, pitch: -0.04 },
     prosecution: { pos: seatMap.prosecution.pos, yaw: seatMap.prosecution.yaw, pitch: 0.12 },
     'bench-front': spawn([0, 8.4, -24], judgeHead),
-    outside: spawn([48, PLAZA_Y, GROUNDS.z0 + 140], [0, 16, LOBBY.z1]),
+    // On the terrace outside the doors, looking out over the plaza.
+    outside: spawn([0, 0, GROUNDS.z0 + 18], [0, PLAZA_Y + 20, GROUNDS.z1]),
+    // The arrival run starts on the far island, facing the identity shrine.
+    arrival: spawn(ARRIVAL_SPAWN.pos, ARRIVAL_SPAWN.look),
   };
 
   const rooms: RoamWorld['rooms'] = [
     { id: 'courtroom', bounds: aabb([-COURT.x + 0.6, -10, COURT.zFront + 1.5], [COURT.x - 0.6, COURT.ceiling, COURT.zBack]) },
     { id: 'doorway', bounds: aabb([-22.1, -10, COURT.zBack - 14], [22.1, 60, LOBBY.z0 + 14]) },
     { id: 'lobby', bounds: aabb([-LOBBY.x + 0.6, -10, LOBBY.z0 + 0.6], [LOBBY.x - 0.6, LOBBY.ceiling, LOBBY.z1 - 0.6]) },
-    { id: 'outside', bounds: aabb([-GROUNDS.x + 1, -16, GROUNDS.z0 + 1], [GROUNDS.x - 1, 80, GROUNDS.z1 - 1]) },
+    { id: 'outside', bounds: aabb([-GROUNDS.x + 1, PLAZA_Y - 20, GROUNDS.z0 + 0.5], [GROUNDS.x - 1, 80, GROUNDS.z1 - 1]) },
+    ...approachRooms(),
   ];
 
   const lights: RoamWorld['lights'] = [
@@ -299,10 +319,11 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     zones: ZONES,
     seats: seatMap,
     spawns,
-    interactables: interactables(placed, marks),
+    interactables: [...interactables(placed, marks), ...approachInteractables()],
     npcs: placed,
     marks,
     lights,
+    gates: approachGates(),
   });
   const npcSolids: Aabb[] = [];
   for (const n of scaled.npcs) {
@@ -328,6 +349,7 @@ function scalePlan<T extends RoamWorld & { boxes: RoamBox[] }>(world: T): T {
     npcs: world.npcs.map((n) => ({ ...n, pos: v(n.pos) })),
     marks: Object.fromEntries(Object.entries(world.marks).map(([id, p]) => [id, v(p)])),
     lights: world.lights.map((l) => ({ ...l, pos: v(l.pos) })),
+    gates: world.gates?.map((g) => ({ ...g, solid: boxOf(g.solid), boxes: g.boxes.map((b) => ({ ...b, f: v(b.f), t: [b.t[0] * s, b.t[1], b.t[2] * s] as Vec3 })) })),
   };
 }
 

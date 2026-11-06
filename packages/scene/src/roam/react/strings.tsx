@@ -94,6 +94,9 @@ export const DEFAULT_ROAM_STRINGS: RoamStrings = {
     'witness-stand': 'Witness stand',
     'jury-box': 'Jury box',
     outside: 'Courthouse plaza',
+    arrival: 'Shrine of Identity',
+    wardrobe: 'The Wardrobe',
+    trials: 'Hall of Trials',
   },
   zoneFallback: 'Courthouse',
 

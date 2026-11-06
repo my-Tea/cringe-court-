@@ -22,6 +22,9 @@ const ZONE_KEYS: Readonly<Record<ZoneId, MessageKey>> = {
   'witness-stand': 'trial.hud.zone.witnessStand',
   'jury-box': 'trial.hud.zone.juryBox',
   outside: 'trial.hud.zone.outside',
+  arrival: 'trial.hud.zone.arrival',
+  wardrobe: 'trial.hud.zone.wardrobe',
+  trials: 'trial.hud.zone.trials',
 };
 
 const QUALITY_KEYS: Readonly<Record<QualityLevel, MessageKey>> = {

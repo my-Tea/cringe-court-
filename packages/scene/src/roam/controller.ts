@@ -22,10 +22,12 @@ import type {
   ControlMode,
   DialogueLine,
   DialogueState,
+  GateId,
   InteractableSpec,
   NpcPose,
   NpcSpec,
   NpcState,
+  PanelId,
   PlayerRole,
   PlayerState,
   RoamEvent,
@@ -39,7 +41,7 @@ import type {
   Vec3,
   ZoneId,
 } from './types';
-import { ISO_RAKE, cameraMode, type PerspectiveChoice } from './perspective';
+import type { PerspectiveChoice } from './perspective';
 import { PLAYER_JURY_SLOT, zoneAt } from './world';
 
 export interface RoamControllerOptions {
@@ -57,6 +59,8 @@ export interface RoamControllerOptions {
   pace?: HearingPace;
   /** Jurors in this hearing, the player included when they are one (Solo and Versus 3, Grand Jury 7). Default 7: a full box. */
   jurors?: number;
+  /** Arrival-run seals already open. Default all: a world entered past the run has none in the way. */
+  openGates?: readonly GateId[] | 'all';
 }
 
 /** Where each role sits during the hearing. */
@@ -98,7 +102,7 @@ interface ExternalInput {
 export class RoamController implements BeatHost {
   readonly world: RoamWorld;
   readonly keys = new KeyState();
-  readonly #index: SolidIndex;
+  #index: SolidIndex;
   readonly #bounds;
   readonly #stepper = new FixedStepper();
   readonly #barks = new BarkBook();
@@ -137,7 +141,7 @@ export class RoamController implements BeatHost {
   #beat: { runner: BeatRunner; resolve: () => void } | null = null;
   /** Street doors open once the hearing has finished. */
   #adjourned = false;
-  /** First person until the view asks for auto, which is isometric. */
+  /** First person until the view asks for auto, which is third person. */
   #perspective: PerspectiveChoice = 'first';
   #remotes: PlayerState[] = [];
   #jumpQueued = false;
@@ -148,17 +152,22 @@ export class RoamController implements BeatHost {
   readonly #jurors: number;
 
   readonly id: string;
-  readonly avatar: AvatarSpec;
+  #avatar: AvatarSpec;
   readonly role: PlayerRole;
+  /** Arrival-run panel open (host-drawn); movement and look are held meanwhile. */
+  #panel: PanelId | null = null;
+  readonly #openGates: Set<GateId>;
 
   constructor(world: RoamWorld, options: RoamControllerOptions = {}) {
     this.world = world;
-    this.#index = new SolidIndex(world.solids);
+    const gateIds = (world.gates ?? []).map((g) => g.id);
+    this.#openGates = new Set(options.openGates === undefined || options.openGates === 'all' ? gateIds : options.openGates);
+    this.#index = this.#buildIndex();
     this.#bounds = world.rooms.map((r) => r.bounds);
     this.#reduced = options.reducedMotion ?? false;
     this.#audio = detectAudio(options.audio);
     this.id = options.id ?? 'local';
-    this.avatar = options.avatar ?? { model: 'creator', name: 'You' };
+    this.#avatar = options.avatar ?? { model: 'creator', name: 'You' };
     this.role = options.role ?? 'defendant';
     this.#now = options.now;
     const spawn = typeof options.spawn === 'object' ? options.spawn : world.spawns[options.spawn ?? 'lobby'];
@@ -177,6 +186,56 @@ export class RoamController implements BeatHost {
       if (options.remotes.onLeave) this.#unsubs.push(options.remotes.onLeave((id) => this.#interp.remove(id)));
     }
     this.#zone = zoneAt(world, spawn.pos[0], spawn.pos[2])?.id ?? null;
+  }
+
+  /** Static solids plus every seal that is still closed. */
+  #buildIndex(): SolidIndex {
+    const closed = (this.world.gates ?? []).filter((g) => !this.#openGates.has(g.id)).map((g) => g.solid);
+    return new SolidIndex(closed.length ? [...this.world.solids, ...closed] : this.world.solids);
+  }
+
+  /* ── Arrival run ───────────────────────────────────────────────────── */
+
+  get avatar(): AvatarSpec {
+    return this.#avatar;
+  }
+
+  /** Change how the player looks (the wardrobe previews every click). */
+  setAvatar(avatar: AvatarSpec): void {
+    this.#avatar = avatar;
+    this.#emit({ type: 'avatar', avatar });
+    this.#changed();
+  }
+
+  get panel(): PanelId | null {
+    return this.#panel;
+  }
+
+  /** Close the station panel the host was showing and give the player back control. */
+  closePanel(): void {
+    if (!this.#panel) return;
+    this.#panel = null;
+    this.keys.clear();
+    this.#emit({ type: 'panel', panel: null });
+    this.#changed();
+  }
+
+  isGateOpen(id: GateId): boolean {
+    return this.#openGates.has(id);
+  }
+
+  get openGates(): readonly GateId[] {
+    return [...this.#openGates];
+  }
+
+  /** Lift a seal: its bridge becomes walkable and its glow goes out. */
+  openGate(id: GateId): void {
+    if (this.#openGates.has(id) || !this.world.gates?.some((g) => g.id === id)) return;
+    this.#openGates.add(id);
+    this.#index = this.#buildIndex();
+    this.#cue('sfx.unlock');
+    this.#emit({ type: 'gate', gate: id });
+    this.#changed();
   }
 
   /** Jurors past the hearing's jury size, and the seat a player juror takes, stay empty. */
@@ -282,7 +341,7 @@ export class RoamController implements BeatHost {
 
   /** Relative look (radians): mouse, touch drag. */
   look(dYaw: number, dPitch: number): void {
-    if (this.#paused || this.#control === 'cinematic' || this.#exhibit) return;
+    if (this.#paused || this.#control === 'cinematic' || this.#exhibit || this.#panel) return;
     this.#yaw += dYaw;
     this.#pitch = clampPitch(this.#pitch + dPitch);
   }
@@ -294,6 +353,7 @@ export class RoamController implements BeatHost {
         break;
       case 'pause':
         if (this.#exhibit) this.closeExhibit();
+        else if (this.#panel) this.closePanel();
         else this.setPaused(!this.#paused);
         break;
       case 'jump':
@@ -335,7 +395,7 @@ export class RoamController implements BeatHost {
 
   /** E / tap: the focused thing, else (seated) stand up, else advance dialogue. */
   interact(): string | null {
-    if (this.#paused) return null;
+    if (this.#paused || this.#panel) return null;
     if (this.#exhibit) {
       this.closeExhibit();
       return null;
@@ -379,6 +439,11 @@ export class RoamController implements BeatHost {
           this.teleport('outside');
           break;
         }
+        if (f.gate && !this.#openGates.has(f.gate)) {
+          const line = this.#barks.next(f.lines ?? '');
+          if (line) this.#setDialogue({ speaker: 'narrator', text: line });
+          break;
+        }
         if (f.id === 'return-inside') {
           this.#setDialogue(null);
           this.teleport('lobby');
@@ -389,6 +454,17 @@ export class RoamController implements BeatHost {
           if (line) this.#setDialogue({ speaker: 'narrator', text: line });
         }
         break;
+      case 'station': {
+        const station = f.station;
+        if (!station) break;
+        this.#panel = station === 'verify' ? 'verify' : station === 'wardrobe' ? 'wardrobe' : 'trials';
+        this.keys.clear();
+        this.#setDialogue(null);
+        this.#cue('ui.notify');
+        this.#emit({ type: 'station', station });
+        this.#emit({ type: 'panel', panel: this.#panel });
+        break;
+      }
       case 'inspect': {
         const line = this.#barks.next(f.lines ?? f.id);
         if (line) this.#setDialogue({ speaker: 'narrator', text: line });
@@ -656,38 +732,28 @@ export class RoamController implements BeatHost {
     const intent = mergeIntents(held.intent, ...ext.map((e) => e.intent));
     const turn = held.turn + ext.reduce((s, e) => s + e.turn, 0);
     const tilt = held.tilt + ext.reduce((s, e) => s + e.tilt, 0);
-    const iso = cameraMode(this.#perspective) === 'iso';
-    const canLook = this.#control !== 'cinematic' && !this.#exhibit;
-    if (canLook && !iso) {
+    const canLook = this.#control !== 'cinematic' && !this.#exhibit && !this.#panel;
+    if (canLook) {
       this.#yaw -= turn * frame;
       this.#pitch = clampPitch(this.#pitch + tilt * frame);
     }
     if (this.#seat && !this.#beat && (intent.forward !== 0 || intent.strafe !== 0) && ext.some((e) => e.intent.forward !== 0 || e.intent.strafe !== 0)) this.stand();
 
-    const walking = this.#control === 'free' && !this.#seat && !this.#exhibit;
+    const walking = this.#control === 'free' && !this.#seat && !this.#exhibit && !this.#panel;
     const move: MoveIntent = walking ? { ...intent, jump: intent.jump || this.#jumpQueued } : NO_MOVE;
     this.#jumpQueued = false;
     let moved = false;
     this.#alpha = this.#stepper.advance(frame, (h) => {
       this.#prev = [...this.#body.pos];
       if (this.#seat) return;
-      stepBody(this.#body, move, iso ? ISO_RAKE.yaw : this.#yaw, this.#index, this.#bounds, h);
+      stepBody(this.#body, move, this.#yaw, this.#index, this.#bounds, h);
       moved = true;
     });
-    if (iso && walking && (move.forward !== 0 || move.strafe !== 0)) {
-      const sin = Math.sin(ISO_RAKE.yaw);
-      const cos = Math.cos(ISO_RAKE.yaw);
-      const fx = -sin * move.forward + cos * move.strafe;
-      const fz = -cos * move.forward - sin * move.strafe;
-      const face = Math.atan2(-fx, -fz);
-      const turnK = 1 - Math.exp(-10 * frame);
-      this.#yaw += Math.atan2(Math.sin(face - this.#yaw), Math.cos(face - this.#yaw)) * turnK;
-    }
     this.#speed = Math.hypot(this.#body.vel[0], this.#body.vel[2]);
     if (moved) this.#updateZone();
 
     // Cinematic look: ease the view toward the speaker.
-    if (this.#look && !iso) {
+    if (this.#look) {
       const eye = this.eye();
       const dx = this.#look.target[0] - eye[0];
       const dz = this.#look.target[2] - eye[2];
@@ -763,8 +829,9 @@ export class RoamController implements BeatHost {
 
   #refreshFocus(): void {
     let next: InteractableSpec | null = null;
-    if (this.#control !== 'cinematic' && !this.#exhibit && !this.#seat) {
-      const r = selectFocus(this.eye(), lookDir(this.#yaw, this.#pitch), this.world.interactables);
+    if (this.#control !== 'cinematic' && !this.#exhibit && !this.#seat && !this.#panel) {
+      const live = this.world.gates ? this.world.interactables.filter((i) => !i.gate || !this.#openGates.has(i.gate)) : this.world.interactables;
+      const r = selectFocus(this.eye(), lookDir(this.#yaw, this.#pitch), live);
       next = r ? (this.world.interactables.find((i) => i.id === r.id) ?? null) : null;
     }
     if (next?.id !== this.#focus?.id) {
@@ -826,7 +893,7 @@ export class RoamController implements BeatHost {
     return this.#perspective;
   }
 
-  /** `auto` locks the court to third-person isometric. */
+  /** `auto` is the trailing third-person camera; look and movement are the same in both. */
   setPerspective(choice: PerspectiveChoice): void {
     if (choice === this.#perspective) return;
     this.#perspective = choice;
@@ -848,7 +915,7 @@ export class RoamController implements BeatHost {
   playerState(): PlayerState {
     return {
       id: this.id,
-      avatar: this.avatar,
+      avatar: this.#avatar,
       role: this.role,
       pos: [...this.#body.pos],
       yaw: this.#yaw,
@@ -875,6 +942,8 @@ export class RoamController implements BeatHost {
       dialogue: d ? { speaker: d.speaker, name: d.name, text: d.text, shown: Math.floor(d.shown), hold: d.hold } : null,
       beat: b ? { id: b.runner.id, step: Math.min(b.runner.index, b.runner.steps.length), steps: b.runner.steps.length } : null,
       exhibit: this.#exhibit,
+      panel: this.#panel,
+      gates: [...this.#openGates],
       callout: this.#callout ? { ...this.#callout } : null,
       mood: this.#mood,
       shake: this.#reduced ? 0 : this.#shake,

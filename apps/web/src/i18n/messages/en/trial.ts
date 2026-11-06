@@ -88,6 +88,9 @@ export const trial = {
   'hud.zone.witnessStand': 'Witness stand',
   'hud.zone.juryBox': 'Jury box',
   'hud.zone.outside': 'Courthouse plaza',
+  'hud.zone.arrival': 'Shrine of Identity',
+  'hud.zone.wardrobe': 'The Wardrobe',
+  'hud.zone.trials': 'Hall of Trials',
   'hud.zone.none': 'Courthouse',
 
   // Roam HUD: frame
