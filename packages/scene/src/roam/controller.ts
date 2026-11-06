@@ -112,6 +112,8 @@ export class RoamController implements BeatHost {
   #version = 0;
   #look: { target: Vec3 } | null = null;
   #beat: { runner: BeatRunner; resolve: () => void } | null = null;
+  /** Street doors open once the hearing has finished. */
+  #adjourned = false;
   #remotes: PlayerState[] = [];
   #jumpQueued = false;
   #speed = 0;
@@ -290,7 +292,16 @@ export class RoamController implements BeatHost {
       case 'door':
         this.#cue('sfx.door-creak');
         this.#shakeBy(0.2);
-        // fallthrough to the bark
+        if (f.id === 'street-doors' && this.#adjourned) {
+          this.#setDialogue(null);
+          this.teleport('outside');
+          break;
+        }
+        if (f.id === 'return-inside') {
+          this.#setDialogue(null);
+          this.teleport('lobby');
+          break;
+        }
         {
           const line = this.#barks.next(f.lines ?? '');
           if (line) this.#setDialogue({ speaker: 'narrator', text: line });
@@ -411,8 +422,25 @@ export class RoamController implements BeatHost {
     this.#look = null;
     for (const n of this.#npcs) n.talking = false;
     if (this.#control === 'cinematic') this.#control = this.#seat ? 'look' : 'free';
-    this.#emit({ type: 'beat-end', beat: b.runner.id, skipped });
+    const beatId = b.runner.id;
+    this.#emit({ type: 'beat-end', beat: beatId, skipped });
+    if (beatId === 'verdict') this.adjourn();
     b.resolve();
+    this.#changed();
+  }
+
+  /** The hearing is over: the street doors open onto the steps. */
+  adjourn(): void {
+    if (this.#adjourned) return;
+    this.#adjourned = true;
+    this.#changed();
+  }
+
+  /** A replay starts the hearing again and bars the street doors. */
+  reconvene(): void {
+    if (!this.#adjourned) return;
+    this.#adjourned = false;
+    if (this.#zone === 'outside') this.teleport('lobby');
     this.#changed();
   }
 
@@ -715,7 +743,9 @@ export class RoamController implements BeatHost {
   snapshot(): RoamSnapshot {
     const d = this.#dialogue;
     const b = this.#beat;
-    const focus = this.#seat && !this.#beat && this.#control !== 'cinematic' ? { id: 'stand', prompt: 'Stand up' } : this.#focus ? { id: this.#focus.id, prompt: this.#focus.prompt } : null;
+    const focused = this.#focus;
+    const doorPrompt = focused?.id === 'street-doors' ? (this.#adjourned ? 'Step outside' : focused.prompt) : focused?.prompt;
+    const focus = this.#seat && !this.#beat && this.#control !== 'cinematic' ? { id: 'stand', prompt: 'Stand up' } : focused ? { id: focused.id, prompt: doorPrompt ?? focused.prompt } : null;
     return {
       player: this.playerState(),
       eye: this.eye(),

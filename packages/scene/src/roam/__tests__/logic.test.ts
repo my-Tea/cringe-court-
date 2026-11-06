@@ -9,6 +9,7 @@ import { headTarget, HEAD_YAW_MAX } from '../npc';
 import { AutoQuality, lowerQuality, QUALITY } from '../quality';
 import { MockRemotePlayers, RemoteInterpolator, DEMO_WALKERS } from '../remote';
 import { BODY, SolidIndex, overlaps } from '../physics';
+import { ROOM_SCALE } from '../scale';
 import type { BeatStep, InteractableSpec, PlayerState, RoamWorld } from '../types';
 import { roamData } from './fixtures';
 
@@ -47,13 +48,13 @@ describe('interaction focus', () => {
   });
 
   it('in the real room: facing the stand from the dais step focuses "Take the stand"; facing the exhibits focuses Exhibit B', () => {
-    const fromStep = [-8, 8.4 + BODY.eye, -27] as const;
+    const fromStep = [-8 * ROOM_SCALE, 8.4 + BODY.eye, -27 * ROOM_SCALE] as const;
     const at = world.interactables.find((i) => i.id === 'witness-stand')!.at;
     const toStand = Math.atan2(-(at[0] - fromStep[0]), -(at[2] - fromStep[2]));
     const down = Math.atan2(at[1] - fromStep[1], Math.hypot(at[0] - fromStep[0], at[2] - fromStep[2]));
     expect(selectFocus(fromStep, lookDir(toStand, down), world.interactables)?.id).toBe('witness-stand');
     const b = world.interactables.find((i) => i.id === 'exhibit-b')!.at;
-    const eye = [0, BODY.eye, 20] as const;
+    const eye = [0, BODY.eye, 20 * ROOM_SCALE] as const;
     expect(selectFocus(eye, lookDir(0, Math.atan2(b[1] - eye[1], eye[2] - b[2])), world.interactables)?.id).toBe('exhibit-b');
   });
 });

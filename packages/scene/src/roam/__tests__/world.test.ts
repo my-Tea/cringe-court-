@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { isPaletteColor } from '../palette';
 import { BODY, FIXED_DT, insideAny, overlaps, SolidIndex, stepBody, type BodyState } from '../physics';
 import type { RoamWorld, Vec3 } from '../types';
+import { ROOM_SCALE } from '../scale';
 import { zoneAt } from '../world';
 import { roamData } from './fixtures';
 
@@ -54,30 +55,30 @@ describe('roam world', () => {
 
   it('walks from the lobby, through the doors and down the aisle into the well', () => {
     const b = body(world.spawns.lobby.pos);
-    walkTo(b, 0, 72);
+    walkTo(b, 0, 72 * ROOM_SCALE);
     expect(zoneAt(world, b.pos[0], b.pos[2])?.id).toBe('doorway');
-    walkTo(b, 0, 30);
+    walkTo(b, 0, 30 * ROOM_SCALE);
     expect(zoneAt(world, b.pos[0], b.pos[2])?.id).toBe('aisle');
-    walkTo(b, 0, 6);
+    walkTo(b, 0, 6 * ROOM_SCALE);
     expect(zoneAt(world, b.pos[0], b.pos[2])?.id).toBe('well');
   });
 
   it('climbs the dais step to stand before the bench, and reaches every seat exit on foot', () => {
     const b = body(world.spawns.well.pos);
-    walkTo(b, 22, 2);
-    walkTo(b, 22, -26);
+    walkTo(b, 22 * ROOM_SCALE, 2 * ROOM_SCALE);
+    walkTo(b, 22 * ROOM_SCALE, -26 * ROOM_SCALE);
     expect(b.pos[1]).toBeCloseTo(8.4, 1);
     for (const s of Object.values(world.seats)) {
       const w = body(world.spawns.aisle.pos);
-      if (s.exit[2] < 15) {
-        walkTo(w, 0, 20);
-        walkTo(w, s.exit[0] > 0 ? 24 : -22, 6);
+      if (s.exit[2] < 15 * ROOM_SCALE) {
+        walkTo(w, 0, 20 * ROOM_SCALE);
+        walkTo(w, s.exit[0] > 0 ? 24 * ROOM_SCALE : -22 * ROOM_SCALE, 6 * ROOM_SCALE);
       }
-      if (s.id === 'witness') walkTo(w, -22, -24);
+      if (s.id === 'witness') walkTo(w, -22 * ROOM_SCALE, -24 * ROOM_SCALE);
       if (s.id === 'lobby-bench') {
         // Round the open door leaf, which walls the corner off below z ≈ 99.
-        walkTo(w, 0, 103);
-        walkTo(w, s.exit[0], 103);
+        walkTo(w, 0, 103 * ROOM_SCALE);
+        walkTo(w, s.exit[0], 103 * ROOM_SCALE);
       }
       walkTo(w, s.exit[0], s.exit[2], 20);
       expect(Math.hypot(w.pos[0] - s.exit[0], w.pos[2] - s.exit[2]), s.id).toBeLessThan(2);
@@ -86,26 +87,27 @@ describe('roam world', () => {
 
   it('cannot walk through furniture: the evidence table, a pew, the defence desk', () => {
     // Straight at the evidence table from the gate: stops at its edge.
-    const t = body([0, 0, 10]);
-    walkTo(t, 0, -20, 4);
-    expect(t.pos[2]).toBeGreaterThan(2 + BODY.radius - 0.01);
+    const t = body([0, 0, 10 * ROOM_SCALE]);
+    walkTo(t, 0, -20 * ROOM_SCALE, 4);
+    expect(t.pos[2]).toBeGreaterThan(2 * ROOM_SCALE + BODY.radius - 0.01);
     // Into the side of a pew from the aisle.
-    const p = body([-28, 0, 40]);
-    walkTo(p, -70, 40, 4);
-    expect(p.pos[0]).toBeGreaterThan(-36.5);
+    const p = body([-28 * ROOM_SCALE, 0, 40 * ROOM_SCALE]);
+    walkTo(p, -70 * ROOM_SCALE, 40 * ROOM_SCALE, 4);
+    expect(p.pos[0]).toBeGreaterThan(-36.5 * ROOM_SCALE);
     // Into the defence desk from the gallery side.
-    const d = body([56, 0, 9]);
-    walkTo(d, 56, -40, 4);
-    expect(d.pos[2]).toBeGreaterThan(-13);
+    const d = body([56 * ROOM_SCALE, 0, 9 * ROOM_SCALE]);
+    walkTo(d, 56 * ROOM_SCALE, -40 * ROOM_SCALE, 4);
+    expect(d.pos[2]).toBeGreaterThan(-13 * ROOM_SCALE);
   });
 
   it('cannot leave the bounded rooms: walls, locked street doors, ceiling-high barriers', () => {
+    const s = ROOM_SCALE;
     const tries: Array<[Vec3, number, number]> = [
-      [[0, 0, 130], 0, 300], // through the locked street doors
-      [[60, 0, 120], 400, 120], // through the lobby side wall
-      [[-10, 0, 40], -400, 40], // through the courtroom wall
-      [[0, 0, 0], 0, -400], // past the bench into the back wall
-      [[60, 0, 4], 200, -40], // into the jury box
+      [[0, 0, 130 * s], 0, 300 * s], // through the locked street doors
+      [[60 * s, 0, 120 * s], 400 * s, 120 * s], // through the lobby side wall
+      [[-10 * s, 0, 40 * s], -400 * s, 40 * s], // through the courtroom wall
+      [[0, 0, 0], 0, -400 * s], // past the bench into the back wall
+      [[60 * s, 0, 4 * s], 200 * s, -40 * s], // into the jury box
     ];
     for (const [start, x, z] of tries) {
       const b = body(start);
@@ -113,16 +115,27 @@ describe('roam world', () => {
         stepBody(b, { forward: 1, strafe: 0, sprint: true, jump: i % 30 === 0 }, Math.atan2(-(x - b.pos[0]), -(z - b.pos[2])), index, bounds);
         expect(insideAny(b.pos, bounds)).toBe(true);
       }
-      expect(Math.abs(b.pos[0])).toBeLessThan(91);
-      expect(b.pos[2]).toBeLessThan(146);
-      expect(b.pos[2]).toBeGreaterThan(-71);
+      expect(Math.abs(b.pos[0])).toBeLessThan(91 * s);
+      expect(b.pos[2]).toBeLessThan(146 * s);
+      expect(b.pos[2]).toBeGreaterThan(-71 * s);
       // Never into the jury box (x > 72.5 in its z range).
-      if (b.pos[2] < -10.5 && b.pos[2] > -70) expect(b.pos[0]).toBeLessThan(72.5 - BODY.radius + 0.01);
+      if (b.pos[2] < -10.5 * s && b.pos[2] > -70 * s) expect(b.pos[0]).toBeLessThan(72.5 * s - BODY.radius + 0.01);
     }
   });
 
+  it('walks off the plaza, up onto the porch, and around the fountain', () => {
+    const b = body(world.spawns.outside.pos);
+    expect(b.pos[1]).toBeLessThan(-4);
+    const fountain = world.boxes.find((box) => box.m === '#3F8FA8' && box.f[1] < 0)!;
+    walkTo(b, (fountain.f[0] + fountain.t[0]) / 2, (fountain.f[2] + fountain.t[2]) / 2, 8);
+    expect(Math.abs(b.pos[0])).toBeGreaterThan(14 * ROOM_SCALE);
+    walkTo(b, b.pos[0], 160 * ROOM_SCALE, 20);
+    expect(b.pos[1]).toBeGreaterThan(-1);
+    expect(zoneAt(world, b.pos[0], b.pos[2])?.id).toBe('outside');
+  });
+
   it('a hop is a hop: no flying, no standing on furniture', () => {
-    const b = body([0, 0, 44]);
+    const b = body([0, 0, 44 * ROOM_SCALE]);
     let peak = 0;
     for (let i = 0; i < 240; i++) {
       stepBody(b, { forward: 0, strafe: 0, sprint: false, jump: true }, 0, index, bounds);
@@ -131,13 +144,13 @@ describe('roam world', () => {
     expect(peak).toBeGreaterThan(5);
     expect(peak).toBeLessThan(BODY.step + 3);
     // Hop-spamming against a pew never lands on top of it.
-    const p = body([-30, 0, 38]);
+    const p = body([-30 * ROOM_SCALE, 0, 38 * ROOM_SCALE]);
     let top = 0;
     for (let i = 0; i < 600; i++) {
       stepBody(p, { forward: 1, strafe: 0, sprint: false, jump: true }, Math.PI / 2, index, bounds);
       top = Math.max(top, p.pos[1]);
     }
-    expect(p.pos[0]).toBeGreaterThan(-36.4 + BODY.radius - 0.01);
+    expect(p.pos[0]).toBeGreaterThan(-36.4 * ROOM_SCALE + BODY.radius - 0.01);
     expect(top).toBeLessThan(BODY.step + 3);
   });
 });

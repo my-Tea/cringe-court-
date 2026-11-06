@@ -17,7 +17,7 @@ export interface Aabb {
 
 /* ── World ──────────────────────────────────────────────────────────────── */
 
-export type ZoneId = 'lobby' | 'gallery' | 'aisle' | 'well' | 'dais' | 'defendant-table' | 'prosecution-table' | 'witness-stand' | 'doorway';
+export type ZoneId = 'lobby' | 'gallery' | 'aisle' | 'well' | 'dais' | 'defendant-table' | 'prosecution-table' | 'witness-stand' | 'doorway' | 'outside';
 
 export interface Zone {
   id: ZoneId;
@@ -42,7 +42,7 @@ export interface Seat {
   standing?: boolean;
 }
 
-export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'witness' | 'jury-view' | 'bench-front';
+export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'witness' | 'jury-view' | 'bench-front' | 'outside';
 
 export interface Spawn {
   pos: Vec3;
@@ -94,7 +94,7 @@ export interface RoamWorld {
   /** Collision boxes: the solid subset of `boxes` plus invisible barriers. */
   solids: readonly Aabb[];
   /** Hard outer limits per room (the player can never leave their union). */
-  rooms: ReadonlyArray<{ id: 'courtroom' | 'lobby' | 'doorway'; bounds: Aabb }>;
+  rooms: ReadonlyArray<{ id: 'courtroom' | 'lobby' | 'doorway' | 'outside'; bounds: Aabb }>;
   zones: readonly Zone[];
   seats: Readonly<Record<SeatId, Seat>>;
   spawns: Readonly<Record<SpawnId, Spawn>>;

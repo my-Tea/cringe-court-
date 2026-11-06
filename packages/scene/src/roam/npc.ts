@@ -4,7 +4,9 @@
  */
 import type { NpcPose, NpcSpec, NpcState, Vec3 } from './types';
 
-export const HEAD_RANGE = 90;
+import { ROOM_SCALE } from './scale';
+
+export const HEAD_RANGE = 90 * ROOM_SCALE;
 export const HEAD_YAW_MAX = 1.1;
 export const HEAD_PITCH_MAX = 0.45;
 /** Radians per second. */

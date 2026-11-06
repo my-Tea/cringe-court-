@@ -20,6 +20,7 @@ const ZONE_KEYS: Readonly<Record<ZoneId, MessageKey>> = {
   'defendant-table': 'trial.hud.zone.defendantTable',
   'prosecution-table': 'trial.hud.zone.prosecutionTable',
   'witness-stand': 'trial.hud.zone.witnessStand',
+  outside: 'trial.hud.zone.outside',
 };
 
 const QUALITY_KEYS: Readonly<Record<QualityLevel, MessageKey>> = {

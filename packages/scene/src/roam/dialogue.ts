@@ -30,7 +30,7 @@ export const BARKS: Readonly<Record<string, readonly string[]>> = {
   clerk: ['Everything is saved. Twice. Ctrl+S is a lifestyle.', 'Please speak up, the minutes are in all caps.'],
   juror: ['I am legally not allowed to say, but... wow.', 'I came for jury duty, I stayed for the plot.', 'Is it too late to be a juror for the other side?'],
   gallery: ['I brought popcorn. Do not tell the bailiff.', 'Second row is the best seat. Cringe splash zone.', 'This is better than streaming.'],
-  guard: ['Courtroom is through those doors. Street doors are locked till the verdict.', 'Nobody leaves before the gavel.'],
+  guard: ['Courtroom is through those doors. The street doors stay barred until the hearing is over.', 'Nobody leaves before the gavel.'],
   'locked-doors': ['Locked. A brass bar and a note: "COURT IN SESSION. NO ESCAPING YOUR CRINGE."', 'Still locked. The note now has a smiley face.'],
   bust: ['"Hon. Judge Shades I — first to wear sunglasses indoors, 1987." The plaque is very proud.', 'The bust stares back. Somehow the sunglasses make it worse.'],
   globe: ['You spin the globe. It lands on "the group chat".', 'The globe wobbles. Every country on it is labelled "cringe jurisdiction".'],

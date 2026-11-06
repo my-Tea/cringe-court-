@@ -3,7 +3,7 @@
  * before and after the trial. Authored as boxes in the courtroom's voxel
  * language (cream stone, wood wainscot, gold trim, maroon banners) with the
  * reference's set dressing: a sunglasses bust, a globe, a potted plant, the
- * docket board, and locked street doors ("court is in session").
+ * docket board, and street doors that stay barred until the hearing ends.
  */
 import type { Box } from '../../courtroom/geometry';
 import { box } from './boxes';
@@ -209,3 +209,5 @@ export function lobbyBoxes(): Box[] {
   out.push(box([56, 20, 116], [58, 26, 118], GOLD_LT)); // desk bell
   return out;
 }
+
+

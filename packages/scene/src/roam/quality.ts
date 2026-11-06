@@ -25,9 +25,9 @@ export interface QualityPreset {
 }
 
 export const QUALITY: Readonly<Record<QualityLevel, QualityPreset>> = {
-  low: { level: 'low', pixelHeight: 200, dprCap: 1, shadowMap: 0, pointLights: 2, fogFar: 300, far: 360, fullRateAnimation: false },
-  medium: { level: 'medium', pixelHeight: 270, dprCap: 1.5, shadowMap: 1024, pointLights: 4, fogFar: 420, far: 480, fullRateAnimation: true },
-  high: { level: 'high', pixelHeight: 360, dprCap: 2, shadowMap: 2048, pointLights: 8, fogFar: 520, far: 560, fullRateAnimation: true },
+  low: { level: 'low', pixelHeight: 200, dprCap: 1, shadowMap: 0, pointLights: 2, fogFar: 750, far: 900, fullRateAnimation: false },
+  medium: { level: 'medium', pixelHeight: 270, dprCap: 1.5, shadowMap: 1024, pointLights: 4, fogFar: 1050, far: 1200, fullRateAnimation: true },
+  high: { level: 'high', pixelHeight: 360, dprCap: 2, shadowMap: 2048, pointLights: 8, fogFar: 1300, far: 1400, fullRateAnimation: true },
 };
 
 export function lowerQuality(level: QualityLevel): QualityLevel | null {

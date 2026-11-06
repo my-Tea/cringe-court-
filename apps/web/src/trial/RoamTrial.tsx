@@ -70,11 +70,13 @@ export function RoamTrial({
     const planned = JSON.parse(plan) as PlannedBeat[];
     // eslint-disable-next-line react-hooks/set-state-in-effect -- resets the finished flag when a new run starts
     setDone(false);
+    controller.reconvene();
     void playBeats(controller, planned, abort.signal, (i) => {
       setCurrent(i);
       cb.current.onBeat?.(i);
     }).then((all) => {
       if (!all) return;
+      controller.adjourn();
       setCurrent(null);
       setDone(true);
       cb.current.onDone?.();

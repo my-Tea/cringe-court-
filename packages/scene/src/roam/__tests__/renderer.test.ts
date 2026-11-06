@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { RoamController } from '../controller';
 import type { RoamData } from '../load';
+import { ROOM_SCALE } from '../scale';
 import { RoamRenderer } from '../three/renderer';
 import { surfaceFor, surfaceTexture, tilePixels, TILE } from '../three/textures';
 import { batchWorld } from '../three/worldMesh';
@@ -55,7 +56,7 @@ describe('roam renderer (no GL needed)', () => {
     expect(key.shadow.mapSize.x).toBe(2048);
     r.setQuality('low');
     expect(key.castShadow).toBe(false);
-    expect(r.camera.far).toBe(360);
+    expect(r.camera.far).toBe(900);
     const lit = r.scene.children.filter((o) => o instanceof THREE.PointLight && o.visible).length;
     expect(lit).toBe(2);
     r.dispose();
@@ -63,7 +64,7 @@ describe('roam renderer (no GL needed)', () => {
 
   it('the focus outline follows the focused interactable', () => {
     const b = data.world.interactables.find((i) => i.id === 'exhibit-b')!.at;
-    const controller = new RoamController(data.world, { spawn: { pos: [0, 0, 20], yaw: 0, pitch: Math.atan2(b[1] - 44, 20 - b[2]) } });
+    const controller = new RoamController(data.world, { spawn: { pos: [0, 0, 20 * ROOM_SCALE], yaw: 0, pitch: Math.atan2(b[1] - 44, 20 * ROOM_SCALE - b[2]) } });
     const r = new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller });
     controller.update(1 / 60);
     r.update(1 / 60);

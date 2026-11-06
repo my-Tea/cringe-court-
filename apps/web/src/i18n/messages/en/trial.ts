@@ -14,7 +14,7 @@ export const trial = {
   'roam.useClassic': 'Use the classic stage',
   'roam.building': 'Building the courtroom…',
   'roam.beatOf': 'Beat {current} of {total}',
-  'roam.over': 'The hearing is over. Look around, or replay it.',
+  'roam.over': 'The hearing is over. Stand up and use the street doors.',
   'roam.aboutToSit': 'The court is about to sit.',
   'roam.skipBeat': 'Skip beat',
   'roam.replay': 'Replay hearing',
@@ -74,6 +74,7 @@ export const trial = {
   'hud.zone.defendantTable': "Defendant's table",
   'hud.zone.prosecutionTable': 'Prosecution table',
   'hud.zone.witnessStand': 'Witness stand',
+  'hud.zone.outside': 'Courthouse plaza',
   'hud.zone.none': 'Courthouse',
 
   // Roam HUD: frame

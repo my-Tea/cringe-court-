@@ -21,7 +21,11 @@ import type { Aabb, InteractableSpec, NpcSpec, RoamWorld, Seat, SeatId, Spawn, S
 import { aabb } from './boxes';
 import { adaptCourtroom, COURT, WITNESS_STAND } from './courtroom';
 import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TABLE, EXHIBITS, stainedGlass } from './dressing';
+import { ROOM_SCALE } from '../scale';
 import { LOBBY, lobbyBoxes } from './lobby';
+import { GROUNDS, groundsBoxes, PLAZA_Y } from './plaza';
+
+export { ROOM_SCALE } from '../scale';
 
 export { COURT } from './courtroom';
 export { LOBBY } from './lobby';
@@ -78,6 +82,7 @@ export function pitchTo(from: Vec3, to: Vec3): number {
 
 const ZONES: readonly Zone[] = [
   { id: 'lobby', label: 'Lobby', rects: [{ x0: -LOBBY.x, z0: LOBBY.z0, x1: LOBBY.x, z1: LOBBY.z1 }] },
+  { id: 'outside', label: 'Courthouse plaza', rects: [{ x0: -GROUNDS.x, z0: GROUNDS.z0, x1: GROUNDS.x, z1: GROUNDS.z1 }] },
   { id: 'doorway', label: 'Courtroom doors', rects: [{ x0: -25, z0: 64, x1: 25, z1: LOBBY.z0 }] },
   { id: 'witness-stand', label: 'Witness stand', rects: [{ x0: WITNESS_STAND.x0, z0: WITNESS_STAND.z0, x1: WITNESS_STAND.x1, z1: WITNESS_STAND.z1 }] },
   { id: 'defendant-table', label: "Defendant's table", rects: [{ x0: 36, z0: -14, x1: 76, z1: 8 }] },
@@ -152,6 +157,7 @@ function interactables(list: readonly NpcSpec[], marks: Record<string, Vec3>): I
       range: 42,
     })),
     { id: 'street-doors', prompt: 'Try the doors', kind: 'door', at: [0, 32, LOBBY.z1 - 2], hull: aabb([-26, 0, LOBBY.z1 - 4.5], [26, 64, LOBBY.z1]), range: 36, lines: 'locked-doors' },
+    { id: 'return-inside', prompt: 'Go back inside', kind: 'door', at: [0, 32, GROUNDS.z0 + 4], hull: aabb([-22, 0, GROUNDS.z0], [22, 64, GROUNDS.z0 + 8]), range: 40 },
     { id: 'bust', prompt: 'Inspect the bust', kind: 'inspect', at: [70, 49, 131], hull: aabb([63, 0, 129], [77, 57, 143]), range: 30, lines: 'bust' },
     { id: 'globe', prompt: 'Spin the globe', kind: 'inspect', at: [70, 34, 100], hull: aabb([63, 0, 93], [77, 42, 107]), range: 26, lines: 'globe' },
     { id: 'docket', prompt: 'Read the docket', kind: 'inspect', at: [-88, 40, 111], hull: aabb([-91, 22, 96], [-88, 58, 126]), range: 30, lines: 'docket' },
@@ -203,6 +209,7 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     ...dressingBoxes(),
     ...stainedGlass(),
     ...lobbyBoxes().map((b) => (b.m === '#FFD79A' ? { ...b, glow: 0.9 } : b.m === '#BFD7F5' ? { ...b, glow: 0.55 } : b)),
+    ...groundsBoxes().map((b) => (b.m === '#FFD79A' ? { ...b, glow: 0.9 } : b.m === '#BFD7F5' ? { ...b, glow: 0.45 } : b)),
   ];
   const boxes: RoamBox[] = raw.map((b) => ({ ...b, m: toPalette(b.m) }));
 
@@ -215,12 +222,10 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
   solids.push(aabb([-COURT.x, -3, COURT.zFront - 5], [COURT.x, 0, COURT.zBack]));
   solids.push(aabb([-25, -3, COURT.zBack - 1], [25, 0, LOBBY.z0 + 1]));
   solids.push(aabb([-LOBBY.x, -3, LOBBY.z0], [LOBBY.x, 0, LOBBY.z1]));
+  // The plaza paving is the floor. A flat slab here would float the player above it.
   solids.push(...barriers());
 
   const placed = npcs(cast, boxes);
-  for (const n of placed) {
-    if (n.radius > 0) solids.push(aabb([n.pos[0] - n.radius, n.pos[1], n.pos[2] - n.radius], [n.pos[0] + n.radius, BARRIER_TOP, n.pos[2] + n.radius]));
-  }
 
   const marks: Record<string, Vec3> = {};
   for (const n of placed) marks[n.id] = headOf(n, cast);
@@ -242,12 +247,14 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     // From the dais step the three jurors stand side by side (from the well they line up).
     'jury-view': spawn([30, 8.4, -28], marks.jury),
     'bench-front': spawn([0, 8.4, -24], judgeHead),
+    outside: spawn([48, PLAZA_Y, GROUNDS.z0 + 140], [0, 16, LOBBY.z1]),
   };
 
   const rooms: RoamWorld['rooms'] = [
     { id: 'courtroom', bounds: aabb([-COURT.x + 0.6, -10, COURT.zFront + 1.5], [COURT.x - 0.6, COURT.ceiling, COURT.zBack]) },
     { id: 'doorway', bounds: aabb([-22.1, -10, COURT.zBack - 14], [22.1, 60, LOBBY.z0 + 14]) },
     { id: 'lobby', bounds: aabb([-LOBBY.x + 0.6, -10, LOBBY.z0 + 0.6], [LOBBY.x - 0.6, LOBBY.ceiling, LOBBY.z1 - 0.6]) },
+    { id: 'outside', bounds: aabb([-GROUNDS.x + 1, -16, GROUNDS.z0 + 1], [GROUNDS.x - 1, 80, GROUNDS.z1 - 1]) },
   ];
 
   const lights: RoamWorld['lights'] = [
@@ -258,7 +265,7 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     { pos: [0, 82, -34], kind: 'spot' },
   ];
 
-  return {
+  const scaled = scalePlan({
     boxes,
     solids,
     rooms,
@@ -269,6 +276,31 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     npcs: placed,
     marks,
     lights,
+  });
+  const npcSolids: Aabb[] = [];
+  for (const n of scaled.npcs) {
+    if (n.radius > 0) npcSolids.push(aabb([n.pos[0] - n.radius, n.pos[1], n.pos[2] - n.radius], [n.pos[0] + n.radius, BARRIER_TOP, n.pos[2] + n.radius]));
+  }
+  return { ...scaled, solids: [...scaled.solids, ...npcSolids] };
+}
+
+/** Grow the floor plan. Heights, character size and step heights stay put. */
+function scalePlan<T extends RoamWorld & { boxes: RoamBox[] }>(world: T): T {
+  const s = ROOM_SCALE;
+  const v = (p: Vec3): Vec3 => [p[0] * s, p[1], p[2] * s];
+  const boxOf = (b: Aabb): Aabb => ({ min: v(b.min), max: [b.max[0] * s, b.max[1], b.max[2] * s] });
+  return {
+    ...world,
+    boxes: world.boxes.map((b) => ({ ...b, f: v(b.f), t: [b.t[0] * s, b.t[1], b.t[2] * s] })),
+    solids: world.solids.map(boxOf),
+    rooms: world.rooms.map((r) => ({ ...r, bounds: boxOf(r.bounds) })),
+    zones: world.zones.map((z) => ({ ...z, rects: z.rects.map((r) => ({ x0: r.x0 * s, z0: r.z0 * s, x1: r.x1 * s, z1: r.z1 * s })) })),
+    seats: Object.fromEntries(Object.entries(world.seats).map(([id, seat]) => [id, { ...seat, pos: v(seat.pos), exit: v(seat.exit) }])) as T['seats'],
+    spawns: Object.fromEntries(Object.entries(world.spawns).map(([id, spawn]) => [id, { ...spawn, pos: v(spawn.pos) }])) as T['spawns'],
+    interactables: world.interactables.map((i) => ({ ...i, at: v(i.at), hull: boxOf(i.hull), range: (i.range ?? 32) * s })),
+    npcs: world.npcs.map((n) => ({ ...n, pos: v(n.pos) })),
+    marks: Object.fromEntries(Object.entries(world.marks).map(([id, p]) => [id, v(p)])),
+    lights: world.lights.map((l) => ({ ...l, pos: v(l.pos) })),
   };
 }
 

@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import type { CastFile } from '../cast';
 import type { RoamController } from '../controller';
 import { QUALITY, type QualityLevel, type QualityPreset } from '../quality';
+import { ROOM_SCALE } from '../scale';
 import type { PlayerState } from '../types';
 import type { RoamBox } from '../world';
 import { VoxelAvatar } from './avatar';
@@ -47,7 +48,7 @@ export interface RoamRendererOptions {
 
 export class RoamRenderer {
   readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(72, 16 / 9, 0.6, 560);
+  readonly camera = new THREE.PerspectiveCamera(58, 16 / 9, 0.6, 1400);
   readonly #controller: RoamController;
   readonly #cast: CastFile;
   readonly #world: WorldMeshes;
@@ -78,22 +79,22 @@ export class RoamRenderer {
     this.scene.add(this.#world.group);
 
     // Key light: sunlight through the stained glass behind the bench, raking down the room.
-    this.#key.position.set(-40, 170, -110);
-    this.#key.target.position.set(10, 0, 30);
+    this.#key.position.set(-40 * ROOM_SCALE, 170, -110 * ROOM_SCALE);
+    this.#key.target.position.set(10 * ROOM_SCALE, 0, 30 * ROOM_SCALE);
     const sc = this.#key.shadow.camera;
-    sc.left = -110;
-    sc.right = 110;
-    sc.top = 150;
-    sc.bottom = -110;
+    sc.left = -110 * ROOM_SCALE;
+    sc.right = 110 * ROOM_SCALE;
+    sc.top = 150 * ROOM_SCALE;
+    sc.bottom = -110 * ROOM_SCALE;
     sc.near = 20;
-    sc.far = 420;
+    sc.far = 420 * ROOM_SCALE;
     this.#key.shadow.bias = -0.0008;
     this.#key.shadow.normalBias = 0.6;
     this.scene.add(this.#ambient, this.#hemi, this.#key, this.#key.target);
     const world = options.controller.world;
     for (const l of world.lights) {
       if (l.kind === 'spot') continue;
-      const p = new THREE.PointLight(l.kind === 'window' ? '#BFD7F5' : '#FFD79A', l.kind === 'window' ? 260 : 420, l.kind === 'window' ? 90 : 110, 1.6);
+      const p = new THREE.PointLight(l.kind === 'window' ? '#BFD7F5' : '#FFD79A', l.kind === 'window' ? 260 : 420, (l.kind === 'window' ? 90 : 110) * ROOM_SCALE, 1.6);
       p.position.set(...l.pos);
       p.userData.base = p.intensity;
       this.#points.push(p);

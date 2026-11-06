@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { RoamController } from '../controller';
+import { ROOM_SCALE } from '../scale';
 import { MockRemotePlayers } from '../remote';
 import type { RoamEvent, RoamWorld } from '../types';
 import { roamData } from './fixtures';
@@ -41,9 +42,9 @@ describe('RoamController', () => {
 
   it('interacts: E on the stand seats you there; moving or E stands you up at the exit', () => {
     const at = world.interactables.find((i) => i.id === 'witness-stand')!.at;
-    const eye = [-8, 8.4 + 44, -27] as const;
+    const eye = [-8 * ROOM_SCALE, 8.4 + 44, -27 * ROOM_SCALE] as const;
     const c = new RoamController(world, {
-      spawn: { pos: [-8, 8.4, -27], yaw: Math.atan2(-(at[0] - eye[0]), -(at[2] - eye[2])), pitch: Math.atan2(at[1] - eye[1], Math.hypot(at[0] - eye[0], at[2] - eye[2])) },
+      spawn: { pos: [-8 * ROOM_SCALE, 8.4, -27 * ROOM_SCALE], yaw: Math.atan2(-(at[0] - eye[0]), -(at[2] - eye[2])), pitch: Math.atan2(at[1] - eye[1], Math.hypot(at[0] - eye[0], at[2] - eye[2])) },
     });
     const events: RoamEvent[] = [];
     c.subscribe((e) => events.push(e));
@@ -61,7 +62,7 @@ describe('RoamController', () => {
 
   it('exhibits open a panel (movement frozen) and close with E or Esc', () => {
     const b = world.interactables.find((i) => i.id === 'exhibit-b')!.at;
-    const c = new RoamController(world, { spawn: { pos: [0, 0, 20], yaw: 0, pitch: Math.atan2(b[1] - 44, 20 - b[2]) } });
+    const c = new RoamController(world, { spawn: { pos: [0, 0, 20 * ROOM_SCALE], yaw: 0, pitch: Math.atan2(b[1] - 44, 20 * ROOM_SCALE - b[2]) } });
     c.update(1 / 60);
     expect(c.snapshot().focus?.prompt).toBe('Inspect Exhibit B');
     c.interact();
@@ -148,7 +149,7 @@ describe('RoamController', () => {
   });
 
   it('NPC heads turn toward the player within range', () => {
-    const c = new RoamController(world, { spawn: { pos: [-40, 0, 10], yaw: 0, pitch: 0 } });
+    const c = new RoamController(world, { spawn: { pos: [-40 * ROOM_SCALE, 0, 10 * ROOM_SCALE], yaw: 0, pitch: 0 } });
     run(c, 1.5);
     const bailiff = c.npcStates.find((n) => n.id === 'bailiff')!;
     expect(Math.abs(bailiff.headYaw)).toBeGreaterThan(0.2);
@@ -175,11 +176,33 @@ describe('RoamController', () => {
 
   it('talking to an NPC shows their bark with their name', () => {
     const judge = world.marks.judge!;
-    const eye = [0, 8.4, -24] as const;
+    const eye = [0, 8.4, -24 * ROOM_SCALE] as const;
     const c = new RoamController(world, { spawn: { pos: eye, yaw: Math.atan2(-(judge[0] - eye[0]), -(judge[2] - eye[2])), pitch: 0.25 } });
     c.update(1 / 60);
     expect(c.snapshot().focus?.prompt).toBe('Approach the bench');
     c.interact();
     expect(c.snapshot().dialogue).toMatchObject({ speaker: 'judge', name: 'Judge Gavel.exe' });
+  });
+
+  it('bars the street doors during the hearing and opens them once court is adjourned', async () => {
+    const door = world.interactables.find((i) => i.id === 'street-doors')!;
+    const atDoor = { pos: [door.at[0], 0, door.at[2] - 20] as [number, number, number], yaw: Math.PI, pitch: 0 };
+    const c = new RoamController(world, { spawn: atDoor });
+    c.update(1 / 60);
+    expect(c.snapshot().focus?.prompt).toBe('Try the doors');
+    c.interact();
+    expect(c.snapshot().zone).not.toBe('outside');
+    expect(await playThrough(c, c.runBeat('verdict', { verdict: 'not-cooked' }))).toBe(true);
+    c.teleport(atDoor);
+    c.update(1 / 60);
+    expect(c.snapshot().focus?.prompt).toBe('Step outside');
+    c.interact();
+    expect(c.snapshot().zone).toBe('outside');
+    const back = world.interactables.find((i) => i.id === 'return-inside')!;
+    c.teleport({ pos: [back.at[0], 0, back.at[2] + 12], yaw: 0, pitch: 0 });
+    c.update(1 / 60);
+    expect(c.snapshot().focus?.id).toBe('return-inside');
+    c.interact();
+    expect(c.snapshot().zone).toBe('lobby');
   });
 });

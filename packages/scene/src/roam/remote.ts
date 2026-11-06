@@ -5,6 +5,9 @@
  * MockRemotePlayers is a feed that walks fake avatars around the gallery.
  */
 import type { AvatarSpec, PlayerRole, PlayerState, Unsubscribe, Vec3 } from './types';
+import { ROOM_SCALE } from './scale';
+
+const xz = (x: number, y: number, z: number): Vec3 => [x * ROOM_SCALE, y, z * ROOM_SCALE];
 
 /** A remote participant as the transport knows them. */
 export interface RemotePlayer {
@@ -98,12 +101,7 @@ export const DEMO_WALKERS: readonly MockWalker[] = [
     role: 'side-b',
     speed: 34,
     pause: 1.5,
-    path: [
-      [-8, 0, 60],
-      [-8, 0, 26],
-      [8, 0, 26],
-      [8, 0, 60],
-    ],
+    path: [xz(-8, 0, 60), xz(-8, 0, 26), xz(8, 0, 26), xz(8, 0, 60)],
   },
   {
     id: 'remote-juror',
@@ -111,12 +109,7 @@ export const DEMO_WALKERS: readonly MockWalker[] = [
     role: 'juror',
     speed: 28,
     pause: 2.5,
-    path: [
-      [-80, 0, 106],
-      [-56, 0, 104],
-      [-56, 0, 116],
-      [-80, 0, 114],
-    ],
+    path: [xz(-80, 0, 106), xz(-56, 0, 104), xz(-56, 0, 116), xz(-80, 0, 114)],
   },
   {
     id: 'remote-side-a',
@@ -124,12 +117,7 @@ export const DEMO_WALKERS: readonly MockWalker[] = [
     role: 'side-a',
     speed: 30,
     pause: 2,
-    path: [
-      [-62, 0, 112],
-      [-20, 0, 112],
-      [-20, 0, 124],
-      [-62, 0, 124],
-    ],
+    path: [xz(-62, 0, 112), xz(-20, 0, 112), xz(-20, 0, 124), xz(-62, 0, 124)],
   },
 ];
 

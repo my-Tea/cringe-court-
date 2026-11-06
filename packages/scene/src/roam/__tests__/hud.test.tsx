@@ -3,6 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { RoamController } from '../controller';
+import { ROOM_SCALE } from '../scale';
 import type { RoamWorld } from '../types';
 import { ControlLegend, ExhibitPanel, PauseMenu, Prompt, TopBar, Dialogue } from '../react/Hud';
 import { DEFAULT_ROAM_STRINGS, RoamStringsProvider, resolveRoamStrings } from '../react/strings';
@@ -17,7 +18,11 @@ beforeAll(async () => {
 
 describe('roam HUD', () => {
   it('shows the focus prompt with its key, and the touch variant on phones', () => {
-    const c = new RoamController(world, { spawn: { pos: [-8, 8.4, -27], yaw: 1.6, pitch: -0.7 } });
+    const at = world.interactables.find((i) => i.id === 'witness-stand')!.at;
+    const eye = [-8 * ROOM_SCALE, 8.4 + 44, -27 * ROOM_SCALE] as const;
+    const c = new RoamController(world, {
+      spawn: { pos: [-8 * ROOM_SCALE, 8.4, -27 * ROOM_SCALE], yaw: Math.atan2(-(at[0] - eye[0]), -(at[2] - eye[2])), pitch: Math.atan2(at[1] - eye[1], Math.hypot(at[0] - eye[0], at[2] - eye[2])) },
+    });
     c.update(1 / 60);
     const snap = c.snapshot();
     const { rerender } = render(<Prompt snap={snap} touch={false} />);
@@ -70,7 +75,8 @@ describe('roam HUD', () => {
   });
 
   it('exhibit panel shows the card and closes with Esc', () => {
-    const c = new RoamController(world, { spawn: { pos: [0, 0, 20], yaw: 0, pitch: -0.9 } });
+    const b = world.interactables.find((i) => i.id === 'exhibit-b')!.at;
+    const c = new RoamController(world, { spawn: { pos: [0, 0, 20 * ROOM_SCALE], yaw: 0, pitch: Math.atan2(b[1] - 44, 20 * ROOM_SCALE - b[2]) } });
     c.update(1 / 60);
     c.interact();
     render(<ExhibitPanel snap={c.snapshot()} controller={c} restoreFocus={() => undefined} />);
