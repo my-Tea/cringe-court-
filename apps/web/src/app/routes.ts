@@ -4,6 +4,7 @@ import type { ModeId } from '@cringe-court/core';
 export const paths = {
   home: '/',
   mode: (id: ModeId) => `/${id}`,
+  courtroom: '/courtroom',
   gallery: '/gallery',
 } as const;
 
@@ -11,5 +12,6 @@ export const NAV_ITEMS: ReadonlyArray<{ to: string; label: string }> = [
   { to: paths.mode('solo'), label: 'Solo' },
   { to: paths.mode('versus'), label: 'Versus' },
   { to: paths.mode('grand-jury'), label: 'Grand Jury' },
+  { to: paths.courtroom, label: 'Demo court' },
   { to: paths.gallery, label: 'Design gallery' },
 ];

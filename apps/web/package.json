@@ -12,7 +12,11 @@
     "guide-art": "python3 -I scripts/gen-guide-art.py"
   },
   "dependencies": {
+    "@cringe-court/ai": "*",
+    "@cringe-court/audio": "*",
     "@cringe-court/core": "*",
+    "@cringe-court/engine": "*",
+    "@cringe-court/scene": "*",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/nunito": "^5.3.0",
