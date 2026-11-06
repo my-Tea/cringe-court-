@@ -85,6 +85,26 @@ describe('roam renderer (no GL needed)', () => {
     r.dispose();
   });
 
+  it('auto perspective is a third-person isometric camera above the player', () => {
+    const controller = new RoamController(data.world, { spawn: 'aisle' });
+    const r = new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller, quality: 'high' });
+    r.setPerspective('auto');
+    r.setViewport(1600, 900);
+    controller.setPerspective('auto');
+    controller.update(1 / 60);
+    r.update(1 / 60);
+    const eye = controller.view().eye;
+    const cam = r.viewCamera;
+    expect(cam).toBeInstanceOf(THREE.OrthographicCamera);
+    expect(cam.position.y).toBeGreaterThan(eye[1] + 20);
+    expect(r.scene.getObjectByName('avatar:you')?.visible).toBe(true);
+    r.setPerspective('first');
+    r.update(1 / 60);
+    expect(r.viewCamera).toBe(r.camera);
+    expect(r.scene.getObjectByName('avatar:you')?.visible).toBe(false);
+    r.dispose();
+  });
+
   it('the focus outline follows the focused interactable', () => {
     const b = data.world.interactables.find((i) => i.id === 'exhibit-b')!.at;
     const controller = new RoamController(data.world, { spawn: { pos: [0, 0, 20 * ROOM_SCALE], yaw: 0, pitch: Math.atan2(b[1] - 44, 20 * ROOM_SCALE - b[2]) } });
