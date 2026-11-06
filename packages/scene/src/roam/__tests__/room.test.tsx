@@ -8,7 +8,8 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RoamController } from '../controller';
 import type { RoamData } from '../load';
-import { ONBOARDED_STORAGE_KEY, RoamCourtroom } from '../react/RoamCourtroom';
+import { ONBOARDED_STORAGE_KEY } from '../react/onboarding';
+import { RoamCourtroom } from '../react/RoamCourtroom';
 import { roamData } from './fixtures';
 
 vi.mock('@react-three/fiber', () => ({ Canvas: () => null, useFrame: () => undefined, useThree: () => undefined }));

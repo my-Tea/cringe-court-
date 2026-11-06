@@ -9,6 +9,7 @@ import { RoamRenderer } from '../three/renderer';
 import { BeatChip, Callout, ControlLegend, Dialogue, Dock, ExhibitPanel, Onboarding, PauseMenu, Prompt, TopBar } from './Hud';
 import { ensureRoamStyles } from './styles';
 import { RoamStringsProvider, resolveRoamStrings, type RoamStrings } from './strings';
+import { readOnboarded, writeOnboarded } from './onboarding';
 import { TouchControls } from './TouchControls';
 import { useRoamSnapshot } from './useRoamCourtroom';
 
@@ -38,25 +39,6 @@ export interface RoamCourtroomProps {
   onRenderer?: (r: RoamRenderer) => void;
   /** Open the controls legend at start. Default false: the Controls button and the onboarding card cover it. */
   controlsOpen?: boolean;
-}
-
-/** Remembers that the player has seen (or dismissed) the onboarding card, per browser. */
-export const ONBOARDED_STORAGE_KEY = 'cc:roam-onboarded';
-
-function readOnboarded(): boolean {
-  try {
-    return typeof window !== 'undefined' && window.localStorage.getItem(ONBOARDED_STORAGE_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function writeOnboarded(): void {
-  try {
-    window.localStorage.setItem(ONBOARDED_STORAGE_KEY, '1');
-  } catch {
-    /* storage blocked: the card stays dismissed for this page only */
-  }
 }
 
 function Driver({ controller, renderer, pixelated, auto, onDowngrade }: { controller: RoamController; renderer: RoamRenderer; pixelated: boolean; auto: AutoQuality | null; onDowngrade: (q: QualityLevel) => void }) {
