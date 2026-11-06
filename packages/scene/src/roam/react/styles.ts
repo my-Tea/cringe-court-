@@ -105,7 +105,8 @@ export const ROAM_CSS = `
 .ccr-act{min-width:60px!important;min-height:60px!important}
 .ccr-prompt{top:auto;bottom:calc(var(--ccr-dock) + 144px);font-size:14px}
 .ccr-callout{top:100px;font-size:clamp(20px,8cqw,34px);padding:6px 14px}
-.ccr-beat{top:auto;bottom:calc(var(--ccr-dock) + 8px);left:8px;right:8px;justify-content:space-between;font-size:12px}
+/* The beat name moves into the dock (and the host's bar); a chip would sit on the action. */
+.ccr-beat{display:none}
 .ccr-legend{top:96px;right:8px;max-height:calc(100% - var(--ccr-dock) - 104px)}
 }
 `;

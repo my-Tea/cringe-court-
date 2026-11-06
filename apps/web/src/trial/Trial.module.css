@@ -49,9 +49,11 @@
 }
 
 @media (max-width: 40rem) {
-  .canvas {
+  /* Tall on phones: the dialogue docks inside the room, under the 3D view (B5).
+     Two classes, so it beats the room's own injected height. */
+  .roam .canvas {
     aspect-ratio: auto;
-    height: min(78svh, 40rem);
+    height: min(76svh, 38rem);
   }
 }
 

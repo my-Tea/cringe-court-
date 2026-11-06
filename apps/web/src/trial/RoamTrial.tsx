@@ -43,7 +43,16 @@ const ROLE_SPAWN: Readonly<Record<PlayerRole, SpawnId>> = { defendant: 'defendan
 
 const PACE_KEYS = { standard: 'trial.roam.pace.standard', highlights: 'trial.roam.pace.highlights', full: 'trial.roam.pace.full' } as const;
 
-export function RoamTrial({
+/**
+ * The room is rebuilt when the viewer's role or the jury size changes (taking a
+ * Grand Jury seat turns a spectator into a juror): the controller seats by role
+ * and fills the jury box when it is created.
+ */
+export function RoamTrial(props: RoamTrialProps) {
+  return <RoamTrialRoom key={`${props.role ?? 'defendant'}:${props.jurors ?? 3}`} {...props} />;
+}
+
+function RoamTrialRoom({
   beats,
   label,
   role = 'defendant',
