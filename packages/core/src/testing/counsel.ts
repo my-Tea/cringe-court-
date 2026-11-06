@@ -133,7 +133,7 @@ export class FixtureCounsel implements AiCounselPort {
   async sentence(request: SentenceRequest): Promise<CourtLine> {
     const text =
       request.verdictLabel === 'NO VERDICT'
-        ? 'MISTRIAL. No verdict was reached, so everybody gets their money back and nobody learns anything.'
+        ? 'MISTRIAL. The jury could not agree, so everybody gets their money back and nobody learns anything.'
         : `The jury says ${request.verdictLabel}. The court sentences everyone involved to log off for one (1) hour.`;
     return { id: 'S01', speaker: 'judge', segment: 'sentence', beat: 'gavel', text };
   }

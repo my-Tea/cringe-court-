@@ -171,9 +171,8 @@ export function nextStep(c: VersusCase, viewer: Viewer, account: Hex | null): Ne
     case 'appeal':
     case 'share': {
       const claim = account ? claimable(c, account) : ZERO_USDC;
-      if (s.verdict.kind === 'no-verdict') return claim > 0n ? out('Mistrial: no verdict. Claim your refund.', true) : out('NO VERDICT: both sides refunded');
       if (claim > 0n) return out('Verdict is in. Claim your payout.', true);
-      return out(`Verdict: ${s.verdict.label}`);
+      return out(s.verdict.kind === 'no-verdict' ? 'NO VERDICT: both sides refunded' : `Verdict: ${s.verdict.label}`);
     }
     case 'closed': {
       const claim = account ? claimable(c, account) : ZERO_USDC;
@@ -183,14 +182,6 @@ export function nextStep(c: VersusCase, viewer: Viewer, account: Hex | null): Ne
     default:
       return out('');
   }
-}
-
-/**
- * Why a case ended without a verdict: not enough jurors opened their scrolls
- * ("no-shows"), or every juror voted and the vote genuinely split.
- */
-export function mistrialCause(v: { completedDuty: number; appointed: number }): 'no-shows' | 'split' {
-  return v.completedDuty < v.appointed ? 'no-shows' : 'split';
 }
 
 /** What `account` can still claim from the ledger. */

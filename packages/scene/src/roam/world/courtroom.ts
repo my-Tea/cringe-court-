@@ -16,7 +16,6 @@
  */
 import type { Box } from '../../courtroom/geometry';
 import { box, centre, mirrorZ, translate, within } from './boxes';
-import { C } from '../palette';
 
 export const COURT = {
   x: 91,
@@ -27,11 +26,11 @@ export const COURT = {
   door: { x: 22.2, frame: 24.82, gap: 38, z0: 64.9, z1: 76 },
 } as const;
 
-const WALL = C.neutral100;
-const TRIM = C.gold500;
-const WOOD = C.gold900;
-const WOOD_DARK = C.neutral900;
-const GOLD_LIGHT = C.gold300;
+const WALL = '#FFF9ED';
+const TRIM = '#D9A046';
+const WOOD = '#8B5E2A';
+const WOOD_DARK = '#4A3A32';
+const GOLD_LIGHT = '#F6C75B';
 
 function isRemoved(b: Box): boolean {
   const c = centre(b);
@@ -80,7 +79,7 @@ function additions(): Box[] {
     const x0 = s * 22.1;
     const x1 = s * 20.4;
     out.push(box([x0, 1.7, 74.1], [x1, 56.1, 94.5], WOOD));
-    out.push(box([s * 20.3, 6.8, 78], [s * 19.9, 40.8, 90.5], C.gold700));
+    out.push(box([s * 20.3, 6.8, 78], [s * 19.9, 40.8, 90.5], '#B77D3A'));
     out.push(box([s * 20.3, 44.2, 76], [s * 19.9, 49.3, 92.5], TRIM));
     out.push(box([s * 20.3, 25.5, 91], [s * 19.6, 32.3, 93], GOLD_LIGHT));
   }
@@ -91,7 +90,7 @@ function additions(): Box[] {
     out.push(box([s * 19.9, 0, 18.2], [s * 18.5, 2.4, 34.7], TRIM));
   }
   // The back-wall wainscot, either side of the doorway.
-  for (const s of [-1, 1]) out.push(box([s * 95, 0, 71], [s * d.frame, 12, 72.5], C.neutral500));
+  for (const s of [-1, 1]) out.push(box([s * 95, 0, 71], [s * d.frame, 12, 72.5], '#A9917D'));
   return out;
 }
 

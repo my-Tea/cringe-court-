@@ -7,7 +7,6 @@
  */
 import type { AudioCueId, CalloutStyle, LightingMood } from '@cringe-court/core';
 import type { Box } from '../courtroom/geometry';
-import type { HearingPace } from './pace';
 
 export type Vec3 = readonly [number, number, number];
 
@@ -18,7 +17,7 @@ export interface Aabb {
 
 /* ── World ──────────────────────────────────────────────────────────────── */
 
-export type ZoneId = 'lobby' | 'gallery' | 'aisle' | 'well' | 'dais' | 'defendant-table' | 'prosecution-table' | 'witness-stand' | 'doorway' | 'jury-box';
+export type ZoneId = 'lobby' | 'gallery' | 'aisle' | 'well' | 'dais' | 'defendant-table' | 'prosecution-table' | 'witness-stand' | 'doorway';
 
 export interface Zone {
   id: ZoneId;
@@ -27,7 +26,7 @@ export interface Zone {
   rects: ReadonlyArray<{ x0: number; z0: number; x1: number; z1: number }>;
 }
 
-export type SeatId = 'defendant' | 'prosecution' | 'witness' | 'jury-box' | 'gallery-left' | 'gallery-right' | 'lobby-bench';
+export type SeatId = 'defendant' | 'witness' | 'gallery-left' | 'gallery-right' | 'lobby-bench';
 
 export interface Seat {
   id: SeatId;
@@ -41,11 +40,9 @@ export interface Seat {
   exit: Vec3;
   /** Standing spots (the witness stand) keep standing eye height. */
   standing?: boolean;
-  /** Camera pitch on sitting down (default level). */
-  pitch?: number;
 }
 
-export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'prosecution' | 'witness' | 'jury-box' | 'jury-view' | 'bench-front';
+export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'witness' | 'jury-view' | 'bench-front';
 
 export interface Spawn {
   pos: Vec3;
@@ -89,8 +86,6 @@ export interface NpcSpec {
   radius: number;
   /** Bark pool id (dialogue.ts). */
   lines: string;
-  /** Jurors: seat in the jury box, 0–2 front row (filled first), 3–6 raised back row. */
-  jurySlot?: number;
 }
 
 export interface RoamWorld {
@@ -174,12 +169,6 @@ export type BeatStep =
 export interface BeatOptions {
   /** Replace the built-in dialogue (modes feed AI counsel lines here). */
   lines?: readonly DialogueLine[];
-  /** Where the player sits for the beat. The controller fills it from the player's role. */
-  seat?: SeatId;
-  /** True when the player is a party (defendant, Side A, Side B): parties rise for the verdict. Default true. */
-  party?: boolean;
-  /** Hearing pace (pace.ts). The controller fills it from its current pace. */
-  pace?: HearingPace;
   verdict?: VerdictKind;
   /** Verdict headline override, e.g. "SIDE A WINS". */
   verdictText?: string;
@@ -206,8 +195,6 @@ export interface NpcState {
   /** Body yaw (NPCs turn their whole body only in cinematics). */
   yaw: number;
   talking: boolean;
-  /** Not in this hearing (an empty jury seat, or the seat the player took). The renderer hides it. */
-  hidden?: boolean;
 }
 
 export interface RoamSnapshot {
@@ -229,9 +216,6 @@ export interface RoamSnapshot {
   npcs: readonly NpcState[];
   remotes: readonly PlayerState[];
   reducedMotion: boolean;
-  pace: HearingPace;
-  /** Beats and dialogue play FAST_FORWARD× faster. */
-  fastForward: boolean;
   /** Monotonic counter; bumps whenever the snapshot changes. */
   version: number;
 }

@@ -79,7 +79,7 @@ function PhaseColumn({ p, current }: { p: PricingProfile; current: boolean }) {
           <dt>{t('grandJury.pricing.target')}</dt>
           <dd>
             {formatAmount(p.target)}{' '}
-            <span className={styles.termsNote}>{t('grandJury.pricing.term.people', { people: crowdSize(p.target, p.typicalTicket), ticket: formatAmount(p.typicalTicket, { unit: false }) })}</span>
+            <span className={styles.termsNote}>{t('grandJury.pricing.term.people', { people: crowdSize(p.target), ticket: formatAmount(p.typicalTicket, { unit: false }) })}</span>
           </dd>
         </div>
         <div>
@@ -117,7 +117,7 @@ export function PricingPage() {
   useDocumentTitle(t('grandJury.pricing.docTitle'));
   const { demo } = useCourtContext();
   const p = CURRENT_PRICING;
-  const used = demo.marketingUsed();
+  const used = demo.court.docket.list().filter((c) => c.basis === 'marketing-cap').length;
   const left = marketingBudgetLeft(p, used);
 
   return (

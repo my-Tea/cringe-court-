@@ -9,7 +9,7 @@ import styles from '../versus.module.css';
 
 /** Who you are in this tab, your demo wallet, sound, and the demo-court controls. */
 export function PersonaBar() {
-  const { persona, personas, switchPersona, newPersona, balance, desk, run, audio, resetDemo, snapshot, court } = useVersus();
+  const { persona, personas, switchPersona, newPersona, balance, desk, run, audio, resetDemo, snapshot } = useVersus();
   const sound = useAudioSnapshot(audio);
   const mine = snapshot?.cases.filter((c) => Object.values(c.parties).some((p) => p?.account === persona.account.toLowerCase())).length ?? 0;
 
@@ -17,8 +17,8 @@ export function PersonaBar() {
     <aside className={styles.personaBar} aria-label={t('versus.persona.aria')}>
       <div className={styles.personaInner}>
         <div className={styles.personaWho}>
-          <Badge tone={court.kind === 'remote' ? (court.status === t('backend.status.live') ? 'success' : 'highlight') : 'info'} dot={court.kind === 'remote' && court.status === t('backend.status.live') ? 'pulse' : true}>
-            {court.kind === 'remote' ? (court.status ?? t('backend.status.connecting')) : t('versus.persona.demoCourt')}
+          <Badge tone="info" dot>
+            {t('versus.persona.demoCourt')}
           </Badge>
           <TestnetBadge />
           <span className={styles.personaName}>
@@ -84,7 +84,6 @@ export function PersonaBar() {
                   </li>
                 ))}
               </ul>
-              {court.kind === 'local' && (
               <details className={styles.resetBox}>
                 <summary>{t('versus.persona.reset.summary')}</summary>
                 <p>{t('versus.persona.reset.body')}</p>
@@ -94,7 +93,6 @@ export function PersonaBar() {
                   </Button>
                 </DialogClose>
               </details>
-              )}
             </DialogContent>
           </Dialog>
         </div>

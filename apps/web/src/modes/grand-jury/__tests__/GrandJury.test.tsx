@@ -76,30 +76,6 @@ describe('Grand Jury docket', () => {
   });
 });
 
-describe('Grand Jury topics', () => {
-  it('labels cases with Grand Jury topics, not the Solo crime categories, and filters by them', async () => {
-    const user = userEvent.setup();
-    renderAt('/grand-jury/docket');
-    await screen.findByText('8 cases');
-    const group = screen.getByRole('group', { name: 'Topic' });
-    expect(within(group).getByRole('button', { name: 'Food fight' })).toBeInTheDocument();
-    expect(within(group).getByRole('button', { name: 'Etiquette' })).toBeInTheDocument();
-    expect(within(group).queryByRole('button', { name: /Crypto|Dating|NPC Behavior|Internet Crimes/ })).toBeNull();
-    expect(screen.queryByText(/NPC Behavior|Internet Crimes/)).toBeNull();
-    await user.click(within(group).getByRole('button', { name: 'Food fight' }));
-    expect(await screen.findByText('3 of 8 cases')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Does pineapple belong on pizza?' })).toBeInTheDocument();
-  });
-
-  it('shows the topic on the case page header', async () => {
-    const n = await caseNumberOf('pineapple-pizza');
-    renderAt(`/grand-jury/case/${n}`);
-    await screen.findByRole('heading', { level: 1, name: 'Does pineapple belong on pizza?' });
-    expect(screen.getByText('Food fight')).toBeInTheDocument();
-    expect(screen.queryByText('NPC Behavior')).toBeNull();
-  });
-});
-
 describe('Grand Jury case page', () => {
   it('summons the court: validates the amount, contributes and credits the viewer', async () => {
     const user = userEvent.setup();
@@ -148,35 +124,6 @@ describe('Grand Jury case page', () => {
     expect(await axe(container, AXE)).toHaveNoViolations();
   });
 
-  it('scrolls to and focuses the verdict heading when settling reveals it (B3)', async () => {
-    const user = userEvent.setup();
-    const n = await caseNumberOf('k-reply');
-    for (let i = 0; i < 200; i++) {
-      const c = (await demo.chain.getCase(n))!;
-      if (c.phase === 'finalizing') break;
-      await runWorld(5);
-    }
-    expect((await demo.chain.getCase(n))!.phase).toBe('finalizing');
-    const scrollIntoView = vi.fn();
-    Element.prototype.scrollIntoView = scrollIntoView;
-    renderAt(`/grand-jury/case/${n}`);
-    await user.click(await screen.findByRole('button', { name: 'Settle and read the verdict' }));
-    const heading = await screen.findByRole('heading', { name: /strangers agreed|No verdict/ });
-    const scrolledVerdict = () => scrollIntoView.mock.contexts.some((el) => (el as Element).getAttribute('aria-labelledby') === 'verdict-title');
-    await waitFor(() => expect(scrolledVerdict()).toBe(true));
-    expect(heading).toHaveAttribute('tabindex', '-1');
-    expect(document.activeElement).toBe(heading);
-  });
-
-  it('does not steal focus or scroll when an already-decided case loads', async () => {
-    const scrollIntoView = vi.fn();
-    Element.prototype.scrollIntoView = scrollIntoView;
-    const n = await caseNumberOf('hot-dog-sandwich');
-    renderAt(`/grand-jury/case/${n}`);
-    await screen.findByRole('heading', { name: '5 of 7 strangers agreed' });
-    expect(scrollIntoView).not.toHaveBeenCalled();
-  });
-
   it('steps through the hearing in the trial view', async () => {
     const user = userEvent.setup();
     const n = await caseNumberOf('hot-dog-sandwich');
@@ -218,34 +165,12 @@ describe('My court and Who pays', () => {
   });
 });
 
-describe('simulation heartbeat', () => {
-  it('logs a failing tick instead of leaving an unhandled rejection, and keeps ticking (B9)', async () => {
-    const unhandled: unknown[] = [];
-    const onUnhandled = (e: unknown) => unhandled.push(e);
-    process.on('unhandledRejection', onUnhandled);
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const tick = vi.spyOn(demo.sim, 'tick').mockRejectedValue(new Error('Minimum contribution is 0.10 USDC'));
-    renderAt('/grand-jury/docket');
-    await waitFor(() => expect(tick.mock.calls.length).toBeGreaterThanOrEqual(2), { timeout: 4000 });
-    await new Promise((r) => setTimeout(r, 50));
-    process.off('unhandledRejection', onUnhandled);
-    expect(unhandled).toEqual([]);
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('simulation tick failed'), expect.any(Error));
-    warn.mockRestore();
-  });
-});
-
 describe('loading and errors', () => {
   it('shows the loading state, then an error with a retry when the court fails to start', async () => {
     let fail!: (e: Error) => void;
-    const starting = new Promise<never>((_, reject) => (fail = reject));
-    const subscribed = vi.spyOn(starting, 'then');
-    __setDemoCourtForTests(starting);
+    __setDemoCourtForTests(new Promise((_, reject) => (fail = reject)));
     renderAt('/grand-jury/docket');
     expect(await screen.findByText('Calling the court to order…')).toBeInTheDocument();
-    // Fail only once the provider is listening: on a loaded machine its effect can run after the first paint,
-    // and rejecting earlier leaves a (briefly) unhandled rejection that is the test's doing, not the app's.
-    await waitFor(() => expect(subscribed).toHaveBeenCalled());
     await act(async () => fail(new Error('ledger offline')));
     expect(await screen.findByText('The court could not sit')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();

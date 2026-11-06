@@ -3,7 +3,6 @@ import { formatAmount } from '@/i18n/domain';
 import { NavLink, Outlet } from 'react-router';
 import { t, type MessageKey } from '@/i18n';
 import { Badge, Button, ErrorState, Icon, LoadingState, Tooltip, cx, useToast } from '@/ds';
-import { BackendGate, useBackendLink, type BackendClient } from '@/platform/backend';
 import { paths } from './lib';
 import { useCourtContext } from './state/context';
 import { CourtProvider } from './state/CourtProvider';
@@ -22,10 +21,8 @@ function WalletChip() {
   const { toast } = useToast();
   const balance = wallet.state === 'ready' ? wallet.data.balance : null;
   const topUp = () => {
-    demo.faucet(usdc('10.00')).then(
-      () => toast({ tone: 'success', title: t('grandJury.layout.faucet.toast.title'), description: t('grandJury.layout.faucet.toast.body') }),
-      (err: unknown) => toast({ tone: 'danger', title: t('grandJury.layout.faucet.button'), description: err instanceof Error ? err.message : String(err) }),
-    );
+    demo.faucet(usdc('10.00'));
+    toast({ tone: 'success', title: t('grandJury.layout.faucet.toast.title'), description: t('grandJury.layout.faucet.toast.body') });
   };
   return (
     <div className={styles.wallet}>
@@ -71,36 +68,9 @@ function CourtBar() {
  * court comes up.
  */
 export function GrandJuryLayout() {
-  return <BackendGate>{(court) => <GrandJuryCourt client={court.kind === 'remote' ? court.client : null} />}</BackendGate>;
-}
-
-function CourtRibbon({ client }: { client: BackendClient | null }) {
-  const status = useBackendLink(client);
-  if (client) {
-    return (
-      <p className={styles.demoRibbon}>
-        <Badge tone={status === t('backend.status.live') ? 'success' : 'highlight'} solid>
-          {status ?? t('backend.status.connecting')}
-        </Badge>
-        <span>{t('backend.gj.ribbon', { host: client.host })}</span>
-      </p>
-    );
-  }
-  return (
-    <p className={styles.demoRibbon}>
-      <Badge tone="info" solid>
-        {t('grandJury.layout.ribbon.badge')}
-      </Badge>
-      <span>{t('grandJury.layout.ribbon.text')}</span>
-    </p>
-  );
-}
-
-function GrandJuryCourt({ client }: { client: BackendClient | null }) {
   return (
     <div className={styles.mode}>
       <CourtProvider
-        client={client}
         fallback={(status, retry) =>
           status.state === 'loading' ? (
             <div className={styles.page}>
@@ -116,7 +86,12 @@ function GrandJuryCourt({ client }: { client: BackendClient | null }) {
         }
       >
         <CourtBar />
-        <CourtRibbon client={client} />
+        <p className={styles.demoRibbon}>
+          <Badge tone="info" solid>
+            {t('grandJury.layout.ribbon.badge')}
+          </Badge>
+          <span>{t('grandJury.layout.ribbon.text')}</span>
+        </p>
         <Outlet />
       </CourtProvider>
     </div>

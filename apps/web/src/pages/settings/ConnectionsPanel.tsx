@@ -1,10 +1,9 @@
 import { formatAmount } from '@/i18n/domain';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Alert, Badge, Icon, PaperButton, PaperPanel, Spinner } from '@/ds';
+import { Alert, Badge, Icon, PaperPanel, Spinner } from '@/ds';
 import { t, tRich } from '@/i18n';
 import { platformConfig, type PlatformConfig } from '@/platform/config';
 import { identityInfo } from '@/platform/identity/createIdentity';
-import { prefersLocal, setPrefersLocal } from '@/platform/backend';
 import type { ModeProbe } from '@/platform/ledger';
 import { COURT_LABEL_KEY } from '../modeText';
 import styles from './Settings.module.css';
@@ -96,8 +95,6 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
             <p className={styles.serviceDetail}>{t('shell.connections.ai.body')}</p>
           </div>
         </PaperPanel>
-
-        <CourtServerPanel config={config} />
       </ul>
 
       {probe.status === 'loading' && (
@@ -166,53 +163,5 @@ export function ConnectionsPanel({ config = platformConfig }: { config?: Platfor
         </ul>
       </details>
     </div>
-  );
-}
-
-/** Where Versus and Grand Jury live: this browser, or the shared court server (and this device's choice). */
-function CourtServerPanel({ config }: { config: PlatformConfig }) {
-  const [local, setLocal] = useState(() => prefersLocal());
-  const backend = config.backend;
-  let host = backend?.url ?? '';
-  try {
-    host = backend ? new URL(backend.url).host : '';
-  } catch {
-    /* keep the raw value */
-  }
-  const shared = backend !== null && !local;
-  return (
-    <PaperPanel as="li" tone="cream" edge="cut" elevation={1} padding="md">
-      <div className={styles.service}>
-        <div className={styles.serviceHead}>
-          <h3 className={styles.serviceName}>{t('backend.settings.title')}</h3>
-          <Badge tone={shared ? 'success' : 'info'}>{shared ? t('backend.settings.shared') : t('backend.settings.local')}</Badge>
-        </div>
-        {backend ? (
-          <>
-            <p className={styles.serviceDetail}>{local ? t('backend.settings.localChosen') : t('backend.settings.sharedBody', { host })}</p>
-            <dl className={styles.rows}>
-              <div className={styles.row}>
-                <dt>{t('backend.settings.url')}</dt>
-                <dd className={styles.mono}>{backend.url}</dd>
-              </div>
-            </dl>
-            {local && (
-              <PaperButton
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setPrefersLocal(false);
-                  setLocal(false);
-                }}
-              >
-                {t('backend.local.useServer')}
-              </PaperButton>
-            )}
-          </>
-        ) : (
-          <p className={styles.serviceDetail}>{t('backend.settings.noneBody')}</p>
-        )}
-      </div>
-    </PaperPanel>
   );
 }

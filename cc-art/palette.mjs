@@ -18,10 +18,12 @@ export const PAL = {
 
 // Semantic aliases — what meshes actually reference.
 export const MAT = {
-  marble:      PAL.neu5,  marbleMid:  PAL.neu4,  marbleDark: PAL.neu3,
+  marble:      PAL.neu5,  marbleMid:  PAL.neu4,  marbleDark: PAL.neu3, marblePale: PAL.neu5,
   stone:       PAL.neu3,  stoneDark:  PAL.neu2,  stoneDeep:  PAL.neu1,
   roof:        PAL.royal3, roofDark:  PAL.royal1, roofLight:  PAL.royal4,
-  wood:        PAL.gold1, woodLight:  PAL.gold2,
+  wood:        PAL.gold1, woodLight:  PAL.gold2, woodDark: PAL.neu1,
+  blue:        PAL.blu3,  blueLight:  PAL.blu4,
+  green:       PAL.grn3,  greenDark:  PAL.grn2,
   gold:        PAL.gold3, goldLight:  PAL.gold4, goldPale:   PAL.gold5,
   velvet:      PAL.royal1, velvetLight: PAL.royal2,
   parchment:   PAL.neu5,

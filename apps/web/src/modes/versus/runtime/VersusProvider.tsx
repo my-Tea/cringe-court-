@@ -1,10 +1,8 @@
 import type { AudioEngine } from '@cringe-court/audio';
-import { ZERO_USDC, monotonicUnixClock, type AiCounselPort, type IdentityPort, type SaltVault } from '@cringe-court/core';
-import { VersusCounsel, VersusDesk, VersusError, World, type FactStore, type Persona, type VersusDeskOptions, type WorldSnapshot } from '@cringe-court/modes-versus';
-import { BackendError } from '@cringe-court/net';
+import { ZERO_USDC, type AiCounselPort, type IdentityPort, type SaltVault } from '@cringe-court/core';
+import { VersusCounsel, VersusDesk, VersusError, World, type FactStore, type Persona, type WorldSnapshot } from '@cringe-court/modes-versus';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { VersusContext, type CourtKind, type VersusRuntime } from './context';
-import { describeBackendError } from '@/platform/backend/messages';
+import { VersusContext, type VersusRuntime } from './context';
 import { useToast } from '@/ds';
 import { t } from '@/i18n';
 import { platformConfig } from '@/platform/config';
@@ -26,66 +24,32 @@ export interface VersusProviderProps {
   audio?: AudioEngine;
   /** ms between world rebuilds and clerk rounds; 0 disables the timers (tests drive them). */
   tickMs?: number;
-  /** Build the desk (a shared court uses `RemoteVersusDesk`). */
-  createDesk?: (options: VersusDeskOptions) => VersusDesk;
-  /** Run the court clerk on this device. A shared court's clerk runs on the server. */
-  clerk?: boolean;
-  /** Who this device can be, when someone other than this browser keeps the list (the court server). */
-  personaControl?: { list: readonly Persona[]; switchTo(id: string): void; create(): void };
-  /** Which court this is, for the persona bar. Default: this device's demo court. */
-  court?: CourtKind;
-  /** A shared court: open an invite by code (or signed link) before looking it up. */
-  openInvite?: (code: string, token?: string) => Promise<string | null>;
-  /** A shared court: the signed invite link for Side A to send. */
-  inviteUrl?: (trialId: string) => Promise<string>;
 }
 
-const LOCAL_COURT: CourtKind = { kind: 'local' };
-
-export function VersusProvider({
-  children,
-  store: storeProp,
-  persona: personaProp,
-  counsel: counselProp,
-  identity,
-  salts: saltsProp,
-  clock: clockProp,
-  audio: audioProp,
-  tickMs = 1000,
-  createDesk,
-  clerk = true,
-  personaControl,
-  court = LOCAL_COURT,
-  openInvite,
-  inviteUrl,
-}: VersusProviderProps) {
+export function VersusProvider({ children, store: storeProp, persona: personaProp, counsel: counselProp, identity, salts: saltsProp, clock: clockProp, audio: audioProp, tickMs = 1000 }: VersusProviderProps) {
   const { toast } = useToast();
   const store = useMemo(() => storeProp ?? new LocalFactStore(), [storeProp]);
-  // Monotonic after page load (B19): a wall-clock jump does not expire invites or jury windows.
-  const clock = useMemo(() => {
-    if (clockProp) return clockProp;
-    const real = monotonicUnixClock();
-    return () => Math.floor(real());
-  }, [clockProp]);
+  const clock = useMemo(() => clockProp ?? (() => Math.floor(Date.now() / 1000)), [clockProp]);
   const counsel = useMemo(() => counselProp ?? new VersusCounsel({ latencyMs: 1400 }), [counselProp]);
   const salts = useMemo(() => saltsProp ?? new LocalSaltVault(), [saltsProp]);
   const audio = audioProp ?? appAudio();
   const [persona, setPersona] = useState<Persona>(() => personaProp ?? tabPersona());
   const [personas, setPersonas] = useState<readonly Persona[]>(() => (personaProp ? [personaProp] : listPersonas()));
 
-  const desk = useMemo(() => {
-    const options: VersusDeskOptions = {
-      store,
-      persona,
-      counsel,
-      identity: identity ? identity(persona) : identityFor(platformConfig, persona.id),
-      salts,
-      clock,
-      random: secureRandom,
-      demo: true,
-    };
-    return createDesk ? createDesk(options) : new VersusDesk(options);
-  }, [store, persona, counsel, identity, salts, clock, createDesk]);
+  const desk = useMemo(
+    () =>
+      new VersusDesk({
+        store,
+        persona,
+        counsel,
+        identity: identity ? identity(persona) : identityFor(platformConfig, persona.id),
+        salts,
+        clock,
+        random: secureRandom,
+        demo: true,
+      }),
+    [store, persona, counsel, identity, salts, clock],
+  );
 
   const [snapshot, setSnapshot] = useState<WorldSnapshot | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -127,7 +91,7 @@ export function VersusProvider({
 
   // The court clerk: permissionless housekeeping (drafting, finalizing, the demo jury).
   useEffect(() => {
-    if (!tickMs || !clerk) return;
+    if (!tickMs) return;
     let running = false;
     const id = window.setInterval(() => {
       if (running) return;
@@ -140,7 +104,7 @@ export function VersusProvider({
         });
     }, Math.round(tickMs * 1.5));
     return () => window.clearInterval(id);
-  }, [desk, tickMs, clerk]);
+  }, [desk, tickMs]);
 
   // The shared app engine already unlocks on the document; an injected engine (tests) needs its own.
   useEffect(() => (audioProp ? audioProp.attachUnlock() : undefined), [audioProp]);
@@ -153,7 +117,7 @@ export function VersusProvider({
         await rebuild();
         return true;
       } catch (err) {
-        const message = err instanceof BackendError ? describeBackendError(err) : err instanceof Error ? err.message : t('versus.error.generic');
+        const message = err instanceof Error ? err.message : t('versus.error.generic');
         if (!options.quiet) toast({ title: err instanceof VersusError && err.code === 'identity' ? t('versus.error.identity') : t('versus.error.refused'), description: message, tone: 'danger' });
         audio.handle({ type: 'tx.failed' });
         return false;
@@ -166,22 +130,17 @@ export function VersusProvider({
     () => ({
       desk,
       persona,
-      personas: personaControl ? personaControl.list : personas,
+      personas,
       switchPersona: (id) => {
-        if (personaControl) return personaControl.switchTo(id);
         const p = switchTabPersona(id);
         if (p) setPersona(p);
       },
       newPersona: () => {
-        if (personaControl) return personaControl.create();
         const p = createPersona();
         switchTabPersona(p.id);
         setPersona(p);
         setPersonas(listPersonas());
       },
-      court,
-      ...(openInvite ? { openInvite } : {}),
-      ...(inviteUrl ? { inviteUrl } : {}),
       snapshot,
       error,
       now: snapshot ? Math.max(snapshot.now, clock() + snapshot.skew) : clock(),
@@ -194,7 +153,7 @@ export function VersusProvider({
         void rebuild();
       },
     }),
-    [desk, persona, personas, personaControl, court, openInvite, inviteUrl, snapshot, error, clock, run, audio, store, rebuild],
+    [desk, persona, personas, snapshot, error, clock, run, audio, store, rebuild],
   );
 
   return <VersusContext.Provider value={value}>{children}</VersusContext.Provider>;
