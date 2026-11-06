@@ -1,4 +1,3 @@
-/* global process, console */
 // `npm run dev:full`: the court server and the web app together, wired up.
 // Server on :8787 (JSON-lines store in .data/, or CC_STORE=memory), Vite on
 // :5173 with VITE_BACKEND_URL pointing at it. Ctrl+C stops both.

@@ -4,7 +4,7 @@
  * server's clerk. People on this device are court-server sessions.
  */
 import { invitePath, type Persona } from '@cringe-court/modes-versus';
-import { RemoteVersusDesk, type BackendError } from '@cringe-court/net';
+import { RemoteVersusDesk, type BackendError, type RemoteFactStore } from '@cringe-court/net';
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { ErrorState, LoadingState } from '@/ds';
 import { t } from '@/i18n';
@@ -20,16 +20,17 @@ export function RemoteVersusProvider({ client, children }: { client: BackendClie
   const persona = useMemo<Persona | null>(() => (current ? { id: current.id, name: name(current.id), account: current.account } : null), [current, name]);
   const store = useMemo(() => (persona ? client.versusStore() : null), [client, persona]);
   const clock = useMemo(() => () => client.connection.serverNow(), [client]);
-  const [sync, setSync] = useState<{ state: 'loading' } | { state: 'ready' } | { state: 'error'; error: BackendError }>({ state: 'loading' });
   const [attempt, setAttempt] = useState(0);
+  // The first read of the log, keyed by store and attempt (a new key reads as loading until it settles).
+  const [result, setResult] = useState<{ store: RemoteFactStore; attempt: number; error: BackendError | null } | null>(null);
+  const sync = !store || result?.store !== store || result.attempt !== attempt ? { state: 'loading' as const } : result.error ? { state: 'error' as const, error: result.error } : { state: 'ready' as const };
 
   useEffect(() => {
     if (!store) return;
     let live = true;
-    setSync({ state: 'loading' });
     store.ready().then(
-      () => live && setSync({ state: 'ready' }),
-      (error: BackendError) => live && setSync({ state: 'error', error }),
+      () => live && setResult({ store, attempt, error: null }),
+      (error: BackendError) => live && setResult({ store, attempt, error }),
     );
     return () => {
       live = false;

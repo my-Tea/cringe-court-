@@ -1,4 +1,4 @@
-/* global console, document */
+/* global document, localStorage */
 // Versus across devices: Side A, Side B and a juror each in their own browser
 // context (separate storage = separate devices), all on one court server.
 // A files and sends the signed link; B opens it on "another device", accepts
@@ -120,6 +120,8 @@ export async function playVersusAcrossDevices(browser, base, shots) {
   await sleep(2500);
   await shots.shot(J, 'J-device-sealed');
 
+  // The labelled demo jurors seal 4 s and 8 s after court opens (server clerk); skipping sooner makes them no-shows.
+  await sleep(10000);
   shots.step('demo clock: skip to the reveal');
   for (let i = 0; i < 5 && !(await hasText(J, 'Open my scroll')); i++) {
     await clickText(A, 'Skip to the deadline', 'button', 5000).catch(() => {});

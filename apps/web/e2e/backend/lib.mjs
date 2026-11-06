@@ -1,4 +1,4 @@
-/* global process, console */
+/* global process, console, fetch, window */
 // Harness for the cross-device runs: a real court server (apps/server), a
 // production build of the web app pointed at it (VITE_BACKEND_URL), and
 // separate Playwright browser contexts, one per "device" (separate storage,
