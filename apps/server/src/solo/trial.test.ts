@@ -12,8 +12,21 @@ describe('Solo trial', () => {
   it('writes the trial only for a real stake on this exact confession', async () => {
     const trials = createSoloTrials({ writer: writer(), stakes: stakes(confessionHash(TITLE, STORY)) });
     const r = await trials.trial(TX, TITLE, STORY);
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.lines.length).toBeGreaterThan(3);
+    expect(r.ok === true && r.lines.length).toBeGreaterThan(3);
+  });
+
+  it('keeps writing past a slow request, and the next ask collects the same trial', async () => {
+    const ai = writer();
+    const real = ai.generateTrial.bind(ai);
+    const spy = vi.spyOn(ai, 'generateTrial').mockImplementation(async (c) => {
+      await new Promise((r) => setTimeout(r, 40));
+      return real(c);
+    });
+    const trials = createSoloTrials({ writer: ai, stakes: stakes(confessionHash(TITLE, STORY)), answerWithinMs: 1 });
+    expect(await trials.trial(TX, TITLE, STORY)).toEqual({ ok: 'writing' });
+    await new Promise((r) => setTimeout(r, 80));
+    expect((await trials.trial(TX, TITLE, STORY)).ok).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it('refuses a stake made for a different confession, without calling the model', async () => {

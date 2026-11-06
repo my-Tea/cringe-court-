@@ -228,6 +228,8 @@
 }
 
 .court {
+  --cc-courtroom-max: calc(52dvh * 1.6);
+
   display: grid;
   gap: var(--cc-space-3);
 }

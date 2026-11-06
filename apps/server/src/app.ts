@@ -292,7 +292,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       limit(limits.world, sid, 'Too many requests. Wait a minute.');
       const b = await body<{ txHash?: unknown; title?: unknown; story?: unknown }>(req);
       const r = await soloTrials.trial(b.txHash, b.title, b.story);
-      if (r.ok) return json(res, 200, r);
+      if (r.ok) return json(res, r.ok === 'writing' ? 202 : 200, r);
       if (r.reason === 'bad-request') throw new HttpError(400, 'bad-request', r.message);
       if (r.reason === 'not-a-stake' || r.reason === 'wrong-confession') throw new HttpError(403, 'forbidden', r.message);
       throw new HttpError(503, 'disabled', r.message);

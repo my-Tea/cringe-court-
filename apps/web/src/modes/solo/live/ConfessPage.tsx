@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { Alert, Icon, PaperButton } from '@/ds';
 import { t, type MessageKey } from '@/i18n';
 import { soloPaths } from '../lib/paths';
-import { readDraft, screenConfession, titleFrom, writeDraft } from './liveCase';
+import { CASE_TITLE, readDraft, screenConfession, writeDraft } from './liveCase';
 import styles from './live.module.css';
 
 const MAX = 600;
@@ -22,7 +22,7 @@ export function ConfessPage() {
   const text = story.trim();
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    const confession = { title: titleFrom(text), story: text };
+    const confession = { title: CASE_TITLE, story: text };
     setBusy(true);
     setError(null);
     try {

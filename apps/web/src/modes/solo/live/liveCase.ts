@@ -44,7 +44,10 @@ export const writeDraft = (c: Confession) => write(session(), DRAFT_KEY, c);
 export const readCase = (n: string) => read<LiveCase>(local(), `${CASE_KEY}${n}`);
 export const writeCase = (n: string, c: LiveCase) => write(local(), `${CASE_KEY}${n}`, c);
 
-/** The first few words make the case title, so the player only ever writes one thing. */
+/** What the court calls every case. The judge says it aloud, so it cannot be the whole confession. */
+export const CASE_TITLE = 'The Public Confession';
+
+/** The first sentence, for headings. The player only ever writes one thing. */
 export function titleFrom(story: string): string {
   const first = story.trim().split(/(?<=[.!?])\s/)[0] ?? story;
   if (first.length <= TITLE_MAX) return first.replace(/[.!?]+$/, '');
@@ -66,9 +69,26 @@ export async function screenConfession(c: Confession): Promise<{ ok: true } | { 
   return api.connection.post('/api/v1/solo/screen', c);
 }
 
-export async function fetchTrial(c: LiveCase): Promise<CourtLine[]> {
+const POLL_MS = 2500;
+const GIVE_UP_MS = 3 * 60 * 1000;
+
+/** The trial is written on the server while this waits. A dropped request just asks again. */
+export async function fetchTrial(c: LiveCase, alive: () => boolean): Promise<CourtLine[] | null> {
   const api = client();
   await api.connect();
-  const r = await api.connection.post<{ lines: CourtLine[] }>('/api/v1/solo/trial', { txHash: c.txHash, title: c.title, story: c.story });
-  return r.lines;
+  const deadline = Date.now() + GIVE_UP_MS;
+  let lastError: unknown = new Error('The court took too long.');
+  while (alive() && Date.now() < deadline) {
+    try {
+      const r = await api.connection.post<{ ok: true; lines: CourtLine[] } | { ok: 'writing' }>('/api/v1/solo/trial', { txHash: c.txHash, title: c.title, story: c.story });
+      if (r.ok === true) return r.lines;
+    } catch (e) {
+      // A refusal from the court is final; a timeout or a blip is not.
+      if ((e as { code?: string }).code !== 'timeout' && (e as { code?: string }).code !== 'unreachable') throw e;
+      lastError = e;
+    }
+    await new Promise((resolve) => setTimeout(resolve, POLL_MS));
+  }
+  if (!alive()) return null;
+  throw lastError;
 }

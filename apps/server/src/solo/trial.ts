@@ -62,10 +62,14 @@ export function screenConfession(title: unknown, story: unknown): ScreenResult {
 }
 
 export type TrialFailure = 'bad-request' | 'not-a-stake' | 'wrong-confession' | 'unavailable' | 'failed';
-export type TrialResult = { ok: true; lines: CourtLine[]; contentHash: string } | { ok: false; reason: TrialFailure; message: string };
+export type TrialResult = { ok: true; lines: CourtLine[]; contentHash: string } | { ok: false; reason: TrialFailure; message: string } | { ok: 'writing' };
 
-export function createSoloTrials(o: { writer: CourtAI | null; stakes: StakeReader }) {
+/** A request answers within this; the page asks again until the trial is ready. A slow model never loses a paid trial. */
+const ANSWER_WITHIN_MS = 3000;
+
+export function createSoloTrials(o: { writer: CourtAI | null; stakes: StakeReader; answerWithinMs?: number }) {
   const store = new MemoryTranscriptStore();
+  const jobs = new Map<string, Promise<Transcript>>();
 
   const generate = async (caseKey: string, title: string, story: string): Promise<Transcript> => {
     const prepared = prepare(title, story, caseKey);
@@ -89,8 +93,18 @@ export function createSoloTrials(o: { writer: CourtAI | null; stakes: StakeReade
       if (filing.contentHash.toLowerCase() !== confessionHash(title, story)) {
         return { ok: false, reason: 'wrong-confession', message: 'That stake was for a different confession.' };
       }
+      const key = `arc-solo-${filing.caseId}`;
+      let job = jobs.get(key);
+      if (!job) {
+        job = generate(key, title, story);
+        jobs.set(key, job);
+        // A failed attempt must not stick: the next ask tries again.
+        job.catch(() => jobs.delete(key));
+      }
       try {
-        const transcript = await generate(`arc-solo-${filing.caseId}`, title, story);
+        const wait = new Promise<null>((resolve) => setTimeout(() => resolve(null), o.answerWithinMs ?? ANSWER_WITHIN_MS));
+        const transcript = await Promise.race([job, wait]);
+        if (!transcript) return { ok: 'writing' };
         return { ok: true, lines: toCourtLines(transcript), contentHash: transcript.contentHash };
       } catch (e) {
         return { ok: false, reason: 'failed', message: e instanceof Error ? e.message : 'The court could not sit.' };

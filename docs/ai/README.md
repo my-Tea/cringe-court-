@@ -13,9 +13,9 @@ Code: [`packages/ai/src/court/`](../../packages/ai/src/court). Import from `@cri
 | Case preparation, prompts, parsing, validation, repair, assembly, hashing, replay store | Implemented and unit-tested (mock and fixtures) |
 | Solo / Versus / Viral trial plans, post-verdict commentary for all 7 outcomes | Implemented and unit-tested |
 | 0G Router adapter (`OgRouterClient`) | Implemented against the published 0G docs; HTTP behaviour tested with a fake `fetch` |
-| **A real 0G inference call** | **Not executed yet.** No API key was available while this was built. The public model catalog (`GET /v1/models`, no key needed) *was* read live. See [10 §8](10_0G_PROVIDER_INTEGRATION.md#8-live-smoke-test) |
+| **A real 0G inference call** | **Done on 2026-11-06:** Solo trials run live through the router on `gemini-3.5-flash-lite`, written only after the stake is read from Arc. Earlier note: **Not executed yet.** No API key was available while this was built. The public model catalog (`GET /v1/models`, no key needed) *was* read live. See [10 §8](10_0G_PROVIDER_INTEGRATION.md#8-live-smoke-test) |
 | Comedy quality on a real model | **Unmeasured.** The mock writer is template-based; its jokes say nothing about model quality. See [11](11_TESTING_AND_EVALUATION.md) |
-| Wiring into the web app / server | Not done. The layer exposes typed functions; the game's existing engine performs the result ([09](09_ANIMATION_CONTRACT.md)) |
+| Wiring into the web app / server | Solo on Arc: `apps/server/src/solo/trial.ts`. Versus and Viral are not wired. The layer exposes typed functions; the game's existing engine performs the result ([09](09_ANIMATION_CONTRACT.md)) |
 
 ## Read in this order
 

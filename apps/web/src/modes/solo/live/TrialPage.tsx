@@ -10,7 +10,7 @@ import { appLedger } from '@/platform/ledger';
 import { soloPaths } from '../lib/paths';
 import { Courtroom } from '../court/Courtroom';
 import { soloAudioPort } from '../lib/sound';
-import { fetchTrial, readCase, type LiveCase } from './liveCase';
+import { fetchTrial, readCase, titleFrom, type LiveCase } from './liveCase';
 import styles from './live.module.css';
 
 const SUMMON: readonly MessageKey[] = ['solo.live.trial.summon.0', 'solo.live.trial.summon.1', 'solo.live.trial.summon.2', 'solo.live.trial.summon.3'];
@@ -21,7 +21,7 @@ const JURY_POLL_MS = 8000;
 export function TrialPage() {
   const { caseNumber = '' } = useParams();
   const [live] = useState(() => readCase(caseNumber));
-  useDocumentTitle(live?.title ?? t('solo.live.confess.title'));
+  useDocumentTitle(live ? titleFrom(live.story) : t('solo.live.confess.title'));
   const [lines, setLines] = useState<readonly CourtLine[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
@@ -32,8 +32,8 @@ export function TrialPage() {
     if (!live) return;
     let current = true;
     setError(null);
-    fetchTrial(live).then(
-      (l) => current && setLines(l),
+    fetchTrial(live, () => current).then(
+      (l) => current && l && setLines(l),
       (e: unknown) => current && setError(e instanceof Error ? e.message : String(e)),
     );
     return () => {
@@ -56,7 +56,7 @@ export function TrialPage() {
   if (!lines) return <Summoning />;
   return (
     <div className={styles.court}>
-      <h1 className={styles.courtTitle}>{live.title}</h1>
+      <h1 className={styles.courtTitle}>{titleFrom(live.story)}</h1>
       <Courtroom lines={lines} cast={cast} title={live.title} audio={soloAudioPort} onFinished={() => setFinished(true)} />
     </div>
   );
