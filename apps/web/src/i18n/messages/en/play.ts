@@ -17,7 +17,7 @@ export const play = {
 
   // Verify panel
   'verify.title': 'Verify your identity',
-  'verify.body': 'Step into the courtroom with World ID. Jurors and parties must be real, unique people: one human, one seat.',
+  'verify.body': 'Optional. Verify now so a jury seat does not make you wait. Walking, watching, and filing stay open either way. One human, one wallet.',
   'verify.point1': 'The court never sees your name or face.',
   'verify.point2': 'The same person cannot judge their own case, even from a second wallet.',
   'verify.mock': 'Testnet build: the proof comes from the mock verifier.',
@@ -25,7 +25,7 @@ export const play = {
   'verify.cta': 'Verify with World ID',
   'verify.later': 'Not now',
   'verify.ok.title': 'Verified human',
-  'verify.ok.body': 'The seal on the bridge has lifted. The wardrobe is next.',
+  'verify.ok.body': 'You are verified. When a seat opens, this wallet is already a person.',
   'verify.failed': 'Verification did not finish: {message}',
   'verify.done': 'You are already verified.',
 
