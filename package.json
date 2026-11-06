@@ -2,7 +2,7 @@
   "name": "cringe-court",
   "private": true,
   "version": "0.0.0",
-  "description": "CringeCourt — a comedy courtroom where AI performs and humans decide. Testnet only.",
+  "description": "CringeCourt \u2014 a comedy courtroom where AI performs and humans decide. Testnet only.",
   "type": "module",
   "engines": {
     "node": ">=20.19"
