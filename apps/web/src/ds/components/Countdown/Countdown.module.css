@@ -1,9 +1,9 @@
 /*
  * Deadline widget (V4 §5: time remaining "must be instantly readable"). The
- * bar drains from sunrise gold to dusk red as the deadline approaches.
+ * bar drains from burnished gold to dusk red as the deadline approaches.
  */
 .countdown {
-  --_tone: var(--cc-color-highlight);
+  --_tone: var(--cc-color-highlight-shadow);
   display: flex;
   flex-direction: column;
   gap: var(--cc-space-2);
@@ -52,7 +52,7 @@
   width: calc(var(--_left) * 100%);
   background: var(--_tone);
   /* Pixel ticks every 10 %. */
-  background-image: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), rgb(0 0 0 / 0.25) calc(10% - 2px) 10%);
+  background-image: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), color-mix(in srgb, var(--cc-neutral-900) 25%, transparent) calc(10% - 2px) 10%);
   background-size: calc(100% / var(--_left, 1)) 100%;
   transition: width var(--cc-duration-slow) linear;
 }
