@@ -13,9 +13,7 @@ function shade(hex, mul) {
 }
 
 /** Render one prop's boxes to an isometric Canvas. */
-/** `keepOrder`: draw boxes in list order (authored layering) instead of depth-sorting —
- *  for thin overlays (stripes, labels) that depth-sorting would bury. */
-export function renderProp(parts, pad = 2, { keepOrder = false } = {}) {
+export function renderProp(parts, pad = 2) {
   // Project every box corner to find bounds first.
   const proj = (x, y, z) => [(x - z) * COS30, (x + z) * SIN30 - y];
   let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
@@ -38,7 +36,7 @@ export function renderProp(parts, pad = 2, { keepOrder = false } = {}) {
       b, i,
       d: (b.f[0] + b.t[0]) / 2 + (b.f[2] + b.t[2]) / 2 - (b.f[1] + b.t[1]) / 2,
     }))
-    .sort((a, b) => (keepOrder ? a.i - b.i : a.d - b.d));
+    .sort((a, b) => a.d - b.d);
 
   for (const { b } of order) {
     const [x0, y0, z0] = b.f, [x1, y1, z1] = b.t;
@@ -87,7 +85,7 @@ export function renderProp(parts, pad = 2, { keepOrder = false } = {}) {
 
 /** Contact sheet of every prop, left-aligned into uniform cells. */
 export function propSheet(outFile, scale = 5, cols = 7) {
-  const imgs = PROP_NAMES.map((n) => ({ name: n, c: renderProp(PROPS[n].parts, 2, { keepOrder: !!PROPS[n].keepOrder }) }));
+  const imgs = PROP_NAMES.map((n) => ({ name: n, c: renderProp(PROPS[n].parts) }));
   const cw = Math.max(...imgs.map((i) => i.c.w)) + 6;
   const ch = Math.max(...imgs.map((i) => i.c.h)) + 6;
   const rows = Math.ceil(imgs.length / cols);
