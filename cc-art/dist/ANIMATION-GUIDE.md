@@ -3,8 +3,9 @@
 How to wire character animation. Companion to `CHARACTER-SPEC.md` (what the
 assets are) — this file is **how they move**.
 
-Machine-readable source: `animation/animations.json` — 8 characters,
-**55 character animations** (54 shared-set + juror `seated_idle`), **10 system animations**.
+Machine-readable source: `animation/animations.json` — 11 characters (9 posed humanoids,
+the AI Narrator and the layered player), **106 character animations** (shared set, 3 idle
+variants per posed character and the narrator, juror `seated_idle`), **10 system animations**.
 
 ---
 
@@ -121,8 +122,8 @@ Rules, enforced in `animations.json → stateMachine.rules`:
 
 ### Idle variants
 
-Every character (all 8 in `animations.json`, i.e. the cast plus Creator, minus the
-player) has three variants of `idle`: `idle_a`, `idle_b`, `idle_c`. Each is a small
+Every character in `animations.json` except the player (the cast, Creator, Side A /
+Side B and the AI Narrator) has three variants of `idle`: `idle_a`, `idle_b`, `idle_c`. Each is a small
 rig delta from base idle (judge: adjusts shades / taps gavel / strokes beard;
 juror: munches popcorn / leans back / leans in; AI Narrator: hover bob left, lean in,
 hover bob right, and so on). Art: `characters/<id>/poses/idle_{a,b,c}[@2x].png`, same

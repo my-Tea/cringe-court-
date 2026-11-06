@@ -514,7 +514,7 @@ Honest status, so nobody plans against art that doesn't exist.
 |---|---|
 | `CHARACTER-SPEC.md` (this file) | ✅ Complete |
 | `ANIMATION-GUIDE.md` | ✅ Complete |
-| `animation/animations.json` | ✅ 8 characters, 54 animations, 10 system, validated |
+| `animation/animations.json` | ✅ 11 characters, 106 animations, 10 system, validated |
 | **Player avatar** | ❌ Not built — voxel parts plan in §6 |
 | **Characters (8)** | ✅ **Shipped** — 643 boxes total, 3 views each, see `characters/` |
 | Expressions for the cast | ⬜ None — neutral render only |

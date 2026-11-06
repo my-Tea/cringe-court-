@@ -7,7 +7,7 @@ Start here. Five guides, in the order a coding agent should read them.
 | 1 | **`SCENE-GUIDE.md`** | What the courtroom is, where everything sits, how to load it |
 | 2 | **`ASSET-GUIDE.md`** | All 53 props, 13 block textures, palette, placement conventions |
 | 3 | **`CHARACTER-SPEC.md`** | Every character, the layer system, customization, manifests |
-| 4 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 85 character animations |
+| 4 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 106 character animations |
 | 5 | **`ASSET-COMPLETE.md`** | Final inventory + what remains (optional polish only) |
 | 6 | `GAP-ANALYSIS.md` | Historical: what the gaps were before they were filled |
 | 7 | `VILLAGE-DECISION.md` | Why the village set was cut, what stays, when to reopen |
@@ -30,7 +30,7 @@ Start here. Five guides, in the order a coding agent should read them.
 | `scene/pov_*.png` | 6 first-person angles + iso + cutaway |
 | `preview_blocks.png` | 13 block textures, tiled 2×2 to show seams |
 | `preview_props@4x.png` | All 53 props, isometric |
-| `characters/_previews/lineup.png` | All 8 characters, equal scale |
+| `characters/_previews/lineup.png` | All 10 characters (incl. Side A / Side B), equal scale |
 | `characters/_previews/gallery.png`, `gallery_benches.png` | 8 seated gallery NPCs: back / rear 3/4 / front 3/4, and on benches |
 | `characters/gallery/` | Gallery NPC sprites + manifest (seeded) |
 
@@ -54,10 +54,10 @@ const anim = (await fetch('animation/animations.json').then(r => r.json()))
 | Courtroom | ✅ 1606 boxes, 8 camera presets, validated |
 | Props | ✅ 53 props / 1138 boxes, manifest + bbmodel |
 | Block textures | ✅ 13 tileable 16×16 |
-| Characters | ✅ 8 voxel characters, 643 boxes, 3 views each |
-| Animation data | ✅ 85 animations, validated, timed |
-| Expressions | ✅ **64** (8 per character) |
-| Poses | ✅ **80** (10 per character) |
+| Characters | ✅ 10 voxel characters (incl. Side A / Side B) + 6 juror variants |
+| Animation data | ✅ 106 animations, validated, timed |
+| Expressions | ✅ **80** (8 per character) |
+| Poses | ✅ **100** (10 per character) + 30 idle variants + juror `seated` |
 | UI kit | ✅ **34** assets |
 | FX | ✅ **10** |
 | Player parts | ✅ **60** |

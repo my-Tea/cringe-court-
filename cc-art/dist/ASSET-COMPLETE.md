@@ -290,30 +290,35 @@ than detailed anatomy. Not yet tried in-engine.
 | `artkit.mjs` | Material ramps + shared face parts (eye, brow, mouth, blush) |
 | `chars-v4-core.mjs` | Pose/expression tables + body/face/hair builders |
 | `chars-v4.mjs` | All 8 character definitions, parameterised |
-| `ui-kit.mjs` | UI assets + the 5×7 bitmap font |
+| `ui-kit.mjs` / `pixel-font.mjs` | UI assets / the shared 5×7 bitmap font (UI kit, brand kit, defendant stamp) |
 | `fx-kit.mjs` | FX sprites |
 | `sprite-player.mjs` | Player compositor |
-| `vox-base.mjs` / `vox-chars.mjs` | Voxel anatomy, pose rig, all 8 characters |
+| `vox-base.mjs` / `vox-chars.mjs` | Voxel anatomy, face rig, pose rig (10 poses, `seated`, idle variants), 10 characters incl. Side A/B and 6 juror variants |
+| `held-props.mjs` | Gavel, EXHIBIT A, popcorn, papers: one geometry source for characters, props and first-person hands |
 | `char-render.mjs` | Orthographic voxel renderer (supports per-box transforms) |
-| `export-vox.mjs` | Bulk export → 144 character sprites + sheets (+ juror seated) |
+| `export-vox.mjs` | Bulk export → 212 character sprites + sheets (10 poses, 8 expressions, 3 idle variants each; juror seated; juror variants) |
 | `gallery-npcs.mjs` / `export-gallery.mjs` | Seeded seated audience NPCs + export |
 | `export-player-vox.mjs` | Player parts → 58 sprites |
-| `animations.mjs` | 55 animations (incl. juror `seated_idle`), 10 system |
+| `animations.mjs` | 106 animations over 11 characters (idle variants, juror `seated_idle`), 10 system; validated on write |
+| `export-portraits.mjs` / `export-defendant.mjs` / `export-fp-hands.mjs` | Dialogue portraits / anonymous defendant / first-person hands |
+| `export-bbmodel.mjs` / `validate-bbmodel.mjs` | Props `.bbmodel` generator / validator |
+| `build-all.mjs` | Runs every generator above in dependency order; `--check` fails on any diff |
 
-Regenerate everything:
+Regenerate everything (characters, props, `.bbmodel`, scene, UI, FX, brand, portraits,
+defendant, hands, gallery, animation library, `dist/source` mirror, Judge GLB + previews,
+economics CSVs) with the one driver:
 
 ```bash
 cd cc-art
-npm install --no-save pngjs   # the only dependency; not vendored
-node export-vox.mjs          # characters (export-all.mjs is the retired 2D pipeline)
-node export-gallery.mjs      # gallery NPCs
-node export-player-vox.mjs   # player parts
-node ui-kit.mjs              # UI
-node fx-kit.mjs              # FX
-node brand-kit.mjs           # wordmark, share card, case card
-node export-portraits.mjs    # dialogue portraits (after export-vox)
-node export-defendant.mjs    # anonymous defendant set
+npm install --no-save pngjs     # the only dependency; not vendored
+node build-all.mjs              # every generator, in dependency order
+node build-all.mjs --check      # same, then exit 1 if any committed output differs
+node build-all.mjs --skip-scene # skip the slow courtroom renders (shot.mjs)
 ```
+
+`export-all.mjs` / `export-chars.mjs` are the retired 2D pipeline: do not run them, they
+overwrite the voxel sprites. See `docs/ART-INTEGRATION-REPORT.md` for how PRs #1–#18 were
+integrated and verified.
 
 ---
 

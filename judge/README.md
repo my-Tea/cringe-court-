@@ -116,6 +116,7 @@ python3 judge/tools/bbmodel2glb.py                      # dist/GavelExe.bbmodel 
 python3 judge/tools/bbmodel2glb.py in.bbmodel out.glb --scale 0.03125 --fps 30
 python3 judge/tools/glbcheck.py check judge/dist/GavelExe.glb
 python3 judge/tools/glbcheck.py render judge/dist/GavelExe.glb out.png --anim gavel_strike --time 0.18 --yaw 80 --pitch 4
+python3 judge/tools/glbcheck.py preview judge/dist/GavelExe.glb judge/dist/preview-glb.png   # the committed 4-frame strip
 ```
 
 Conventions (also in the `bbmodel2glb.py` docstring):

@@ -3,6 +3,7 @@
 
     python3 judge/tools/glbcheck.py check  model.glb
     python3 judge/tools/glbcheck.py render model.glb out.png [--anim NAME --time T] [--yaw DEG] [--pitch DEG] [--view-from -z|+z]
+    python3 judge/tools/glbcheck.py preview model.glb out.png   # the 4-frame strip in dist/preview-glb.png
 
 check : header/chunk alignment, buffer + bufferView + accessor bounds,
         POSITION min/max vs. data, index range, node/animation references,
@@ -167,7 +168,8 @@ def pose(g, bin_, anim, t):
     return st
 
 
-def render(path, out, anim=None, t=0.0, yaw=24.0, pitch=8.0, view='-z', W=360, H=520):
+def raster(path, anim=None, t=0.0, yaw=24.0, pitch=8.0, view='-z', W=360, H=520):
+    """Render one frame; returns (rows of RGB tuples, triangle count)."""
     g, bin_, _ = load(path)
     st = pose(g, bin_, anim, t)
     tris = []  # world-space triangles with colour sampler
@@ -222,14 +224,36 @@ def render(path, out, anim=None, t=0.0, yaw=24.0, pitch=8.0, view='-z', W=360, H
                     zb[y][x] = z
                     u = l1 * T[0][0] + l2 * T[1][0] + l3 * T[2][0]; v = l1 * T[0][1] + l2 * T[1][1] + l3 * T[2][1]
                     img[y][x] = tuple(int(c * sh) for c in f(u, v))
+    return img, len(tris)
+
+
+def write_png(img, out):
+    W, H = len(img[0]), len(img)
     raw = b''.join(b'\0' + bytes(c for p in row for c in p) for row in img)
     def ch(t, d): return struct.pack('>I', len(d)) + t + d + struct.pack('>I', zlib.crc32(t + d))
     open(out, 'wb').write(b'\x89PNG\r\n\x1a\n' + ch(b'IHDR', struct.pack('>IIBBBBB', W, H, 8, 2, 0, 0, 0)) + ch(b'IDAT', zlib.compress(raw, 9)) + ch(b'IEND', b''))
-    print('rendered %d tris -> %s' % (len(tris), out))
+
+
+def render(path, out, **kw):
+    img, n = raster(path, **kw)
+    write_png(img, out)
+    print('rendered %d tris -> %s' % (n, out))
+
+
+# dist/preview-glb.png: rest, then the gavel_strike wind-up, mid-swing and impact,
+# seen from the side so the swing arc reads.
+PREVIEW_FRAMES = [(None, 0.0), ('gavel_strike', 0.0), ('gavel_strike', 0.18), ('gavel_strike', 0.25)]
+
+
+def preview(path, out, yaw=80.0, pitch=4.0):
+    frames = [raster(path, anim=a, t=t, yaw=yaw, pitch=pitch)[0] for a, t in PREVIEW_FRAMES]
+    write_png([sum((f[y] for f in frames), []) for y in range(len(frames[0]))], out)
+    print('preview %d frames -> %s' % (len(frames), out))
 
 
 def main(a):
     if a[0] == 'check': sys.exit(check(a[1]))
+    if a[0] == 'preview': return preview(a[1], a[2])
     kw = {}; i = 3
     while i < len(a):
         k = a[i].lstrip('-'); kw[{'anim': 'anim', 'time': 't', 'yaw': 'yaw', 'pitch': 'pitch', 'view-from': 'view'}[k]] = a[i + 1]; i += 2
