@@ -231,9 +231,13 @@ export interface PauseMenuProps {
   onExit?: () => void;
   restoreFocus: () => void;
   autoNote?: string | null;
+  /** Host entries after Resume (a game's own menu). */
+  extra?: ReactNode;
+  /** Show "Back to the lobby". Default true. */
+  lobby?: boolean;
 }
 
-export function PauseMenu({ snap, controller, touch, quality, onQuality, perspective, onPerspective, pixelated, onPixelated, onExit, restoreFocus, autoNote }: PauseMenuProps) {
+export function PauseMenu({ snap, controller, touch, quality, onQuality, perspective, onPerspective, pixelated, onPixelated, onExit, restoreFocus, autoNote, extra, lobby = true }: PauseMenuProps) {
   const S = useRoamStrings();
   const ref = useModalFocus(snap.paused, restoreFocus);
   if (!snap.paused) return null;
@@ -247,23 +251,26 @@ export function PauseMenu({ snap, controller, touch, quality, onQuality, perspec
           <button type="button" className="ccr-btn" data-autofocus onClick={() => controller.setPaused(false)}>
             {S.pauseResume}
           </button>
-          <button
-            type="button"
-            className="ccr-btn ccr-btn--ghost"
-            onClick={() => {
-              controller.skipBeat();
-              controller.teleport('lobby');
-              controller.setPaused(false);
-            }}
-          >
-            {S.pauseBackToLobby}
-          </button>
+          {lobby ? (
+            <button
+              type="button"
+              className="ccr-btn ccr-btn--ghost"
+              onClick={() => {
+                controller.skipBeat();
+                controller.teleport('lobby');
+                controller.setPaused(false);
+              }}
+            >
+              {S.pauseBackToLobby}
+            </button>
+          ) : null}
           {onExit ? (
             <button type="button" className="ccr-btn ccr-btn--gold" onClick={onExit}>
               {S.skipToMenuView}
             </button>
           ) : null}
         </div>
+        {extra ? <div className="ccr-modal-row ccr-modal-menu">{extra}</div> : null}
         <label className="ccr-field">
           <span>{S.pausePerspective}</span>
           <select value={perspective} onChange={(e) => onPerspective(e.target.value as PerspectiveChoice)}>

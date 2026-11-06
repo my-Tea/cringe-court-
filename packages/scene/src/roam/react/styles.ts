@@ -60,6 +60,8 @@ export const ROAM_CSS = `
 .ccr-modal{width:min(460px,calc(100% - 28px));max-height:calc(100% - 28px);overflow:auto;padding:20px;display:grid;gap:12px}
 .ccr-modal-row{display:flex;gap:8px;flex-wrap:wrap}
 .ccr-modal-row .ccr-btn{min-height:32px;flex:none}
+.ccr-modal-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:8px 0;border-block:1px dashed currentColor}
+.ccr-modal-menu .ccr-btn{min-height:40px;width:100%;justify-content:flex-start}
 .ccr-modal{align-content:start}
 .ccr-field{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
 .ccr-field select{font:inherit;min-height:36px;padding:4px 8px;border:2px solid ${C.neutral900};background:${C.gold100};color:${C.neutral900};border-radius:0}
