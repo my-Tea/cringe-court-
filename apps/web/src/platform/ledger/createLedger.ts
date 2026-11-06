@@ -11,7 +11,8 @@ import {
   type MemoryChain,
 } from '@cringe-court/chain-client';
 import { ChainError, monotonicUnixClock, type Hex } from '@cringe-court/core';
-import { createPublicClient, createWalletClient, custom, http, type EIP1193Provider } from 'viem';
+import { humanRegistryAbi } from '@cringe-court/chain-client';
+import { createPublicClient, createWalletClient, custom, http, numberToHex, type EIP1193Provider } from 'viem';
 import type { Address, PlatformConfig } from '../config';
 import { ArcLedger, RelayerSeatOffers } from './arcLedger';
 import { DemoBackend } from './demoBackend';
@@ -46,6 +47,12 @@ export interface Ledger {
   info: LedgerInfo;
   /** Arc only: ask the injected wallet for an account and attach it. Resolves to the account or null. */
   connect?: (options?: { silent?: boolean }) => Promise<Hex | null>;
+  /** Arc only: the level HumanRegistry holds for this wallet (0 means the court refuses its stake). */
+  humanLevel?: (account: Hex) => Promise<number>;
+  /** Arc only: the connected wallet signs a plain message. */
+  sign?: (account: Hex, message: string) => Promise<Hex>;
+  /** Arc only: is a wallet extension installed? */
+  hasWallet?: () => boolean;
   demo?: DemoHandles;
 }
 
@@ -54,7 +61,8 @@ export interface CreateLedgerOptions {
   clock?: () => number;
 }
 
-const ARC_EXPLORER = 'https://testnet.arcscan.app/tx/';
+const ARC_EXPLORER_HOME = 'https://testnet.arcscan.app';
+const ARC_EXPLORER = `${ARC_EXPLORER_HOME}/tx/`;
 
 function injectedProvider(): EIP1193Provider | null {
   const w = typeof window === 'undefined' ? undefined : (window as unknown as { ethereum?: EIP1193Provider });
@@ -106,6 +114,21 @@ function createDemo(options: CreateLedgerOptions): Ledger {
   };
 }
 
+/** Moves the wallet to Arc, and teaches it the network first if it has never seen it. */
+async function ensureArc(provider: EIP1193Provider, arc: NonNullable<PlatformConfig['arc']>): Promise<void> {
+  const chainId = numberToHex(arc.chainId);
+  try {
+    await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId }] });
+  } catch (e) {
+    const code = (e as { code?: number; data?: { originalError?: { code?: number } } }).code ?? (e as { data?: { originalError?: { code?: number } } }).data?.originalError?.code;
+    if (code !== 4902) throw e;
+    await provider.request({
+      method: 'wallet_addEthereumChain',
+      params: [{ chainId, chainName: arcTestnet.name, nativeCurrency: arcTestnet.nativeCurrency, rpcUrls: [arc.rpcUrl], blockExplorerUrls: [ARC_EXPLORER_HOME] }],
+    });
+  }
+}
+
 function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
   const chain = { ...arcTestnet, rpcUrls: { default: { http: [arc.rpcUrl] } } };
   const publicClient = createPublicClient({ chain, transport: http(arc.rpcUrl, { retryCount: 0 }) });
@@ -121,6 +144,7 @@ function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
       const accounts = (await provider.request({ method: o.silent ? 'eth_accounts' : 'eth_requestAccounts' })) as string[];
       const account = accounts[0] as Hex | undefined;
       if (!account) return null;
+      if (!o.silent) await ensureArc(provider, arc);
       const walletClient = createWalletClient({ chain, transport: custom(provider), account });
       port.attach(createViemChainPort({ publicClient, walletClient, addresses, chainId: BigInt(arc.chainId) }) as ChainClient);
       return account.toLowerCase() as Hex;
@@ -146,5 +170,15 @@ function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
       notes: [t('shell.ledger.arc.note')],
     },
     connect,
+    humanLevel: async (account) => {
+      const [, level] = await publicClient.readContract({ address: arc.registry, abi: humanRegistryAbi, functionName: 'humanOf', args: [account] });
+      return level;
+    },
+    sign: async (account, message) => {
+      const provider = injectedProvider();
+      if (!provider) throw new ChainError('rejected', t('shell.ledger.error.walletDeclined'));
+      return createWalletClient({ chain, transport: custom(provider), account }).signMessage({ message });
+    },
+    hasWallet: () => injectedProvider() !== null,
   };
 }
