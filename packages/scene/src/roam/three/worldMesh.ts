@@ -1,17 +1,21 @@
 /**
  * The static world as a handful of merged meshes: boxes grouped by
- * (colour, glow), each face given world-space UVs on the shared pixel grid and
- * a baked Minecraft face shade in its vertex colour. ~2,400 boxes → ~30 draw
- * calls; nothing static is re-uploaded after build.
+ * (colour, glow, face), each face given world-space UVs on the shared pixel
+ * grid and a baked Minecraft face shade in its vertex colour. Colours whose
+ * tops wear their own tile (marble floors, lawns) split their upward faces into
+ * a second batch. ~2,400 boxes → ~35 draw calls; nothing static is re-uploaded
+ * after build.
  */
 import * as THREE from 'three';
 import { FACE_SHADE } from '../cast';
 import type { RoamBox } from '../world';
-import { surfaceFor, surfaceTexture, TEXEL, TILE } from './textures';
+import { hasTopTile, surfaceFor, surfaceGain, surfaceTexture, TEXEL, TILE, type FaceKind } from './textures';
 
 export interface WorldBatch {
   color: string;
   glow: number;
+  /** `top` holds only upward faces of a colour with a top tile; `side` holds the rest. */
+  face: FaceKind;
   boxes: number;
   positions: Float32Array;
   normals: Float32Array;
@@ -39,35 +43,46 @@ export function batchWorld(boxes: readonly RoamBox[]): WorldBatch[] {
     list.push(b);
   }
   const scale = 1 / (TEXEL * TILE);
-  return [...groups.entries()]
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([key, list]) => {
-      const [color, glow] = key.split('|') as [string, string];
-      const n = list.length * 24;
-      const positions = new Float32Array(n * 3);
-      const normals = new Float32Array(n * 3);
-      const uvs = new Float32Array(n * 2);
-      const shades = new Float32Array(n * 3);
-      const indices = new Uint32Array(list.length * 36);
-      let v = 0;
-      let ix = 0;
-      for (const b of list) {
-        for (const face of FACES) {
-          const base = v;
-          for (const k of face.c) {
-            const p = [k & 1 ? b.t[0] : b.f[0], k & 2 ? b.t[1] : b.f[1], k & 4 ? b.t[2] : b.f[2]] as const;
-            positions.set(p, v * 3);
-            normals.set(face.n, v * 3);
-            uvs.set([p[face.u] * scale, p[face.v] * scale], v * 2);
-            shades.set([face.shade, face.shade, face.shade], v * 3);
-            v++;
-          }
-          indices.set([base, base + 1, base + 2, base, base + 2, base + 3], ix);
-          ix += 6;
-        }
+  const out: WorldBatch[] = [];
+  for (const [key, list] of [...groups.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    const [color, glowText] = key.split('|') as [string, string];
+    const glow = Number(glowText);
+    if (!hasTopTile(color, glow)) out.push(merge(color, glow, 'side', list, FACES, scale));
+    else {
+      out.push(merge(color, glow, 'side', list, FACES.filter((f) => f.n[1] !== 1), scale));
+      out.push(merge(color, glow, 'top', list, FACES.filter((f) => f.n[1] === 1), scale));
+    }
+  }
+  return out;
+}
+
+type Face = (typeof FACES)[number];
+
+function merge(color: string, glow: number, face: FaceKind, list: readonly RoamBox[], faces: readonly Face[], scale: number): WorldBatch {
+  const n = list.length * faces.length * 4;
+  const positions = new Float32Array(n * 3);
+  const normals = new Float32Array(n * 3);
+  const uvs = new Float32Array(n * 2);
+  const shades = new Float32Array(n * 3);
+  const indices = new Uint32Array(list.length * faces.length * 6);
+  let v = 0;
+  let ix = 0;
+  for (const b of list) {
+    for (const f of faces) {
+      const base = v;
+      for (const k of f.c) {
+        const p = [k & 1 ? b.t[0] : b.f[0], k & 2 ? b.t[1] : b.f[1], k & 4 ? b.t[2] : b.f[2]] as const;
+        positions.set(p, v * 3);
+        normals.set(f.n, v * 3);
+        uvs.set([p[f.u] * scale, p[f.v] * scale], v * 2);
+        shades.set([f.shade, f.shade, f.shade], v * 3);
+        v++;
       }
-      return { color, glow: Number(glow), boxes: list.length, positions, normals, uvs, shades, indices };
-    });
+      indices.set([base, base + 1, base + 2, base, base + 2, base + 3], ix);
+      ix += 6;
+    }
+  }
+  return { color, glow, face, boxes: list.length, positions, normals, uvs, shades, indices };
 }
 
 export interface WorldMeshes {
@@ -89,13 +104,14 @@ export function buildWorldMeshes(boxes: readonly RoamBox[]): WorldMeshes {
     geometry.setIndex(new THREE.BufferAttribute(batch.indices, 1));
     geometry.computeBoundingSphere();
     geometry.computeBoundingBox();
-    const map = surfaceTexture(surfaceFor(batch.color, batch.glow));
-    const color = new THREE.Color(batch.color);
+    const kind = surfaceFor(batch.color, batch.glow, batch.face);
+    const map = surfaceTexture(kind);
+    const color = new THREE.Color(batch.color).multiplyScalar(surfaceGain(kind));
     const material =
       batch.glow > 0
-        ? new THREE.MeshBasicMaterial({ color: color.clone().multiplyScalar(0.75 + batch.glow * 0.35), map, vertexColors: true, fog: true })
+        ? new THREE.MeshBasicMaterial({ color: new THREE.Color(batch.color).multiplyScalar(1 + batch.glow * 1.1), map, vertexColors: true, fog: true })
         : new THREE.MeshLambertMaterial({ color, map, vertexColors: true });
-    material.name = `roam:${batch.color}${batch.glow ? ':glow' : ''}`;
+    material.name = `roam:${batch.color}${batch.glow ? ':glow' : ''}${batch.face === 'top' ? ':top' : ''}`;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.name = material.name;
     mesh.receiveShadow = batch.glow === 0;
