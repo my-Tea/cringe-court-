@@ -1,0 +1,18 @@
+{
+  "name": "@cringe-court/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The shared court server: Versus and Grand Jury across devices. Node http + Server-Sent Events, a JSON-lines store, the same mode rules as the app. Testnet/demo money only.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "dev": "tsx watch src/main.ts"
+  },
+  "dependencies": {
+    "@cringe-court/core": "*",
+    "@cringe-court/engine": "*",
+    "@cringe-court/modes-grand-jury": "*",
+    "@cringe-court/modes-versus": "*",
+    "@cringe-court/net": "*"
+  }
+}

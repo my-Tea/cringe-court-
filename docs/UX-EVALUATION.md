@@ -390,3 +390,37 @@ npm run playtest -w @cringe-court/web -- versus grand-jury roam
   - **versus:** desktop, desktop-mistrial, desktop-juror-watches-hearing, desktop-B-never-joins, mobile, reduced-motion.
   - **grand-jury:** desktop, mobile, reduced-motion.
   - **roam:** desktop, narrow-760, mobile-touch, no-webgl.
+
+## Status after backend (v3/backend)
+
+**B8 (cross-device play): fixed when a court server is configured.** The local
+browser-only demo is still the default.
+
+- `apps/server` holds Versus and Grand Jury courts for every device; the web app
+  opts in with `VITE_BACKEND_URL` (`npm run dev:full` wires both). See docs/BACKEND.md.
+- **Versus.** A Versus invite opened in another browser now shows the summons,
+  instead of "No case with that code here".
+  - Checked with A, B (mobile) and a juror in three separate Playwright contexts
+    (`npm run e2e:backend`, screenshots in `screenshots/backend/versus/`). The
+    run covers the signed link, B's live arrival on A's screen, a reload
+    mid-case, the server's clerk drafting counsel, payments, seal, reveal, the
+    verdict on both devices, and claims.
+  - B's device never received A's private notes. This is asserted on raw HTTP
+    responses in `apps/server` tests, and on screen in the e2e.
+- **Grand Jury.** Every device sees the same docket. Seven jurors in seven
+  contexts funded, screened, took seats, sealed, opened their scrolls, settled
+  4–3 and collected (`screenshots/backend/grand-jury/`).
+  - The second-browser contribution check from §8 now passes: same raised
+    total, same court record.
+- **Failure UX.** If the configured server is unreachable, an i18n'd error
+  offers retry or an explicit local-demo choice. A lost connection shows a
+  banner, and actions fail with "Nothing was sent". A server reset gives a fresh
+  session with a notice (`screenshots/backend/offline/`).
+- **Still open.**
+  - Single-node, demo-grade bearer tokens, World ID still mocked, fixture AI
+    counsel, no real chain by default.
+  - The demo clock skip is shared by every case on one server (it can be
+    switched off with `CC_DEMO_CLOCK=off`).
+  - The Grand Jury summoning crowd is still simulated.
+  - B19 (demo deadlines vs sleeping devices) now follows the server's clock
+    rather than each device's, but is otherwise unchanged.

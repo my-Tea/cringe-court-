@@ -25,6 +25,7 @@ import { PageHead } from '../components/PageHead';
 import { WorldIdDialog } from '../components/WorldIdDialog';
 import { versusPaths } from '../mode';
 import { useVersus } from '../runtime/context';
+import { useInviteAccess } from '../runtime/useInvite';
 import styles from '../versus.module.css';
 import { PaperSection } from '../components/PaperSection';
 
@@ -71,6 +72,8 @@ export function JoinPage() {
   useDocumentTitle(t('versus.join.docTitle'));
   const { snapshot, persona, desk, run, now } = useVersus();
   const navigate = useNavigate();
+  const early = raw ? parseInviteCode(raw) : null;
+  const access = useInviteAccess(early?.ok ? early.code : null);
 
   if (!raw) {
     return (
@@ -100,12 +103,33 @@ export function JoinPage() {
       </>
     );
   }
-  if (!snapshot) {
+  if (access.state === 'error') {
     return (
       <>
         {head}
         <div className={styles.page}>
-          <LoadingState title={t('versus.join.loading')} />
+          <Alert
+            tone="danger"
+            live="assertive"
+            title={t('backend.invite.error.title')}
+            actions={
+              <PaperButton size="sm" onClick={access.retry}>
+                {t('backend.gate.retry')}
+              </PaperButton>
+            }
+          >
+            {access.message}
+          </Alert>
+        </div>
+      </>
+    );
+  }
+  if (!snapshot || access.state === 'pending') {
+    return (
+      <>
+        {head}
+        <div className={styles.page}>
+          <LoadingState title={access.state === 'pending' ? t('backend.invite.loading') : t('versus.join.loading')} />
         </div>
       </>
     );

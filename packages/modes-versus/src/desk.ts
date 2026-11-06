@@ -519,7 +519,7 @@ export class VersusDesk {
         const r = await w.apply(f);
         if (!r.ok) throw new VersusError(r.message);
       }
-      if (this.store.append(next, facts.length)) return;
+      if (await this.store.append(next, facts.length)) return;
     }
     throw new VersusError('Someone else is updating this case. Try again in a moment.', 'busy');
   }

@@ -3,6 +3,9 @@ import type { Usdc } from '@cringe-court/core';
 import type { Persona, VersusDesk, WorldSnapshot } from '@cringe-court/modes-versus';
 import { createContext, useContext, useSyncExternalStore } from 'react';
 
+/** Which court this runtime plays on. */
+export type CourtKind = { kind: 'local' } | { kind: 'remote'; host: string; status: string | null };
+
 export interface VersusRuntime {
   desk: VersusDesk;
   persona: Persona;
@@ -22,6 +25,11 @@ export interface VersusRuntime {
   run(action: () => Promise<unknown>, options?: { success?: string; quiet?: boolean }): Promise<boolean>;
   audio: AudioEngine;
   resetDemo(): void;
+  court: CourtKind;
+  /** Shared court only: ask the server for access to an invite (code, or signed link token). */
+  openInvite?: (code: string, token?: string) => Promise<string | null>;
+  /** Shared court only: the signed invite link Side A sends. */
+  inviteUrl?: (trialId: string) => Promise<string>;
 }
 
 export const VersusContext = createContext<VersusRuntime | null>(null);

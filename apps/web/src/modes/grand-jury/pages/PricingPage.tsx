@@ -117,7 +117,7 @@ export function PricingPage() {
   useDocumentTitle(t('grandJury.pricing.docTitle'));
   const { demo } = useCourtContext();
   const p = CURRENT_PRICING;
-  const used = demo.court.docket.list().filter((c) => c.basis === 'marketing-cap').length;
+  const used = demo.marketingUsed();
   const left = marketingBudgetLeft(p, used);
 
   return (
