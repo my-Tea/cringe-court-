@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": "../../node_modules/.tsc/web",
+    "jsx": "react-jsx",
+    "paths": { "@/*": ["./src/*"] },
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom/vitest", "node"]
+  },
+  "include": ["src"],
+  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/modes-solo" }, { "path": "../../packages/engine" }, { "path": "../../packages/scene" }]
+}

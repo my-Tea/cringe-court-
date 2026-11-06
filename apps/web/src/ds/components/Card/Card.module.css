@@ -1,0 +1,156 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--cc-color-border);
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-color-surface);
+  box-shadow: var(--cc-shadow-1);
+  color: var(--cc-color-text);
+}
+
+.raised {
+  background: var(--cc-color-surface-raised);
+  box-shadow: var(--cc-shadow-2);
+}
+
+/* The brand-card frame: neon rim plus gold corner brackets (share_card.png). */
+.ornate {
+  background: var(--cc-color-surface);
+  border-color: var(--cc-color-accent);
+  box-shadow: var(--cc-shadow-ring-accent), var(--cc-shadow-2);
+}
+
+.ornate::before,
+.ornate::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--cc-color-highlight);
+  pointer-events: none;
+}
+
+.ornate::before {
+  top: 8px;
+  left: 8px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.ornate::after {
+  right: 8px;
+  bottom: 8px;
+  border-left: 0;
+  border-top: 0;
+}
+
+/* Parchment: the in-world document (dialogue box, receipts). Gold top rule,
+   burgundy frame. Uses data-surface so children re-map automatically. */
+.parchment {
+  background: var(--cc-color-canvas);
+  border: 2px solid var(--cc-royal-900);
+  box-shadow:
+    inset 0 4px 0 var(--cc-gold-500),
+    0 0 0 2px var(--cc-gold-700),
+    var(--cc-shadow-2);
+}
+
+.sunken {
+  background: var(--cc-color-surface-sunken);
+  box-shadow: none;
+}
+
+.interactive {
+  transition:
+    transform var(--cc-duration-base) var(--cc-ease-standard),
+    border-color var(--cc-duration-base) var(--cc-ease-standard),
+    box-shadow var(--cc-duration-base) var(--cc-ease-standard);
+}
+
+.interactive:hover,
+.interactive:focus-within {
+  border-color: var(--cc-color-accent);
+  box-shadow: var(--cc-shadow-ring-accent), var(--cc-shadow-3);
+  transform: translateY(-2px);
+}
+
+/* A whole-card link: the title's link stretches over the card. */
+.interactive :global(a[data-card-link])::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.interactive :global(a[data-card-link]):focus-visible {
+  outline: none;
+}
+
+.interactive:has(:global(a[data-card-link]:focus-visible)) {
+  outline: 2px solid var(--cc-color-focus);
+  outline-offset: 3px;
+}
+
+.padSm {
+  --_pad: var(--cc-space-4);
+}
+
+.padMd {
+  --_pad: var(--cc-space-5);
+}
+
+.padLg {
+  --_pad: var(--cc-space-8);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+  padding: var(--_pad) var(--_pad) 0;
+}
+
+.eyebrow {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xs);
+  letter-spacing: var(--cc-tracking-caps);
+  text-transform: uppercase;
+  color: var(--cc-color-accent-text);
+}
+
+.title {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xl);
+  font-weight: var(--cc-weight-semibold);
+  line-height: var(--cc-leading-snug);
+}
+
+.title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.description {
+  color: var(--cc-color-text-muted);
+  font-size: var(--cc-text-sm);
+}
+
+.body {
+  padding: var(--_pad);
+  flex: 1;
+}
+
+.header + .body {
+  padding-top: var(--cc-space-4);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-4) var(--_pad);
+  border-top: 1px solid var(--cc-color-border);
+}

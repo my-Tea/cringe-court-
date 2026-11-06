@@ -1,0 +1,25 @@
+.content {
+  z-index: var(--cc-z-tooltip);
+  max-width: 18rem;
+  padding: var(--cc-space-2) var(--cc-space-3);
+  border: 1px solid var(--cc-color-border-strong);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-neutral-900);
+  box-shadow: var(--cc-shadow-3);
+  color: var(--cc-neutral-100);
+  font-size: var(--cc-text-sm);
+  line-height: var(--cc-leading-snug);
+  transform-origin: var(--radix-tooltip-content-transform-origin);
+  animation: in var(--cc-duration-fast) var(--cc-ease-enter);
+}
+
+.arrow {
+  fill: var(--cc-neutral-900);
+}
+
+@keyframes in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}

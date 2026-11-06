@@ -1,0 +1,99 @@
+.list {
+  position: relative;
+  display: flex;
+  gap: var(--cc-space-1);
+  border-bottom: 1px solid var(--cc-color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+.trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  min-height: var(--cc-control-md);
+  padding: 0 var(--cc-space-4);
+  border: 0;
+  border-radius: var(--cc-radius-sm) var(--cc-radius-sm) 0 0;
+  background: transparent;
+  color: var(--cc-color-text-muted);
+  font-weight: var(--cc-weight-semibold);
+  white-space: nowrap;
+  transition:
+    color var(--cc-duration-fast) var(--cc-ease-standard),
+    background-color var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.trigger::after {
+  content: '';
+  position: absolute;
+  left: var(--cc-space-2);
+  right: var(--cc-space-2);
+  bottom: -1px;
+  height: 3px;
+  border-radius: 1px 1px 0 0;
+  background: var(--cc-color-accent);
+  scale: 0 1;
+  transition: scale var(--cc-duration-base) var(--cc-ease-emphasized);
+}
+
+.trigger:hover {
+  color: var(--cc-color-text);
+  background: color-mix(in srgb, var(--cc-color-text) 6%, transparent);
+}
+
+.trigger[data-state='active'] {
+  color: var(--cc-color-text);
+}
+
+.trigger[data-state='active']::after {
+  scale: 1 1;
+}
+
+.trigger[data-disabled] {
+  color: var(--cc-color-disabled-text);
+  cursor: not-allowed;
+}
+
+.trigger:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Pills: segmented control look for compact filters. */
+.pills {
+  display: inline-flex;
+  padding: var(--cc-space-1);
+  gap: var(--cc-space-1);
+  border: 1px solid var(--cc-color-border);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-surface-sunken);
+}
+
+.pills .trigger {
+  min-height: var(--cc-control-sm);
+  padding: 0 var(--cc-space-3);
+  border-radius: var(--cc-radius-sm);
+  font-size: var(--cc-text-sm);
+}
+
+.pills .trigger::after {
+  display: none;
+}
+
+.pills .trigger[data-state='active'] {
+  background: var(--cc-color-accent);
+  color: var(--cc-color-on-accent);
+}
+
+.panel {
+  padding-top: var(--cc-space-5);
+}
+
+.panel:focus-visible {
+  outline-offset: 4px;
+}

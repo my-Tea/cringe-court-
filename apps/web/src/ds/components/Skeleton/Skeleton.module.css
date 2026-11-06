@@ -1,0 +1,46 @@
+.skeleton {
+  display: block;
+  border-radius: var(--cc-radius-sm);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cc-color-text) 8%, transparent) 50%,
+      transparent 100%
+    )
+    0 0 / 200% 100% no-repeat,
+    color-mix(in srgb, var(--cc-color-text) 9%, var(--cc-color-surface));
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 150% 0, 0 0;
+  }
+
+  to {
+    background-position: -50% 0, 0 0;
+  }
+}
+
+:global(:root[data-reduced-motion='true']) .skeleton {
+  animation: none;
+}
+
+.text {
+  height: 0.85em;
+  margin: 0.35em 0;
+}
+
+.circle {
+  border-radius: var(--cc-radius-pill);
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+}
+
+.lines > .text:last-child:not(:only-child) {
+  width: 62%;
+}
