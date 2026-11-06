@@ -49,6 +49,7 @@ function speakerOf(line: CourtLine): StageActor {
       return 'defense';
     case 'judge':
     case 'narrator':
+    case 'clerk':
       return 'judge';
     default:
       // Versus counsel never appear in Solo; treat a stray line as the bench it sits at.

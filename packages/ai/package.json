@@ -6,9 +6,15 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./court": "./src/court/index.ts",
+    "./court/node": "./src/court/node.ts"
   },
   "dependencies": {
-    "@cringe-court/core": "*"
+    "@cringe-court/core": "*",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@cringe-court/engine": "*"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "mode": "viral",
+  "caseId": "demo-viral-cereal-soup",
+  "caseTitle": "Is Cereal a Soup?",
+  "question": "Is cereal a soup?",
+  "summary": "An argument that returns to social feeds every few months: does a bowl of cereal in milk count as soup?",
+  "sideA": { "label": "Yes, soup", "position": "Solid pieces in a liquid, served in a bowl and eaten with a spoon." },
+  "sideB": { "label": "Not soup", "position": "Soup is savoury and usually cooked; cereal is neither." },
+  "sources": [
+    { "id": "S1", "title": "Community-submitted summary of the recurring debate", "claim": "Supporters say anything with solids in a liquid, eaten from a bowl with a spoon, qualifies as soup.", "kind": "opinion" },
+    { "id": "S2", "title": "Community-submitted summary of the recurring debate", "claim": "Opponents say soup must be savoury and served as a meal course, which rules cereal out.", "kind": "opinion" }
+  ],
+  "uncertainty": ["There is no official authority that defines soup for this purpose."],
+  "approved": true
+}

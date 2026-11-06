@@ -57,6 +57,7 @@ const ACTOR_FOR: Readonly<Record<Speaker, string>> = {
   'side-a': 'side-a',
   'side-b': 'side-b',
   narrator: 'narrator',
+  clerk: 'clerk',
 };
 
 const VOICE: Readonly<Record<Speaker, AudioCueId>> = {
@@ -66,16 +67,39 @@ const VOICE: Readonly<Record<Speaker, AudioCueId>> = {
   'side-a': 'voice.side-a',
   'side-b': 'voice.side-b',
   narrator: 'voice.narrator',
+  // No dedicated clerk voice cue yet; the clerk borrows the narrator blip.
+  clerk: 'voice.narrator',
 };
 
-/** Shot by who speaks: prosecution bench is camera-left, defense camera-right (SCENE-GUIDE sightlines). */
+/**
+ * The actor that performs a speaker's line in this cast. A clerk line falls back
+ * to the narrator, then the judge, so casts staged before the clerk existed still play.
+ */
+function actorIn(speaker: Speaker, present: ReadonlySet<string>): string | null {
+  const preferred = ACTOR_FOR[speaker];
+  if (present.has(preferred)) return preferred;
+  if (speaker === 'clerk') return ['narrator', 'judge'].find((a) => present.has(a)) ?? null;
+  return null;
+}
+
+/**
+ * Shot by who speaks: prosecution bench is camera-left, defense camera-right (SCENE-GUIDE sightlines).
+ * A line's own `camera` preset (validated court-ai output) wins.
+ */
 function shotFor(line: CourtLine): CameraShot {
+  if (line.camera) return line.camera;
   if (line.speaker === 'judge') return 'close_judge';
-  if (line.speaker === 'narrator') return 'close_witness';
+  if (line.speaker === 'narrator' || line.speaker === 'clerk') return 'close_witness';
   return line.bench === 1 ? 'close_defense' : 'close_prosecution';
 }
 
-const PAN: Readonly<Record<string, number>> = { prosecutor: -0.6, 'side-a': -0.6, defense: 0.6, 'side-b': 0.6, judge: 0, narrator: -0.3 };
+const PAN: Readonly<Record<string, number>> = { prosecutor: -0.6, 'side-a': -0.6, defense: 0.6, 'side-b': 0.6, judge: 0, narrator: -0.3, clerk: -0.3 };
+
+const CROWD: Readonly<Record<NonNullable<CourtLine['crowd']>, AudioCueId>> = {
+  gasp: 'sfx.crowd-gasp',
+  laugh: 'sfx.crowd-laugh',
+  murmur: 'sfx.crowd-murmur',
+};
 
 interface BeatPlan {
   animation?: string;
@@ -124,8 +148,8 @@ export function directTrial(id: string, lines: readonly CourtLine[], cast: reado
   cues.push({ kind: 'music', cue: 'music.trial' }, { kind: 'lighting', mood: 'spotlight', seconds: 1.2 });
 
   for (const line of lines) {
-    const actor = ACTOR_FOR[line.speaker];
-    if (!present.has(actor)) throw new Error(`Line ${line.id}: speaker ${line.speaker} is not in the cast`);
+    const actor = actorIn(line.speaker, present);
+    if (actor === null) throw new Error(`Line ${line.id}: speaker ${line.speaker} is not in the cast`);
     lineStarts[line.id] = cues.length;
 
     if (line.segment !== segment) {
@@ -149,7 +173,8 @@ export function directTrial(id: string, lines: readonly CourtLine[], cast: reado
     if (plan.animation && plan.animation !== 'talk') cues.push({ kind: 'animate', actor, animation: plan.animation });
     if (plan.sound) cues.push({ kind: 'sound', cue: plan.sound, pan: PAN[actor] ?? 0 });
     if (plan.fx) cues.push({ kind: 'fx', effect: plan.fx, actor });
-    if (plan.crowd) cues.push({ kind: 'sound', cue: plan.crowd });
+    const crowd = plan.crowd ?? (line.crowd ? CROWD[line.crowd] : undefined);
+    if (crowd) cues.push({ kind: 'sound', cue: crowd });
     if (line.beat === 'dramatic-pause') {
       cues.push({ kind: 'wait', seconds: 0.8 });
       seconds += 0.8;

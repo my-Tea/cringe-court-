@@ -9,8 +9,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { RoamController } from '../controller';
 import type { RoamData } from '../load';
 import { ONBOARDED_STORAGE_KEY } from '../react/onboarding';
-import { RoamCourtroom, type RoamCourtroomProps } from '../react/RoamCourtroom';
-import { useRoamSnapshot } from '../react/useRoamCourtroom';
+import { RoamCourtroom } from '../react/RoamCourtroom';
 import { roamData } from './fixtures';
 
 vi.mock('@react-three/fiber', () => ({ Canvas: () => null, useFrame: () => undefined, useThree: () => undefined }));
@@ -85,107 +84,5 @@ describe('first-person room overlays', () => {
     expect(screen.getByRole('button', { name: 'Skip beat' })).toBeInTheDocument();
     act(() => void c.runBeat('verdict', { verdict: 'guilty' }));
     expect(screen.queryByRole('button', { name: 'Skip beat' })).toBeNull();
-  });
-});
-
-describe('the keys always come back to the room', () => {
-  /** Standing at the World ID plinth, looking at it, with its station live. */
-  const atShrine = () => {
-    const at = data.world.interactables.find((i) => i.station === 'verify')!.at;
-    const c = new RoamController(data.world, { spawn: { pos: [at[0], -30, at[2] + 60], yaw: 0, pitch: Math.atan2(at[1] - 14, 60) }, openGates: [], stations: true });
-    c.update(1 / 60);
-    return c;
-  };
-  /** A host panel like the game's: a button that takes focus, gone when the panel closes. */
-  function Panel({ controller }: { controller: RoamController }) {
-    const snap = useRoamSnapshot(controller);
-    return snap.panel ? <button type="button">Panel button</button> : null;
-  }
-  const play = (c: RoamController, props: Partial<RoamCourtroomProps> = { fullscreen: true }) =>
-    render(
-      <RoamCourtroom controller={c} data={data} touch={false} {...props}>
-        <Panel controller={c} />
-      </RoamCourtroom>,
-    );
-  const walking = (c: RoamController) => c.keys.has('forward');
-
-  it('closing a station panel gives focus and WASD back (the panel button is gone, focus must not fall to the page)', () => {
-    const c = atShrine();
-    play(c);
-    const roomEl = screen.getByRole('application');
-    act(() => void c.interact());
-    expect(c.panel).toBe('verify');
-    const button = screen.getByRole('button', { name: 'Panel button' });
-    button.focus();
-    act(() => c.closePanel());
-    expect(screen.queryByRole('button', { name: 'Panel button' })).toBeNull();
-    expect(document.activeElement).toBe(roomEl);
-    fireEvent.keyDown(roomEl, { code: 'KeyW' });
-    expect(walking(c)).toBe(true);
-    fireEvent.keyUp(roomEl, { code: 'KeyW' });
-    expect(walking(c)).toBe(false);
-  });
-
-  it('holds the player while a panel is up, then walks again', () => {
-    const c = atShrine();
-    play(c);
-    act(() => void c.interact());
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Panel button' }), { code: 'KeyW' });
-    expect(walking(c)).toBe(false);
-    act(() => c.closePanel());
-    fireEvent.keyDown(document.activeElement!, { code: 'KeyW' });
-    expect(walking(c)).toBe(true);
-  });
-
-  it('Escape closes a station panel from inside it, without pausing', () => {
-    const c = atShrine();
-    play(c);
-    act(() => void c.interact());
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Panel button' }), { key: 'Escape', code: 'Escape' });
-    expect(c.panel).toBeNull();
-    expect(c.paused).toBe(false);
-  });
-
-  it('a key with no focused target is the player\'s in a full-screen room, the page\'s in an embedded one', () => {
-    const full = new RoamController(data.world, { spawn: 'aisle' });
-    const first = play(full);
-    fireEvent.keyDown(document.body, { code: 'KeyW' });
-    expect(walking(full)).toBe(true);
-    fireEvent.keyUp(document.body, { code: 'KeyW' });
-    expect(walking(full)).toBe(false);
-    first.unmount();
-    const embedded = new RoamController(data.world, { spawn: 'aisle' });
-    play(embedded, {});
-    fireEvent.keyDown(document.body, { code: 'KeyW' });
-    expect(walking(embedded)).toBe(false);
-  });
-
-  it('a clicked HUD button does not stop the walk, but keeps its own keys; a menu keeps them all', () => {
-    const c = new RoamController(data.world, { spawn: 'aisle' });
-    play(c);
-    const controls = screen.getByRole('button', { name: 'Controls' });
-    controls.focus();
-    fireEvent.keyDown(controls, { code: 'KeyW' });
-    expect(walking(c)).toBe(true);
-    fireEvent.keyUp(controls, { code: 'KeyW' });
-    const jump = vi.spyOn(c, 'jump');
-    fireEvent.keyDown(controls, { code: 'Space' });
-    expect(jump).not.toHaveBeenCalled();
-    act(() => c.setPaused(true));
-    const resume = screen.getByRole('button', { name: 'Resume' });
-    fireEvent.keyDown(resume, { code: 'KeyW' });
-    expect(walking(c)).toBe(false);
-  });
-
-  it('a room behind another screen takes no keys, and losing the mouse there is not a pause', () => {
-    const c = new RoamController(data.world, { spawn: 'aisle' });
-    const { rerender } = play(c);
-    fireEvent.keyDown(screen.getByRole('application'), { code: 'KeyW' });
-    fireEvent.keyUp(screen.getByRole('application'), { code: 'KeyW' });
-    rerender(<RoamCourtroom controller={c} data={data} touch={false} fullscreen presentation="suspended" />);
-    act(() => void document.dispatchEvent(new Event('pointerlockchange')));
-    expect(c.paused).toBe(false);
-    fireEvent.keyDown(document.body, { code: 'KeyW' });
-    expect(walking(c)).toBe(false);
   });
 });

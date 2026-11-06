@@ -16,6 +16,7 @@ import type { Benches, CharacterId, CounselCharacter, CounselRole, SideId } from
 import type { ModeId } from '../modes';
 import type { BallotChoice } from '../settlement';
 import type { Speaker, TranscriptLine } from './court';
+import type { CameraShot } from './stage';
 
 /** Which part of the show a line belongs to. */
 export type Segment = 'call-to-order' | 'opening' | 'exhibit' | 'rebuttal' | 'closing' | 'jury-out' | 'sentence';
@@ -34,6 +35,22 @@ export type Beat =
   | 'present-evidence'
   | 'dramatic-pause';
 
+/** Portrait / expression preset for a line. Renderers without a matching portrait fall back to neutral. */
+export type Emotion =
+  | 'neutral'
+  | 'confident'
+  | 'smug'
+  | 'angry'
+  | 'shocked'
+  | 'nervous'
+  | 'sad'
+  | 'amused'
+  | 'exasperated'
+  | 'triumphant';
+
+/** Gallery reaction after a line. */
+export type CrowdReaction = 'gasp' | 'laugh' | 'murmur';
+
 /** A transcript line with the courtroom metadata the director needs. Extends TranscriptLine. */
 export interface CourtLine extends TranscriptLine {
   /** Stable id within the transcript ("L07"). */
@@ -44,6 +61,12 @@ export interface CourtLine extends TranscriptLine {
   beat?: Beat;
   /** Exhibit referenced by this line, if any. */
   exhibitId?: string;
+  /** Expression preset (court-ai output). Optional: older transcripts omit it. */
+  emotion?: Emotion;
+  /** Camera preset override. Omitted = the director picks the shot from the speaker. */
+  camera?: CameraShot;
+  /** Gallery reaction after the line, used when the beat does not already imply one. */
+  crowd?: CrowdReaction;
 }
 
 export interface PublicExhibit {
@@ -180,4 +203,5 @@ export const SPEAKER_CHARACTER: Readonly<Record<Speaker, CharacterId>> = {
   'side-a': 'side-a',
   'side-b': 'side-b',
   narrator: 'ai-narrator',
+  clerk: 'clerk',
 };

@@ -61,12 +61,6 @@ export interface RoamControllerOptions {
   jurors?: number;
   /** Arrival-run seals already open. Default all: a world entered past the run has none in the way. */
   openGates?: readonly GateId[] | 'all';
-  /**
-   * Something draws the arrival-run panels. Default false: a room with no such
-   * host (the sandbox, a hearing) ignores stations, or E would open a panel
-   * nobody shows and hold the player still.
-   */
-  stations?: boolean;
 }
 
 /** Where each role sits during the hearing. */
@@ -163,11 +157,9 @@ export class RoamController implements BeatHost {
   /** Arrival-run panel open (host-drawn); movement and look are held meanwhile. */
   #panel: PanelId | null = null;
   readonly #openGates: Set<GateId>;
-  readonly #stations: boolean;
 
   constructor(world: RoamWorld, options: RoamControllerOptions = {}) {
     this.world = world;
-    this.#stations = options.stations ?? false;
     const gateIds = (world.gates ?? []).map((g) => g.id);
     this.#openGates = new Set(options.openGates === undefined || options.openGates === 'all' ? gateIds : options.openGates);
     this.#index = this.#buildIndex();
@@ -838,7 +830,7 @@ export class RoamController implements BeatHost {
   #refreshFocus(): void {
     let next: InteractableSpec | null = null;
     if (this.#control !== 'cinematic' && !this.#exhibit && !this.#seat && !this.#panel) {
-      const live = this.world.interactables.filter((i) => (!i.gate || !this.#openGates.has(i.gate)) && (this.#stations || i.kind !== 'station'));
+      const live = this.world.gates ? this.world.interactables.filter((i) => !i.gate || !this.#openGates.has(i.gate)) : this.world.interactables;
       const r = selectFocus(this.eye(), lookDir(this.#yaw, this.#pitch), live);
       next = r ? (this.world.interactables.find((i) => i.id === r.id) ?? null) : null;
     }

@@ -80,7 +80,7 @@ describe('RoamController', () => {
     const verify = world.interactables.find((i) => i.station === 'verify')!;
     const at = verify.at;
     const from: [number, number, number] = [at[0], -30, at[2] + 60];
-    const c = new RoamController(world, { spawn: { pos: from, yaw: 0, pitch: Math.atan2(at[1] - (from[1] + 44), 60) }, openGates: [], stations: true });
+    const c = new RoamController(world, { spawn: { pos: from, yaw: 0, pitch: Math.atan2(at[1] - (from[1] + 44), 60) }, openGates: [] });
     const events: RoamEvent[] = [];
     c.subscribe((e) => events.push(e));
     expect(c.openGates).toEqual([]);
@@ -111,15 +111,6 @@ describe('RoamController', () => {
     expect(events).toContainEqual({ type: 'gate', gate: 'verify' });
     run(c, 3);
     expect(c.playerState().pos[2]).toBeLessThan(sealZ - 20);
-  });
-
-  it('a room with no host for the panels ignores stations: E must not hold the player for a panel nobody draws', () => {
-    const at = world.interactables.find((i) => i.station === 'verify')!.at;
-    const c = new RoamController(world, { spawn: { pos: [at[0], -30, at[2] + 60], yaw: 0, pitch: Math.atan2(at[1] - 14, 60) } });
-    c.update(1 / 60);
-    expect(c.snapshot().focus).toBeNull();
-    c.interact();
-    expect(c.panel).toBeNull();
   });
 
   it('a new avatar look is announced and becomes the player\'s avatar', () => {

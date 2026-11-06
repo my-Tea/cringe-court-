@@ -5,9 +5,23 @@
     "emitDeclarationOnly": true,
     "noEmit": false,
     "outDir": "../../node_modules/.tsc/ai",
-    "lib": ["ES2023"],
-    "types": ["node"]
+    "lib": [
+      "ES2023"
+    ],
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src"],
-  "references": [{ "path": "../core" }]
+  "include": [
+    "src",
+    "scripts"
+  ],
+  "references": [
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../engine"
+    }
+  ]
 }

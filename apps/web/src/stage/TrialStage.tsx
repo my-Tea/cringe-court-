@@ -15,6 +15,7 @@ const SPEAKER: Readonly<Record<Speaker, CharacterId>> = {
   'side-a': 'side-a',
   'side-b': 'side-b',
   narrator: 'ai-narrator',
+  clerk: 'clerk',
 };
 
 const IMPACT: Readonly<Record<CalloutStyle, ImpactKind | null>> = {
@@ -218,6 +219,7 @@ const SPEAKER_NAME_KEYS: Readonly<Record<Speaker, MessageKey>> = {
   'side-a': 'common.role.sideA',
   'side-b': 'common.role.sideB',
   narrator: 'solo.stage.speaker.narrator',
+  clerk: 'solo.stage.speaker.clerk',
 };
 
 const speakerLabel = (speaker: Speaker): string => t(SPEAKER_NAME_KEYS[speaker]);

@@ -1,6 +1,6 @@
 # @cringe-court/ai
 
-The real `AiCounselPort` for CringeCourt: the AI prosecution and defense, the intake angle suggestions and Judge Gavel.exe's sentence line. It has zero runtime dependencies beyond `@cringe-court/core`, and it never imports the 0G SDK.
+The real `AiCounselPort` for CringeCourt: the AI prosecution and defense, the intake angle suggestions and Judge Gavel.exe's sentence line. The legacy counsel service has zero runtime dependencies beyond `@cringe-court/core`, and it never imports the 0G SDK. The court intelligence layer (`./court`, below) adds `zod`, which the repo already uses.
 
 ```
 CounselService (AiCounselPort)  -->  ChatClient  -->  OgComputeChatClient  -->  injected OgBroker (0G SDK)
@@ -49,3 +49,19 @@ Flow per call: `getServiceMetadata` (cached) -> `getRequestHeaders(provider, use
 - The method names `getServiceMetadata`, `getRequestHeaders` and `processResponse` match what public 0G docs and search results describe, but they were NOT checked against the live SDK. Search results suggest the package was renamed from `@0glabs/0g-serving-broker` to `@0gfoundation/0g-compute-ts-sdk`, that `getServiceMetadata` may take an optional model argument, and that the argument order and meaning of `getRequestHeaders` and `processResponse` differ between versions. `createOgBrokerFromSdk` is the single place to adjust.
 - The chat id is read from the `ZG-Res-Key` response header, falling back to the body `id`. That header is from memory of the docs, not confirmed.
 - No test talks to a real provider; everything uses a fake broker and fake fetch.
+
+## Court intelligence layer (`@cringe-court/ai/court`)
+
+A separate, newer layer that writes and validates a complete comedic trial for Solo, Versus and Viral cases with one 0G Router call (plus at most one repair), stores it write-once with a content hash, and hands the game typed `CourtLine`s for the existing Director. It does not replace or change the counsel service above.
+
+```
+prepareCase -> trialMessages -> InferenceClient (OgRouterClient | MockInferenceClient)
+            -> parseModelScript -> checkScript (-> one repair) -> Transcript (hash) -> TranscriptStore
+            -> toCourtLines + courtCast + courtDirectorOptions -> engine directTrial()
+```
+
+- Entry points: `@cringe-court/ai/court` (browser-safe, no secrets) and `@cringe-court/ai/court/node` (`FileTranscriptStore`).
+- Configuration: `loadCourtAIConfig(env)` / `createCourtAI(config)`; env vars and setup in [docs/ai/10](../../docs/ai/10_0G_PROVIDER_INTEGRATION.md). Template: [`.env.court.example`](.env.court.example).
+- Developer runner: `npm run court:test` (see the header of `scripts/court-test.ts`), corpus: `npm run court:eval`, generated prompt docs: `npm run court:prompts`.
+- Full documentation: [docs/ai/README.md](../../docs/ai/README.md).
+- **Live 0G inference has not been executed yet** (no credentials during development); see docs/ai/10 §8.

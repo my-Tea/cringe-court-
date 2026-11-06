@@ -9,7 +9,11 @@ import type { Usdc } from '../money';
 
 /* ── 0G Compute: AI prosecution and defense ─────────────────────────────── */
 
-export type Speaker = 'judge' | 'prosecutor' | 'defense' | 'side-a' | 'side-b' | 'narrator';
+/**
+ * `clerk` is the Court Clerk (case introductions, procedure, waiting states).
+ * Renderers without a clerk actor fall back to the narrator slot.
+ */
+export type Speaker = 'judge' | 'prosecutor' | 'defense' | 'side-a' | 'side-b' | 'narrator' | 'clerk';
 
 export interface TranscriptLine {
   speaker: Speaker;

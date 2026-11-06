@@ -305,6 +305,7 @@ export const solo = {
   'stage.speaker.prosecutor': 'Miss Ratio',
   'stage.speaker.defense': 'Counsel Chaos',
   'stage.speaker.narrator': 'AI Narrator',
+  'stage.speaker.clerk': 'Court Clerk',
   'stage.canvas': 'The voxel courtroom. Every line spoken is in the transcript below.',
   'stage.testnet': 'TESTNET · demo data',
   'stage.card.case': 'CASE',

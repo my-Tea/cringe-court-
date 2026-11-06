@@ -1,0 +1,8 @@
+{
+  "mode": "versus",
+  "caseId": "demo-versus-group-chat",
+  "caseTitle": "The Muted Group Chat",
+  "sideA": { "name": "Aisha", "account": "I muted the family group chat for a year because it got about 400 good-morning images a week. Muting it was self-care, and anything important should have been a phone call." },
+  "sideB": { "name": "Rohan", "account": "The reunion moved to a new restaurant and we announced it in the chat a week ahead. Aisha went to the old place, sat alone for an hour, and then blamed the chat instead of the mute button." },
+  "agreedFacts": ["The family group chat was muted for about a year.", "The new reunion venue was announced only in the group chat, one week before the date."]
+}

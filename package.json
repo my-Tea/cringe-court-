@@ -30,7 +30,10 @@
     "check:full": "npm run check && npm run test:packages && npm run test:contracts",
     "server": "npm start -w @cringe-court/server",
     "dev:full": "node tools/dev-full.mjs",
-    "e2e:backend": "node apps/web/e2e/backend/run.mjs"
+    "e2e:backend": "node apps/web/e2e/backend/run.mjs",
+    "court:test": "tsx packages/ai/scripts/court-test.ts",
+    "court:eval": "tsx packages/ai/scripts/court-eval.ts",
+    "court:prompts": "tsx packages/ai/scripts/court-prompts.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
