@@ -187,8 +187,11 @@ export class RemoteGrandJuryCourt implements GrandJuryCourtApi {
 
   /** Juror Screening: the World ID proof is made on this device and checked by the server. */
   async screen(n: CaseNumber, signal?: AbortSignal): Promise<ActionResult<Hex>> {
-    const proof = await this.#identity.requestProof({ action: 'accept-jury-seat', signal: `case:${n}:seat`, minLevel: 'orb' }, signal);
+    const request = { action: 'accept-jury-seat' as const, signal: `case:${n}:seat`, minLevel: 'orb' as const };
+    const proof = await this.#identity.requestProof(request, signal);
     if (!proof.ok) return fail(proof.reason, proof.message);
+    const screened = await this.#identity.verify(proof.proof, request);
+    if (!screened.ok) return fail(screened.reason, screened.message);
     return this.#act<Hex>(n, 'screen', { proof: proof.proof });
   }
 
