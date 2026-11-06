@@ -2,8 +2,8 @@ import { MODES, type ModeId } from '@cringe-court/core';
 import { stagePose } from '@/art/art';
 import { paths } from '@/app/routes';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { webModes } from '@/modes/registry';
 import { Alert, Button, ButtonLink, Card, CardBody, CardHeader, CardTitle, Icon, PhaseStepper, Tooltip } from '@/ds';
+import { webModes } from '@/modes/registry';
 import { MODE_PRESENTATION } from './modeContent';
 import { ModeFacts } from './ModeFacts';
 import styles from './pages.module.css';
@@ -11,7 +11,7 @@ import styles from './pages.module.css';
 export function ModePage({ id }: { id: ModeId }) {
   const mode = MODES[id];
   const m = MODE_PRESENTATION[id];
-  const cta = webModes.get(id)?.cta;
+  const playable = webModes.get(id)?.landing;
   useDocumentTitle(mode.name);
 
   return (
@@ -26,9 +26,9 @@ export function ModePage({ id }: { id: ModeId }) {
             <p className={styles.modeHeadline}>{m.headline}</p>
             <p className={styles.heroLede}>{m.pitch}</p>
             <div className={styles.heroActions}>
-              {cta ? (
-                <ButtonLink to={cta.to} size="lg" iconEnd={<Icon name="arrow-right" />}>
-                  {cta.label}
+              {playable ? (
+                <ButtonLink to={playable.to} size="lg" iconEnd={<Icon name="arrow-right" />}>
+                  {playable.label}
                 </ButtonLink>
               ) : (
                 <Tooltip content="Filing opens when the contracts and AI counsel phases land.">
@@ -100,11 +100,16 @@ export function ModePage({ id }: { id: ModeId }) {
           </CardBody>
         </Card>
 
-        {!cta && (
-        <Alert tone="warning" title="You are looking at the app shell" className={styles.modeAlert}>
-          This build has the courts, design system and rules, but no filing yet. Contracts on Arc testnet, AI counsel on 0G and
-          World ID juror screening arrive in the next phases. Nothing here touches money.
-        </Alert>
+        {playable ? (
+          <Alert tone="info" title="Testnet demo court" className={styles.modeAlert}>
+            This court runs end to end in your browser: scripted counsel stands in for 0G Compute, an in-browser twin of the Arc testnet
+            contract holds free test USDC, and NPC jurors stand in for World ID–verified humans. Nothing here touches real money.
+          </Alert>
+        ) : (
+          <Alert tone="warning" title="You are looking at the app shell" className={styles.modeAlert}>
+            This build has the courts, design system and rules, but no filing yet. Contracts on Arc testnet, AI counsel on 0G and
+            World ID juror screening arrive in the next phases. Nothing here touches money.
+          </Alert>
         )}
       </div>
     </>

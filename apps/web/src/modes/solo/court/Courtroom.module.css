@@ -1,0 +1,484 @@
+/* The voxel courtroom. One wide render (cc-art/dist/scene/pov_well.png) is the
+   set; the camera "moves" by zooming the whole set + cast toward a mark, so
+   close-ups stay in the same pixel world. */
+
+.courtroom {
+  display: grid;
+  gap: var(--cc-space-4);
+  padding: var(--cc-space-3);
+  border-radius: var(--cc-radius-xl);
+  background: var(--cc-color-surface);
+  box-shadow:
+    inset 0 0 0 2px var(--cc-gold-500),
+    inset 0 0 0 5px var(--cc-royal-900),
+    var(--cc-shadow-3);
+  color: var(--cc-color-text);
+}
+
+@media (min-width: 640px) {
+  .courtroom {
+    padding: var(--cc-space-5);
+  }
+}
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-royal-900);
+  box-shadow:
+    0 0 0 3px var(--cc-gold-700),
+    0 0 0 6px var(--cc-royal-900);
+  isolation: isolate;
+}
+
+.camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transition:
+    transform var(--cc-duration-dramatic) var(--cc-ease-emphasized),
+    transform-origin var(--cc-duration-dramatic) var(--cc-ease-emphasized);
+}
+
+.camera[data-camera='close_judge'] {
+  transform: scale(1.45);
+  transform-origin: 50% 22%;
+}
+.camera[data-camera='close_prosecution'] {
+  transform: scale(1.22);
+  transform-origin: 8% 70%;
+}
+.camera[data-camera='close_defense'] {
+  transform: scale(1.22);
+  transform-origin: 92% 70%;
+}
+.camera[data-camera='pov_corner'] {
+  transform: scale(1.12);
+  transform-origin: 50% 40%;
+}
+
+.camera[data-fx='shake'] {
+  animation: shake 420ms steps(6, end);
+}
+.camera[data-fx='impact'] {
+  animation: impact 300ms var(--cc-ease-stamp);
+}
+
+@keyframes shake {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -1.2% 0.4%; }
+  40% { translate: 1.1% -0.5%; }
+  60% { translate: -0.8% 0.3%; }
+  80% { translate: 0.6% 0; }
+}
+
+@keyframes impact {
+  0% { scale: 1.03; }
+  100% { scale: 1; }
+}
+
+.set {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The judge stands behind the bench: crop the cutout at the bench top. */
+.judgeBox {
+  position: absolute;
+  left: 50%;
+  top: 5%;
+  width: 30%;
+  height: 52%;
+  translate: -50% 0;
+  overflow: hidden;
+}
+
+.judge {
+  width: 100%;
+  height: auto;
+  margin-top: -6%;
+}
+
+.actor {
+  position: absolute;
+  bottom: -14%;
+  height: 86%;
+  width: auto;
+  filter: drop-shadow(0 12px 14px color-mix(in srgb, var(--cc-neutral-900) 55%, transparent));
+  transition: filter var(--cc-duration-base) var(--cc-ease-standard), translate var(--cc-duration-base) var(--cc-ease-standard);
+}
+
+.prosecutor {
+  left: -9%;
+}
+.defense {
+  right: 12%;
+}
+.defendant {
+  right: -9%;
+  height: 66%;
+  bottom: -12%;
+}
+
+/* The speaker steps forward a touch and gets a warm rim. */
+.actor[data-speaking],
+.judge[data-speaking] {
+  translate: 0 -1.5%;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cc-gold-300) 70%, transparent))
+    drop-shadow(0 12px 14px color-mix(in srgb, var(--cc-neutral-900) 55%, transparent));
+}
+
+.nameplate {
+  position: absolute;
+  bottom: 3%;
+  padding: 2px var(--cc-space-2);
+  border: 2px solid var(--cc-gold-500);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-royal-900);
+  color: var(--cc-neutral-100);
+  font-family: var(--cc-font-pixel);
+  font-size: clamp(0.55rem, 0.4rem + 0.6vw, var(--cc-text-xs));
+  letter-spacing: var(--cc-tracking-wide);
+  white-space: nowrap;
+}
+.plateP {
+  left: 3%;
+}
+.plateD {
+  right: 26%;
+}
+
+.light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background var(--cc-duration-slow) var(--cc-ease-standard);
+}
+.light[data-mood='spotlight'] {
+  background: radial-gradient(60% 75% at 50% 45%, transparent 40%, color-mix(in srgb, var(--cc-neutral-900) 55%, transparent));
+}
+.light[data-mood='tense'] {
+  background:
+    radial-gradient(70% 80% at 50% 40%, transparent 30%, color-mix(in srgb, var(--cc-royal-900) 55%, transparent)),
+    color-mix(in srgb, var(--cc-royal-900) 18%, transparent);
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  background: var(--cc-neutral-100);
+  opacity: 0;
+  animation: flash 360ms var(--cc-ease-exit);
+  pointer-events: none;
+}
+
+@keyframes flash {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+.callout {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Keep the shout clear of whoever is talking. */
+.callout[data-speaker='judge'] {
+  top: auto;
+  bottom: 30%;
+}
+.callout[data-speaker='prosecutor'] {
+  left: 64%;
+}
+.callout[data-speaker='defense'] {
+  left: 36%;
+}
+
+.juryOut {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.exhibit {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  width: min(70%, 26rem);
+  padding: var(--cc-space-3) var(--cc-space-4);
+  border: 2px solid var(--cc-royal-900);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-canvas);
+  box-shadow: inset 0 4px 0 var(--cc-gold-500), var(--cc-shadow-3);
+  color: var(--cc-color-text);
+  animation: drop var(--cc-duration-slow) var(--cc-ease-emphasized);
+}
+
+.exhibit figcaption {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-accent-text);
+}
+
+.exhibit p {
+  margin-top: var(--cc-space-1);
+  font-size: var(--cc-text-sm);
+}
+
+@keyframes drop {
+  from { translate: -50% -30%; opacity: 0; }
+  to { translate: -50% 0; opacity: 1; }
+}
+
+.segmentTag {
+  position: absolute;
+  top: var(--cc-space-3);
+  left: var(--cc-space-3);
+  padding: 2px var(--cc-space-2);
+  border-radius: var(--cc-radius-pill);
+  background: color-mix(in srgb, var(--cc-neutral-900) 72%, transparent);
+  color: var(--cc-gold-100);
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-xs);
+  letter-spacing: var(--cc-tracking-caps);
+  text-transform: uppercase;
+}
+
+.dialogue {
+  margin-top: var(--cc-space-2);
+}
+
+.controls {
+  display: grid;
+  gap: var(--cc-space-3);
+  align-items: center;
+  grid-template-columns: auto 1fr;
+}
+
+@media (min-width: 1100px) {
+  .controls {
+    grid-template-columns: auto 1fr auto;
+  }
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+.progress {
+  display: grid;
+  gap: var(--cc-space-1);
+  min-width: 0;
+}
+
+.counter {
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-xs);
+  color: var(--cc-color-text-muted);
+}
+
+.chapters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-1);
+}
+
+.chapter {
+  padding: 2px var(--cc-space-2);
+  border: 1px solid var(--cc-color-border);
+  border-radius: var(--cc-radius-pill);
+  background: transparent;
+  color: var(--cc-color-text-muted);
+  font-size: var(--cc-text-xs);
+  cursor: pointer;
+}
+
+.chapter:hover {
+  border-color: var(--cc-color-border-strong);
+  color: var(--cc-color-text);
+}
+
+.chapter[aria-current] {
+  border-color: var(--cc-color-accent);
+  background: var(--cc-color-accent);
+  color: var(--cc-color-on-accent);
+}
+
+.bar {
+  height: 6px;
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-color-surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--cc-color-border);
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cc-gold-500), var(--cc-gold-300));
+  transition: inline-size var(--cc-duration-slow) var(--cc-ease-standard);
+}
+
+.extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+@media (min-width: 1100px) {
+  .extra {
+    grid-column: auto;
+  }
+}
+
+.hint {
+  font-size: var(--cc-text-xs);
+  color: var(--cc-color-text-muted);
+}
+
+@media (hover: none) {
+  .hint {
+    display: none;
+  }
+}
+
+.transcript {
+  display: grid;
+  gap: var(--cc-space-1);
+  max-height: 22rem;
+  overflow: auto;
+  padding: var(--cc-space-2);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-surface-sunken);
+  list-style: none;
+}
+
+.transcript button {
+  width: 100%;
+  padding: var(--cc-space-2);
+  border: 0;
+  border-radius: var(--cc-radius-sm);
+  background: transparent;
+  color: var(--cc-color-text);
+  text-align: left;
+  font: inherit;
+  font-size: var(--cc-text-sm);
+  cursor: pointer;
+}
+
+.transcript button:hover {
+  background: var(--cc-color-surface);
+}
+
+.transcript li[aria-current] button {
+  background: var(--cc-color-surface);
+  box-shadow: inset 3px 0 0 var(--cc-color-accent);
+}
+
+.transcript strong {
+  font-family: var(--cc-font-display);
+  color: var(--cc-color-accent-text);
+  margin-right: var(--cc-space-1);
+}
+
+:global(:root[data-reduced-motion='true']) .camera,
+:global(:root[data-reduced-motion='true']) .flash,
+:global(:root[data-reduced-motion='true']) .exhibit {
+  animation: none;
+}
+
+:global(:root[data-reduced-motion='true']) .flash {
+  display: none;
+}
+
+/* Phones: a taller frame, smaller shouts, no nameplates, a scrolling chapter rail. */
+@media (max-width: 639px) {
+  .viewport {
+    aspect-ratio: 4 / 3.4;
+  }
+
+  .set {
+    object-position: 50% 40%;
+  }
+
+  .nameplate {
+    display: none;
+  }
+
+  .callout {
+    scale: 0.62;
+    transform-origin: top center;
+  }
+
+  .juryOut {
+    scale: 0.7;
+  }
+
+  .exhibit {
+    width: 86%;
+  }
+
+  .chapters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--cc-space-1);
+    scrollbar-width: thin;
+  }
+
+  .chapter {
+    flex: none;
+  }
+}
+
+/* ── 3D voxel stage (@cringe-court/scene) ── */
+
+.voxelLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.voxel {
+  width: 100%;
+  height: 100%;
+}
+
+.voxel canvas {
+  display: block;
+}
+
+.voxelLoading {
+  position: absolute;
+  right: var(--cc-space-3);
+  bottom: var(--cc-space-3);
+  z-index: 3;
+  padding: 2px var(--cc-space-2);
+  border-radius: var(--cc-radius-pill);
+  background: color-mix(in srgb, var(--cc-neutral-900) 72%, transparent);
+  color: var(--cc-gold-100);
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-xs);
+}
+
+/* Once the 3D scene is up, the illustrated set steps aside (the overlays stay). */
+.viewport[data-voxel-ready] .camera {
+  visibility: hidden;
+}

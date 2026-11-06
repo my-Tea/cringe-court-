@@ -19,8 +19,8 @@ export interface WebModeModule {
   definition: ModeDefinition;
   /** Child routes under `/<mode id>/`. */
   routes?: RouteObject[];
-  /** The landing page's main call to action once the mode is playable (e.g. `{ label: 'Open the docket', to: '/grand-jury/docket' }`). */
-  cta?: { label: string; to: string };
+  /** The landing page's primary call to action, once the mode is playable. */
+  landing?: { label: string; to: string };
 }
 
 const discovered = import.meta.glob<WebModeModule>('./*/mode.{ts,tsx}', { eager: true, import: 'default' });
