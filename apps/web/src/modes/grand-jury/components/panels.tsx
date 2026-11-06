@@ -172,6 +172,7 @@ function ScreeningDialog({ open, onOpenChange, detail }: { open: boolean; onOpen
     }
   };
   const error = screen.error ?? offer.error;
+  const terminal = error === t('domain.screening.ineligible_level') || error === t('domain.screening.is_party');
   return (
     <Dialog open={open} onOpenChange={(o) => !busy && onOpenChange(o)}>
       <DialogContent
@@ -182,9 +183,11 @@ function ScreeningDialog({ open, onOpenChange, detail }: { open: boolean; onOpen
             <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
               {t('grandJury.screening.notNow')}
             </Button>
-            <PaperButton onClick={verify} loading={busy} iconStart={<Icon name="eye" />}>
-              {error ? t('common.action.retry') : t('grandJury.screening.verify')}
-            </PaperButton>
+            {terminal ? null : (
+              <PaperButton onClick={verify} loading={busy} iconStart={<Icon name="eye" />}>
+                {error ? t('common.action.retry') : t('grandJury.screening.verify')}
+              </PaperButton>
+            )}
           </>
         }
       >
