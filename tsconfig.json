@@ -2,7 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/core" },
-    { "path": "./packages/audio" },
+    { "path": "./packages/modes-solo" },
     { "path": "./apps/web" },
     { "path": "./apps/web/tsconfig.node.json" }
   ]

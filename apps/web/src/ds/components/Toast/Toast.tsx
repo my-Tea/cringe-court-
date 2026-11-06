@@ -56,7 +56,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             type={tone === 'danger' ? 'foreground' : 'background'}
             duration={duration ?? (tone === 'danger' ? 10000 : 6000)}
             className={cx(styles.toast, tone !== 'info' && styles[tone])}
-            data-surface="wood"
           >
             <Icon name={icons[tone]} size="1.25rem" className={styles.icon} />
             <div className={styles.text}>

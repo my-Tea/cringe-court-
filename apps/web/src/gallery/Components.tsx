@@ -39,15 +39,10 @@ import {
   TestnetBadge,
   TextArea,
   TextField,
-  OrnateFrame,
-  RoundIconButton,
-  RoundIconLink,
-  RoundIconTile,
   Tooltip,
   useToast,
 } from '@/ds';
 import { EXPRESSIONS } from '@/art/art';
-import styles from './Gallery.module.css';
 import { GallerySection, Specimen } from './Specimen';
 
 const noop = () => {};
@@ -58,7 +53,7 @@ export function ButtonSection() {
     <GallerySection
       id="buttons"
       title="Buttons"
-      description="Solid faces in a gold rim on a hard bottom edge, like the style-guide tiles; pressing sinks the face. Gold “swear” is reserved for committing money or duty. Disabled stays focusable (aria-disabled) so its reason can be read."
+      description="Solid faces on a hard bottom edge, like the UI-kit art; pressing sinks the face. Gold “swear” is reserved for committing money or duty. Disabled stays focusable (aria-disabled) so its reason can be read."
     >
       <Specimen label="Variants">
         <Button>Primary</Button>
@@ -105,61 +100,6 @@ export function ButtonSection() {
   );
 }
 
-export function ChromeSection() {
-  const [pinned, setPinned] = useState(false);
-  return (
-    <GallerySection
-      id="chrome"
-      title="Ornate chrome"
-      description="The style guide's UI chrome: four round ornate icon buttons (scales, document, gear, star) and the parchment frame. Icon buttons always have an accessible name; a captioned link uses the decorative tile."
-    >
-      <Specimen label="Round icon buttons" note="<RoundIconButton icon label />">
-        <Tooltip content="Courts">
-          <RoundIconButton icon="scales" label="Courts" />
-        </Tooltip>
-        <Tooltip content="Case file">
-          <RoundIconButton icon="document" label="Case file" />
-        </Tooltip>
-        <Tooltip content="Settings">
-          <RoundIconButton icon="gear" label="Settings" />
-        </Tooltip>
-        <Tooltip content={pinned ? 'Unpin case' : 'Pin case'}>
-          <RoundIconButton icon="star" label="Pin case" pressed={pinned} onClick={() => setPinned((p) => !p)} />
-        </Tooltip>
-        <RoundIconButton icon="scales" label="Courts (gold)" tone="gold" />
-        <RoundIconButton icon="gavel" label="Gavel (large)" size="lg" />
-        <RoundIconLink to="/gallery#chrome" icon="star" label="Gallery (link)" tone="gold" size="lg" />
-      </Specimen>
-      <Specimen label="Captioned tiles in links" note="<RoundIconTile /> inside <a>">
-        {(['scales', 'document', 'gear', 'star'] as const).map((icon) => (
-          <a key={icon} href="#chrome" className={styles.tileLink}>
-            <RoundIconTile icon={icon} />
-            {icon}
-          </a>
-        ))}
-      </Specimen>
-      <Specimen label="Parchment frame" note="<OrnateFrame tone ribbon />" layout="grid2">
-        <OrnateFrame ribbon="Case #0069">
-          <p>
-            <strong>The People v. Bro.</strong> Sold ETH for a keyboard because the switches sounded bullish.
-          </p>
-        </OrnateFrame>
-        <OrnateFrame tone="wood" ribbon="Verdict">
-          <p>
-            Seven sworn jurors found the defendant <strong>COOKED</strong>. Bonds returned.
-          </p>
-        </OrnateFrame>
-        <OrnateFrame padding="lg">
-          <p>Empty parchment frame, large padding: the right-hand panel of the style guide.</p>
-        </OrnateFrame>
-        <OrnateFrame tone="wood" padding="sm">
-          <p>Wood, small padding.</p>
-        </OrnateFrame>
-      </Specimen>
-    </GallerySection>
-  );
-}
-
 export function BadgeSection() {
   return (
     <GallerySection id="badges" title="Badges" description="Short status labels in the pixel face. The TESTNET badge is permanent on every screen (D14).">
@@ -191,7 +131,7 @@ export function BadgeSection() {
 
 export function CardSection() {
   return (
-    <GallerySection id="cards" title="Cards" description="Default and raised cards have gold-tinted edges; ornate is the style-guide frame (gold band, hairline rule, pixel corner knots); parchment adds a maroon top rule for in-world documents; sunken is a well. Interactive cards lift; the title link covers the card.">
+    <GallerySection id="cards" title="Cards" description="Default, raised, neon (the brand frame with gold corner brackets), parchment (in-world documents) and sunken wells. Interactive cards lift and glow; the title link covers the card.">
       <Specimen label="Tones" layout="grid3">
         {(['default', 'raised', 'ornate', 'parchment', 'sunken'] as const).map((tone) => (
           <Card key={tone} tone={tone}>

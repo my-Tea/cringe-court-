@@ -1,6 +1,5 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cx } from '../../lib/cx';
-import { OrnateCorners } from '../OrnateFrame/OrnateFrame';
 import styles from './Card.module.css';
 
 export type CardTone = 'default' | 'raised' | 'ornate' | 'parchment' | 'sunken';
@@ -14,16 +13,15 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   as?: 'article' | 'section' | 'div' | 'li';
 }
 
-/** `ornate` and `parchment` carry the style-guide frame with gold corner knots. */
 const pad = { sm: styles.padSm, md: styles.padMd, lg: styles.padLg };
 
 export function Card({ tone = 'default', padding = 'md', interactive, as: Tag = 'article', className, children, ...rest }: CardProps) {
   return (
     <Tag
       className={cx(styles.card, tone !== 'default' && styles[tone], pad[padding], interactive && styles.interactive, className)}
+      data-surface={tone === 'parchment' ? 'parchment' : undefined}
       {...rest}
     >
-      {(tone === 'ornate' || tone === 'parchment') && <OrnateCorners />}
       {children}
     </Tag>
   );

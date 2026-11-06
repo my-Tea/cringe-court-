@@ -21,11 +21,11 @@
   align-items: start;
   gap: var(--cc-space-3);
   padding: var(--cc-space-4);
-  border: 2px solid var(--cc-color-frame);
-  border-left: 5px solid var(--_tone);
+  border: 1px solid var(--cc-color-border-strong);
+  border-left: 4px solid var(--_tone);
   border-radius: var(--cc-radius-md);
   background: var(--cc-color-surface-raised);
-  box-shadow: 0 0 0 1px var(--cc-color-frame-dark), var(--cc-shadow-bevel), var(--cc-shadow-3);
+  box-shadow: var(--cc-shadow-3);
   color: var(--cc-color-text);
 }
 
@@ -65,7 +65,6 @@
 /* Verdict toasts get the gold rim: "the jury has spoken". */
 .verdict {
   --_tone: var(--cc-color-highlight);
-  border-color: var(--cc-color-frame-light);
   box-shadow: var(--cc-shadow-ring-highlight), var(--cc-shadow-3);
 }
 

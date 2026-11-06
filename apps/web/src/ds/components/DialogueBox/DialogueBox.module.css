@@ -1,5 +1,5 @@
-/* The visual-novel dialogue box: the style-guide parchment frame (gold band,
-   dark-gold line, maroon top rule), a maroon speaker plate, typewriter text. */
+/* The visual-novel dialogue box (ui/dialogue_box.png): parchment, burgundy
+   frame, gold rule, speaker plate, typewriter text. */
 .box {
   position: relative;
   display: grid;
@@ -8,15 +8,12 @@
   align-items: start;
   padding: var(--cc-space-5);
   padding-top: var(--cc-space-6);
-  border: 3px solid var(--cc-gold-500);
-  border-radius: var(--cc-radius-xl);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--cc-gold-300) 14%, transparent), transparent 4rem),
-    var(--cc-neutral-100);
+  border: 2px solid var(--cc-royal-900);
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-color-canvas);
   box-shadow:
-    0 0 0 1px var(--cc-gold-900),
-    inset 0 4px 0 var(--cc-royal-900),
-    var(--cc-shadow-bevel),
+    inset 0 5px 0 var(--cc-gold-500),
+    0 0 0 2px var(--cc-gold-700),
     var(--cc-shadow-3);
 }
 
@@ -29,13 +26,10 @@
   border: 2px solid var(--cc-gold-500);
   border-radius: var(--cc-radius-sm);
   background: var(--cc-royal-900);
-  box-shadow: 0 0 0 1px var(--cc-gold-900), 0 2px 0 var(--cc-neutral-900);
-  color: var(--cc-gold-100);
+  color: var(--cc-neutral-100);
   font-family: var(--cc-font-display);
   font-size: var(--cc-text-sm);
-  font-weight: var(--cc-weight-bold);
-  font-variation-settings: 'SOFT' 100;
-  letter-spacing: var(--cc-tracking-normal);
+  letter-spacing: var(--cc-tracking-wide);
 }
 
 .text {
