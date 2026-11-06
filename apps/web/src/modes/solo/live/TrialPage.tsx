@@ -2,11 +2,13 @@ import { soloMode, soloTerms } from '@cringe-court/modes-solo';
 import type { ChainCase, CourtLine } from '@cringe-court/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
-import { PaperButton, Alert } from '@/ds';
+import { Alert, Icon, PaperButton } from '@/ds';
 import { stagePose } from '@/art/art';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { t, type MessageKey } from '@/i18n';
 import { appLedger } from '@/platform/ledger';
+import { beatsFromLines } from '@/trial/beats';
+import { TrialViewFrame } from '@/trial/TrialViewFrame';
 import { soloPaths } from '../lib/paths';
 import { Courtroom } from '../court/Courtroom';
 import { soloAudioPort } from '../lib/sound';
@@ -54,10 +56,26 @@ export function TrialPage() {
     );
   }
   if (!lines) return <Summoning />;
+  const title = titleFrom(live.story);
   return (
     <div className={styles.court}>
-      <h1 className={styles.courtTitle}>{titleFrom(live.story)}</h1>
-      <Courtroom lines={lines} cast={cast} title={live.title} audio={soloAudioPort} onFinished={() => setFinished(true)} />
+      <h1 className="cc-visually-hidden">{title}</h1>
+      <TrialViewFrame
+        roam={{
+          beats: beatsFromLines(lines),
+          label: t('solo.courtroom.region', { title }),
+          role: 'defendant',
+          spawn: 'defendant',
+          avatar: { model: 'creator', name: t('solo.case.trial.you') },
+          onDone: () => setFinished(true),
+        }}
+        classic={<Courtroom lines={lines} cast={cast} title={title} audio={soloAudioPort} onFinished={() => setFinished(true)} />}
+        toolbar={
+          <PaperButton size="sm" variant="maroon" onClick={() => setFinished(true)} iconEnd={<Icon name="arrow-right" />}>
+            {t('solo.case.trial.skip')}
+          </PaperButton>
+        }
+      />
     </div>
   );
 }

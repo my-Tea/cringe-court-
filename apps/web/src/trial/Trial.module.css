@@ -48,6 +48,11 @@
   min-height: 22rem;
 }
 
+.roam .canvas {
+  /* A page can cap the room to what it leaves free, so the dialogue stays on screen. */
+  max-height: var(--cc-trial-room-height, none);
+}
+
 @media (max-width: 40rem) {
   /* Tall on phones: the dialogue docks inside the room, under the 3D view (B5).
      Two classes, so it beats the room's own injected height. */

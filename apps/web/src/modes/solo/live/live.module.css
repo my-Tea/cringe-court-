@@ -229,19 +229,13 @@
 
 .court {
   --cc-courtroom-max: calc(52dvh * 1.6);
+  /* The site bar, the frame and the toolbar take this much; the room gets the rest, so its dialogue stays on screen. */
+  --cc-trial-room-height: calc(100svh - 12.5rem);
 
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--cc-space-3);
   min-width: 0;
-}
-
-.courtTitle {
-  margin: 0;
-  text-align: center;
-  font-family: var(--cc-font-display);
-  font-size: var(--cc-text-2xl);
-  color: var(--cc-royal-900);
 }
 
 .bench {

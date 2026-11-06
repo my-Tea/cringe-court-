@@ -9,7 +9,7 @@ import type { PlayerProfile } from '@/play/profile';
 /** What a path shows: the title, the walkable world, a panel over it, or a full-screen hearing. */
 export type GameView = 'title' | 'world' | 'panel' | 'scene';
 
-const HEARING = /^\/(solo|versus|grand-jury)\/case\/[^/]+/;
+const HEARING = /^\/(solo\/trial|(solo|versus|grand-jury)\/case)\/[^/]+/;
 
 export function viewFor(pathname: string): GameView {
   if (pathname === '/' || pathname === '') return 'title';
