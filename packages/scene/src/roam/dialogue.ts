@@ -37,6 +37,11 @@ export const BARKS: Readonly<Record<string, readonly string[]>> = {
   globe: ['You spin the globe. It lands on "the group chat".', 'The globe wobbles. Every country on it is labelled "cringe jurisdiction".'],
   docket: ['TODAY: "The People v. That Post You Made at 3 a.m." — Courtroom 1.', 'Also listed: "Side A v. Side B: Who Ate the Leftovers". Adjourned forever.'],
   'desk-bell': ['Ding. Nobody comes. The clerk is inside, saving things.', 'Ding ding. A sticky note: "please stop".'],
+  'seal-verify': ['A wall of warm light hums across the bridge. Words float in it: "HUMANS ONLY. PROVE IT AT THE SHRINE."', 'The seal does not care how confident you are. Verify at the shrine.'],
+  'seal-wardrobe': ['The seal flickers: "DRESS CODE: ANY. BUT PICK ONE." The wardrobe dais is behind you.', 'You cannot enter court in the default look. Legally you can. Spiritually, no.'],
+  'seal-trials': ['The last seal glows gold: "CHOOSE YOUR TRIAL." Stand on a gate\'s circle in the hall.', 'Three gates, one choice. The courthouse waits beyond.'],
+  'arrival-board': ['"WELCOME TO CRINGECOURT. 1. Prove you are human. 2. Look the part. 3. Pick your trial. 4. Your honor, bro is cooked."', 'A sticky note: "the shrine is up ahead, it does not bite".'],
+  mannequin: ['A mannequin in a judge\'s robe. The tag says "worn once, during a very long trial".', 'This one wears a suit and an expression of mild regret.'],
   'ballot-box': ['Sealed tight. Votes are committed, not revealed — the jury reveals together.', 'The wax seal has a tiny gavel on it.'],
 };
 
