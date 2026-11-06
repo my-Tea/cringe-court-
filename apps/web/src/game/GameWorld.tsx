@@ -188,7 +188,7 @@ function RunOverlay({ controller, station }: { controller: RoamController; stati
       {showQuest ? <QuestTracker step={step} onSkip={step === 'enter' && snap.zone !== 'outside' ? () => controller.teleport('outside') : null} /> : null}
       {snap.panel === 'verify' ? <VerifyPanel mock={mock} done={!!profile.verified} onVerify={verify} onClose={() => controller.closePanel()} /> : null}
       {snap.panel === 'wardrobe' ? <WardrobePanel look={controller.avatar.look ?? profile.look} onChange={setLook} onConfirm={confirmLook} onCancel={() => controller.closePanel()} /> : null}
-      {snap.panel === 'trials' && mode ? <TrialPanel mode={mode} chosen={profile.mode} onChoose={() => chooseMode(mode)} onClose={() => controller.closePanel()} /> : null}
+      {snap.panel === 'trials' && mode ? <TrialPanel initial={mode} chosen={profile.mode} onChoose={chooseMode} onClose={() => controller.closePanel()} /> : null}
     </>
   );
 }

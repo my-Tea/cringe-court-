@@ -202,9 +202,32 @@ export function WardrobePanel({ look, onChange, onConfirm, onCancel }: { look: P
 
 const MODE_ICON: Readonly<Record<ModeId, IconName>> = { solo: 'gavel', versus: 'users', 'grand-jury': 'scales' };
 
-export function TrialPanel({ mode, chosen, onChoose, onClose }: { mode: ModeId; chosen: ModeId | null; onChoose: () => void; onClose: () => void }) {
-  const m = MODE_PRESENTATION[mode];
-  const name = t(MODE_KEYS[mode]);
+const MODE_ORDER: readonly ModeId[] = ['solo', 'versus', 'grand-jury'];
+
+/** Every mode in one panel: switch here, without walking to another gate. Opens on the gate's own mode. */
+export function TrialPanel({ initial, chosen, onChoose, onClose }: { initial: ModeId; chosen: ModeId | null; onChoose: (mode: ModeId) => void; onClose: () => void }) {
+  const [mode, setMode] = useState(initial);
+  const items = MODE_ORDER.map((id) => {
+    const m = MODE_PRESENTATION[id];
+    return {
+      value: id,
+      label: t(MODE_KEYS[id]),
+      content: (
+        <div className={styles.modeCard}>
+          <p className={styles.modeEyebrow}>
+            {t(m.eyebrow)} {chosen === id ? <Badge tone="success">{t('play.trial.chosen')}</Badge> : null}
+          </p>
+          <h3 className={styles.modeHeadline}>{t(m.headline)}</h3>
+          <p>{t(m.pitch)}</p>
+          <ol className={styles.modeSteps}>
+            {m.steps.slice(0, 3).map((step) => (
+              <li key={step}>{t(step)}</li>
+            ))}
+          </ol>
+        </div>
+      ),
+    };
+  });
   return (
     <StationPanel
       id="trial"
@@ -213,27 +236,16 @@ export function TrialPanel({ mode, chosen, onChoose, onClose }: { mode: ModeId; 
       footer={
         <>
           <PaperButton variant="ghost" onClick={onClose}>
-            {t('play.trial.others')}
+            {t('play.trial.back')}
           </PaperButton>
-          <PaperButton data-autofocus iconStart={<Icon name={MODE_ICON[mode]} />} onClick={onChoose}>
-            {t('play.trial.choose', { mode: name })}
+          <PaperButton data-autofocus iconStart={<Icon name={MODE_ICON[mode]} />} onClick={() => onChoose(mode)}>
+            {t('play.trial.choose', { mode: t(MODE_KEYS[mode]) })}
           </PaperButton>
         </>
       }
     >
       <p className={styles.lede}>{t('play.trial.lede')}</p>
-      <div className={styles.modeCard}>
-        <p className={styles.modeEyebrow}>
-          {t(m.eyebrow)} {chosen === mode ? <Badge tone="success">{t('play.trial.chosen')}</Badge> : null}
-        </p>
-        <h3 className={styles.modeHeadline}>{t(m.headline)}</h3>
-        <p>{t(m.pitch)}</p>
-        <ol className={styles.modeSteps}>
-          {m.steps.slice(0, 3).map((s) => (
-            <li key={s}>{t(s)}</li>
-          ))}
-        </ol>
-      </div>
+      <Tabs items={items} label={t('play.trial.title')} value={mode} onValueChange={(v) => setMode(v as ModeId)} variant="pills" />
     </StationPanel>
   );
 }

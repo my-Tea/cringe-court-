@@ -75,9 +75,9 @@ export const play = {
 
   // Trial gates
   'trial.title': 'Select game mode',
-  'trial.lede': 'Choose your trial, your honor.',
+  'trial.lede': 'All three are right here. Switch any time.',
   'trial.choose': 'Choose {mode}',
-  'trial.others': 'See the other gates',
+  'trial.back': 'Keep walking',
   'trial.chosen': 'Chosen',
   'trial.ok.title': '{mode} it is',
   'trial.ok.body': 'The last seal is open. The courthouse is across the bridge.',
