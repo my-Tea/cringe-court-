@@ -1,6 +1,7 @@
 // All 8 characters at realistic (non-chibi) proportions — voxel boxes.
 // Head ≈ 23% of height, matching the Judge reference.
 import { H, C, b, pair, head, torso, arms, legs } from './vox-base.mjs';
+import { gavelBoxes, exhibitABoxes, popcornBoxes, papersBoxes, ANCHORS } from './held-props.mjs';
 
 export { head };
 
@@ -68,11 +69,7 @@ export const JUDGE = {
     out.push(b([-2, H.torsoTop - 16, -td - 2.4], [2, H.torsoTop - 12, -td - 1.4], C.goldLt));
 
     // ── gavel, held right — oversized ───────────────────────────────
-    const gx = H.torsoW + H.armW * 2 + 4, gy = H.armBot + lift + 4;
-    out.push(b([gx - 1.4, gy, -1.4], [gx + 1.4, gy + 26, 1.4], C.hairBr));
-    out.push(b([gx - 6, gy + 24, -3], [gx + 6, gy + 32, 3], C.hairBrLt));
-    out.push(b([gx - 6.6, gy + 26, -3.4], [gx + 6.6, gy + 29, 3.4], C.gold));
-    out.push(...pair([gx - 7, gy + 24, -3], [gx - 5.6, gy + 32, 3], C.goldLt));
+    out.push(...gavelBoxes(...ANCHORS.gavel(lift)));
 
     return out;
   },
@@ -147,9 +144,8 @@ export const DEFENSE = {
     out.push(...arms({ col: C.navy, colSh: C.navySh, cuff: C.cream }));
     out.push(...legs({ col: C.navySh, shoe: C.ink }));
 
-    // EXHIBIT A paper
-    out.push(b([-H.torsoW - H.armW * 2 - 3, H.armBot + 4, -6], [-H.torsoW - H.armW * 2 + 8, H.armBot + 16, -4.6], C.cream));
-    out.push(b([-H.torsoW - H.armW * 2 - 1, H.armBot + 13, -6.2], [-H.torsoW - H.armW * 2 + 6, H.armBot + 14, -5], '#A32D3F'));
+    // EXHIBIT A paper (shared with the standalone prop, see held-props.mjs)
+    out.push(...exhibitABoxes(...ANCHORS.exhibit()));
     return out;
   },
 };
@@ -212,9 +208,7 @@ export const CLERK = {
     out.push(...legs({ col: C.burgSh, shoe: C.ink }));
 
     // armful of papers
-    for (let i = 0; i < 4; i++) {
-      out.push(b([-H.torsoW - 9 + i * 0.6, H.armBot + 2 + i * 1.6, -6], [-H.torsoW + 4 + i * 0.6, H.armBot + 4 + i * 1.6, -3], i % 2 ? C.cream : C.creamSh));
-    }
+    out.push(...papersBoxes(...ANCHORS.papers()));
     return out;
   },
 };
@@ -291,9 +285,7 @@ export const JUROR = {
     out.push(...legs({ col: C.navy, shoe: C.ink }));
 
     // popcorn
-    out.push(b([-H.torsoW - 12, H.armBot + 2, -5], [-H.torsoW - 2, H.armBot + 13, -1], C.cream));
-    out.push(b([-H.torsoW - 12, H.armBot + 10, -5.4], [-H.torsoW - 2, H.armBot + 13, -0.6], C.burg));
-    for (let i = 0; i < 4; i++) out.push(b([-H.torsoW - 11 + i * 2.6, H.armBot + 13, -4], [-H.torsoW - 9.4 + i * 2.6, H.armBot + 16, -1.6], i % 2 ? C.goldLt : C.cream));
+    out.push(...popcornBoxes(...ANCHORS.popcorn()));
     return out;
   },
 };
