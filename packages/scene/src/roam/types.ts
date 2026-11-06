@@ -18,7 +18,7 @@ export interface Aabb {
 
 /* ── World ──────────────────────────────────────────────────────────────── */
 
-export type ZoneId = 'lobby' | 'gallery' | 'aisle' | 'well' | 'dais' | 'defendant-table' | 'prosecution-table' | 'witness-stand' | 'doorway' | 'outside';
+export type ZoneId = 'lobby' | 'gallery' | 'aisle' | 'well' | 'dais' | 'defendant-table' | 'prosecution-table' | 'witness-stand' | 'doorway' | 'jury-box' | 'outside';
 
 export interface Zone {
   id: ZoneId;
@@ -45,7 +45,7 @@ export interface Seat {
   pitch?: number;
 }
 
-export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'witness' | 'jury-view' | 'bench-front' | 'outside';
+export type SpawnId = 'lobby' | 'doorway' | 'aisle' | 'well' | 'defendant' | 'prosecution' | 'witness' | 'jury-box' | 'jury-view' | 'bench-front' | 'outside';
 
 export interface Spawn {
   pos: Vec3;

@@ -15,12 +15,13 @@
 import type { Box } from '../../courtroom/geometry';
 import { EMISSIVE } from '../../courtroom/geometry';
 import { CAST_SCALE, type CastFile } from '../cast';
-import { ART, C, toPalette } from '../palette';
+import { ART, toPalette } from '../palette';
 import { BODY } from '../physics';
 import type { Aabb, InteractableSpec, NpcSpec, RoamWorld, Seat, SeatId, Spawn, SpawnId, Vec3, Zone } from '../types';
 import { aabb } from './boxes';
 import { adaptCourtroom, COURT, WITNESS_STAND } from './courtroom';
-import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TABLE, EXHIBITS, stainedGlass } from './dressing';
+import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TABLE, EXHIBITS, PROSECUTION_CHAIR, stainedGlass } from './dressing';
+import { isOldJuryBox, JURY_BOX, JURY_SLOTS, juryBoxBoxes, PLAYER_JURY_SLOT } from './jury';
 import { ROOM_SCALE } from '../scale';
 import { LOBBY, lobbyBoxes } from './lobby';
 import { GROUNDS, groundsBoxes, PLAZA_Y } from './plaza';

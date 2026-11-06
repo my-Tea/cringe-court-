@@ -14,6 +14,7 @@ import { IsoTown } from '@cringe-court/scene/iso/react';
 import type { IsoRenderer } from '@cringe-court/scene/iso/three';
 import { MAP_ORDER, loadTownData, type IsoController, type MapId, type TownData } from '@cringe-court/scene/iso';
 import { fetchJson } from '@cringe-court/scene';
+import { t } from '@/i18n';
 
 type Status =
   | { kind: 'loading' }
@@ -27,7 +28,7 @@ const SHORTCUTS: ReadonlyArray<{ id: MapId; label: string; spawn: string }> = MA
 }));
 
 export function TownPage() {
-  useDocumentTitle('The town');
+  useDocumentTitle(t('trial.town.title'));
   const [status, setStatus] = useState<Status>({ kind: 'loading' });
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -61,22 +62,22 @@ export function TownPage() {
   const controller: IsoController | null = status.kind === 'ready' ? status.data.controller : null;
 
   return (
-    <main style={page} aria-label="The town">
+    <main style={page} aria-label={t('trial.town.title')}>
       <header style={header}>
         <Link to={paths.court} style={link}>
-          ← The court
+          {t('trial.town.back')}
         </Link>
-        <h1 style={title}>The town</h1>
+        <h1 style={title}>{t('trial.town.title')}</h1>
         <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13 }}>
           <input type="checkbox" checked={reducedMotion} onChange={(e) => setReducedMotion(e.target.checked)} />
-          Reduced motion
+          {t('trial.town.reducedMotion')}
         </label>
       </header>
 
-      {status.kind === 'loading' ? <p style={{ padding: 24 }}>Loading the town…</p> : null}
+      {status.kind === 'loading' ? <p style={{ padding: 24 }}>{t('trial.town.loading')}</p> : null}
       {status.kind === 'error' ? (
         <div role="alert" style={{ padding: 24 }}>
-          <p style={{ margin: 0, fontWeight: 700 }}>The town failed to load.</p>
+          <p style={{ margin: 0, fontWeight: 700 }}>{t('trial.town.error')}</p>
           <pre style={{ whiteSpace: 'pre-wrap', fontSize: 13 }}>{status.message}</pre>
         </div>
       ) : null}

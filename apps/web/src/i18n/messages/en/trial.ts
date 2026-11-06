@@ -86,6 +86,7 @@ export const trial = {
   'hud.zone.defendantTable': "Defendant's table",
   'hud.zone.prosecutionTable': 'Prosecution table',
   'hud.zone.witnessStand': 'Witness stand',
+  'hud.zone.juryBox': 'Jury box',
   'hud.zone.outside': 'Courthouse plaza',
   'hud.zone.none': 'Courthouse',
 
@@ -155,4 +156,11 @@ export const trial = {
   'hud.touch.interact': 'Interact',
   'hud.touch.interactWith': 'Interact: {prompt}',
   'hud.touch.drag': 'drag to walk',
+
+  // Town page
+  'town.title': 'The town',
+  'town.back': '← The court',
+  'town.reducedMotion': 'Reduced motion',
+  'town.loading': 'Loading the town…',
+  'town.error': 'The town failed to load.',
 } as const;
