@@ -51,9 +51,11 @@ describe('D10 launch profile', () => {
     expect(L.bond).toBe(usdc('1.20'));
     expect(L.minContribution).toBe(usdc('0.10'));
   });
-  it('sizes the crowd at about 15.6 contributors at 0.50', () => {
-    expect(crowdSize(L.target)).toBeCloseTo(15.6, 5);
-    expect(crowdSize(H.target)).toBeCloseTo(14.6, 5);
+  it('sizes the crowd in whole people, rounded up (7.80 at 0.50 is 16, 7.30 is 15)', () => {
+    expect(crowdSize(L.target)).toBe(16);
+    expect(crowdSize(H.target)).toBe(15);
+    expect(Number.isInteger(crowdSize(usdc('7.01'), usdc('0.50')))).toBe(true);
+    expect(crowdSize(usdc('7.00'))).toBe(14);
   });
 });
 

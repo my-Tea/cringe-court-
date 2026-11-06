@@ -149,9 +149,8 @@ describe('contribute', () => {
     expect(r.ok === false ? r.message : '').not.toMatch(/start at/);
   });
 
-  // KNOWN GAP in core's MemoryChain twin: fund() rejects amount < minContribution even when it equals the
-  // remaining amount, unlike contracts/src/CringeCourt.sol (`accepted < min && accepted < remaining`).
-  it.fails('lets the ledger close the last sliver of funding (twin should match the contract)', async () => {
+  // The MemoryChain twin matches contracts/src/CringeCourt.sol (`accepted < min && accepted < remaining`).
+  it('lets the ledger close the last sliver of funding (twin should match the contract)', async () => {
     const w = await world();
     const n = await w.publish();
     await w.fundRest(n, ['3.65', '3.60']);

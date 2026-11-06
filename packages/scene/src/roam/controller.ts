@@ -11,7 +11,6 @@ import { BarkBook } from './dialogue';
 import { clampPitch, KeyState, mergeIntents, type RoamAction } from './input';
 import { lookDir, selectFocus } from './interact';
 import { initialNpcState, updateNpcHead } from './npc';
-import { DEFAULT_PACE, FAST_FORWARD, HEARING_PACE, holdSeconds, type HearingPace, type PaceSpec } from './pace';
 import { BODY, FixedStepper, NO_MOVE, SolidIndex, stepBody, type BodyState, type MoveIntent } from './physics';
 import { RemoteInterpolator, type RemotePlayerFeed } from './remote';
 import type {
@@ -24,7 +23,6 @@ import type {
   DialogueState,
   InteractableSpec,
   NpcPose,
-  NpcSpec,
   NpcState,
   PlayerRole,
   PlayerState,
@@ -39,7 +37,7 @@ import type {
   Vec3,
   ZoneId,
 } from './types';
-import { PLAYER_JURY_SLOT, zoneAt } from './world';
+import { zoneAt } from './world';
 
 export interface RoamControllerOptions {
   reducedMotion?: boolean;
@@ -52,30 +50,10 @@ export interface RoamControllerOptions {
   remotes?: RemotePlayerFeed;
   /** Clock for PlayerState.t (ms). Defaults to the controller's own simulated clock. */
   now?: () => number;
-  /** Hearing pace (pace.ts). Default 'standard'. */
-  pace?: HearingPace;
-  /** Jurors in this hearing, the player included when they are one (Solo and Versus 3, Grand Jury 7). Default 7: a full box. */
-  jurors?: number;
 }
 
-/** Where each role sits during the hearing. */
-export const ROLE_SEAT: Readonly<Record<PlayerRole, SeatId>> = {
-  defendant: 'defendant',
-  'side-a': 'prosecution',
-  'side-b': 'defendant',
-  juror: 'jury-box',
-  spectator: 'gallery-left',
-};
-
-/** Parties rise for the verdict; jurors and spectators watch. */
-export function isParty(role: PlayerRole): boolean {
-  return role === 'defendant' || role === 'side-a' || role === 'side-b';
-}
-
-
-
-/** Characters per second for the dialogue typewriter at full pace (see pace.ts for the others). */
-export const TYPE_SPEED = HEARING_PACE.full.typeSpeed;
+/** Characters per second for the dialogue typewriter. */
+export const TYPE_SPEED = 48;
 export const CALLOUT_SECONDS = 2.4;
 const CAMERA_EASE = 5;
 
@@ -137,10 +115,6 @@ export class RoamController implements BeatHost {
   #remotes: PlayerState[] = [];
   #jumpQueued = false;
   #speed = 0;
-  #pace: HearingPace;
-  #fast = false;
-  readonly #specs: ReadonlyMap<string, NpcSpec>;
-  readonly #jurors: number;
 
   readonly id: string;
   readonly avatar: AvatarSpec;
@@ -161,10 +135,7 @@ export class RoamController implements BeatHost {
     this.#prev = [...spawn.pos];
     this.#yaw = spawn.yaw;
     this.#pitch = spawn.pitch;
-    this.#pace = options.pace ?? DEFAULT_PACE;
-    this.#jurors = Math.max(0, Math.min(options.jurors ?? 7, world.npcs.filter((n) => n.role === 'juror').length + (this.role === 'juror' ? 1 : 0)));
-    this.#specs = new Map(world.npcs.map((n) => [n.id, n]));
-    this.#npcs = world.npcs.map((n) => ({ ...initialNpcState(n), ...(this.#absent(n) ? { hidden: true } : {}) }));
+    this.#npcs = world.npcs.map(initialNpcState);
     this.#npcHeads = new Map(world.npcs.map((n) => [n.id, world.marks[n.id] ?? [n.pos[0], n.pos[1] + 50, n.pos[2]]]));
     this.#remoteFeed = options.remotes;
     if (options.remotes) {
@@ -172,47 +143,6 @@ export class RoamController implements BeatHost {
       if (options.remotes.onLeave) this.#unsubs.push(options.remotes.onLeave((id) => this.#interp.remove(id)));
     }
     this.#zone = zoneAt(world, spawn.pos[0], spawn.pos[2])?.id ?? null;
-  }
-
-  /** Jurors past the hearing's jury size, and the seat a player juror takes, stay empty. */
-  #absent(n: NpcSpec): boolean {
-    if (n.role !== 'juror' || n.jurySlot === undefined) return false;
-    // Slots fill front row first (0–2), then the raised back row (3–6).
-    return n.jurySlot >= this.#jurors || (this.role === 'juror' && n.jurySlot === PLAYER_JURY_SLOT);
-  }
-
-  /* ── Pace ──────────────────────────────────────────────────────────── */
-
-  get pace(): HearingPace {
-    return this.#pace;
-  }
-
-  /** Change the pace; line selection applies from the next beat, timing at once. */
-  setPace(pace: HearingPace): void {
-    if (pace === this.#pace) return;
-    this.#pace = pace;
-    this.#changed();
-  }
-
-  get fastForward(): boolean {
-    return this.#fast;
-  }
-
-  /** Play beats and dialogue FAST_FORWARD× faster (walking and looking are unaffected). */
-  setFastForward(on: boolean): void {
-    if (on === this.#fast) return;
-    this.#fast = on;
-    this.#changed();
-  }
-
-  /** BeatHost */
-  paceSpec(): PaceSpec {
-    return HEARING_PACE[this.#pace];
-  }
-
-  /** Where this player sits during the hearing. */
-  get homeSeat(): SeatId {
-    return ROLE_SEAT[this.role];
   }
 
   /* ── Events ────────────────────────────────────────────────────────── */
@@ -405,7 +335,7 @@ export class RoamController implements BeatHost {
     this.#body.onGround = true;
     this.#prev = [...seat.pos];
     this.#yaw = seat.yaw;
-    this.#pitch = seat.pitch ?? 0;
+    this.#pitch = id === 'defendant' ? 0.12 : 0;
     if (this.#control === 'free') this.#control = 'look';
     this.keys.clear();
     this.#emit({ type: 'seat', seat: id });
@@ -459,7 +389,7 @@ export class RoamController implements BeatHost {
     this.skipBeat();
     this.closeExhibit();
     return new Promise<void>((resolve) => {
-      const runner = new BeatRunner(id, beatScript(id, { seat: this.homeSeat, party: isParty(this.role), pace: this.#pace, ...options }), this);
+      const runner = new BeatRunner(id, beatScript(id, options), this);
       this.#beat = { runner, resolve };
       this.#emit({ type: 'beat-start', beat: id });
       runner.start();
@@ -480,8 +410,6 @@ export class RoamController implements BeatHost {
     this.#beat = null;
     this.#look = null;
     for (const n of this.#npcs) n.talking = false;
-    // A line that has finished its hold leaves with its beat, so it never opens the next one.
-    if (this.#dialogue && !this.dialogueBusy()) this.#setDialogue(null);
     if (this.#control === 'cinematic') this.#control = this.#seat ? 'look' : 'free';
     this.#emit({ type: 'beat-end', beat: b.runner.id, skipped });
     b.resolve();
@@ -557,7 +485,7 @@ export class RoamController implements BeatHost {
   #pose(who: string, pose: NpcPose): void {
     const role = who === 'jury' ? 'juror' : who === 'gallery' ? 'gallery' : null;
     for (const n of this.#npcs) {
-      const spec = this.#specs.get(n.id)!;
+      const spec = this.world.npcs.find((s) => s.id === n.id)!;
       if (who === 'all' || n.id === who || (role && spec.role === role)) {
         if (pose === 'talk') n.talking = true;
         else n.pose = pose === 'stand' && spec.seated ? 'sit' : pose;
@@ -587,10 +515,10 @@ export class RoamController implements BeatHost {
       }
       return;
     }
-    const npc = this.#specs.get(line.speaker) ?? null;
+    const npc = this.world.npcs.find((n) => n.id === line.speaker) ?? null;
     const name = npc?.name ?? (line.speaker === 'player' ? this.avatar.name : line.speaker === 'narrator' ? '' : line.speaker);
     const shown = this.#reduced ? line.text.length : 0;
-    this.#dialogue = { speaker: line.speaker, name, text: line.text, shown, hold: holdSeconds(line.text, this.paceSpec()), npc: npc?.id ?? null };
+    this.#dialogue = { speaker: line.speaker, name, text: line.text, shown, hold: 1.4 + line.text.length * 0.025, npc: npc?.id ?? null };
     const st = npc && this.#npcs.find((n) => n.id === npc.id);
     if (st) st.talking = true;
     this.#emit({ type: 'dialogue', line });
@@ -602,9 +530,6 @@ export class RoamController implements BeatHost {
   update(dt: number): void {
     const frame = Math.min(Math.max(dt, 0), 0.25);
     if (this.#paused) return;
-    // Physics and the camera cap long frames (no tunnelling, no lurch); the hearing's clock
-    // keeps real time up to 1 s a frame, so a slow device doesn't stretch the trial.
-    const real = Math.min(Math.max(dt, 0), 1);
     this.#time += frame;
     const held = this.keys.read();
     const ext = [...this.#external.values()];
@@ -651,23 +576,22 @@ export class RoamController implements BeatHost {
     if (this.#reduced) this.#bob = 0;
     this.#shake = Math.max(0, this.#shake - frame * 2.6);
 
-    // Dialogue typewriter, callout lifetime. Fast-forward speeds up hearing time only.
-    const story = this.#fast && this.#beat ? real * FAST_FORWARD : real;
+    // Dialogue typewriter, callout lifetime.
     const d = this.#dialogue;
     if (d) {
       if (d.shown < d.text.length) {
         const before = Math.floor(d.shown);
-        d.shown = Math.min(d.text.length, d.shown + story * this.paceSpec().typeSpeed);
+        d.shown = Math.min(d.text.length, d.shown + frame * TYPE_SPEED);
         if (Math.floor(d.shown) !== before && Math.floor(d.shown) % 6 === 0) this.#changed();
         if (d.shown >= d.text.length) this.#changed();
       } else if (d.hold > 0) {
-        d.hold -= story;
+        d.hold -= frame;
         // Barks outside beats fade on their own; beat lines wait for the runner.
         if (d.hold <= 0 && !this.#beat) this.#setDialogue(null);
       }
     }
     if (this.#callout) {
-      this.#callout.age += real;
+      this.#callout.age += frame;
       if (this.#callout.age > (this.#callout.style === 'verdict' ? CALLOUT_SECONDS * 2.5 : CALLOUT_SECONDS)) {
         this.#callout = null;
         this.#changed();
@@ -680,8 +604,7 @@ export class RoamController implements BeatHost {
     const watch: Vec3[] = [this.eye(), ...this.#remotes.map<Vec3>((r) => [r.pos[0], r.pos[1] + BODY.eye, r.pos[2]])];
     const speaker = this.#dialogue?.npc;
     for (const s of this.#npcs) {
-      if (s.hidden) continue;
-      const spec = this.#specs.get(s.id)!;
+      const spec = this.world.npcs.find((n) => n.id === s.id)!;
       const head = this.#npcHeads.get(s.id)!;
       // During a line, everyone else looks at the speaker; the speaker looks at the player.
       const override = speaker && speaker !== s.id ? (this.world.marks[speaker] ?? null) : null;
@@ -689,7 +612,7 @@ export class RoamController implements BeatHost {
       if (s.pose === 'gavel' && this.#shake < 0.05) s.pose = spec.seated ? 'sit' : 'stand';
     }
 
-    if (this.#beat && this.#beat.runner.advance(story)) this.#endBeat(false);
+    if (this.#beat && this.#beat.runner.advance(frame)) this.#endBeat(false);
     this.#refreshFocus();
   }
 
@@ -810,8 +733,6 @@ export class RoamController implements BeatHost {
       npcs: this.#npcs.map((n) => ({ ...n })),
       remotes: this.#remotes,
       reducedMotion: this.#reduced,
-      pace: this.#pace,
-      fastForward: this.#fast,
       version: this.#version,
     };
   }

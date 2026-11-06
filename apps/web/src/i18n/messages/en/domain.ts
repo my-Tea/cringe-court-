@@ -22,6 +22,7 @@ export const domain = {
   'hits.wallet': '{count, plural, one {# wallet address} other {# wallet addresses}}',
   'hits.ens': '{count, plural, one {# ENS name} other {# ENS names}}',
   'hits.handle': '{count, plural, one {# social handle} other {# social handles}}',
+  'hits.name': '{count, plural, one {# first name} other {# first names}}',
   'hits.number': '{count, plural, one {# long number} other {# long numbers}}',
 
   // ── category ──

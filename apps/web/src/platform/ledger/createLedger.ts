@@ -10,7 +10,7 @@ import {
   type ChainPort as ChainClient,
   type MemoryChain,
 } from '@cringe-court/chain-client';
-import { ChainError, type Hex } from '@cringe-court/core';
+import { ChainError, monotonicUnixClock, type Hex } from '@cringe-court/core';
 import { createPublicClient, createWalletClient, custom, http, type EIP1193Provider } from 'viem';
 import type { Address, PlatformConfig } from '../config';
 import { ArcLedger, RelayerSeatOffers } from './arcLedger';
@@ -70,7 +70,8 @@ export function createLedger(config: PlatformConfig, options: CreateLedgerOption
 }
 
 function createDemo(options: CreateLedgerOptions): Ledger {
-  const clock = options.clock ?? (() => Math.floor(Date.now() / 1000));
+  const real = monotonicUnixClock();
+  const clock = options.clock ?? (() => Math.floor(real()));
   const chain = createMemoryChain({ chainId: 5042002n, timing: 'demo', startTime: BigInt(clock()) });
   const backend = new DemoBackend(chain);
   const sync = () => {

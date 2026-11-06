@@ -1,4 +1,4 @@
-import { versusMode } from '@cringe-court/modes-versus';
+import { VERSUS_DEMO_DEADLINES, versusMode } from '@cringe-court/modes-versus';
 import { t } from '@/i18n';
 import type { WebModeModule } from '../registry';
 
@@ -13,6 +13,7 @@ export const versusPaths = {
 
 const mode: WebModeModule = {
   definition: versusMode,
+  demoDeadlines: VERSUS_DEMO_DEADLINES,
   // Labels are getters so they translate at read time (render), not once at module load.
   landing: {
     to: versusPaths.newCase,

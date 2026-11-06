@@ -164,8 +164,9 @@ export class MemoryChain implements ChainPort {
     const t = c.terms;
     let kind: ChainDeposit['kind'];
     if (t.funding.kind === 'crowdfund') {
-      if (amount < t.funding.minContribution) throw new ChainError('bad-amount', `Minimum contribution is ${formatUsdc(t.funding.minContribution)}`);
       const remaining = subUsdc(t.target, this.#raised(c));
+      // Like the contract (BelowMinContribution): a final top-up that exactly closes the target may be below the minimum.
+      if (amount < t.funding.minContribution && amount !== remaining) throw new ChainError('bad-amount', `Minimum contribution is ${formatUsdc(t.funding.minContribution)}`);
       if (amount > remaining) throw new ChainError('bad-amount', `Only ${formatUsdc(remaining)} left to raise`);
       kind = 'contributor';
     } else {

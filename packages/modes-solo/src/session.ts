@@ -57,6 +57,9 @@ export interface SoloSessionDeps {
   teasers: TeaserQuota | null;
 }
 
+/** The jury's timed windows, in the order they run. */
+export type JuryWindow = 'recruitment' | 'commit' | 'reveal';
+
 export type Busy = 'angles' | 'teaser' | 'drafting' | 'paying' | 'seating' | 'voting' | 'closing' | 'finalizing' | 'claiming';
 
 export interface SessionError {
@@ -81,6 +84,12 @@ export interface SoloSnapshot {
   receipt: readonly ReceiptLine[] | null;
   /** True once the filer pulled their refund (NO VERDICT / cancel). */
   claimed: boolean;
+  /**
+   * Jury windows that closed on the ledger before every juror acted in them
+   * (a paused jury, a sleeping laptop, a background tab). The UI says so
+   * instead of expiring silently. Absent on cases saved before it existed.
+   */
+  lapsed?: readonly JuryWindow[];
   /** Ledger tx hashes and explorer links, by step (V4 §14.3). */
   txs: Readonly<Partial<Record<'opened' | 'funded' | 'finalized' | 'claimed', { hash: Hex; explorerUrl: string }>>>;
 }
@@ -124,7 +133,7 @@ export class SoloSession {
       filer: init.filer,
       now,
     });
-    this.#snap = { trial, filer: init.filer, busy: null, error: null, redactions: [], angles: null, balance: null, teaser: null, receipt: null, claimed: false, txs: {} };
+    this.#snap = { trial, filer: init.filer, busy: null, error: null, redactions: [], angles: null, balance: null, teaser: null, receipt: null, claimed: false, txs: {}, lapsed: [] };
   }
 
   /* ── store ── */
@@ -392,32 +401,93 @@ export class SoloSession {
 
   /** Seat the next NPC juror. Opens the court when the jury is full. */
   async seatNextJuror(): Promise<void> {
-    await this.#run('seating', async () => {
-      const t = this.#snap.trial;
-      if (t.stage !== 'jury' || t.step !== 'recruiting') return;
-      const j = await this.#jury().takeSeat(t.caseNumber, t.seats.length + 1);
-      const next = this.#apply({ type: 'SEAT_FILLED', account: j.account });
-      if (next.stage === 'jury' && next.step === 'briefing') {
-        const c = await this.deps.chain.getCase(next.caseNumber);
-        const commit = c?.deadlines.commit;
-        const reveal = c?.deadlines.reveal;
-        if (!commit || !reveal) throw new Error('The ledger did not open the commit window');
-        this.#apply({ type: 'COURT_OPENED', commitEndsAt: commit, revealEndsAt: reveal });
-      }
-    });
+    await this.#run('seating', () =>
+      this.#juryStep(async () => {
+        const t = this.#snap.trial;
+        if (t.stage !== 'jury' || t.step !== 'recruiting') return;
+        const j = await this.#jury().takeSeat(t.caseNumber, t.seats.length + 1);
+        const next = this.#apply({ type: 'SEAT_FILLED', account: j.account });
+        if (next.stage === 'jury' && next.step === 'briefing') {
+          const c = await this.deps.chain.getCase(next.caseNumber);
+          const commit = c?.deadlines.commit;
+          const reveal = c?.deadlines.reveal;
+          if (!commit || !reveal) throw new Error('The ledger did not open the commit window');
+          this.#apply({ type: 'COURT_OPENED', commitEndsAt: commit, revealEndsAt: reveal });
+        }
+      }),
+    );
   }
 
   /** The NPC juror in `seat` seals their ballot. */
   async commitBallot(seat: number): Promise<void> {
-    await this.#run('voting', async () => {
+    await this.#run('voting', () =>
+      this.#juryStep(async () => {
+        const t = this.#snap.trial;
+        if (t.stage !== 'jury' || t.step !== 'commit') return;
+        const jury = this.#jury();
+        const j = jury.juror(seat);
+        const choice = npcChoice(j.persona, t.transcript.hash, seat, this.#snap.balance);
+        await jury.commit(t.caseNumber, seat, choice);
+        this.#apply({ type: 'BALLOT_COMMITTED', account: j.account });
+      }),
+    );
+  }
+
+  /**
+   * B1: run one jury step against the ledger as it is *now*. Any window the
+   * ledger already closed is closed here first (a paused jury, a sleeping
+   * laptop, a background tab), so the jury carries on from the ledger's phase
+   * instead of retrying a step the ledger refuses. A step that races the
+   * deadline and loses is caught up the same way rather than surfaced.
+   */
+  async #juryStep(work: () => Promise<void>): Promise<void> {
+    if (await this.#catchUp()) return;
+    try {
+      await work();
+    } catch (e) {
+      if (e instanceof ChainError && e.code === 'deadline' && (await this.#catchUp())) return;
+      throw e;
+    }
+  }
+
+  /** Apply every jury deadline the clock has passed. True if the case moved. */
+  async #catchUp(): Promise<boolean> {
+    let moved = false;
+    for (;;) {
       const t = this.#snap.trial;
-      if (t.stage !== 'jury' || t.step !== 'commit') return;
-      const jury = this.#jury();
-      const j = jury.juror(seat);
-      const choice = npcChoice(j.persona, t.transcript.hash, seat, this.#snap.balance);
-      await jury.commit(t.caseNumber, seat, choice);
-      this.#apply({ type: 'BALLOT_COMMITTED', account: j.account });
-    });
+      if (t.stage !== 'jury') return moved;
+      const now = this.deps.clock.now();
+      if (t.step === 'recruiting' && now >= t.recruitEndsAt) {
+        await this.deps.chain.advance(t.caseNumber);
+        this.#lapse('recruitment');
+        this.#apply({ type: 'DEADLINE_PASSED', deadline: 'recruitment' });
+        // The ledger refunds the filer and every posted bond; same maths, recorded on the case.
+        const jurors: JurorRecord[] = t.seats.map((s) => ({ account: s.account, committed: false, revealed: false }));
+        this.#apply({ type: 'REFUNDED', settlement: settle({ terms: t.terms, funders: t.deposits, jurors, outcome: 'cancelled' }) });
+        this.#set({ receipt: await this.deps.chain.receipts(t.caseNumber, this.#snap.filer) });
+        return true;
+      }
+      if (t.step === 'commit' && t.commitEndsAt !== null && now >= t.commitEndsAt) {
+        await this.deps.chain.advance(t.caseNumber);
+        if (t.seats.some((s) => !s.committed)) this.#lapse('commit');
+        this.#apply({ type: 'DEADLINE_PASSED', deadline: 'commit' });
+        moved = true;
+        continue;
+      }
+      if (t.step === 'reveal' && t.revealEndsAt !== null && now >= t.revealEndsAt) {
+        await this.deps.chain.advance(t.caseNumber);
+        if (t.seats.some((s) => s.committed && !s.revealed)) this.#lapse('reveal');
+        this.#apply({ type: 'DEADLINE_PASSED', deadline: 'reveal' });
+        moved = true;
+        continue;
+      }
+      return moved;
+    }
+  }
+
+  #lapse(window: JuryWindow): void {
+    const lapsed = this.#snap.lapsed ?? [];
+    if (!lapsed.includes(window)) this.#set({ lapsed: [...lapsed, window] });
   }
 
   async #passDeadline(at: number | null, deadline: 'commit' | 'reveal'): Promise<void> {
@@ -440,11 +510,14 @@ export class SoloSession {
 
   async revealBallot(seat: number): Promise<BallotChoice | undefined> {
     return this.#run('voting', async () => {
-      const t = this.#snap.trial;
-      if (t.stage !== 'jury' || t.step !== 'reveal') return undefined;
-      const jury = this.#jury();
-      const choice = await jury.reveal(t.caseNumber, seat);
-      this.#apply({ type: 'BALLOT_REVEALED', account: jury.juror(seat).account, choice });
+      let choice: BallotChoice | undefined;
+      await this.#juryStep(async () => {
+        const t = this.#snap.trial;
+        if (t.stage !== 'jury' || t.step !== 'reveal') return;
+        const jury = this.#jury();
+        choice = await jury.reveal(t.caseNumber, seat);
+        this.#apply({ type: 'BALLOT_REVEALED', account: jury.juror(seat).account, choice });
+      });
       return choice;
     });
   }
@@ -491,12 +564,14 @@ export class SoloSession {
     });
   }
 
-  /** Pull the filer's refund (NO VERDICT). */
+  /** Pull the filer's refund (NO VERDICT, or a jury that never filled). */
   async claimRefund(): Promise<void> {
     const t = this.#snap.trial;
-    if ((t.stage !== 'verdict' && t.stage !== 'share') || this.#snap.claimed) return;
+    if (this.#snap.claimed) return;
+    const caseNumber = t.stage === 'verdict' || t.stage === 'share' ? t.caseNumber : t.stage === 'closed' && t.settlement ? t.caseNumber : null;
+    if (caseNumber === null) return;
     await this.#run('claiming', async () => {
-      const receipt = await this.deps.chain.claim(t.caseNumber);
+      const receipt = await this.deps.chain.claim(caseNumber);
       this.#set({ claimed: true, txs: { ...this.#snap.txs, claimed: receipt } });
     });
   }

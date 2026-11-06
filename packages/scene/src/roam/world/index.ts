@@ -15,19 +15,17 @@
 import type { Box } from '../../courtroom/geometry';
 import { EMISSIVE } from '../../courtroom/geometry';
 import { CAST_SCALE, type CastFile } from '../cast';
-import { ART, C, toPalette } from '../palette';
+import { toPalette } from '../palette';
 import { BODY } from '../physics';
 import type { Aabb, InteractableSpec, NpcSpec, RoamWorld, Seat, SeatId, Spawn, SpawnId, Vec3, Zone } from '../types';
 import { aabb } from './boxes';
 import { adaptCourtroom, COURT, WITNESS_STAND } from './courtroom';
-import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TABLE, EXHIBITS, PROSECUTION_CHAIR, stainedGlass } from './dressing';
-import { isOldJuryBox, JURY_BOX, JURY_SLOTS, juryBoxBoxes, PLAYER_JURY_SLOT } from './jury';
+import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TABLE, EXHIBITS, stainedGlass } from './dressing';
 import { LOBBY, lobbyBoxes } from './lobby';
 
 export { COURT } from './courtroom';
 export { LOBBY } from './lobby';
-export { EXHIBITS, EVIDENCE_TABLE, DEFENDANT_CHAIR, PROSECUTION_CHAIR } from './dressing';
-export { JURY_BOX, JURY_SLOTS, PLAYER_JURY_SLOT } from './jury';
+export { EXHIBITS, EVIDENCE_TABLE, DEFENDANT_CHAIR } from './dressing';
 
 /** A world box: palette colour, plus an emissive strength for glass, flames and neon. */
 export interface RoamBox extends Box {
@@ -42,7 +40,7 @@ const BARRIER_TOP = 200;
 const DAIS = { x: 51.7, z0: -76.1, z1: -15.1, top: 10.01 } as const;
 
 function isBenchGlass(b: Box): boolean {
-  if (b.m !== ART.windowGlass || b.f[2] < -70.1 || b.t[2] > BENCH_GLASS.z + 0.01) return false;
+  if (b.m !== '#BDF5FF' || b.f[2] < -70.1 || b.t[2] > BENCH_GLASS.z + 0.01) return false;
   return BENCH_WINDOWS.some((w) => Math.abs(b.f[0] - w.x0) < 0.2 && Math.abs(b.t[0] - w.x1) < 0.2);
 }
 
@@ -79,8 +77,6 @@ export function pitchTo(from: Vec3, to: Vec3): number {
 }
 
 const ZONES: readonly Zone[] = [
-  // The box itself, and the floor in front of it beside the dais (the "Jury box" viewpoint).
-  { id: 'jury-box', label: 'Jury box', rects: [{ x0: JURY_BOX.x0, z0: JURY_BOX.z0, x1: COURT.x, z1: JURY_BOX.z1 }, { x0: 52, z0: -71, x1: JURY_BOX.x0, z1: -44 }] },
   { id: 'lobby', label: 'Lobby', rects: [{ x0: -LOBBY.x, z0: LOBBY.z0, x1: LOBBY.x, z1: LOBBY.z1 }] },
   { id: 'doorway', label: 'Courtroom doors', rects: [{ x0: -25, z0: 64, x1: 25, z1: LOBBY.z0 }] },
   { id: 'witness-stand', label: 'Witness stand', rects: [{ x0: WITNESS_STAND.x0, z0: WITNESS_STAND.z0, x1: WITNESS_STAND.x1, z1: WITNESS_STAND.z1 }] },
@@ -97,14 +93,8 @@ const JUDGE_POS: Vec3 = [0, 21, -63];
 
 function seats(): Record<SeatId, Seat> {
   const def: Vec3 = [DEFENDANT_CHAIR.x, 0, DEFENDANT_CHAIR.z];
-  const pro: Vec3 = [PROSECUTION_CHAIR.x, 0, PROSECUTION_CHAIR.z];
-  const jury = JURY_SLOTS[PLAYER_JURY_SLOT]!.pos;
-  // A juror looks across the well at the bench and both counsel tables.
-  const juryLook: Vec3 = [-10, 30, -34];
   return {
-    defendant: { id: 'defendant', label: "Defendant's table", pos: def, eye: 40, yaw: yawTo(def, JUDGE_POS) * 0.6, exit: [DEFENDANT_CHAIR.x - 2, 0, 9], pitch: 0.12 },
-    prosecution: { id: 'prosecution', label: 'Prosecution table', pos: pro, eye: 40, yaw: yawTo(pro, JUDGE_POS) * 0.6, exit: [PROSECUTION_CHAIR.x + 2, 0, 9], pitch: 0.12 },
-    'jury-box': { id: 'jury-box', label: 'Jury box', pos: [jury[0], jury[1], jury[2]], eye: 30, yaw: yawTo(jury, juryLook), exit: [64, 0, 9], pitch: -0.04 },
+    defendant: { id: 'defendant', label: "Defendant's table", pos: def, eye: 40, yaw: yawTo(def, JUDGE_POS) * 0.6, exit: [DEFENDANT_CHAIR.x - 2, 0, 9] },
     witness: { id: 'witness', label: 'Witness stand', pos: [-28, WITNESS_STAND.floor, -28], eye: BODY.eye, yaw: -1.75, exit: [-8, 8.4, -27], standing: true },
     'gallery-left': { id: 'gallery-left', label: 'Gallery, left pew', pos: [-42, 0, 36.5], eye: 31, yaw: 0, exit: [-28, 0, 36.5] },
     'gallery-right': { id: 'gallery-right', label: 'Gallery, right pew', pos: [42, 0, 36.5], eye: 31, yaw: 0, exit: [28, 0, 36.5] },
@@ -117,29 +107,17 @@ function spawn(pos: Vec3, lookAt: Vec3, eye: number = BODY.eye): Spawn {
   return { pos, yaw: yawTo(e, lookAt), pitch: pitchTo(e, lookAt) };
 }
 
-/** Juror looks, cycled over the seven seats (the gallery uses d–f too, from the other side of the room). */
-const JUROR_MODELS = ['juror-a', 'juror-b', 'juror-c', 'juror-d', 'juror-e', 'juror-f', 'juror'] as const;
-
 function npcs(cast: CastFile | null, boxes: readonly Box[]): NpcSpec[] {
   const at = (x: number, z: number): Vec3 => [x, floorAt(boxes, x, z), z];
   const list: NpcSpec[] = [
     { id: 'judge', name: 'Judge Gavel.exe', role: 'judge', model: 'judge', pos: JUDGE_POS, yaw: Math.PI, seated: false, radius: 0, lines: 'judge' },
     { id: 'prosecutor', name: 'Miss Ratio', role: 'prosecutor', model: 'prosecutor', pos: at(-52, -36), yaw: Math.PI + 0.3, seated: false, radius: 6, lines: 'prosecutor' },
-    { id: 'defense', name: 'Counsel Chaos', role: 'defense', model: 'defense', pos: at(66, -5), yaw: 0.35, seated: false, radius: 5, lines: 'defense' },
+    { id: 'defense', name: 'Counsel Chaos', role: 'defense', model: 'defense', pos: at(70, 4), yaw: 0.35, seated: false, radius: 6, lines: 'defense' },
     { id: 'bailiff', name: 'Officer Bonk', role: 'bailiff', model: 'bailiff', pos: at(-76, 6), yaw: -Math.PI / 2 - 0.35, seated: false, radius: 6, lines: 'bailiff' },
     { id: 'clerk', name: 'Clerk Ctrl+S', role: 'clerk', model: 'clerk', pos: at(-46, -45), yaw: Math.PI + 0.7, seated: false, radius: 6, lines: 'clerk' },
-    ...JURY_SLOTS.map<NpcSpec>((slot, i) => ({
-      id: `juror-${i + 1}`,
-      name: `Juror ${i + 1}`,
-      role: 'juror',
-      model: JUROR_MODELS[i % JUROR_MODELS.length]!,
-      pos: slot.pos,
-      yaw: Math.PI / 2,
-      seated: true,
-      radius: 0,
-      lines: 'juror',
-      jurySlot: i,
-    })),
+    { id: 'juror-1', name: 'Juror 1', role: 'juror', model: 'juror-a', pos: [84.6, 4.5, -57.5], yaw: Math.PI / 2, seated: true, radius: 0, lines: 'juror' },
+    { id: 'juror-2', name: 'Juror 2', role: 'juror', model: 'juror-b', pos: [84.6, 4.5, -39.3], yaw: Math.PI / 2, seated: true, radius: 0, lines: 'juror' },
+    { id: 'juror-3', name: 'Juror 3', role: 'juror', model: 'juror-c', pos: [84.6, 4.5, -21.1], yaw: Math.PI / 2, seated: true, radius: 0, lines: 'juror' },
     { id: 'gallery-1', name: 'Spectator', role: 'gallery', model: 'juror-d', pos: [-58, -0.8, 36.5], yaw: 0, seated: true, radius: 0, lines: 'gallery' },
     { id: 'gallery-2', name: 'Spectator', role: 'gallery', model: 'juror-e', pos: [66, -0.8, 36.5], yaw: 0, seated: true, radius: 0, lines: 'gallery' },
     { id: 'gallery-3', name: 'Spectator', role: 'gallery', model: 'juror-f', pos: [-70, -0.8, 60.5], yaw: 0, seated: true, radius: 0, lines: 'gallery' },
@@ -158,7 +136,6 @@ function headOf(n: NpcSpec, cast: CastFile | null): Vec3 {
 function interactables(list: readonly NpcSpec[], marks: Record<string, Vec3>): InteractableSpec[] {
   const out: InteractableSpec[] = [
     { id: 'witness-stand', prompt: 'Take the stand', kind: 'seat', seat: 'witness', at: [-27, 30, -28], hull: aabb([WITNESS_STAND.x0, 8.4, WITNESS_STAND.z0], [WITNESS_STAND.x1, 31, WITNESS_STAND.z1]), range: 36 },
-    { id: 'prosecution-chair', prompt: 'Sit at the prosecution table', kind: 'seat', seat: 'prosecution', at: [PROSECUTION_CHAIR.x, 12, PROSECUTION_CHAIR.z], hull: aabb([PROSECUTION_CHAIR.x - 4.5, 0, PROSECUTION_CHAIR.z - 4], [PROSECUTION_CHAIR.x + 4.5, 27, PROSECUTION_CHAIR.z + 4.3]), range: 30 },
     { id: 'defendant-table', prompt: "Sit at defendant's table", kind: 'seat', seat: 'defendant', at: [DEFENDANT_CHAIR.x, 20, -14], hull: aabb([40.4, 0, -31.1], [71.6, 33, -1]), range: 34 },
     { id: 'gallery-left', prompt: 'Sit in the gallery', kind: 'seat', seat: 'gallery-left', at: [-38, 10, 38], hull: aabb([-46, 0, 30], [-35, 16, 48]), range: 26 },
     { id: 'gallery-right', prompt: 'Sit in the gallery', kind: 'seat', seat: 'gallery-right', at: [38, 10, 38], hull: aabb([35, 0, 30], [46, 16, 48]), range: 26 },
@@ -204,7 +181,7 @@ function interactables(list: readonly NpcSpec[], marks: Record<string, Vec3>): I
 function barriers(): Aabb[] {
   return [
     aabb([-44, 0, -76], [44, BARRIER_TOP, -45]),
-    aabb([JURY_BOX.x0 - 0.4, 0, JURY_BOX.z0 - 1], [96, BARRIER_TOP, JURY_BOX.z1 + 0.8]),
+    aabb([72.5, 0, -70], [96, BARRIER_TOP, -10.5]),
     // Behind the counsel desks the step narrows to a ledge (the prosecutor stands there).
     aabb([-74, 0, -44], [-40, BARRIER_TOP, -31]),
     aabb([40, 0, -44], [74, BARRIER_TOP, -31]),
@@ -221,12 +198,11 @@ export interface RoamWorldInput {
 export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld & { boxes: readonly RoamBox[] } {
   const raw: RoamBox[] = [
     ...adaptCourtroom(courtroom)
-      .filter((b) => !isBenchGlass(b) && !isOldJuryBox(b))
+      .filter((b) => !isBenchGlass(b))
       .map((b) => (EMISSIVE[b.m] ? { ...b, glow: EMISSIVE[b.m] } : b)),
     ...dressingBoxes(),
-    ...juryBoxBoxes(),
     ...stainedGlass(),
-    ...lobbyBoxes().map((b) => (b.m === C.royal100 ? { ...b, glow: 0.9 } : b.m === C.blue300 ? { ...b, glow: 0.55 } : b)),
+    ...lobbyBoxes().map((b) => (b.m === '#FFD79A' ? { ...b, glow: 0.9 } : b.m === '#BFD7F5' ? { ...b, glow: 0.55 } : b)),
   ];
   const boxes: RoamBox[] = raw.map((b) => ({ ...b, m: toPalette(b.m) }));
 
@@ -248,8 +224,7 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
 
   const marks: Record<string, Vec3> = {};
   for (const n of placed) marks[n.id] = headOf(n, cast);
-  // The middle of the box at head height, between the rows.
-  marks.jury = [84, 36, -30];
+  marks.jury = [84.6, 30, -39.3];
   marks.gallery = [0, 30, 50];
   marks.exhibits = [0, EVIDENCE_TABLE.top, (EVIDENCE_TABLE.z0 + EVIDENCE_TABLE.z1) / 2];
   marks.seal = [0, 66, -70];
@@ -264,10 +239,8 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     well: spawn([0, 0, 10], judgeHead),
     defendant: { pos: seatMap.defendant.pos, yaw: seatMap.defendant.yaw, pitch: 0.12 },
     witness: { pos: seatMap.witness.pos, yaw: seatMap.witness.yaw, pitch: -0.05 },
-    // Beside the dais, in front of the box: both rows face you.
-    'jury-view': spawn([62, 0, -50], marks.jury),
-    'jury-box': { pos: seatMap['jury-box'].pos, yaw: seatMap['jury-box'].yaw, pitch: -0.04 },
-    prosecution: { pos: seatMap.prosecution.pos, yaw: seatMap.prosecution.yaw, pitch: 0.12 },
+    // From the dais step the three jurors stand side by side (from the well they line up).
+    'jury-view': spawn([30, 8.4, -28], marks.jury),
     'bench-front': spawn([0, 8.4, -24], judgeHead),
   };
 
