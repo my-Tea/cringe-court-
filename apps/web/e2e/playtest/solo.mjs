@@ -13,7 +13,7 @@ export const CONFESSIONS = [
   { title: 'Sold the top, bought it back higher', story: 'I sold at the bottom, bought back at the top, and posted a thread about my discipline as a trader.', category: 'Crypto Crimes' },
 ];
 
-/** Stop the jury and jump the page clock past a deadline (Playwright fakes Date and performance.now, which the demo clock reads). */
+/** Stop the jury and jump the page clock past a deadline (the demo clock reads Date.now). */
 async function stallJury(page, rec, { at, minutes }) {
   // Wait until the jury reaches the requested step, then pause it.
   const t = stopwatch();

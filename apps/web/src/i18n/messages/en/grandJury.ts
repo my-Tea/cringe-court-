@@ -337,11 +337,6 @@ export const grandJury = {
   'docket.filter.closedHint': 'Verdicts, no-verdicts and dismissals',
   'docket.topic.group': 'Topic',
   'docket.topic.any': 'Any topic',
-  'topic.food': 'Food fight',
-  'topic.etiquette': 'Etiquette',
-  'topic.tech': 'Tech and internet',
-  'topic.style': 'Style',
-  'topic.life': 'Everyday life',
   'docket.loading': 'Loading the docket…',
   'docket.error.title': 'The docket would not open',
   'docket.error.body': 'We couldn’t read the cases from the ledger. Nothing was charged.',
@@ -394,7 +389,7 @@ export const grandJury = {
 
   // ── Pricing page ──
   'pricing.docTitle': 'Who pays: Grand Jury pricing',
-  'pricing.kicker': 'How it is priced',
+  'pricing.kicker': 'Decision D10',
   'pricing.title': 'Who pays for a public trial',
   'pricing.lede':
     'A Grand Jury case is a show the crowd buys a ticket to. Nobody bets, nobody gets odds, and nothing a summoner gets depends on the verdict. Here is every number.',
@@ -438,5 +433,5 @@ export const grandJury = {
   'pricing.why.review': '<b>Review only</b> (0.84) means cutting the safety review that keeps public-figure cases out of defamation territory.',
   'pricing.why.blend':
     '<b>The Sponsored Docket</b> raises the fee by 0.50, asks a sponsor for about 1.00 per 1,000 views, and trims review through tooling. It is the only option that stays positive at every tested funding elasticity and with zero forfeit revenue.',
-  'pricing.why.fineprint': 'Numbers are modelled per published case (see the published pricing notes). Before launch they are re-solved with measured funding, review time and views.',
+  'pricing.why.fineprint': 'Numbers are modelled per published case (docs/DECISIONS.md D10). Before launch they are re-solved with measured funding, review time and views.',
 } as const;

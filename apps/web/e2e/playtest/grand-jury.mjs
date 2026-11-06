@@ -38,10 +38,10 @@ export async function playGrandJury(browser, rec, profile) {
   }
   await rec.shot(p, 'docket-filter-decided', { fullPage: true });
   await clickText(p, 'All cases', 'button');
-  await clickText(p, 'Tech and internet', 'button');
+  await clickText(p, 'Internet Crimes', 'button');
   await sleep(500);
-  await rec.shot(p, 'docket-topic-tech', { fullPage: true });
-  await clickText(p, 'Tech and internet', 'button');
+  await rec.shot(p, 'docket-topic-internet', { fullPage: true });
+  await clickText(p, 'Internet Crimes', 'button');
   await p.getByRole('searchbox').fill('pizza');
   await sleep(600);
   rec.time('docket-search', 'pizza', 0, `${(await caseLinks(p)).length} links; url=${new URL(p.url()).search}`);

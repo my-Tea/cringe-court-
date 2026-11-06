@@ -305,42 +305,6 @@ Effort: **S** is under half a day, **M** is half a day to 2 days, **L** is more 
 14. **B19: Demo clocks.** On visibility return or a large clock jump, show "Time moved on: this case's window closed" instead of silently expiring, or pause the demo clock while hidden. **S–M**
 15. **Visual consistency.** Move the 339 roam hex literals and the 46 audio-demo literals to tokens; fix the 390 px ribbon overlap (B14), add `scroll-margin-top` under the sticky header (B15), and fix the stale zone label (B17). **M**
 
-## Status after fixes (track A: game logic and flows)
-
-Track UX-FIXES A, branch `v3/ux-fixes-a`, 2026-11-04. Every fix has a regression test that failed before the fix and passes after it. Playtest re-runs used the production build. "Before" evidence is copied to `~/cringe-court-v3/screenshots/ux-fixes-a/before/`. "After" runs are in `~/cringe-court-v3/screenshots/ux-fixes-a/after/`. The host still had wall-clock jumps of 2–27 min and freezes during these runs. See the notes.
-
-| Bug | Status | Fix | Evidence |
-|---|---|---|---|
-| B1 Solo deadline loop, NO VERDICT unreachable | **Fixed** | `SoloSession` applies every jury deadline the ledger has already passed before each jury step, and again after a step that loses the race. Covers recruitment → dismissed, commit → reveal, reveal → finalizing. A paused or backgrounded jury reaches NO VERDICT, or a dismissal with a claimable full refund. A note says which window ran out. Settlement maths unchanged: core `settle()`, and the recorded refund equals the ledger twin's settlement (tested). | `session.test.ts` "deadlines that pass while nobody is watching" (5 tests); `deadlines.test.tsx`. Playtest `solo/desktop-noverdict` now passes: NO VERDICT, 1.20 refunded, claimed (`~/cringe-court-v3/screenshots/ux-fixes-a/after/solo/desktop-noverdict/14-verdict.png`, `15-refund-claimed.png`). |
-| B2 Versus juror misses the commit window | **Fixed** | The demo commit window goes from 3 to 6 min, longer than the ~174 s hearing plus time to decide. The demo clerk closes a window as soon as every seated juror has acted, so nobody waits longer. A sticky ballot HUD above the hearing shows the time left, turns urgent under 60 s, and jumps to the ballot (or opens the scroll in one press). The Grand Jury demo commit window also goes from 4 to 6 min, for the same reason. | `jury-window.test.ts`, `ballotHud.test.tsx`, GJ `demo.test.ts`. New playtest variant `versus/desktop-juror-watches-hearing`: the juror watches 327 s of the window, still seals, opens the scroll, and a verdict lands (`18…21-J-watching-*.png`). |
-| B3 GJ verdict off-screen after Settle | **Fixed** | A live settle scrolls the verdict into view (instant under reduced motion) and focuses its heading. Adds `scroll-margin-top`. | `GrandJury.test.tsx`. Playtest `grand-jury/desktop`: `verdict_position_after_settle = in viewport` (was 1,499 px above). |
-| B7 `/court/walk` without WebGL2 | **Fixed** | `canRoam()` guard plus an error boundary. A paper fallback page links to the courts. | `WalkPage.test.tsx`; `~/cringe-court-v3/screenshots/ux-fixes-a/after/roam/no-webgl/01-walk-without-webgl.png`. |
-| B8 Cross-device play | **Not fixed (out of scope: needs a backend)** | Copy is now honest. Missing invite/case pages say the demo keeps cases in this browser and to open the link in the same browser. Invite and jury-link buttons say "(same browser)", with a visible note. | `versus.test.tsx`; `~/cringe-court-v3/screenshots/ux-fixes-a/after/versus/desktop-mistrial/07-B-other-browser-opens-invite.png`. |
-| B9 GJ sim contribution errors | **Fixed** | Simulated contributions never leave a remainder below the minimum, and the tick catches errors. The memory twin now accepts an exact below-minimum final top-up, as `CringeCourt.sol` does. That turned the existing `it.fails` gap test into a passing test. | `demo.test.ts`, `GrandJury.test.tsx`, `court.test.ts`. GJ desktop and mobile after-runs: 0 "Minimum contribution" page errors (mobile had 6 before). |
-| B10 Redaction misses first names | **Fixed** | Cue words ("ask/tell/text …", "my roommate …") plus a list of common given names. The chosen nickname is exempt. | `redact.test.ts`, `briefing.test.ts`; `11-A-case-room-B-joined.png` shows "Ask [name removed]". |
-| B11 Contradictory redaction note | **Fixed** | The report counts placeholders already in stored text, so both screens agree after a reload and on Side B's tab. | `redact.test.ts`, `versus.test.tsx`; screens 04 and 11 both say "Removed 1 phone number". |
-| B12 Angle quoted twice | **Fixed** | Inner quotes become single quotes. | `counsel.test.ts`; `11-A-case-room-B-joined.png`. |
-| B13 Mistrial copy | **Fixed** | Versus: no-verdict header, eyebrow, body and judge line, telling no-shows apart from a split. Share-card punctuation fixed. Solo: a NO VERDICT can only come from missed windows (3 seats, 2 needed), so the judge line and share caption now say so. The fixture and 0G fallback sentences no longer claim "could not agree". | `versus.test.tsx`, `flow.test.ts`, `counsel.test.ts`, Solo `session.test.ts`. |
-| B14 Solo ribbon at 390 px | **Not touched here** | Left to track B (visual). | — |
-| B15 Trial heading under the sticky header | **Fixed (CSS)** | `scroll-margin-top` on the Solo trial, verdict and closed sections. | CSS only; no screenshot re-taken. |
-| B16 Closed invite still says "summoned" | **Fixed** | A hero per state: not found, closed, taken, your own, already joined. | `versus.test.tsx`; `07-B-other-browser-opens-invite.png` ("We can't find that invite"). |
-| B19 Demo clocks follow the wall clock | **Fixed (in-page)** | `monotonicUnixClock()` (core): the wall clock once, then `performance.now()`. Used by the Solo, Versus and Grand Jury demo clocks and the demo ledger. A reload re-anchors. Note: Playwright's real-speed fake clock passes host clock jumps through to `performance.now`, so playtest runs can still see them. | `clock.test.ts`, Solo `deadlines.test.tsx`, GJ `demo.test.ts`, Versus `jury-window.test.ts` (each fails with the old wall clock). |
-| B20 Console noise | **Partly fixed** | Router `hydrateFallbackElement` removes the `HydrateFallback` warning, which is absent from all after-run logs. `THREE.Clock` lives in `packages/scene`, which belongs to track B. | after-run `issues.txt`. |
-| B4, B5, B6, B17, B18 | Track B (roam) | — | — |
-
-**Copy pass (§4).**
-- 4.1: internal decision IDs are removed from every catalog and from two player-visible package strings. `noInternalIds.test.ts` scans all catalogs.
-- 4.2: same-browser invite wording.
-- 4.3: mistrial copy (B13).
-- 4.5: closed-invite hero (B16).
-- 4.6: "about 15 people at 0.50": whole people, rounded up.
-- 4.7: Grand Jury topics (Food fight, Etiquette, Tech and internet, Style, Everyday life) instead of Solo's crime categories.
-- 4.9: a Grand Jury notice ("you are a verified juror; the rest are simulated").
-- 4.10: mode landings show "Deadlines (live cases)" and "Deadlines (this demo court)". `ModeFacts.test.tsx` covers this.
-- 4.8 (roam onboarding) belongs to track B.
-
-**Not verified.** The Grand Jury mobile re-run could not finish on this host: screenshot timeouts, and three wall-clock jumps of 11–24 min in one run. Its B9 result comes from the partial run, and B3 is verified on desktop. The other Solo, Versus and roam variants were not re-run. Sound, real GPUs and real phones remain untested.
-
 ## 11. Remaining weaknesses, stated plainly
 
 - **None of the three integrations is live in the product as played.** Not 0G, not Arc, not World ID. It is a convincing, honest demo running on in-browser twins.
@@ -367,7 +331,7 @@ npm run playtest -w @cringe-court/web -- versus grand-jury roam
 - The preview server starts on a free port and is always stopped.
 - Not part of `npm run check`.
 - Variants:
-  - **solo:** desktop-A (watches the whole hearing; about 10 min), desktop-B, desktop-C, desktop-noverdict (NO VERDICT and the refund; passes since track A's B1 fix), mobile, reduced-motion, no-webgl-classic.
-  - **versus:** desktop, desktop-mistrial, desktop-juror-watches-hearing, desktop-B-never-joins, mobile, reduced-motion.
+  - **solo:** desktop-A (watches the whole hearing; about 10 min), desktop-B, desktop-C, desktop-noverdict (expected to fail until B1 is fixed), mobile, reduced-motion, no-webgl-classic.
+  - **versus:** desktop, desktop-mistrial, desktop-B-never-joins, mobile, reduced-motion.
   - **grand-jury:** desktop, mobile, reduced-motion.
   - **roam:** desktop, narrow-760, mobile-touch, no-webgl.

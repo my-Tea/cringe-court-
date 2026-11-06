@@ -9,7 +9,6 @@ import { caseSound } from '../lib/sound';
 import { ShareCard } from '../share/ShareCard';
 import styles from './CasePage.module.css';
 import paper from './VerdictPanel.module.css';
-import { LapsedNote } from './LapsedNote';
 
 /** The hero's backing sheet follows the outcome. */
 const BACKING: Record<ReturnType<typeof verdictTone>, NonNullable<PaperPanelProps['backing']>> = { guilty: 'maroon', 'not-cooked': 'gold', 'no-verdict': 'cream' };
@@ -75,8 +74,6 @@ export function VerdictPanel({ snap, session }: VerdictPanelProps) {
           </p>
         </div>
       </PaperPanel>
-
-      <LapsedNote lapsed={snap.lapsed} />
 
       {tState.sentence && (
         <PaperPanel tone="cream" edge="cut" elevation={3} backing="gold" padding="none">

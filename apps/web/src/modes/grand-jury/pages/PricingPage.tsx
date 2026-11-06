@@ -79,7 +79,7 @@ function PhaseColumn({ p, current }: { p: PricingProfile; current: boolean }) {
           <dt>{t('grandJury.pricing.target')}</dt>
           <dd>
             {formatAmount(p.target)}{' '}
-            <span className={styles.termsNote}>{t('grandJury.pricing.term.people', { people: crowdSize(p.target, p.typicalTicket), ticket: formatAmount(p.typicalTicket, { unit: false }) })}</span>
+            <span className={styles.termsNote}>{t('grandJury.pricing.term.people', { people: crowdSize(p.target), ticket: formatAmount(p.typicalTicket, { unit: false }) })}</span>
           </dd>
         </div>
         <div>

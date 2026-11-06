@@ -63,6 +63,8 @@
 @media (max-width: 30rem) {
   .stepTitle.stepTitle {
     font-size: var(--cc-text-xl);
+    /* B14: a long title wraps to three lines and its tails (22% of the band's height) hang lower. */
+    margin-block-end: calc(var(--cc-space-4) + 1.5em);
   }
 }
 

@@ -71,7 +71,7 @@ export function shareSummary(state: VerdictState | ShareState): ShareSummary {
     fingerprint: `${hash.slice(0, 6)}…${hash.slice(-4)}`,
     shareText:
       tone === 'no-verdict'
-        ? `${caseLabel} “${state.filing.title}”: not enough jurors voted in time. Mistrial, full refund. #CringeCourt`
+        ? `${caseLabel} “${state.filing.title}”: the jury could not agree. Mistrial. #CringeCourt`
         : `${caseLabel} “${state.filing.title}”: the jury says ${state.verdict.label} (${tallyText}). ${HEADLINES[tone]} #CringeCourt`,
   };
 }

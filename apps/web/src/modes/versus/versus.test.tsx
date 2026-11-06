@@ -209,60 +209,7 @@ describe('Versus: invite and join', () => {
   });
 });
 
-describe('Versus: honest invite pages (B8, B16)', () => {
-  it('shows a closed invite under a closed hero, not the summons hero', async () => {
-    const t = court();
-    const { trialId, code } = await filed(t);
-    await t.a.withdraw(trialId, 'a');
-    t.view('bob', `/versus/join/${code}`);
-    expect(await screen.findByRole('heading', { level: 1, name: 'This invite has closed' })).toBeInTheDocument();
-    expect(screen.queryByText('You have been summoned')).not.toBeInTheDocument();
-  });
-
-  it('shows an unknown invite under a not-found hero with an honest same-browser message', async () => {
-    const t = court();
-    const { code } = await filed(t);
-    t.view('bob', `/versus/join/${validCodeOtherThan(code)}`);
-    expect(await screen.findByRole('heading', { level: 1, name: 'We can’t find that invite' })).toBeInTheDocument();
-    expect(screen.queryByText('You have been summoned')).not.toBeInTheDocument();
-    expect(screen.getByText(/keeps cases in this browser.*same browser.*can’t travel between devices/)).toBeInTheDocument();
-  });
-
-  it('labels the invite copy buttons as same-browser and says so next to them', async () => {
-    const t = court();
-    const { trialId } = await filed(t);
-    t.view('alice', `/versus/case/${trialId}`);
-    expect(await screen.findByRole('button', { name: 'Copy invite link (same browser)' })).toBeInTheDocument();
-    expect(screen.getByTestId('invite-same-browser')).toHaveTextContent(/only work in this browser/);
-  });
-});
-
-describe('Versus: no internal decision ids in player copy (item 7)', () => {
-  it('keeps (D1)-style codes out of every Versus string', async () => {
-    const { en } = await import('@/i18n');
-    for (const [key, value] of Object.entries(en.versus)) expect(value, key).not.toMatch(/\(D\d+\)|, D\d+\)/);
-  });
-});
-
 describe('Versus: the case room', () => {
-  it('reports the same redactions in the case room as the review screen did (B11)', async () => {
-    const t = court();
-    const briefPhone = prepareBriefing({
-      happened: 'We agreed to split the last dumpling. Call me on 555-123-4567 if you disagree, ok.',
-      why: 'A split is a contract. Napkin duty is a public service, not abandonment.',
-      privateNotes: '',
-      angle: 'A deal is a deal.',
-      nickname: 'Napkin Knight',
-    });
-    expect(briefPhone.redactions.story.map((h) => h.kind)).toEqual(['phone']);
-    const { trialId } = await t.a.fileCase({ title: 'The Last Dumpling', category: 'npc-behavior', patch: briefPhone.patch });
-    await t.b.acceptInvite(trialId);
-    t.view('alice', `/versus/case/${trialId}`);
-    await screen.findByRole('heading', { level: 1, name: /The Last Dumpling/ });
-    expect(await screen.findByText(/Redaction pass: Removed 1 phone number/)).toBeInTheDocument();
-    expect(document.body.textContent).not.toContain('Nothing needed removing');
-  });
-
   it('shows a loading state, then an empty state for an unknown case', async () => {
     const t = court();
     t.view('alice', '/versus/case/vs-nope');
@@ -343,28 +290,6 @@ describe('Versus: the case room', () => {
     expect(await axe(container, AXE)).toHaveNoViolations();
   });
 
-  it('tells a no-show mistrial apart from a real verdict (B13)', async () => {
-    const t = court();
-    const { trialId } = await toJury(t);
-    await t.j.takeSeat(trialId);
-    await t.a.seatDemoJurors(trialId, 'two-no-shows');
-    await t.j.commitBallot(trialId, 0);
-    t.clock.advance(30);
-    await t.a.tick();
-    await t.a.skipAhead(trialId);
-    await t.j.revealBallot(trialId);
-    await t.a.skipAhead(trialId);
-    await t.a.tick();
-    await t.a.tick();
-    expect((await t.a.world()).case(trialId)?.state).toMatchObject({ stage: 'verdict', verdict: { kind: 'no-verdict' } });
-    t.view('alice', `/versus/case/${trialId}`);
-    expect(await screen.findByText('No verdict')).toBeInTheDocument();
-    expect(screen.queryByText('The jury has spoken')).not.toBeInTheDocument();
-    expect(screen.getByText(/Mistrial: no verdict\. Claim your refund\./)).toBeInTheDocument();
-    expect(document.body.textContent).not.toMatch(/Verdict is in|Claim your payout|could not agree/);
-    expect(screen.getByText(/^MISTRIAL\. Not enough jurors opened their scrolls/)).toBeInTheDocument();
-  });
-
   it('refunds the side that paid when the other misses the funding deadline', async () => {
     const t = court();
     await t.a.faucet(usdc('5.00'));
@@ -416,7 +341,7 @@ describe('Versus: the trial in the roaming courtroom', () => {
     expect(screen.queryByRole('region', { name: /^Courtroom/ })).not.toBeInTheDocument();
     const props = roamSeen.at(-1)!;
     expect(props.role).toBe('juror');
-    expect(props.spawn).toBe('jury-view');
+    expect(props.spawn).toBe('jury-box');
     expect(props.avatar).toMatchObject({ model: 'creator', name: 'juror' });
     expect(props.beats.length).toBeGreaterThan(2);
     expect(props.beats.some((b) => b.id === 'verdict')).toBe(false);
@@ -424,7 +349,7 @@ describe('Versus: the trial in the roaming courtroom', () => {
     await waitFor(() => expect(screen.queryByTestId('roam-stub')).not.toBeInTheDocument());
   });
 
-  it('seats a party at the defendant table and ends the replay with a verdict beat', async () => {
+  it('seats Side A at the prosecution table (the filer’s side) and ends the replay with a verdict beat', async () => {
     const t = court();
     const { trialId } = await toVerdict(t);
     const user = userEvent.setup();
@@ -435,7 +360,7 @@ describe('Versus: the trial in the roaming courtroom', () => {
     expect(await screen.findByTestId('roam-stub')).toBeInTheDocument();
     const props = roamSeen.at(-1)!;
     expect(props.role).toBe('side-a');
-    expect(props.spawn).toBe('defendant');
+    expect(props.spawn).toBe('prosecution');
     expect(props.beats.at(-1)!.id).toBe('verdict');
   });
 });

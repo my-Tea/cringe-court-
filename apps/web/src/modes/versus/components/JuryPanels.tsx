@@ -2,8 +2,8 @@ import { usdc } from '@cringe-court/core';
 import { formatAmount, sideLabel } from '@/i18n/domain';
 import { jurorStake, seatsOf, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
 import { useEffect, useState } from 'react';
-import { t, type MessageKey } from '@/i18n';
-import { Alert, Amount, Badge, Button, Card, CardBody, CardHeader, CardTitle, Countdown, Icon, PaperButton, RadioCards, Stamp, useReducedMotion, useToast } from '@/ds';
+import { t } from '@/i18n';
+import { Alert, Amount, Badge, Button, Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, RadioCards, Stamp, useToast } from '@/ds';
 import { agentName } from '../copy';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
@@ -145,77 +145,6 @@ export function RecruitingPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }
   );
 }
 
-const ballotId = (trialId: string) => `ballot-${trialId}`;
-
-/** Seconds left at which the HUD turns urgent. */
-export const BALLOT_URGENT_SECONDS = 60;
-
-type HudState = 'vote' | 'sealed' | 'open' | 'missed' | 'counted';
-
-const HUD_COPY = {
-  vote: { title: 'versus.ballotHud.vote.title', body: 'versus.ballotHud.vote.body', urgent: 'versus.ballotHud.vote.urgent' },
-  sealed: { title: 'versus.ballotHud.sealed.title', body: 'versus.ballotHud.sealed.body', urgent: null },
-  open: { title: 'versus.ballotHud.open.title', body: 'versus.ballotHud.open.body', urgent: 'versus.ballotHud.open.urgent' },
-  missed: { title: 'versus.ballotHud.missed.title', body: 'versus.ballotHud.missed.body', urgent: null },
-  counted: { title: 'versus.ballotHud.counted.title', body: 'versus.ballotHud.counted.body', urgent: null },
-} as const satisfies Record<HudState, { title: MessageKey; body: MessageKey; urgent: MessageKey | null }>;
-
-/**
- * B2: the juror's ballot, pinned above the hearing while it plays. It says what
- * to do and how long is left, turns urgent in the last minute, and takes the
- * juror straight to the ballot (or opens the scroll in one press), so watching
- * the trial never costs a juror their vote.
- */
-export function BallotHud({ c }: { c: VersusCase }) {
-  const { desk, run, persona, now } = useVersus();
-  const reduced = useReducedMotion();
-  const s = c.state;
-  const seat = seatsOf(c).find((x) => x.account.toLowerCase() === persona.account.toLowerCase());
-  if (s.stage !== 'jury' || !seat || (s.step !== 'commit' && s.step !== 'reveal')) return null;
-  const endsAt = s.step === 'commit' ? s.commitEndsAt : s.revealEndsAt;
-  if (endsAt === null) return null;
-  const span = s.step === 'commit' ? s.terms.deadlines.commit : s.terms.deadlines.reveal;
-  const state: HudState = s.step === 'commit' ? (seat.committed ? 'sealed' : 'vote') : !seat.committed ? 'missed' : seat.revealed ? 'counted' : 'open';
-  const copy = HUD_COPY[state];
-  const urgent = copy.urgent !== null && endsAt - now <= BALLOT_URGENT_SECONDS;
-  const toBallot = () => {
-    const card = document.getElementById(ballotId(c.trialId));
-    card?.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
-    card?.querySelector<HTMLElement>('input[type="radio"]:checked, input[type="radio"], button')?.focus({ preventScroll: true });
-  };
-  return (
-    <section className={styles.ballotHud} data-state={state} data-urgent={urgent || undefined} aria-label={t('versus.ballotHud.aria')}>
-      <div className={styles.ballotHudCopy}>
-        <strong className={styles.ballotHudTitle}>
-          <Icon name={state === 'vote' || state === 'sealed' ? 'lock' : state === 'missed' ? 'clock' : 'unlock'} aria-hidden />
-          {t(copy.title)}
-        </strong>
-        <span aria-live="polite">{urgent && copy.urgent ? t(copy.urgent) : t(copy.body)}</span>
-      </div>
-      {state !== 'missed' && state !== 'counted' && (
-        <Countdown
-          compact
-          label={t(s.step === 'commit' ? 'versus.header.deadline.commit' : 'versus.header.deadline.reveal')}
-          startsAt={(endsAt - span) * 1000}
-          endsAt={endsAt * 1000}
-          now={now * 1000}
-          className={styles.ballotHudTimer}
-        />
-      )}
-      {state === 'vote' && (
-        <PaperButton size="sm" variant={urgent ? 'maroon' : undefined} iconEnd={<Icon name="chevron-down" />} onClick={toBallot}>
-          {t('versus.ballotHud.vote.action')}
-        </PaperButton>
-      )}
-      {state === 'open' && (
-        <PaperButton size="sm" variant={urgent ? 'maroon' : undefined} iconStart={<Icon name="unlock" />} onClick={() => void run(() => desk.revealBallot(c.trialId), { success: t('versus.ballot.openedToast') })}>
-          {t('versus.ballotHud.open.action')}
-        </PaperButton>
-      )}
-    </section>
-  );
-}
-
 function BallotPanel({ c }: { c: VersusCase }) {
   const { desk, run, persona } = useVersus();
   const s = c.state;
@@ -289,7 +218,7 @@ function BallotPanel({ c }: { c: VersusCase }) {
     );
   }
   return (
-    <Card as="section" tone="ornate" aria-labelledby="ballot-title" id={ballotId(c.trialId)}>
+    <Card as="section" tone="ornate" aria-labelledby="ballot-title">
       <CardHeader eyebrow={t('versus.ballot.eyebrow', { seat: seat.seat })}>
         <CardTitle id="ballot-title" as="h2">
           {s.step === 'commit' ? t('versus.ballot.title.commit') : t('versus.ballot.title.reveal')}
@@ -310,7 +239,6 @@ export function TrialPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
   return (
     <div className={styles.stack}>
       <PaperSection as="section" padding="md" ribbon={t('versus.trial.ribbon')} aria-label={t('versus.trial.aria')}>
-        {viewer === 'juror' && <BallotHud c={c} />}
         <VersusTrialFrame viewer={viewer} lines={s.transcript.lines} exhibits={s.exhibits} filing={s.filing} seats={seats} jurySize={s.terms.jurySize} />
       </PaperSection>
       {viewer === 'juror' ? (

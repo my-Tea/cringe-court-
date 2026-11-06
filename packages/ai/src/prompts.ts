@@ -254,6 +254,6 @@ export function juryOutLine(scope: 'teaser' | 'full'): JudgeLine {
 export function sentenceFallbackText(verdictLabel: string): string {
   const label = sanitizeText(verdictLabel, VERDICT_LABEL_MAX_CHARS);
   return /no verdict/i.test(label)
-    ? 'MISTRIAL. No verdict was reached, so everybody gets their money back and nobody learns anything.'
+    ? 'MISTRIAL. The jury could not agree, so everybody gets their money back and nobody learns anything.'
     : `The jury says ${label}. The court sentences everyone involved to log off for one (1) hour.`;
 }

@@ -31,16 +31,6 @@ describe('VersusCounsel.draft', () => {
     expect(text).toContain('Napkin Knight');
   });
 
-  it('never doubles punctuation around a quoted sentence (B13 share card)', async () => {
-    const { lines } = await new VersusCounsel().draft(request());
-    for (const l of lines) {
-      expect(l.text, l.text).not.toMatch(/[.!?]”[.!?]/);
-      expect(l.text, l.text).not.toMatch(/[.!?]"[.!?]/);
-    }
-    const rebuttal = lines.find((l) => l.segment === 'rebuttal' && l.speaker === 'side-a')!;
-    expect(rebuttal.text).toMatch(/Side B says “[^”]+[.!?…]” Listen to that again\./);
-  });
-
   it('records every request so tests can inspect the information wall', async () => {
     const c = new VersusCounsel();
     const req = request();
@@ -157,12 +147,6 @@ describe('VersusCounsel options', () => {
 });
 
 describe('VersusCounsel.suggestAngles', () => {
-  it('never nests double quotes inside an angle (B12)', async () => {
-    const out = await new VersusCounsel().suggestAngles({ trialId: 't', story: 'We agreed to split the last dumpling. Then it vanished.' } as never);
-    for (const a of out) expect((a.text.match(/[“”"]/g) ?? []).length, a.text).toBeLessThanOrEqual(0);
-    expect(out[0]!.text).toContain('‘We agreed to split the last dumpling’');
-  });
-
   it('returns three distinct angles of at most 140 chars, deterministically', async () => {
     const req = { trialId: 'vs-x', mode: 'versus' as const, category: 'dating-crimes' as const, story: 'We split a dumpling. It vanished.', role: 'prosecution' as const };
     const one = await new VersusCounsel().suggestAngles(req);
