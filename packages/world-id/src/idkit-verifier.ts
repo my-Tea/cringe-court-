@@ -1,4 +1,5 @@
 import { deriveHumanId } from './human-id.js';
+import { levelFromCredential } from './level.js';
 import {
   IdentityLevel,
   type FailureReason,
@@ -22,16 +23,9 @@ export interface IdkitVerifierOptions {
   now?: () => number;
 }
 
-export const DEFAULT_VERIFY_ENDPOINT = 'https://developer.worldcoin.org/api/v4/verify';
+export { levelFromCredential };
 
-/** Map an IDKit response `identifier` to a level. Unknown identifiers -> NONE. */
-export function levelFromCredential(identifier: string): IdentityLevel {
-  const id = identifier.toLowerCase().replace(/[\s-]+/g, '_');
-  if (id === 'proof_of_human' || id === 'orb') return IdentityLevel.ORB;
-  if (['passport', 'mnc', 'eid', 'document', 'secure_document'].includes(id)) return IdentityLevel.DOCUMENT;
-  if (id === 'selfie' || id === 'device') return IdentityLevel.DEVICE;
-  return IdentityLevel.NONE;
-}
+export const DEFAULT_VERIFY_ENDPOINT = 'https://developer.worldcoin.org/api/v4/verify';
 
 const CODE_MAP: Array<[RegExp, FailureReason]> = [
   [/max_verifications|nullifier_replayed|already_verified|already_exists|duplicate_nonce/, 'already_verified'],

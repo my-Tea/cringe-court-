@@ -356,19 +356,8 @@ export class RoamController implements BeatHost {
     this.#changed();
   }
 
-  /** Set the lighting mood directly (beats also set it). */
-  setMood(mood: LightingMood): void {
-    if (mood === this.#mood) return;
-    this.#mood = mood;
-    this.#emit({ type: 'mood', mood });
-    this.#changed();
-  }
-
   teleport(to: SpawnId | Spawn): void {
     const s = typeof to === 'string' ? this.world.spawns[to] : to;
-    // Moving rooms drops whatever was on screen.
-    this.#callout = null;
-    if (!this.#beat) this.#setDialogue(null);
     if (this.#seat) {
       this.#seat = null;
       this.#emit({ type: 'seat', seat: null });
@@ -592,7 +581,7 @@ export class RoamController implements BeatHost {
     }
     if (this.#callout) {
       this.#callout.age += frame;
-      if (this.#callout.age > (this.#callout.style === 'verdict' ? CALLOUT_SECONDS * 2.5 : CALLOUT_SECONDS)) {
+      if (this.#callout.age > CALLOUT_SECONDS) {
         this.#callout = null;
         this.#changed();
       }
@@ -672,14 +661,6 @@ export class RoamController implements BeatHost {
 
   get remotes(): readonly PlayerState[] {
     return this.#remotes;
-  }
-
-  get reducedMotion(): boolean {
-    return this.#reduced;
-  }
-
-  get focusId(): string | null {
-    return this.#seat || this.#control === 'cinematic' ? null : (this.#focus?.id ?? null);
   }
 
   get mood(): LightingMood {

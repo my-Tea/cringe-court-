@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Countdown, EmptyState, ErrorState, Icon, PaperButtonLink, PaperPanel, PhaseStepper, Skeleton, SkeletonText } from '@/ds';
 import { ArgumentFeed, CourtRecord } from '../components/ArgumentFeed';
+import { CaseSounds } from '../components/CaseSounds';
 import { DemoControls } from '../components/DemoControls';
 import { ClaimPanel, FundingPanel, GalleryPanel, JurorPanel } from '../components/panels';
 import { Benches, CourtPanel, StatusBadge } from '../components/parts';
@@ -173,6 +174,7 @@ export function CasePage() {
         <span aria-current="page">{d.label}</span>
       </nav>
 
+      <CaseSounds key={d.caseNumber} detail={d} />
       <CaseHeader detail={d} />
 
       {closed && (

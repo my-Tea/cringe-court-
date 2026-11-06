@@ -4,6 +4,7 @@ import { stagePose } from "@/art/art";
 import { Icon, PaperButtonLink, PaperPanel, PaperRibbon } from "@/ds";
 import { paths } from "@/app/routes";
 import { useDocumentTitle } from "@/app/useDocumentTitle";
+import { webModes } from "@/modes/registry";
 import { MODE_PRESENTATION } from "./modeContent";
 import { ModeFacts } from "./ModeFacts";
 import styles from "./pages.module.css";
@@ -80,10 +81,32 @@ export function HomePage() {
                     <p className={styles.modeTagline}>{MODES[id].tagline}</p>
                     <ModeFacts id={id} />
                     <span className={styles.modeMore}>
-                      Explore {MODES[id].name} <Icon name="arrow-right" />
+                      {webModes.get(id)?.landing ? "Enter" : "Explore"} {MODES[id].name} <Icon name="arrow-right" />
                     </span>
                   </div>
                 </PaperPanel>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <section aria-labelledby="mine-title" className={styles.mine}>
+        <div className={styles.sectionHead}>
+          <PaperRibbon as="h2" id="mine-title" tone="gold" size="md">
+            Your cases
+          </PaperRibbon>
+          <p className={styles.sectionLede}>Pick up where you left off: open trials, sealed ballots and money to collect.</p>
+        </div>
+        <ul className={styles.mineList} role="list">
+          {MODE_IDS.map((id) => {
+            const docket = webModes.get(id)?.docket;
+            if (!docket) return null;
+            return (
+              <li key={id}>
+                <PaperButtonLink to={docket.to} variant="maroon" size="md" iconStart={<Icon name="document" />}>
+                  {docket.label}
+                </PaperButtonLink>
               </li>
             );
           })}
@@ -103,8 +126,9 @@ export function HomePage() {
             New here? Learn the trial in a minute.
           </h2>
           <p className={styles.sectionLede}>
-            Filing opens when the contracts and AI counsel land. Until then,
-            read the rules or sit in the demo court.
+            Every court is open on the testnet demo: scripted AI counsel, an
+            in-browser twin of the Arc contract and free test USDC. Read the
+            rules, or watch a whole trial play out in the demo court.
           </p>
           <div className={styles.heroActions}>
             <PaperButtonLink

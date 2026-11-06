@@ -1,4 +1,5 @@
-import type { CaseAudioEvent } from '@cringe-court/audio';
+import type { CaseAudioEvent, VerdictOutcome } from '@cringe-court/audio';
+import { caseCue } from '@/platform/audio';
 import type { CharacterId as CoreCharacterId, CourtLine } from '@cringe-court/core';
 import type { CharacterId } from '@/art/art';
 import type { CaseDetail, DocketEntry, DocketStatus, SharePalette } from '@cringe-court/modes-grand-jury';
@@ -88,34 +89,21 @@ export function sharePalette(el: Element = document.documentElement): SharePalet
   };
 }
 
-/* ── Sound: the procedural @cringe-court/audio engine, created lazily ───── */
-
-type Engine = { handle(e: CaseAudioEvent): unknown; attachUnlock(): () => void };
-let engine: Engine | null = null;
-let loading: Promise<Engine | null> | null = null;
-
-function getEngine(): Promise<Engine | null> {
-  if (engine) return Promise.resolve(engine);
-  if (typeof window === 'undefined' || typeof window.AudioContext === 'undefined') return Promise.resolve(null);
-  loading ??= import('@cringe-court/audio')
-    .then(({ createAudioEngine }) => {
-      const e = createAudioEngine();
-      e.attachUnlock();
-      engine = e;
-      return e;
-    })
-    .catch(() => null);
-  return loading;
-}
+/* ── Sound: the app-wide shared engine (platform/audio.ts) ───────────────── */
 
 /** Fire-and-forget courtroom sound. Silent where Web Audio is missing; the engine honours mute and Reduce sound. */
 export function sound(event: CaseAudioEvent): void {
-  void getEngine().then((e) => e?.handle(event));
+  caseCue(event);
 }
 
 /** Verdict stinger for a Grand Jury outcome (bench 0 / bench 1 / none). */
 export function verdictSound(kind: 'ballot-0' | 'ballot-1' | 'no-verdict'): void {
-  sound({ type: 'verdict.read', outcome: kind === 'no-verdict' ? 'no-verdict' : kind === 'ballot-0' ? 'side-a' : 'side-b' });
+  sound({ type: 'verdict.read', outcome: verdictOutcome(kind) });
+}
+
+/** Grand Jury verdict kind → the audio package's outcome. */
+export function verdictOutcome(kind: 'ballot-0' | 'ballot-1' | 'no-verdict'): VerdictOutcome {
+  return kind === 'no-verdict' ? 'no-verdict' : kind === 'ballot-0' ? 'side-a' : 'side-b';
 }
 
 /** Portrait for a transcript speaker. Grand Jury has no player, so `player` falls back to a plain Side A cut-out. */

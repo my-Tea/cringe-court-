@@ -1,5 +1,6 @@
 import { CATEGORIES, activeDeadline, formatCaseNumber, type Deadline } from '@cringe-court/core';
 import { VERSUS_STEPS, nextStep, stepIndex, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
+import { useDeadlineCues } from '@/platform/audio';
 import { Badge, Countdown, PhaseStepper, Stamp } from '@/ds';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
@@ -22,9 +23,10 @@ const VIEWER_BADGE: Record<Viewer, { label: string; tone: 'side-a' | 'side-b' | 
 };
 
 export function CaseHeader({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
-  const { now, persona } = useVersus();
+  const { now, persona, audio } = useVersus();
   const s = c.state;
   const deadline = activeDeadline(s);
+  useDeadlineCues(deadline && deadline.deadline !== 'appeal' ? deadline.endsAt * 1000 : null, now * 1000, audio);
   const step = nextStep(c, viewer, persona.account);
   const span = (d: Deadline) => {
     const t = s.terms.deadlines;

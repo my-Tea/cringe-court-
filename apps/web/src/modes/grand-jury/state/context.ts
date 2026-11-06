@@ -1,6 +1,8 @@
 import type { DemoCourt } from '@cringe-court/modes-grand-jury';
 import { createDemoCourt } from '@cringe-court/modes-grand-jury';
 import { createContext, useContext } from 'react';
+import { platformConfig } from '@/platform/config';
+import { identityFor } from '@/platform/identity/createIdentity';
 
 /**
  * The Grand Jury court for the app. Testnet demo build: a seeded docket on the
@@ -20,7 +22,8 @@ export const CourtContext = createContext<CourtContextValue | null>(null);
 let shared: Promise<DemoCourt> | null = null;
 
 export function sharedDemo(): Promise<DemoCourt> {
-  shared ??= createDemoCourt();
+  // The human player's identity follows the platform config; the simulated crowd stays mock.
+  shared ??= createDemoCourt({ identity: (viewer) => identityFor(platformConfig, `demo-human:${viewer}`) });
   return shared;
 }
 

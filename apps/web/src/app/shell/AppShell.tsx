@@ -7,16 +7,17 @@ import {
   Icon,
   IconButton,
   Logo,
-  PaperButtonLink,
   PaperNavBar,
   PaperPanel,
   PaperTab,
+  RoundIconLink,
   TestnetBadge,
   Tooltip,
 } from '@/ds';
 import { COURT_LINKS, NAV_ITEMS, paths } from '../routes';
 import styles from './AppShell.module.css';
 import { MotionToggle } from './MotionToggle';
+import { SoundButton, SoundMuteSwitch } from '@/platform/SoundSettings';
 
 /** Moves focus to <main> after client-side navigation, so screen readers start at the new page. */
 function useFocusMainOnNavigate() {
@@ -64,9 +65,10 @@ export function AppShell() {
                   <TestnetBadge />
                 </button>
               </Tooltip>
-              <PaperButtonLink to={paths.court} size="sm" iconStart={<Icon name="gavel" />} className={styles.cta}>
-                Enter court
-              </PaperButtonLink>
+              <SoundButton className={styles.sound} />
+              <Tooltip content="Settings">
+                <RoundIconLink to={paths.settings} label="Settings" icon="gear" className={styles.gear} />
+              </Tooltip>
               <Dialog open={menuOpen} onOpenChange={setMenuOpen}>
                 <DialogTrigger asChild>
                   <IconButton label="Open menu" icon={<Icon name="menu" />} className={styles.menuButton} />
@@ -101,8 +103,17 @@ export function AppShell() {
                       </li>
                     ))}
                   </ul>
+                  <ul className={styles.mobileNav} role="list">
+                    <li>
+                      <NavLink to={paths.settings} className={styles.menuLink} onClick={close}>
+                        <Icon name="gear" />
+                        Settings
+                      </NavLink>
+                    </li>
+                  </ul>
                   <div className={styles.sheetSection}>
                     <TestnetBadge />
+                    <SoundMuteSwitch />
                     <MotionToggle />
                   </div>
                 </DialogContent>
@@ -147,6 +158,9 @@ export function AppShell() {
               </li>
               <li>
                 <Link to={paths.leaderboard}>Leaderboard</Link>
+              </li>
+              <li>
+                <Link to={paths.settings}>Settings</Link>
               </li>
               <li>
                 <Link to={paths.gallery}>Design gallery</Link>

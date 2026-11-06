@@ -9,6 +9,7 @@ import { JuryStage } from '../court/JuryStage';
 import { demoCourt, docketEntry, saveToDocket } from '../lib/demoCourt';
 import { soloPaths } from '../lib/paths';
 import { useSessionSnapshot } from '../lib/useSession';
+import { CaseSounds } from './CaseSounds';
 import { VerdictPanel } from './VerdictPanel';
 import styles from './CasePage.module.css';
 
@@ -81,6 +82,7 @@ export function CasePage() {
 
   return (
     <div className={styles.page}>
+      <CaseSounds key={trialId} t={t} />
       <header className={styles.top}>
         <div className={styles.topRow}>
           <PaperButtonLink to={soloPaths.docket} variant="maroon" size="sm" iconStart={<Icon name="arrow-left" />}>

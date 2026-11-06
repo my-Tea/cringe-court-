@@ -1,8 +1,6 @@
 import { formatUsdc, type Usdc } from '@cringe-court/core';
 import type { CaseDetail, Disclosure } from '@cringe-court/modes-grand-jury';
-import { useEffect, useRef } from 'react';
 import { Amount, Icon, Stamp } from '@/ds';
-import { verdictSound } from '../lib';
 import styles from '../GrandJury.module.css';
 import { CourtPanel } from './parts';
 
@@ -72,17 +70,10 @@ export function DisclosureList({ d }: { d: Disclosure }) {
 
 /**
  * The verdict, read out: a stamp, the revealed tally, the judge's sentence and
- * the D13 money disclosure. Plays the verdict stinger once per case when it is
- * first shown.
+ * the D13 money disclosure. The verdict stinger plays from CaseSounds.
  */
 export function VerdictPanel({ detail }: { detail: CaseDetail }) {
   const v = detail.verdict;
-  const played = useRef<number | null>(null);
-  useEffect(() => {
-    if (!v || played.current === detail.caseNumber) return;
-    played.current = detail.caseNumber;
-    verdictSound(v.kind);
-  }, [v, detail.caseNumber]);
 
   if (detail.status === 'cancelled') {
     return (
