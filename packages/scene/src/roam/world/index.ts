@@ -104,7 +104,7 @@ function seats(): Record<SeatId, Seat> {
   return {
     defendant: { id: 'defendant', label: "Defendant's table", pos: def, eye: 40, yaw: yawTo(def, JUDGE_POS) * 0.6, exit: [DEFENDANT_CHAIR.x - 2, 0, 9], pitch: 0.12 },
     prosecution: { id: 'prosecution', label: 'Prosecution table', pos: pro, eye: 40, yaw: yawTo(pro, JUDGE_POS) * 0.6, exit: [PROSECUTION_CHAIR.x + 2, 0, 9], pitch: 0.12 },
-    'jury-box': { id: 'jury-box', label: 'Jury box', pos: [jury[0], jury[1], jury[2]], eye: 30, yaw: yawTo(jury, juryLook), exit: [64, 0, 9], pitch: -0.04 },
+    'jury-box': { id: 'jury-box', label: 'Jury box', pos: [jury[0], jury[1], jury[2]], eye: 30, yaw: yawTo(jury, juryLook), exit: [59.5, 0, 9], pitch: -0.04 },
     witness: { id: 'witness', label: 'Witness stand', pos: [-28, WITNESS_STAND.floor, -28], eye: BODY.eye, yaw: -1.75, exit: [-8, 8.4, -27], standing: true },
     'gallery-left': { id: 'gallery-left', label: 'Gallery, left pew', pos: [-42, 0, 36.5], eye: 31, yaw: 0, exit: [-28, 0, 36.5] },
     'gallery-right': { id: 'gallery-right', label: 'Gallery, right pew', pos: [42, 0, 36.5], eye: 31, yaw: 0, exit: [28, 0, 36.5] },
@@ -125,7 +125,7 @@ function npcs(cast: CastFile | null, boxes: readonly Box[]): NpcSpec[] {
   const list: NpcSpec[] = [
     { id: 'judge', name: 'Judge Gavel.exe', role: 'judge', model: 'judge', pos: JUDGE_POS, yaw: Math.PI, seated: false, radius: 0, lines: 'judge' },
     { id: 'prosecutor', name: 'Miss Ratio', role: 'prosecutor', model: 'prosecutor', pos: at(-52, -36), yaw: Math.PI + 0.3, seated: false, radius: 6, lines: 'prosecutor' },
-    { id: 'defense', name: 'Counsel Chaos', role: 'defense', model: 'defense', pos: at(66, -5), yaw: 0.35, seated: false, radius: 5, lines: 'defense' },
+    { id: 'defense', name: 'Counsel Chaos', role: 'defense', model: 'defense', pos: at(68.5, 6), yaw: 0.35, seated: false, radius: 4, lines: 'defense' },
     { id: 'bailiff', name: 'Officer Bonk', role: 'bailiff', model: 'bailiff', pos: at(-76, 6), yaw: -Math.PI / 2 - 0.35, seated: false, radius: 6, lines: 'bailiff' },
     { id: 'clerk', name: 'Clerk Ctrl+S', role: 'clerk', model: 'clerk', pos: at(-46, -45), yaw: Math.PI + 0.7, seated: false, radius: 6, lines: 'clerk' },
     ...JURY_SLOTS.map<NpcSpec>((slot, i) => ({
@@ -264,8 +264,8 @@ export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld &
     well: spawn([0, 0, 10], judgeHead),
     defendant: { pos: seatMap.defendant.pos, yaw: seatMap.defendant.yaw, pitch: 0.12 },
     witness: { pos: seatMap.witness.pos, yaw: seatMap.witness.yaw, pitch: -0.05 },
-    // Beside the dais, in front of the box: both rows face you.
-    'jury-view': spawn([62, 0, -50], marks.jury),
+    // From the well, across the defence table: all seven seats, both rows, in one frame.
+    'jury-view': spawn([12, 0, 8], [84, 34, -30]),
     'jury-box': { pos: seatMap['jury-box'].pos, yaw: seatMap['jury-box'].yaw, pitch: -0.04 },
     prosecution: { pos: seatMap.prosecution.pos, yaw: seatMap.prosecution.yaw, pitch: 0.12 },
     'bench-front': spawn([0, 8.4, -24], judgeHead),

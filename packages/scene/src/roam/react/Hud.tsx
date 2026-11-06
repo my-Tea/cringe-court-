@@ -110,11 +110,9 @@ export function Onboarding({ onCapture, onKeyboard, onDismiss }: { onCapture: ()
   const S = useRoamStrings();
   return (
     <section className="ccr-panel ccr-onboard" aria-labelledby="ccr-onboard-title">
-      <div className="ccr-onboard-head">
-        <h2 id="ccr-onboard-title" className="ccr-onboard-title ccr-pixel" style={{ margin: 0, fontWeight: 400 }}>
-          {S.captureTitle}
-        </h2>
-      </div>
+      <h2 id="ccr-onboard-title" className="ccr-onboard-title ccr-pixel" style={{ margin: 0, fontWeight: 400 }}>
+        {S.captureTitle}
+      </h2>
       <p>{S.captureMouse}</p>
       <p>{S.captureKeyboard((cap) => <kbd className="ccr-key">{cap}</kbd>)}</p>
       <div className="ccr-modal-row">

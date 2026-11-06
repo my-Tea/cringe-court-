@@ -41,7 +41,7 @@ export const trial = {
   'walk.building': 'Building the courtroom…',
   'walk.controls': 'Sandbox controls',
   'walk.beats.title': 'Trial beats',
-  'walk.beats.hint': "Each beat seats you at the defendant's table and takes the camera while someone speaks.",
+  'walk.beats.hint': "Each beat seats you where your role sits (here, the defendant's table) and takes the camera while someone speaks.",
   'walk.beats.item': '{number}. {label}',
   'walk.verdict': 'Verdict',
   'walk.verdict.guilty': 'Guilty',

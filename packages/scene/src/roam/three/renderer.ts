@@ -63,6 +63,9 @@ export class RoamRenderer {
   #mood: Mood = ROAM_MOODS.house;
   #moodName: LightingMood = 'house';
   #flash = 0;
+  /** Seconds of mood blending left (the blend is ~95% there after 1 s, exact after this). */
+  #blendLeft = MOOD_BLEND_SECONDS;
+  #flashOn = false;
   #lastFocus: string | null = null;
   #frame = 0;
   readonly #unsub: () => void;
@@ -158,13 +161,20 @@ export class RoamRenderer {
     this.camera.position.set(...view.eye);
     this.camera.rotation.set(view.pitch + view.shakePitch, view.yaw + view.shakeYaw, 0, 'YXZ');
 
-    // Mood blend and the gavel flash.
-    if (c.mood !== this.#moodName) this.#moodName = c.mood;
-    const target = ROAM_MOODS[this.#moodName];
-    const k = 1 - Math.exp(-dt * 3);
-    this.#mood = blendMood(this.#mood, target, k);
-    this.#flash = Math.max(0, this.#flash - dt * 3.5);
-    this.#applyMood();
+    // Mood blend and the gavel flash: only while something is changing (a settled room
+    // re-applied nine colours and allocated sixteen THREE.Colors every frame).
+    if (c.mood !== this.#moodName) {
+      this.#moodName = c.mood;
+      this.#blendLeft = MOOD_BLEND_SECONDS;
+    }
+    if (this.#blendLeft > 0 || this.#flash > 0 || this.#flashOn) {
+      const target = ROAM_MOODS[this.#moodName];
+      this.#blendLeft = Math.max(0, this.#blendLeft - dt);
+      this.#mood = this.#blendLeft > 0 ? blendMood(this.#mood, target, 1 - Math.exp(-dt * 3)) : target;
+      this.#flashOn = this.#flash > 0;
+      this.#flash = Math.max(0, this.#flash - dt * 3.5);
+      this.#applyMood();
+    }
 
     const animate = this.preset.fullRateAnimation || this.#frame % 2 === 0;
     const step = this.preset.fullRateAnimation ? dt : dt * 2;
@@ -255,6 +265,9 @@ export class RoamRenderer {
     (this.#focus.material as THREE.Material).dispose();
   }
 }
+
+/** How long a mood change blends before snapping to the target. */
+const MOOD_BLEND_SECONDS = 2.5;
 
 function blendMood(a: Mood, b: Mood, k: number): Mood {
   if (k >= 1) return b;

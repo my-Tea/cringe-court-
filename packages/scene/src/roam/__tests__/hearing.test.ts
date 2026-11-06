@@ -177,4 +177,14 @@ describe('jury size', () => {
     expect(visibleJurors(gj)).not.toContain(`juror-${PLAYER_JURY_SLOT + 1}`);
     expect(visibleJurors(new RoamController(world, { role: 'juror', jurors: 3 }))).toEqual(['juror-1', 'juror-2']);
   });
+
+  it('whoever sits in the player seat takes it from that NPC juror, and gives it back on standing', () => {
+    const c = new RoamController(world, { jurors: 7 });
+    const third = () => c.npcStates.find((n) => n.id === `juror-${PLAYER_JURY_SLOT + 1}`)!;
+    expect(third().hidden).toBeFalsy();
+    c.sit('jury-box');
+    expect(third().hidden).toBe(true);
+    c.stand();
+    expect(third().hidden).toBeFalsy();
+  });
 });

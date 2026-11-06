@@ -176,6 +176,7 @@ describe('roam world', () => {
         [world.seats.defendant.pos[0], 40, world.seats.defendant.pos[2]],
         [world.seats.prosecution.pos[0], 40, world.seats.prosecution.pos[2]],
         [world.spawns['jury-view'].pos[0], 44, world.spawns['jury-view'].pos[2]],
+        [world.spawns['bench-front'].pos[0], 52, world.spawns['bench-front'].pos[2]],
       ];
       for (const v of viewers) {
         for (const b of JURY_SLOTS.filter((s) => s.row === 'back')) {
@@ -198,7 +199,9 @@ describe('roam world', () => {
       expect(seat.pos).toEqual(JURY_SLOTS[PLAYER_JURY_SLOT]!.pos);
       expect(overlaps(index, seat.pos[0], seat.pos[2], seat.pos[1])).toBe(true);
       expect(overlaps(index, seat.exit[0], seat.exit[2], seat.exit[1])).toBe(false);
-      expect(zoneAt(world, world.spawns['jury-view'].pos[0], world.spawns['jury-view'].pos[2])?.id).toBe('jury-box');
+      expect(zoneAt(world, seat.pos[0], seat.pos[2])?.id).toBe('jury-box');
+      // B17: the zone exists, and the viewpoint reports where it really stands (the well, facing the box).
+      expect(zoneAt(world, world.spawns['jury-view'].pos[0], world.spawns['jury-view'].pos[2])?.id).toBe('well');
     });
   });
 });

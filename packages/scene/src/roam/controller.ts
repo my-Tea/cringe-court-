@@ -181,6 +181,15 @@ export class RoamController implements BeatHost {
     return n.jurySlot >= this.#jurors || (this.role === 'juror' && n.jurySlot === PLAYER_JURY_SLOT);
   }
 
+  /** Whoever sits in the jury box's player seat takes it from the NPC juror there. */
+  #syncJuryBox(): void {
+    const inBox = this.#seat?.id === 'jury-box';
+    for (const s of this.#npcs) {
+      const spec = this.#specs.get(s.id)!;
+      if (spec.jurySlot === PLAYER_JURY_SLOT) s.hidden = inBox || this.#absent(spec) || undefined;
+    }
+  }
+
   /* ── Pace ──────────────────────────────────────────────────────────── */
 
   get pace(): HearingPace {
@@ -408,6 +417,7 @@ export class RoamController implements BeatHost {
     this.#pitch = seat.pitch ?? 0;
     if (this.#control === 'free') this.#control = 'look';
     this.keys.clear();
+    this.#syncJuryBox();
     this.#emit({ type: 'seat', seat: id });
     this.#updateZone();
     this.#changed();
@@ -417,6 +427,7 @@ export class RoamController implements BeatHost {
     if (!this.#seat) return;
     const exit = this.#seat.exit;
     this.#seat = null;
+    this.#syncJuryBox();
     this.#body.pos = [...exit];
     this.#prev = [...exit];
     this.#body.vel = [0, 0, 0];
@@ -441,6 +452,7 @@ export class RoamController implements BeatHost {
     if (!this.#beat) this.#setDialogue(null);
     if (this.#seat) {
       this.#seat = null;
+      this.#syncJuryBox();
       this.#emit({ type: 'seat', seat: null });
     }
     this.#body = { pos: [...s.pos], vel: [0, 0, 0], onGround: true };
