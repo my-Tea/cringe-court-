@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import type { ModeId } from '@cringe-court/core';
 import { webModes } from '@/modes/registry';
 import userEvent from '@testing-library/user-event';
@@ -21,27 +21,61 @@ function renderAt(path: string) {
   return { router, ...utils };
 }
 
-describe('landing', () => {
-  it('renders the logo heading, the sign-in form and the main nav', async () => {
+describe('title screen', () => {
+  it('is the front door: the logo, a game menu and the testnet badge, no site nav', async () => {
     renderAt('/');
     expect(await screen.findByRole('heading', { level: 1, name: /CringeCourt/ })).toBeInTheDocument();
-    expect(screen.getByRole('form', { name: 'Sign in' })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
+    const menu = screen.getByRole('navigation', { name: 'Main menu' });
+    for (const name of ['Play', 'How to play', 'Settings']) expect(within(menu).getByRole('button', { name: new RegExp(name) })).toBeInTheDocument();
+    expect(screen.getByText(/every coin is test USDC/)).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
+  });
+
+  it('Play enters the world; without WebGL2 the game falls back to its menu', async () => {
+    const user = userEvent.setup();
+    const { router } = renderAt('/');
+    await user.click(await screen.findByRole('button', { name: /Play/ }));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/menu'));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Game menu' })).toBeInTheDocument();
   });
 });
 
-describe('app shell', () => {
-  it('renders landmarks, a skip link and the permanent testnet badge', async () => {
+describe('game frame', () => {
+  it('draws screens over the world with only the way back and the menu: no header nav, no footer', async () => {
     renderAt('/court');
     expect(await screen.findByRole('heading', { level: 1, name: 'Pick your court' })).toBeInTheDocument();
-    expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute('href', '#main');
-    expect(within(screen.getByRole('banner')).getByText(/test USDC only/)).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Back to the game/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Menu$/ })).toBeInTheDocument();
+    expect(screen.getByText('Testnet')).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Main' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
   });
 
+  it('the menu opens its screens in place, moving focus to them; Escape steps back', async () => {
+    const user = userEvent.setup();
+    const { router } = renderAt('/menu');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Game menu' })).toBeInTheDocument();
+    for (const name of ['Resume', 'Leaderboard', 'My cases', 'The three courts', 'How to play', 'Settings', 'Quit to title']) {
+      expect(screen.getByRole('button', { name: new RegExp(name) })).toBeInTheDocument();
+    }
+    await user.click(screen.getByRole('button', { name: /Leaderboard/ }));
+    expect(router.state.location.pathname).toBe('/leaderboard');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Leaderboard' })).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(router.state.location.pathname).toBe('/menu');
+  });
+
+  it('Escape never leaves a filing step (a half-written story is not thrown away)', async () => {
+    const user = userEvent.setup();
+    const { router } = renderAt('/versus');
+    await screen.findByRole('heading', { level: 1, name: 'Versus Court' });
+    await user.keyboard('{Escape}');
+    expect(router.state.location.pathname).toBe('/versus');
+  });
+});
+
+describe('courts and pages in the game', () => {
   it('shows the decided numbers for every court on the courts lobby', async () => {
     renderAt('/court');
     await screen.findByRole('heading', { name: 'Pick your court' });
@@ -85,24 +119,6 @@ describe('app shell', () => {
     expect(screen.getByRole('link', { name: /Start a Versus case/ })).toHaveAttribute('href', '/versus/new');
     expect(screen.getByRole('link', { name: /I have an invite code/ })).toHaveAttribute('href', '/versus/join');
     expect(screen.queryByRole('button', { name: /Filing opens soon/ })).not.toBeInTheDocument();
-  });
-
-  it('marks the current nav item and navigates client-side, moving focus to main', async () => {
-    const user = userEvent.setup();
-    const { router } = renderAt('/court');
-    await screen.findByRole('heading', { name: 'Pick your court' });
-    const nav = screen.getByRole('navigation', { name: 'Main' });
-    await user.click(within(nav).getByRole('link', { name: 'Leaderboard' }));
-    expect(router.state.location.pathname).toBe('/leaderboard');
-    expect(within(nav).getByRole('link', { name: 'Leaderboard' })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByRole('main')).toHaveFocus();
-  });
-
-  it('keeps "The court" tab current on a mode page', async () => {
-    renderAt('/versus');
-    await screen.findByRole('heading', { level: 1, name: 'Versus Court' });
-    const nav = screen.getByRole('navigation', { name: 'Main' });
-    expect(within(nav).getByRole('link', { name: 'The court' })).toHaveAttribute('aria-current', 'page');
   });
 
   it('shows a 404 page for unknown paths', async () => {

@@ -262,32 +262,9 @@ export const shell = {
   'config.unknownIdentity': 'Unknown VITE_IDENTITY "{value}"; using the mock verifier.',
 
   // ── landing
-  'landing.skip': 'Skip to sign in',
-  'landing.enterCourt': 'Enter court',
-  'landing.footer.note': '<b>Testnet only.</b> Every amount is test USDC on Arc testnet. Entertainment, not legal advice.',
   'landing.scene.exhibit': 'EXHIBIT',
   'landing.scene.alt':
     'A papercraft courtroom in full uproar: a bearded judge in sunglasses raises a gold gavel, a jury in chicken, frog, cat and pizza costumes laughs from the box, two lawyers trade blows at their desks, a bailiff folds his arms, and a Shiba sits sealed in a glass cube beside Exhibits A, B and C.',
-  'login.ribbon': 'The court is now in session',
-  'login.tagline': 'Make your case. Lose your dignity.',
-  'login.formLabel': 'Sign in',
-  'login.email': 'Email',
-  'login.email.placeholder': 'Enter your email',
-  'login.password': 'Password',
-  'login.password.placeholder': 'Enter your password',
-  'login.enter': 'Enter the court',
-  'login.guest': 'Play as guest',
-  'login.or': 'Or continue with',
-  'login.social.label': 'Continue with {name}',
-  'login.social.soon.title': '{name} sign-in is coming soon',
-  'login.social.soon.body': 'Play as a guest for now: every court is open to guests on testnet.',
-  'login.demoNote': 'Demo sign-in. Accounts are not live yet: nothing you type here leaves this page.',
-  'login.error.emailEmpty': 'Enter an email to sign in, or play as a guest.',
-  'login.error.emailInvalid': 'That email is missing an @ or a domain.',
-  'login.error.passwordEmpty': 'Enter a password, or play as a guest.',
-  'login.toast.session': 'Demo entry: accounts are not live yet, so nothing was sent or saved.',
-  'login.guest.title': 'Playing as a guest',
-  'login.guest.body': 'Pick a court. Guests can watch and file practice cases.',
 
   // ── sound
   'sound.channel.master': 'Master',

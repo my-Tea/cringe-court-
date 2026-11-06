@@ -6,7 +6,7 @@ import { t, type MessageKey } from '@/i18n';
 import { MODE_PRESENTATION } from '@/pages/modeContent';
 import { ACCESSORY_KEYS, EFFECT_KEYS, HAIR_KEYS, MODE_KEYS, OUTFIT_KEYS } from './keys';
 import type { QuestStep } from './profile';
-import styles from './PlayPage.module.css';
+import styles from './play.module.css';
 
 /* ── Shared frame ─────────────────────────────────────────────────── */
 

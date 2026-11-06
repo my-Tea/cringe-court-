@@ -1,33 +1,4 @@
-/* The arrival run: a full-bleed world with papercraft station panels over it. */
-
-.page {
-  position: fixed;
-  inset: 0;
-  background: var(--cc-blue-700);
-}
-
-.room {
-  width: 100%;
-  height: 100%;
-}
-
-.loading,
-.fallback {
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: var(--cc-space-3);
-  min-height: 100dvh;
-  padding: var(--cc-space-6) var(--cc-gutter);
-  color: var(--cc-neutral-100);
-  font-family: var(--cc-font-display);
-  font-size: var(--cc-text-xl);
-}
-
-.fallback {
-  background: var(--cc-color-canvas);
-  color: var(--cc-color-text);
-}
+/* The arrival run's station panels and quest tracker, drawn over the world. */
 
 /* ── Quest tracker ─────────────────────────────────────────── */
 

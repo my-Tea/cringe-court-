@@ -1,12 +1,5 @@
 /** English copy for the `play` namespace: the arrival run (verify, wardrobe, trial gates) before the courthouse. */
 export const play = {
-  title: 'Enter CringeCourt',
-  stage: 'The arrival islands',
-  building: 'Raising the sky islands…',
-  buildingLabel: 'Loading the arrival islands',
-  error: 'The islands could not load',
-  noWebgl: 'This browser has no WebGL2, so the walk-in is off. You can still pick a court from the lobby.',
-  'noWebgl.cta': 'Go to the courts',
 
   // Quest tracker
   'quest.title': 'Your way in',
@@ -93,5 +86,4 @@ export const play = {
   'mode.grand-jury': 'Grand Jury',
 
   // Entering
-  'enter.toast': 'All rise. Entering the {mode} court…',
 } as const;
