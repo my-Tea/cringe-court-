@@ -53,6 +53,27 @@ export interface RoamCourtroomProps {
   pauseExtra?: ReactNode;
   /** Show "Back to the lobby" in the pause menu. Default true. */
   pauseLobby?: boolean;
+  /**
+   * The room is the whole screen, so a key with no focused target is the
+   * player's. Off for a room embedded in a page, where such keys scroll it.
+   */
+  fullscreen?: boolean;
+}
+
+/** Keys a focused button acts on: these stay with the button. */
+const BUTTON_KEYS: ReadonlySet<string> = new Set(['Enter', 'NumpadEnter', 'Space', 'Tab']);
+
+/**
+ * Does this key press belong to the room? Yes when the room has focus, or (full
+ * screen) when focus fell to the page. Also on a HUD button the player clicked:
+ * W means nothing to a button, so walking must not die because Controls kept
+ * focus. Never while a menu is up, and never in a field or outside the room.
+ */
+function ownsKey(e: KeyboardEvent, room: HTMLElement, modal: boolean, fullscreen: boolean): boolean {
+  const t = e.target as HTMLElement;
+  if (t === room) return true;
+  if (fullscreen && t === document.body) return true;
+  return !modal && t.tagName === 'BUTTON' && room.contains(t) && !BUTTON_KEYS.has(e.code);
 }
 
 function Driver({ controller, renderer, pixelated, auto, onDowngrade }: { controller: RoamController; renderer: RoamRenderer; pixelated: boolean; auto: AutoQuality | null; onDowngrade: (q: QualityLevel) => void }) {
@@ -117,6 +138,7 @@ export function RoamCourtroom({
   presentation = 'play',
   pauseExtra,
   pauseLobby = true,
+  fullscreen = false,
 }: RoamCourtroomProps) {
   ensureRoamStyles();
   const S = resolveRoamStrings(strings);
@@ -181,12 +203,21 @@ export function RoamCourtroom({
     if (presentation === 'play') focusRoot();
   }, [presentation, focusRoot]);
 
-  // Keyboard: the root element owns the keys while it has focus.
+  // Keyboard: listened for on the window, so no focus change can leave the player stuck.
+  // `ownsKey` decides which presses belong to the room.
   useEffect(() => {
     const el = root.current;
-    if (!el) return;
+    if (!el || !live) return;
     const down = (e: KeyboardEvent) => {
-      if (e.target !== el) return; // buttons/menus keep their own keys
+      if (e.defaultPrevented) return;
+      // A station panel closes on Escape wherever focus sits inside it.
+      if (e.key === 'Escape' && controller.panel) {
+        controller.closePanel();
+        e.preventDefault();
+        return;
+      }
+      const { paused, panel, exhibit } = controller.snapshot();
+      if (!ownsKey(e, el, !!(paused || panel || exhibit), fullscreen)) return;
       if (e.key === 'Escape' && controller.paused) {
         controller.setPaused(false);
         e.preventDefault();
@@ -197,19 +228,18 @@ export function RoamCourtroom({
         setEngaged(true);
       }
     };
+    // Releases always count: a key let go anywhere must not keep the player walking.
     const up = (e: KeyboardEvent) => controller.keyUp(e.code);
     const blur = () => controller.keys.clear();
-    el.addEventListener('keydown', down);
-    el.addEventListener('keyup', up);
-    el.addEventListener('blur', blur);
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
     window.addEventListener('blur', blur);
     return () => {
-      el.removeEventListener('keydown', down);
-      el.removeEventListener('keyup', up);
-      el.removeEventListener('blur', blur);
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
       window.removeEventListener('blur', blur);
     };
-  }, [controller]);
+  }, [controller, live, fullscreen, setEngaged]);
 
   // Pointer lock: click to capture, Esc (browser) releases → pause menu.
   useEffect(() => {
@@ -217,7 +247,8 @@ export function RoamCourtroom({
       const isLocked = document.pointerLockElement === root.current;
       setLocked(isLocked);
       const snapNow = controller.snapshot();
-      if (!isLocked && engagedRef.current && !controller.paused && !snapNow.exhibit && !snapNow.panel) controller.setPaused(true);
+      // Only the player pressing Esc in play means pause; anything else that took the mouse (a panel, a screen drawn over the room) does not.
+      if (!isLocked && liveRef.current && engagedRef.current && !controller.paused && !snapNow.exhibit && !snapNow.panel) controller.setPaused(true);
     };
     const onMove = (e: MouseEvent) => {
       if (document.pointerLockElement !== root.current) return;
@@ -233,11 +264,8 @@ export function RoamCourtroom({
   }, [controller, setEngaged]);
   const engagedRef = useRef(engaged);
   engagedRef.current = engaged;
-
-  // Pause, exhibits and station panels release the pointer so menus are usable.
-  useEffect(() => {
-    if ((snap.paused || snap.exhibit || snap.panel) && document.pointerLockElement === root.current) document.exitPointerLock?.();
-  }, [snap.paused, snap.exhibit, snap.panel]);
+  const liveRef = useRef(live);
+  liveRef.current = live;
 
   const changePerspective = useCallback(
     (p: PerspectiveChoice) => {
@@ -259,6 +287,23 @@ export function RoamCourtroom({
       /* pointer lock unavailable (iframe, headless): keyboard turning still works */
     }
   }, [focusRoot, isTouch, setEngaged]);
+
+  // Pause, exhibits and station panels release the pointer so menus are usable.
+  // A panel that took the mouse hands it back when it closes: focus returns to
+  // the room (its button is gone, so focus would otherwise fall to the page) and
+  // mouse look resumes if it was on.
+  const panelTookMouse = useRef(false);
+  const panelWasOpen = useRef(false);
+  useEffect(() => {
+    const held = !!(snap.paused || snap.exhibit || snap.panel);
+    if (snap.panel && !panelWasOpen.current) panelTookMouse.current = document.pointerLockElement === root.current;
+    if (held && document.pointerLockElement === root.current) document.exitPointerLock?.();
+    if (panelWasOpen.current && !snap.panel && !snap.paused) {
+      focusRoot();
+      if (panelTookMouse.current) capture();
+    }
+    panelWasOpen.current = !!snap.panel;
+  }, [snap.paused, snap.exhibit, snap.panel, focusRoot, capture]);
 
   const cinematic = snap.control === 'cinematic';
   // Non-blocking onboarding (B4): a corner card, never during a cinematic beat, gone once dismissed or used.
