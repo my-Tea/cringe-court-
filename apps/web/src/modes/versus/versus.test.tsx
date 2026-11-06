@@ -7,12 +7,22 @@ import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { Route, Routes } from 'react-router';
 import { axe } from 'vitest-axe';
+import type { RoamTrialProps } from '@/trial/RoamTrial';
+import { __setCanRoamForTests } from '@/trial/trialView';
 import { renderWithProviders } from '@/test/render';
 import { CasePage } from './pages/CasePage';
 import { CasesPage } from './pages/CasesPage';
 import { JoinPage } from './pages/JoinPage';
 import { NewCasePage } from './pages/NewCasePage';
 import { VersusProvider } from './runtime/VersusProvider';
+
+const roamSeen: RoamTrialProps[] = [];
+vi.mock('@/trial/RoamTrial', () => ({
+  RoamTrial: (props: RoamTrialProps) => {
+    roamSeen.push(props);
+    return <div data-testid="roam-stub">roam stub</div>;
+  },
+}));
 
 /* One shared court (fact log + clock + counsel) and three people acting on it. */
 function court() {
@@ -311,3 +321,46 @@ describe('Versus: my cases', () => {
   });
 });
 
+
+describe('Versus: the trial in the roaming courtroom', () => {
+  beforeEach(() => {
+    roamSeen.length = 0;
+    window.localStorage.removeItem('cc:trial-view');
+    __setCanRoamForTests(true);
+  });
+  afterEach(() => __setCanRoamForTests(null));
+
+  it('seats a juror in the jury view, plays roam first without a verdict, and falls back to the classic stage on exit', async () => {
+    const t = court();
+    const { trialId } = await toJury(t);
+    await t.j.takeSeat(trialId);
+    await t.a.seatDemoJurors(trialId, 'reliable');
+    t.view('juror', `/versus/case/${trialId}`);
+    await panel('Court is in session');
+    expect(await screen.findByTestId('roam-stub')).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /^Courtroom/ })).not.toBeInTheDocument();
+    const props = roamSeen.at(-1)!;
+    expect(props.role).toBe('juror');
+    expect(props.spawn).toBe('jury-view');
+    expect(props.avatar).toMatchObject({ model: 'creator', name: 'juror' });
+    expect(props.beats.length).toBeGreaterThan(2);
+    expect(props.beats.some((b) => b.id === 'verdict')).toBe(false);
+    act(() => props.onExit());
+    await waitFor(() => expect(screen.queryByTestId('roam-stub')).not.toBeInTheDocument());
+  });
+
+  it('seats a party at the defendant table and ends the replay with a verdict beat', async () => {
+    const t = court();
+    const { trialId } = await toVerdict(t);
+    const user = userEvent.setup();
+    t.view('alice', `/versus/case/${trialId}`);
+    await screen.findByText('The jury has spoken');
+    expect(screen.queryByTestId('roam-stub')).not.toBeInTheDocument();
+    await user.click(screen.getByText('Watch the trial again'));
+    expect(await screen.findByTestId('roam-stub')).toBeInTheDocument();
+    const props = roamSeen.at(-1)!;
+    expect(props.role).toBe('side-a');
+    expect(props.spawn).toBe('defendant');
+    expect(props.beats.at(-1)!.id).toBe('verdict');
+  });
+});

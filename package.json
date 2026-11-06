@@ -21,9 +21,13 @@
     "lint": "eslint .",
     "tokens": "npm run tokens -w @cringe-court/web --",
     "cutouts": "npm run cutouts -w @cringe-court/web --",
-    "check": "npm run tokens -- --check && npm run cutouts -- --check && npm run atlas -- --check && npm run cast -w @cringe-court/scene -- --check && npm run lint && npm run typecheck && npm test && npm run build",
+    "check": "npm run build:libs && npm run tokens -- --check && npm run cutouts -- --check && npm run atlas -- --check && npm run cast -w @cringe-court/scene -- --check && npm run lint && npm run typecheck && npm test && npm run build",
     "art:build": "node cc-art/build-all.mjs",
-    "atlas": "npm run atlas -w @cringe-court/scene --"
+    "atlas": "npm run atlas -w @cringe-court/scene --",
+    "build:libs": "npm run build -w @cringe-court/chain-client -w @cringe-court/world-id",
+    "test:packages": "npm test -w @cringe-court/chain-client -w @cringe-court/world-id",
+    "test:contracts": "npm --prefix contracts test",
+    "check:full": "npm run check && npm run test:packages && npm run test:contracts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

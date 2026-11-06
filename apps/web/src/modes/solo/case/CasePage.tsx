@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useParams } from 'react-router';
 import { CANCEL_LABELS, formatCaseNumber } from '@cringe-court/core';
 import { isDemoTerms, soloMode } from '@cringe-court/modes-solo';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Badge, EmptyState, Icon, PaperButton, PaperButtonLink, PaperRibbon, PhaseStepper, TestnetBadge } from '@/ds';
+import { beatsFromLines } from '@/trial/beats';
+import { TrialViewFrame } from '@/trial/TrialViewFrame';
 import { Courtroom } from '../court/Courtroom';
 import { JuryStage } from '../court/JuryStage';
 import { demoCourt, docketEntry, saveToDocket } from '../lib/demoCourt';
 import { soloPaths } from '../lib/paths';
 import { useSessionSnapshot } from '../lib/useSession';
+import { CaseSounds } from './CaseSounds';
 import { VerdictPanel } from './VerdictPanel';
 import styles from './CasePage.module.css';
 
@@ -30,6 +33,10 @@ export function CasePage() {
   const headingRef = useRef<HTMLDivElement>(null);
   const t = snap?.trial;
   useDocumentTitle(t && 'caseNumber' in t && t.caseNumber ? `${formatCaseNumber(t.caseNumber)} · Solo Court` : 'Solo case');
+
+  // The trial plays before the verdict exists (the jury beat ends it), so no verdict beat is planned.
+  const lines = t && 'transcript' in t ? t.transcript?.lines : undefined;
+  const roamBeats = useMemo(() => (lines ? beatsFromLines(lines) : []), [lines]);
 
   useEffect(() => {
     if (live) saveToDocket(live);
@@ -65,8 +72,7 @@ export function CasePage() {
             </>
           }
         >
-          Demo cases live in the tab that filed them until the verdict is in; reloading mid-trial ends the demo case (nothing real is ever charged).
-          Decided cases are kept in your docket.
+          Demo cases live in the tab that filed them until the verdict is in; reloading mid-trial ends the demo case (nothing real is ever charged). Decided cases are kept in your docket.
         </EmptyState>
       </div>
     );
@@ -81,6 +87,7 @@ export function CasePage() {
 
   return (
     <div className={styles.page}>
+      <CaseSounds key={trialId} t={t} />
       <header className={styles.top}>
         <div className={styles.topRow}>
           <PaperButtonLink to={soloPaths.docket} variant="maroon" size="sm" iconStart={<Icon name="arrow-left" />}>
@@ -109,14 +116,17 @@ export function CasePage() {
             </h2>
             <p className={styles.small}>The jury is seated and watching with you. Nothing in this transcript can change now: it was frozen before you paid.</p>
           </div>
-          <Courtroom
-            lines={t.transcript.lines}
-            cast={soloMode.staging(t.terms)}
-            title={t.filing.title}
-            exhibits={t.exhibits}
-            audio={court.audio}
-            onFinished={() => setWatched(true)}
-            actions={
+          <TrialViewFrame
+            roam={{
+              beats: roamBeats,
+              label: `Courtroom: ${t.filing.title}`,
+              role: 'defendant',
+              spawn: 'defendant',
+              avatar: { model: 'creator', name: 'You' },
+              onDone: () => setWatched(true),
+            }}
+            classic={<Courtroom lines={t.transcript.lines} cast={soloMode.staging(t.terms)} title={t.filing.title} exhibits={t.exhibits} audio={court.audio} onFinished={() => setWatched(true)} />}
+            toolbar={
               <PaperButton size="sm" variant="maroon" onClick={() => setWatched(true)} iconEnd={<Icon name="arrow-right" />}>
                 Skip to the jury
               </PaperButton>

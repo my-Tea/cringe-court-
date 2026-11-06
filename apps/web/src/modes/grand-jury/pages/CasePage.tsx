@@ -1,16 +1,20 @@
 import { CATEGORIES, formatUsdc } from '@cringe-court/core';
 import { parseCaseParam, type CaseDetail } from '@cringe-court/modes-grand-jury';
+import { useMemo } from 'react';
 import { Link, useParams } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Countdown, EmptyState, ErrorState, Icon, PaperButtonLink, PaperPanel, PhaseStepper, Skeleton, SkeletonText } from '@/ds';
+import { beatsFromLines, type PlannedVerdict } from '@/trial/beats';
+import { TrialViewFrame } from '@/trial/TrialViewFrame';
 import { ArgumentFeed, CourtRecord } from '../components/ArgumentFeed';
+import { CaseSounds } from '../components/CaseSounds';
 import { DemoControls } from '../components/DemoControls';
 import { ClaimPanel, FundingPanel, GalleryPanel, JurorPanel } from '../components/panels';
 import { Benches, CourtPanel, StatusBadge } from '../components/parts';
 import { SharePanel } from '../components/SharePanel';
 import { TrialView } from '../components/TrialView';
 import { VerdictPanel } from '../components/VerdictPanel';
-import { STEPS, deadlineLabel, isClosed, paths, stepOf } from '../lib';
+import { STEPS, deadlineLabel, hearingLines, isClosed, paths, stepOf } from '../lib';
 import { useCase, useCourtNow } from '../state/hooks';
 import styles from '../GrandJury.module.css';
 
@@ -122,6 +126,41 @@ function CaseSkeleton() {
   );
 }
 
+/**
+ * The verdict beat, only once the scrolls are open (D11: nothing leaks early).
+ * FOR (ballot 0) reads as side A, AGAINST (ballot 1) as side B; the text is the
+ * case's own ballot label.
+ */
+function verdictOf(detail: CaseDetail): PlannedVerdict | undefined {
+  const v = detail.verdict;
+  if (!v) return undefined;
+  if (v.kind === 'no-verdict') return { kind: 'mistrial', text: 'NO VERDICT' };
+  const i = v.kind === 'ballot-0' ? 0 : 1;
+  return { kind: i === 0 ? 'side-a' : 'side-b', text: detail.ballot[i].toUpperCase() };
+}
+
+/** The hearing: the roaming courtroom from the public gallery (or the jury box for a seated juror), the spotlight stage as fallback. */
+function Hearing({ detail }: { detail: CaseDetail }) {
+  const juror = detail.viewer.seat !== null;
+  const beats = useMemo(
+    () => beatsFromLines(hearingLines(detail), verdictOf(detail)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the hearing only changes with the transcript, sentence and verdict
+    [detail.caseNumber, detail.transcript, detail.sentence, detail.verdict, detail.ballot],
+  );
+  return (
+    <TrialViewFrame
+      classic={<TrialView detail={detail} />}
+      roam={{
+        beats,
+        label: `Courtroom: ${detail.label}`,
+        role: juror ? 'juror' : 'spectator',
+        spawn: juror ? 'jury-view' : 'aisle',
+        avatar: { model: 'creator', name: 'You' },
+      }}
+    />
+  );
+}
+
 /** Everything about one public case: the hearing, the jury, the money and the verdict. */
 export function CasePage() {
   const { caseNumber } = useParams();
@@ -173,6 +212,7 @@ export function CasePage() {
         <span aria-current="page">{d.label}</span>
       </nav>
 
+      <CaseSounds key={d.caseNumber} detail={d} />
       <CaseHeader detail={d} />
 
       {closed && (
@@ -189,7 +229,7 @@ export function CasePage() {
 
       <div className={styles.caseGridLayout}>
         <div className={styles.caseMain}>
-          <TrialView detail={d} />
+          <Hearing detail={d} />
           <ArgumentFeed detail={d} />
           <CaseContext detail={d} />
         </div>

@@ -8,6 +8,7 @@ export const paths = {
   court: '/court',
   leaderboard: '/leaderboard',
   howToPlay: '/how-to-play',
+  settings: '/settings',
   mode: (id: ModeId) => `/${id}`,
   courtroom: '/courtroom',
   walk: '/court/walk',

@@ -1,4 +1,3 @@
-import { createAudioEngine } from '@cringe-court/audio';
 import { Courtroom, useCourtroom } from '@cringe-court/scene/react';
 import { BASE_MODES } from '@cringe-court/core';
 import { BEAT_IDS, MockRemotePlayers, QUALITY_LEVELS, type BeatId, type QualityLevel, type RoamController, type SpawnId, type VerdictKind } from '@cringe-court/scene/roam';
@@ -6,6 +5,7 @@ import { BEAT_LABELS, RoamCourtroom, useRoamCourtroom } from '@cringe-court/scen
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Alert, Button, Spinner, useReducedMotion } from '@/ds';
+import { appAudio } from '@/platform/audio';
 import styles from './WalkPage.module.css';
 
 const VERDICTS: ReadonlyArray<{ id: VerdictKind; label: string }> = [
@@ -65,7 +65,7 @@ function MenuView({ onBack }: { onBack: () => void }) {
 export function WalkPage() {
   useDocumentTitle('Walk the court');
   const params = useMemo(() => initialParams(), []);
-  const audio = useMemo(() => createAudioEngine(), []);
+  const audio = appAudio();
   const remotes = useMemo(() => new MockRemotePlayers(), []);
   const roam = useRoamCourtroom({ audio, remotes, spawn: params.spawn });
   const [view, setView] = useState<'roam' | 'menu'>('roam');

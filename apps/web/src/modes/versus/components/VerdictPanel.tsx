@@ -1,10 +1,10 @@
+import { useState } from 'react';
 import { formatUsdc, type CaseNumber, type Hex } from '@cringe-court/core';
 import { claimable, claimedBy, disclose, receiptFor, roleLabel, seatsOf, sideLabel, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
-import { useEffect, useRef } from 'react';
 import { Alert, Badge, Button, Card, CardBody, CardHeader, CardTitle, DialogueBox, Icon, Portrait, Receipt, Spinner, Stamp } from '@/ds';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
-import { TrialView } from './TrialView';
+import { VersusTrialFrame } from './VersusTrialFrame';
 import { ShareCard } from './ShareCard';
 import { PaperSection } from './PaperSection';
 
@@ -49,15 +49,10 @@ export function ClaimCard({ c, caseNumber }: { c: VersusCase; caseNumber: CaseNu
 }
 
 export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
-  const { audio } = useVersus();
+  // The replay mounts only once opened, so a closed <details> never builds a WebGL scene.
+  const [replayOpen, setReplayOpen] = useState(false);
+  // The verdict sting fires from CasePage, once, when the case moves into its verdict.
   const s = c.state;
-  const announced = useRef(false);
-  const kind = s.stage === 'verdict' || s.stage === 'share' || s.stage === 'appeal' ? s.verdict.kind : 'no-verdict';
-  useEffect(() => {
-    if (announced.current) return;
-    announced.current = true;
-    audio.handle({ type: 'verdict.read', outcome: kind === 'ballot-0' ? 'side-a' : kind === 'ballot-1' ? 'side-b' : 'no-verdict' });
-  }, [audio, kind]);
   if (s.stage !== 'verdict' && s.stage !== 'share' && s.stage !== 'appeal') return null;
 
   const v = s.verdict;
@@ -162,9 +157,9 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
         </Alert>
       )}
 
-      <details className={styles.replay}>
+      <details className={styles.replay} onToggle={(e) => setReplayOpen(e.currentTarget.open)}>
         <summary>Watch the trial again</summary>
-        <TrialView lines={s.transcript.lines} exhibits={s.exhibits} filing={s.filing} seats={seats} jurySize={s.terms.jurySize} verdict={winner ?? 'none'} />
+        {replayOpen && <VersusTrialFrame viewer={viewer} lines={s.transcript.lines} exhibits={s.exhibits} filing={s.filing} seats={seats} jurySize={s.terms.jurySize} verdict={winner ?? 'none'} />}
         <p className={styles.fine}>
           Transcript fingerprint <code>{s.transcript.hash.slice(0, 18)}…</code>, recorded on the ledger before any vote. Model {s.transcript.model}.
         </p>
