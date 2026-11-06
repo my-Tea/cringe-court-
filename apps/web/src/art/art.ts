@@ -122,3 +122,14 @@ export function brandArt(file: 'wordmark' | 'wordmark_small' | 'wordmark_stacked
   if (!url) throw new Error(`Missing brand art: ${file}`);
   return url;
 }
+
+/** Interim scene art cropped from the style guide (scripts/gen-guide-art.py; docs/STYLE-GUIDE.md). */
+const guideFiles = import.meta.glob<string>('./guide/*.webp', { eager: true, query: '?url', import: 'default' });
+
+export type GuideArtName = 'courthouse' | 'colonnade';
+
+export function guideArt(name: GuideArtName): string {
+  const url = guideFiles[`./guide/${name}.webp`];
+  if (!url) throw new Error(`Missing guide art: ${name}`);
+  return url;
+}

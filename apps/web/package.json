@@ -8,13 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "tokens": "tsx scripts/gen-tokens.ts",
-    "cutouts": "tsx scripts/gen-cutouts.ts"
+    "cutouts": "tsx scripts/gen-cutouts.ts",
+    "guide-art": "python3 -I scripts/gen-guide-art.py"
   },
   "dependencies": {
+    "@cringe-court/audio": "*",
     "@cringe-court/core": "*",
-    "@cringe-court/engine": "*",
-    "@cringe-court/modes-solo": "*",
-    "@cringe-court/scene": "*",
+    "@cringe-court/modes-versus": "*",
+    "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/space-grotesk": "^5.3.0",
     "@fontsource/pixelify-sans": "^5.3.0",

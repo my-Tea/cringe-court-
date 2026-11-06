@@ -2,10 +2,8 @@
   "files": [],
   "references": [
     { "path": "./packages/core" },
-    { "path": "./packages/ai" },
-    { "path": "./packages/scene" },
-    { "path": "./packages/engine" },
-    { "path": "./packages/modes-solo" },
+    { "path": "./packages/audio" },
+    { "path": "./packages/modes-versus" },
     { "path": "./apps/web" },
     { "path": "./apps/web/tsconfig.node.json" }
   ]

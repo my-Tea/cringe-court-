@@ -167,12 +167,8 @@ export type PropState = { prop: 'ballot_box'; state: 'sealed' | 'open' } | { pro
 /** Scene-level signals the renderer sends back (system animation `action`s, end of a one-shot). */
 export type SceneSignal =
   | { type: 'ready' }
-  | { type: 'action'; animation: SystemAnimationId; action: string; sound?: string }
+  | { type: 'action'; animation: SystemAnimationId; action: string }
   | { type: 'animation-end'; actor: string; animation: string }
-  /** A callout to draw over the scene (from ScenePort.callout or an animation's `callout`). */
-  | { type: 'callout'; text: string; style: CalloutStyle; actor?: string }
-  /** Screen-space effects the UI overlay draws (flash). */
-  | { type: 'overlay'; effect: 'flash' | 'impact'; color?: string }
   | { type: 'error'; message: string };
 
 export interface ScenePort {

@@ -3,57 +3,52 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border: 1px solid var(--cc-color-border);
+  border: 2px solid color-mix(in srgb, var(--cc-color-frame) 45%, var(--cc-color-border));
   border-radius: var(--cc-radius-lg);
   background: var(--cc-color-surface);
-  box-shadow: var(--cc-shadow-1);
+  box-shadow: var(--cc-shadow-bevel), var(--cc-shadow-1);
   color: var(--cc-color-text);
 }
 
 .raised {
+  border-color: color-mix(in srgb, var(--cc-color-frame) 75%, var(--cc-color-border));
   background: var(--cc-color-surface-raised);
-  box-shadow: var(--cc-shadow-2);
+  box-shadow: var(--cc-shadow-bevel), var(--cc-shadow-2);
 }
 
-/* The brand-card frame: neon rim plus gold corner brackets (share_card.png). */
-.ornate {
-  background: var(--cc-color-surface);
-  border-color: var(--cc-color-accent);
-  box-shadow: var(--cc-shadow-ring-accent), var(--cc-shadow-2);
+/* The ornate frame (style guide): gold band, dark-gold outer line, hairline
+   inner rule, pixel knots on the corners (rendered by Card.tsx). */
+.ornate,
+.parchment {
+  border: 3px solid var(--cc-color-frame);
+  border-radius: var(--cc-radius-xl);
+  background: var(--cc-color-surface-raised);
+  box-shadow:
+    0 0 0 1px var(--cc-color-frame-dark),
+    var(--cc-shadow-bevel),
+    var(--cc-shadow-2);
 }
 
 .ornate::before,
-.ornate::after {
+.parchment::before {
   content: '';
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 3px solid var(--cc-color-highlight);
+  inset: 5px;
+  border: 1px solid color-mix(in srgb, var(--cc-color-frame) 70%, transparent);
+  border-radius: calc(var(--cc-radius-xl) - 6px);
   pointer-events: none;
 }
 
-.ornate::before {
-  top: 8px;
-  left: 8px;
-  border-right: 0;
-  border-bottom: 0;
-}
-
-.ornate::after {
-  right: 8px;
-  bottom: 8px;
-  border-left: 0;
-  border-top: 0;
-}
-
-/* Parchment: the in-world document (dialogue box, receipts). Gold top rule,
-   burgundy frame. Uses data-surface so children re-map automatically. */
+/* Parchment: the in-world document (receipts, filings). The frame plus a
+   maroon top rule like the banner rods in the style guide. */
 .parchment {
-  background: var(--cc-color-canvas);
-  border: 2px solid var(--cc-royal-900);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--cc-color-frame-light) 16%, transparent), transparent 5rem),
+    var(--cc-color-surface);
   box-shadow:
-    inset 0 4px 0 var(--cc-gold-500),
-    0 0 0 2px var(--cc-gold-700),
+    0 0 0 1px var(--cc-color-frame-dark),
+    inset 0 5px 0 var(--cc-color-accent),
+    var(--cc-shadow-bevel),
     var(--cc-shadow-2);
 }
 
@@ -71,9 +66,12 @@
 
 .interactive:hover,
 .interactive:focus-within {
-  border-color: var(--cc-color-accent);
-  box-shadow: var(--cc-shadow-ring-accent), var(--cc-shadow-3);
-  transform: translateY(-2px);
+  border-color: var(--cc-color-frame);
+  box-shadow:
+    0 0 0 1px var(--cc-color-frame-dark),
+    var(--cc-shadow-bevel),
+    var(--cc-shadow-3);
+  transform: translateY(-3px);
 }
 
 /* A whole-card link: the title's link stretches over the card. */
@@ -113,7 +111,7 @@
 }
 
 .eyebrow {
-  font-family: var(--cc-font-display);
+  font-family: var(--cc-font-pixel);
   font-size: var(--cc-text-xs);
   letter-spacing: var(--cc-tracking-caps);
   text-transform: uppercase;
@@ -123,7 +121,8 @@
 .title {
   font-family: var(--cc-font-display);
   font-size: var(--cc-text-xl);
-  font-weight: var(--cc-weight-semibold);
+  font-weight: var(--cc-weight-bold);
+  font-variation-settings: 'SOFT' 100;
   line-height: var(--cc-leading-snug);
 }
 
@@ -152,5 +151,5 @@
   align-items: center;
   gap: var(--cc-space-3);
   padding: var(--cc-space-4) var(--_pad);
-  border-top: 1px solid var(--cc-color-border);
+  border-top: 1px dashed color-mix(in srgb, var(--cc-color-frame) 60%, var(--cc-color-border));
 }
