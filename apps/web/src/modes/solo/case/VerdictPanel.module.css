@@ -1,0 +1,80 @@
+/*
+ * The verdict in papercraft: the hero is a torn sheet on a backing whose stock
+ * follows the outcome (maroon for cooked, gold for not cooked, cream for a
+ * mistrial); each juror's vote and both money cards are cut sheets.
+ */
+
+.hero {
+  text-align: center;
+}
+
+.heroInner {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-4);
+  padding: var(--cc-space-8) var(--cc-space-4);
+  background: radial-gradient(60% 80% at 50% 30%, color-mix(in srgb, var(--cc-gold-300) 45%, transparent), transparent 70%);
+}
+
+.hero[data-outcome='not-cooked'] .heroInner {
+  background: radial-gradient(60% 80% at 50% 30%, color-mix(in srgb, var(--cc-green-300) 45%, transparent), transparent 70%);
+}
+
+.hero[data-outcome='no-verdict'] .heroInner {
+  background: radial-gradient(60% 80% at 50% 30%, color-mix(in srgb, var(--cc-blue-300) 40%, transparent), transparent 70%);
+}
+
+.sentence {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.vote {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--cc-space-3);
+  align-items: center;
+}
+
+.vote > :last-child {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.vote p {
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+}
+
+.votes > li:nth-child(odd) {
+  rotate: -0.5deg;
+}
+
+.votes > li:nth-child(even) {
+  rotate: 0.6deg;
+}
+
+.cardHead {
+  display: grid;
+  gap: var(--cc-space-1);
+  margin-bottom: var(--cc-space-4);
+}
+
+.cardEyebrow {
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-xs);
+  letter-spacing: var(--cc-tracking-caps);
+  text-transform: uppercase;
+  color: var(--cc-color-text-muted);
+}
+
+.cardTitle {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xl);
+  color: var(--cc-color-accent-text);
+}
+
+:global(:root[data-reduced-motion='true']) .votes > li {
+  rotate: none;
+}
