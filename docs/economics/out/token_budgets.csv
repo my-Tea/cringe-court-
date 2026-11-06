@@ -1,0 +1,30 @@
+budget,call,tokens_in,tokens_out
+m1,intake + sanitize,1200,400
+m1,prosecution (NPC opponent),1500,600
+m1,defense (player advocate),2100,600
+m1,objection x2,5000,300
+m1,judge intro,1500,200
+m1,sentence,2000,150
+teaser,intake,1200,400
+teaser,prosecution,1500,600
+teaser,defense,2100,600
+m2,side A intake interview (4 turns),6000,1200
+m2,side B intake interview (4 turns),6000,1200
+m2,side A argument,2500,600
+m2,side B argument,2500,600
+m2,side A rebuttal,3500,400
+m2,side B rebuttal,3500,400
+m2,side A approval draft,2000,500
+m2,side B approval draft,2000,500
+m2,balance check,5000,200
+m2,judge intro,2000,200
+m2,sentence,2500,150
+m2_abandoned,side A intake interview (4 turns),6000,1200
+m3,sourcing + neutral context card,8000,1000
+m3,prosecution,4000,800
+m3,defense,4800,800
+m3,objection x4,14000,600
+m3,judge intro,3000,300
+m3,sentence,3000,200
+m3,spectator commentary x10,30000,1500
+m3_unfunded,sourcing + neutral context card,8000,1000
