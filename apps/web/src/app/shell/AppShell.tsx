@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
-import { brandArt } from '@/art/art';
 import { Dialog, DialogContent, DialogTrigger, Icon, IconButton, TestnetBadge, Tooltip } from '@/ds';
 import { NAV_ITEMS, paths } from '../routes';
 import styles from './AppShell.module.css';
@@ -38,7 +37,6 @@ function useFocusMainOnNavigate() {
 export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const mainRef = useFocusMainOnNavigate();
-  const wordmark = brandArt('wordmark_small');
 
   return (
     <div className={styles.shell}>
@@ -47,8 +45,9 @@ export function AppShell() {
       </a>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <Link to={paths.home} className={styles.brand}>
-            <img src={wordmark} alt="CringeCourt home" width={557} height={93} data-pixel />
+          <Link to={paths.home} className={styles.brand} aria-label="CringeCourt home">
+            <Icon name="scales" className={styles.brandMark} />
+            CringeCourt
           </Link>
           <nav className={styles.nav} aria-label="Main">
             <NavLinks className={styles.navList} />
@@ -80,10 +79,13 @@ export function AppShell() {
         <Outlet />
       </main>
 
-      <footer className={styles.footer}>
+      <footer className={styles.footer} data-surface="wood">
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <img src={wordmark} alt="CringeCourt" width={557} height={93} data-pixel />
+            <p className={styles.footerWordmark}>
+              <Icon name="scales" />
+              CringeCourt
+            </p>
             <p>The AI performs. Humans decide. A comedy courtroom with real, verified juries and money flows you can check.</p>
           </div>
           <div>
@@ -97,6 +99,13 @@ export function AppShell() {
           <p className={styles.legal}>
             Testnet only: every amount is test USDC on Arc testnet. Entertainment, not legal advice; verdicts are a jury&apos;s
             opinion, not facts. Jurors are World-verified humans.
+          </p>
+          <p className={styles.signature}>
+            <span>Testnet only</span>
+            <span className="cc-diamond" aria-hidden />
+            <span>CringeCourt</span>
+            <span className={styles.signatureRule} aria-hidden />
+            <span>Your Honor, Bro Is Cooked.</span>
           </p>
         </div>
       </footer>

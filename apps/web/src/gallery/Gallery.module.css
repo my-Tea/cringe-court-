@@ -108,7 +108,7 @@
   border-radius: var(--cc-radius-xl);
 }
 
-.canvas[data-surface='parchment'] {
+.canvas[data-surface] {
   padding: var(--cc-space-6);
   background: var(--cc-color-canvas);
 }
@@ -395,4 +395,16 @@
   background: var(--cc-color-canvas);
   border-color: var(--cc-color-border);
   color: var(--cc-color-text-muted);
+}
+
+.tileLink {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cc-space-2);
+  color: var(--cc-color-text);
+  font-family: var(--cc-font-display);
+  font-weight: var(--cc-weight-bold);
+  text-decoration: none;
+  text-transform: capitalize;
 }
