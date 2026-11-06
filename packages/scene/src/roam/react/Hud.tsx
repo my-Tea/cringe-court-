@@ -3,7 +3,6 @@ import type { RoamController } from '../controller';
 import { EXHIBIT_CARDS } from '../dialogue';
 import { QUALITY_LEVELS, type QualityLevel } from '../quality';
 import type { BeatId, RoamSnapshot } from '../types';
-import { C } from '../palette';
 import { DEFAULT_ROAM_STRINGS, useRoamStrings } from './strings';
 
 /** English beat names; hosts localise through `RoamStrings.beatLabels`. */
@@ -73,60 +72,22 @@ export function Prompt({ snap, touch }: { snap: RoamSnapshot; touch: boolean }) 
   );
 }
 
-export function Dialogue({ snap, touch, tapToContinue = false, onAdvance }: { snap: RoamSnapshot; touch: boolean; tapToContinue?: boolean; onAdvance?: () => void }) {
+export function Dialogue({ snap, touch }: { snap: RoamSnapshot; touch: boolean }) {
   const S = useRoamStrings();
   const d = snap.dialogue;
   if (!d) return null;
   const done = d.shown >= d.text.length;
   return (
-    // A pointer shortcut only (finish the line / move on); keyboard players have E and X, so it is not a control.
-    <div className="ccr-panel ccr-dialogue" role="log" aria-live="polite" aria-atomic="true" onClick={onAdvance}>
+    <div className="ccr-panel ccr-dialogue" role="log" aria-live="polite" aria-atomic="true">
       {d.name ? <div className="ccr-name ccr-pixel">{d.name}</div> : null}
       <p className="ccr-line">
         <span aria-hidden="true">{d.text.slice(0, d.shown)}</span>
         <span className="ccr-sr">{d.text}</span>
       </p>
       <span className="ccr-more ccr-pixel" aria-hidden="true">
-        {done ? (tapToContinue ? S.continueTap : touch ? S.continueTouch : S.continueKey) : '…'}
+        {done ? (touch ? S.continueTouch : S.continueKey) : '…'}
       </span>
     </div>
-  );
-}
-
-/** The narrow-room sheet under the 3D view (CSS shows it only in narrow rooms); the dialogue docks over it. */
-export function Dock({ snap, touch }: { snap: RoamSnapshot; touch: boolean }) {
-  const S = useRoamStrings();
-  if (snap.dialogue) return null;
-  const text = snap.beat ? S.beatChip(S.beatLabels[snap.beat.id], snap.control === 'cinematic') : touch ? S.touchDragHint : (snap.zone ? S.zoneLabels[snap.zone] : S.zoneFallback);
-  return (
-    <div className="ccr-dock ccr-pixel" aria-hidden="true">
-      <p>{text}</p>
-    </div>
-  );
-}
-
-/** First-visit hint in a corner: how to take the camera. Dismissible, never modal, never over a cinematic beat. */
-export function Onboarding({ onCapture, onKeyboard, onDismiss }: { onCapture: () => void; onKeyboard: () => void; onDismiss: () => void }) {
-  const S = useRoamStrings();
-  return (
-    <section className="ccr-panel ccr-onboard" aria-labelledby="ccr-onboard-title">
-      <h2 id="ccr-onboard-title" className="ccr-onboard-title ccr-pixel" style={{ margin: 0, fontWeight: 400 }}>
-        {S.captureTitle}
-      </h2>
-      <p>{S.captureMouse}</p>
-      <p>{S.captureKeyboard((cap) => <kbd className="ccr-key">{cap}</kbd>)}</p>
-      <div className="ccr-modal-row">
-        <button type="button" className="ccr-btn ccr-btn--sm" onClick={onCapture}>
-          {S.captureClick}
-        </button>
-        <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" onClick={onKeyboard}>
-          {S.captureKeyboardOnly}
-        </button>
-        <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" onClick={onDismiss}>
-          {S.captureDismiss}
-        </button>
-      </div>
-    </section>
   );
 }
 
@@ -146,12 +107,9 @@ export function BeatChip({ snap, onSkip }: { snap: RoamSnapshot; onSkip: () => v
   return (
     <div className="ccr-beat ccr-pixel" role="status">
       <span>{S.beatChip(S.beatLabels[snap.beat.id], snap.control === 'cinematic')}</span>
-      {/* The verdict is never skipped: it is what the hearing was for. */}
-      {snap.beat.id === 'verdict' ? null : (
-        <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" onClick={onSkip}>
-          {S.skipBeat}
-        </button>
-      )}
+      <button type="button" className="ccr-btn ccr-btn--ghost ccr-btn--sm" onClick={onSkip}>
+        {S.skipBeat}
+      </button>
     </div>
   );
 }
@@ -197,7 +155,7 @@ export function ExhibitPanel({ snap, controller, restoreFocus }: { snap: RoamSna
   return (
     <div className="ccr-scrim" ref={ref} onKeyDown={(e) => (e.key === 'Escape' || e.key === 'e' || e.key === 'E') && (e.stopPropagation(), controller.closeExhibit())}>
       <div className="ccr-panel ccr-exhibit" role="dialog" aria-modal="true" aria-labelledby="ccr-exhibit-title">
-        <div className="ccr-exhibit-tab ccr-pixel" style={{ background: card.color, color: card.color === C.gold500 ? C.neutral900 : C.neutral100 }}>
+        <div className="ccr-exhibit-tab ccr-pixel" style={{ background: card.color, color: card.color === '#D9A046' ? '#4A3A32' : '#FFF9ED' }}>
           <span id="ccr-exhibit-title">{card.title}</span>
           <span>{card.subtitle}</span>
         </div>
@@ -271,7 +229,7 @@ export function PauseMenu({ snap, controller, touch, quality, onQuality, pixelat
             ))}
           </select>
         </label>
-        {autoNote ? <p style={{ margin: 0, fontSize: 13, color: `var(--cc-color-text-muted,${C.neutral700})` }}>{autoNote}</p> : null}
+        {autoNote ? <p style={{ margin: 0, fontSize: 13, color: 'var(--cc-color-text-muted,#7B645A)' }}>{autoNote}</p> : null}
         <label className="ccr-field">
           <span>{S.pauseChunkyPixels}</span>
           <input type="checkbox" checked={pixelated} onChange={(e) => onPixelated(e.target.checked)} />

@@ -31,8 +31,6 @@ export interface RoamStrings {
   /** The interact key cap shown in the focus prompt on desktop. */
   keyInteract: string;
   continueTouch: string;
-  /** The docked dialogue is tappable while the touch buttons are hidden (cinematic beats). */
-  continueTap: string;
   continueKey: string;
   beatChip: (label: string, cinematic: boolean) => string;
   skipBeat: string;
@@ -57,8 +55,6 @@ export interface RoamStrings {
   captureKeyboard: LegendRow;
   captureClick: string;
   captureKeyboardOnly: string;
-  /** Close button of the onboarding card (remembered). */
-  captureDismiss: string;
 
   touchPause: string;
   touchHop: string;
@@ -89,7 +85,6 @@ export const DEFAULT_ROAM_STRINGS: RoamStrings = {
     'defendant-table': "Defendant's table",
     'prosecution-table': 'Prosecution table',
     'witness-stand': 'Witness stand',
-    'jury-box': 'Jury box',
   },
   zoneFallback: 'Courthouse',
 
@@ -152,7 +147,6 @@ export const DEFAULT_ROAM_STRINGS: RoamStrings = {
   skipToMenuView: 'Skip to menu view',
   keyInteract: 'E',
   continueTouch: '▶ tap ✋ to continue',
-  continueTap: '▶ tap to continue',
   continueKey: '▶ E to continue',
   beatChip: (label, cinematic) => `● ${label}${cinematic ? ' · cinematic' : ''}`,
   skipBeat: 'Skip beat',
@@ -175,7 +169,6 @@ export const DEFAULT_ROAM_STRINGS: RoamStrings = {
   captureKeyboard: (k) => <>Keyboard only? Press any movement key: arrows walk and turn, {k('E')} interacts.</>,
   captureClick: 'Click to look around',
   captureKeyboardOnly: 'Use keyboard only',
-  captureDismiss: 'Got it',
 
   touchPause: 'Pause',
   touchHop: 'Hop',

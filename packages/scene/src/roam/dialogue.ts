@@ -3,7 +3,6 @@
  * until the pool is exhausted), so tests and screenshots are stable.
  */
 import type { DialogueLine } from './types';
-import { C } from './palette';
 
 export const BARKS: Readonly<Record<string, readonly string[]>> = {
   judge: [
@@ -55,21 +54,21 @@ export const EXHIBIT_CARDS: Readonly<Record<string, ExhibitCard>> = {
     title: 'Exhibit A',
     subtitle: 'The Post',
     body: 'A screenshot, timestamped 03:12. Caption: "nobody asked but here is my 14-part thread on why I am right". 2 likes. One is the defendant.',
-    color: C.royal700,
+    color: '#A32D3F',
   },
   'exhibit-b': {
     id: 'exhibit-b',
     title: 'Exhibit B',
     subtitle: 'The Receipts',
     body: 'A laminated folder of replies, each highlighted in gold. The prosecution has colour-coded the cringe on a scale of "oof" to "delete your account".',
-    color: C.gold500,
+    color: '#D9A046',
   },
   'exhibit-c': {
     id: 'exhibit-c',
     title: 'Exhibit C',
     subtitle: 'The Defence',
     body: 'A single sticky note in the defence\'s handwriting: "it was a bit". Underneath, smaller: "mostly".',
-    color: C.blue700,
+    color: '#4D7CC5',
   },
 };
 

@@ -1,6 +1,6 @@
 import { Courtroom, useCourtroom } from '@cringe-court/scene/react';
 import { BASE_MODES } from '@cringe-court/core';
-import { BEAT_IDS, MockRemotePlayers, QUALITY_LEVELS, type BeatId, type PlayerRole, type QualityLevel, type RoamController, type SpawnId, type VerdictKind } from '@cringe-court/scene/roam';
+import { BEAT_IDS, MockRemotePlayers, QUALITY_LEVELS, type BeatId, type QualityLevel, type RoamController, type SpawnId, type VerdictKind } from '@cringe-court/scene/roam';
 import { RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
@@ -31,8 +31,7 @@ const QUALITY_LABELS: Readonly<Record<QualityLevel, MessageKey>> = {
   high: 'trial.hud.quality.high',
 };
 
-const SPAWNS = new Set<string>(['lobby', 'doorway', 'aisle', 'well', 'defendant', 'prosecution', 'witness', 'jury-box', 'jury-view', 'bench-front']);
-const ROLES = new Set<string>(['defendant', 'side-a', 'side-b', 'juror', 'spectator']);
+const SPAWNS = new Set<string>(['lobby', 'doorway', 'aisle', 'well', 'defendant', 'witness', 'jury-view', 'bench-front']);
 
 function initialParams() {
   const q = typeof window === 'undefined' ? new URLSearchParams() : new URLSearchParams(window.location.search);
@@ -44,9 +43,6 @@ function initialParams() {
     debug: q.has('debug'),
     touch: q.get('touch') === '1' ? true : ('auto' as const),
     auto: q.get('auto') !== '0',
-    // Scripted checks: `?role=juror&jurors=7` seats you as one of seven jurors for the beats.
-    role: (ROLES.has(q.get('role') ?? '') ? q.get('role') : 'defendant') as PlayerRole,
-    jurors: Math.min(7, Math.max(0, Number(q.get('jurors') ?? 7) || 7)),
   };
 }
 
@@ -79,7 +75,7 @@ export function WalkPage() {
   const params = useMemo(() => initialParams(), []);
   const audio = appAudio();
   const remotes = useMemo(() => new MockRemotePlayers(), []);
-  const roam = useRoamCourtroom({ audio, remotes, spawn: params.spawn, role: params.role, jurors: params.jurors });
+  const roam = useRoamCourtroom({ audio, remotes, spawn: params.spawn });
   const strings = roamStrings();
   const [view, setView] = useState<'roam' | 'menu'>('roam');
   const [quality, setQuality] = useState<QualityLevel>(params.quality);

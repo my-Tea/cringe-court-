@@ -1,8 +1,9 @@
-import { invitePath, type VersusCase } from '@cringe-court/modes-versus';
+import type { VersusCase } from '@cringe-court/modes-versus';
 import { useState } from 'react';
 import { t } from '@/i18n';
 import { Alert, Button, Dialog, DialogClose, DialogContent, DialogTrigger, Icon, PaperButton, useToast } from '@/ds';
 import { useVersus } from '../runtime/context';
+import { useInviteUrl } from '../runtime/useInvite';
 import styles from '../versus.module.css';
 import { PaperSection } from './PaperSection';
 
@@ -11,7 +12,7 @@ export function InvitePanel({ c }: { c: VersusCase }) {
   const { desk, run } = useVersus();
   const { toast } = useToast();
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
-  const url = `${window.location.origin}${invitePath(c.code)}`;
+  const url = useInviteUrl(c);
   const text = t('versus.invite.shareText', { title: c.state.filing.title, url, code: c.code });
 
   const copy = async (what: 'code' | 'link') => {

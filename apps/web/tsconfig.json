@@ -45,6 +45,9 @@
     },
     {
       "path": "../../packages/modes-versus"
+    },
+    {
+      "path": "../../packages/net"
     }
   ]
 }
