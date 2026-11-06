@@ -21,17 +21,6 @@
   font-size: var(--cc-text-4xl);
 }
 
-/* Phones: a 4xl ribbon breaks one word per line ("HOW / TO / PLAY"). Step the
-   title down and trim the band so it stays on one or two lines. */
-@media (max-width: 30rem) {
-  /* [data-size] matches PaperRibbon's own size rule so this one wins. */
-  .heroTitle[data-size] {
-    gap: 0.3em;
-    padding-inline: 0.6em;
-    font-size: var(--cc-text-2xl);
-  }
-}
-
 .heroTag {
   max-width: 100%;
 }

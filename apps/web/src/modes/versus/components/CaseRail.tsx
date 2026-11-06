@@ -1,8 +1,18 @@
-import { type SideId } from '@cringe-court/core';
-import { formatAmount, outcomeLabel, sideLabel } from '@/i18n/domain';
-import { PREVIEW_OUTCOMES, claimable, claimedBy, previewOutcome, sideCharges, sideStatus, type DemoJuryPlan, type VersusCase, type Viewer } from '@cringe-court/modes-versus';
+import { formatUsdc, type SideId } from '@cringe-court/core';
+import {
+  OUTCOME_LABELS,
+  PREVIEW_OUTCOMES,
+  claimable,
+  claimedBy,
+  previewOutcome,
+  sideCharges,
+  sideLabel,
+  sideStatus,
+  type DemoJuryPlan,
+  type VersusCase,
+  type Viewer,
+} from '@cringe-court/modes-versus';
 import { useMemo, useState } from 'react';
-import { formatDateTime, t } from '@/i18n';
 import { Amount, Badge, Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, Portrait, RadioCards, TestnetBadge } from '@/ds';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
@@ -13,7 +23,7 @@ function Check({ on, label }: { on: boolean; label: string }) {
       <Icon name={on ? 'check' : 'clock'} aria-hidden />
       <span>
         {label}
-        <span className="cc-visually-hidden">{on ? t('versus.rail.chip.done') : t('versus.rail.chip.notYet')}</span>
+        <span className="cc-visually-hidden">{on ? ': done' : ': not yet'}</span>
       </span>
     </li>
   );
@@ -29,17 +39,17 @@ function PartyRow({ c, side, viewer }: { c: VersusCase; side: SideId; viewer: Vi
       <div className={styles.partyBody}>
         <p className={styles.partyName}>
           {sideLabel(side, s.filing.sides[side])}
-          {viewer === side && <Badge tone={side === 'a' ? 'side-a' : 'side-b'}>{t('versus.rail.you')}</Badge>}
+          {viewer === side && <Badge tone={side === 'a' ? 'side-a' : 'side-b'}>you</Badge>}
         </p>
         {st.joined ? (
           <ul className={styles.chips} role="list">
-            <Check on={st.briefed} label={t('versus.rail.chip.briefed')} />
-            <Check on={st.approvedBrief} label={t('versus.rail.chip.briefApproved')} />
-            {pastBriefs && <Check on={st.approvedDraft} label={t('versus.rail.chip.draftApproved')} />}
-            {c.caseNumber !== null && <Check on={st.paid} label={t('versus.rail.chip.paid')} />}
+            <Check on={st.briefed} label="Briefed" />
+            <Check on={st.approvedBrief} label="Brief approved" />
+            {pastBriefs && <Check on={st.approvedDraft} label="Draft approved" />}
+            {c.caseNumber !== null && <Check on={st.paid} label="Paid" />}
           </ul>
         ) : (
-          <p className={styles.muted}>{t('versus.rail.invited')}</p>
+          <p className={styles.muted}>Invited, not answered yet</p>
         )}
       </div>
     </li>
@@ -56,9 +66,9 @@ function MoneyCard({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
   const previews = useMemo(() => PREVIEW_OUTCOMES.map((o) => previewOutcome(terms, o)), [terms]);
   return (
     <Card as="section" aria-labelledby="money-title" padding="md">
-      <CardHeader eyebrow={t('versus.rail.money.eyebrow')}>
+      <CardHeader eyebrow="Follow the money">
         <CardTitle id="money-title" as="h2">
-          {t('versus.rail.money.title')} <TestnetBadge />
+          Who pays what <TestnetBadge />
         </CardTitle>
       </CardHeader>
       <CardBody className={styles.money}>
@@ -73,7 +83,7 @@ function MoneyCard({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
               </div>
             ))}
             <div className={styles.breakdownTotal}>
-              <dt>{t('versus.rail.money.yourHalf')}</dt>
+              <dt>Your half</dt>
               <dd>
                 <Amount value={mine.total} />
               </dd>
@@ -82,41 +92,42 @@ function MoneyCard({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
         )}
         {!mine && (
           <p className={styles.muted}>
-            {t('versus.rail.money.jurors', { side: formatAmount(charges[0].total), bond: formatAmount(terms.bondPerJuror), bonus: formatAmount(terms.successBonusPerJuror) })}
+            Each side pays {formatUsdc(charges[0].total)}. Jurors post a {formatUsdc(terms.bondPerJuror)} bond and earn {formatUsdc(terms.successBonusPerJuror)} for finishing.
           </p>
         )}
         {(owed > 0n || claimed !== null) && (
           <p className={styles.claimLine} data-claimed={claimed !== null || undefined}>
             <Icon name={claimed !== null ? 'check' : 'sparkle'} aria-hidden />
-            {claimed !== null ? t('versus.rail.money.claimed', { amount: formatAmount(claimed) }) : t('versus.rail.money.owed', { amount: formatAmount(owed) })}
+            {claimed !== null ? `You claimed ${formatUsdc(claimed)}` : `${formatUsdc(owed)} is waiting for you to claim`}
           </p>
         )}
         <details className={styles.outcomes}>
-          <summary>{t('versus.rail.outcomes.summary')}</summary>
+          <summary>What happens in every outcome</summary>
           <table className={styles.outcomeTable}>
-            <caption className="cc-visually-hidden">{t('versus.rail.outcomes.caption')}</caption>
+            <caption className="cc-visually-hidden">Net cost to each side and what the court keeps, per outcome</caption>
             <thead>
               <tr>
-                <th scope="col">{t('versus.rail.outcomes.outcome')}</th>
-                <th scope="col">{t('versus.rail.outcomes.eachNets')}</th>
-                <th scope="col">{t('versus.rail.outcomes.courtKeeps')}</th>
+                <th scope="col">Outcome</th>
+                <th scope="col">Each side nets</th>
+                <th scope="col">Court keeps</th>
               </tr>
             </thead>
             <tbody>
               {previews.map((p) => (
                 <tr key={p.outcome}>
-                  <th scope="row">{outcomeLabel(p.outcome)}</th>
+                  <th scope="row">{OUTCOME_LABELS[p.outcome]}</th>
                   <td>
-                    {p.sideCost[0] === p.sideCost[1]
-                      ? t('versus.rail.outcomes.same', { amount: formatAmount(p.sideCost[0], { unit: false }) })
-                      : t('versus.rail.outcomes.split', { a: formatAmount(p.sideCost[0], { unit: false }), b: formatAmount(p.sideCost[1], { unit: false }) })}
+                    {p.sideCost[0] === p.sideCost[1] ? `−${formatUsdc(p.sideCost[0], { unit: false })}` : `A −${formatUsdc(p.sideCost[0], { unit: false })} · B −${formatUsdc(p.sideCost[1], { unit: false })}`}
                   </td>
-                  <td>{formatAmount(p.courtKeeps, { unit: false })}</td>
+                  <td>{formatUsdc(p.courtKeeps, { unit: false })}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className={styles.fine}>{t('versus.rail.outcomes.fine')}</p>
+          <p className={styles.fine}>
+            Computed from this case’s frozen terms with the same settlement maths the contract uses. If Side B never answers, the platform absorbs Side A’s AI intake
+            (about 0.0072 USDC, D6). Forfeited juror bonds are kept and disclosed per case (D13); no price here depends on them.
+          </p>
         </details>
       </CardBody>
     </Card>
@@ -135,39 +146,34 @@ function DemoControls({ c }: { c: VersusCase }) {
   if (!recruiting && !canSkip) return null;
   return (
     <Card as="section" tone="sunken" aria-labelledby="demo-title" padding="md" className={styles.demo}>
-      <CardHeader eyebrow={t('versus.rail.demo.eyebrow')}>
+      <CardHeader eyebrow="Demo controls (D14)">
         <CardTitle id="demo-title" as="h2">
-          {t('versus.rail.demo.title')}
+          Speed up the demo
         </CardTitle>
       </CardHeader>
       <CardBody className={styles.demoBody}>
-        <p className={styles.fine}>{t('versus.rail.demo.note')}</p>
+        <p className={styles.fine}>Demo deadlines are shorter than production (24 h / 30 / 20 / 10 min). These buttons exist only in the demo build.</p>
         {recruiting && (
           <>
             <RadioCards
-              legend={t('versus.rail.demo.jurors')}
+              legend="Simulated jurors"
               name={`plan-${c.trialId}`}
               value={plan}
               onValueChange={(v) => setPlan(v as DemoJuryPlan)}
               options={[
-                { value: 'reliable', label: t('versus.rail.demo.plan.reliable'), description: t('versus.rail.demo.plan.reliableHint') },
-                { value: 'one-no-show', label: t('versus.rail.demo.plan.one'), description: t('versus.rail.demo.plan.oneHint') },
-                { value: 'two-no-shows', label: t('versus.rail.demo.plan.two'), description: t('versus.rail.demo.plan.twoHint') },
+                { value: 'reliable', label: 'All show up', description: 'Every simulated juror commits and reveals' },
+                { value: 'one-no-show', label: 'One no-show', description: 'Shows a forfeited bond' },
+                { value: 'two-no-shows', label: 'Two no-shows', description: 'Likely MISTRIAL with full refunds' },
               ]}
             />
-            <PaperButton
-              variant="maroon"
-              fullWidth
-              iconStart={<Icon name="user" />}
-              onClick={() => void run(() => desk.seatDemoJurors(c.trialId, plan), { success: t('versus.rail.demo.seated') })}
-            >
-              {t('versus.rail.demo.seat')}
+            <PaperButton variant="maroon" fullWidth iconStart={<Icon name="user" />} onClick={() => void run(() => desk.seatDemoJurors(c.trialId, plan), { success: 'Simulated jurors took the empty seats' })}>
+              Seat simulated jurors
             </PaperButton>
           </>
         )}
         {canSkip && (
           <PaperButton variant="ghost" fullWidth iconStart={<Icon name="clock" />} onClick={() => void run(() => desk.skipAhead(c.trialId))}>
-            {t('versus.rail.demo.skip')}
+            Skip to the deadline
           </PaperButton>
         )}
       </CardBody>
@@ -175,23 +181,25 @@ function DemoControls({ c }: { c: VersusCase }) {
   );
 }
 
+const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+
 function ActivityFeed({ c }: { c: VersusCase }) {
   const items = [...c.activity].reverse().slice(0, 12);
   return (
     <Card as="section" aria-labelledby="activity-title" padding="md">
-      <CardHeader eyebrow={t('versus.rail.feed.eyebrow')}>
+      <CardHeader eyebrow="Court record">
         <CardTitle id="activity-title" as="h2">
-          {t('versus.rail.feed.title')}
+          What happened
         </CardTitle>
       </CardHeader>
       <CardBody>
         {items.length === 0 ? (
-          <p className={styles.muted}>{t('versus.rail.feed.empty')}</p>
+          <p className={styles.muted}>Nothing yet.</p>
         ) : (
           <ol className={styles.feed}>
             {items.map((a, i) => (
               <li key={`${a.seq}-${i}`} data-kind={a.kind} data-side={a.side}>
-                <time dateTime={new Date(a.at * 1000).toISOString()}>{formatDateTime(a.at * 1000, { hour: 'numeric', minute: '2-digit' })}</time>
+                <time dateTime={new Date(a.at * 1000).toISOString()}>{timeFmt.format(a.at * 1000)}</time>
                 <span>{a.text}</span>
               </li>
             ))}
@@ -204,11 +212,11 @@ function ActivityFeed({ c }: { c: VersusCase }) {
 
 export function CaseRail({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
   return (
-    <aside className={styles.rail} aria-label={t('versus.rail.aria')}>
+    <aside className={styles.rail} aria-label="Case details">
       <Card as="section" aria-labelledby="parties-title" padding="md">
-        <CardHeader eyebrow={t('versus.rail.parties.eyebrow')}>
+        <CardHeader eyebrow="The sides">
           <CardTitle id="parties-title" as="h2">
-            {t('versus.rail.parties.title')}
+            Side A vs Side B
           </CardTitle>
         </CardHeader>
         <CardBody>

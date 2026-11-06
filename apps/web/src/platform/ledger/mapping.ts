@@ -2,7 +2,17 @@
  * Translation tables between core's app-level ledger vocabulary and p5's
  * contract-shaped chain-client: ids, money, phases, terms and errors.
  */
-import { CancelReason, CourtError, Mode as ChainMode, Outcome, Phase as ChainPhase, Status, type CaseView, type Terms as ChainTerms } from '@cringe-court/chain-client';
+import {
+  CancelReason,
+  COURT_ERROR_COPY,
+  CourtError,
+  Mode as ChainMode,
+  Outcome,
+  Phase as ChainPhase,
+  Status,
+  type CaseView,
+  type Terms as ChainTerms,
+} from '@cringe-court/chain-client';
 import {
   ChainError,
   MODES,
@@ -17,8 +27,6 @@ import {
   type Usdc,
   type VerdictKind,
 } from '@cringe-court/core';
-import { t, type MessageKey } from '@/i18n';
-import { courtErrorCopy } from '@/i18n/domain';
 
 /* ── ids and money ── */
 
@@ -29,7 +37,11 @@ export const usdcOf = (amount: bigint): Usdc => micro(amount);
 
 /* ── modes ── */
 
-const MODE_TO_CHAIN: Readonly<Record<ModeId, ChainMode>> = { solo: ChainMode.Solo, versus: ChainMode.Versus, 'grand-jury': ChainMode.GrandJury };
+const MODE_TO_CHAIN: Readonly<Record<ModeId, ChainMode>> = {
+  solo: ChainMode.Solo,
+  versus: ChainMode.Versus,
+  'grand-jury': ChainMode.GrandJury,
+};
 export const chainModeOf = (mode: ModeId): ChainMode => MODE_TO_CHAIN[mode];
 export function modeIdOf(mode: ChainMode): ModeId {
   return mode === ChainMode.Solo ? 'solo' : mode === ChainMode.Versus ? 'versus' : 'grand-jury';
@@ -119,7 +131,12 @@ export function termsFromChain(mode: ModeId, t: ChainTerms, sponsorDeposit: bigi
       aiFee: micro(t.aiFeePerAgent * agents),
       incidentStipend: micro(t.incidentStipend),
     },
-    deadlines: { preTrial: t.pendingWindow > 0 ? t.pendingWindow : null, recruitment: t.recruitWindow, commit: t.commitWindow, reveal: t.revealWindow },
+    deadlines: {
+      preTrial: t.pendingWindow > 0 ? t.pendingWindow : null,
+      recruitment: t.recruitWindow,
+      commit: t.commitWindow,
+      reveal: t.revealWindow,
+    },
     funding: base.funding.kind === 'crowdfund' ? { kind: 'crowdfund', minContribution: micro(t.minContribution), sponsorDeposit: null } : base.funding,
   };
   return termsFor(config, { sponsorDeposit: sponsorDeposit === null ? null : micro(sponsorDeposit) });
@@ -128,23 +145,23 @@ export function termsFromChain(mode: ModeId, t: ChainTerms, sponsorDeposit: bigi
 /** Money and seat differences between two terms, in plain words. Windows are not money and are not compared. */
 export function diffTerms(app: CaseTerms, chain: CaseTerms): string[] {
   const out: string[] = [];
-  const num = (label: MessageKey, a: bigint | number, b: bigint | number) => {
-    if (a !== b) out.push(t('shell.ledger.diff.value', { label: t(label), app: String(a), ledger: String(b) }));
+  const num = (label: string, a: bigint | number, b: bigint | number) => {
+    if (a !== b) out.push(`${label}: app ${a}, ledger ${b}`);
   };
-  num('shell.ledger.diff.jurySeats', app.jurySize, chain.jurySize);
-  num('shell.ledger.diff.threshold', app.threshold, chain.threshold);
-  num('shell.ledger.diff.bond', app.bondPerJuror, chain.bondPerJuror);
-  num('shell.ledger.diff.successBonus', app.successBonusPerJuror, chain.successBonusPerJuror);
-  num('shell.ledger.diff.failedBonus', app.failedTrialBonusPerTimelyJuror, chain.failedTrialBonusPerTimelyJuror);
-  num('shell.ledger.diff.protocolFee', app.protocolFee, chain.protocolFee);
-  num('shell.ledger.diff.aiFee', app.aiFee, chain.aiFee);
-  num('shell.ledger.diff.stipend', app.incidentStipend, chain.incidentStipend);
-  num('shell.ledger.diff.price', app.target, chain.target);
+  num('jury seats', app.jurySize, chain.jurySize);
+  num('verdict threshold', app.threshold, chain.threshold);
+  num('juror bond', app.bondPerJuror, chain.bondPerJuror);
+  num('success bonus', app.successBonusPerJuror, chain.successBonusPerJuror);
+  num('failed-trial bonus', app.failedTrialBonusPerTimelyJuror, chain.failedTrialBonusPerTimelyJuror);
+  num('protocol fee', app.protocolFee, chain.protocolFee);
+  num('AI fee', app.aiFee, chain.aiFee);
+  num('incident stipend', app.incidentStipend, chain.incidentStipend);
+  num('case price', app.target, chain.target);
   if (app.payerShares.length !== chain.payerShares.length || app.payerShares.some((s, i) => s !== chain.payerShares[i])) {
-    out.push(t('shell.ledger.diff.shares', { app: app.payerShares.join(', '), ledger: chain.payerShares.join(', ') }));
+    out.push(`payer shares: app [${app.payerShares.join(', ')}], ledger [${chain.payerShares.join(', ')}]`);
   }
   if (app.funding.kind === 'crowdfund' && chain.funding.kind === 'crowdfund') {
-    num('shell.ledger.diff.minContribution', app.funding.minContribution, chain.funding.minContribution);
+    num('minimum contribution', app.funding.minContribution, chain.funding.minContribution);
   }
   return out;
 }
@@ -197,7 +214,14 @@ const CODES: Readonly<Record<string, Code>> = {
   AlreadyRevealed: 'duplicate',
 };
 
-const NETWORK_NAMES = new Set(['HttpRequestError', 'TimeoutError', 'WebSocketRequestError', 'TransportRequestTimeoutError', 'RpcRequestError', 'UrlRequiredError']);
+const NETWORK_NAMES = new Set([
+  'HttpRequestError',
+  'TimeoutError',
+  'WebSocketRequestError',
+  'TransportRequestTimeoutError',
+  'RpcRequestError',
+  'UrlRequiredError',
+]);
 
 function chainOfCauses(e: unknown): unknown[] {
   const out: unknown[] = [];
@@ -209,7 +233,7 @@ function chainOfCauses(e: unknown): unknown[] {
 export function toChainError(e: unknown): ChainError {
   if (e instanceof ChainError) return e;
   if (e instanceof CourtError) {
-    const err = new ChainError(CODES[e.code] ?? 'rejected', courtErrorCopy(e.code) ?? e.message);
+    const err = new ChainError(CODES[e.code] ?? 'rejected', COURT_ERROR_COPY[e.code] ?? e.message);
     err.cause = e;
     return err;
   }
@@ -217,14 +241,14 @@ export function toChainError(e: unknown): ChainError {
   const message = e instanceof Error ? e.message : String(e);
   let err: ChainError;
   if (/read-only port/i.test(message)) {
-    err = new ChainError('not-allowed', t('shell.ledger.error.connectWallet'));
+    err = new ChainError('not-allowed', 'Connect a wallet first');
   } else if (causes.some((c) => (c as { name?: string }).name === 'UserRejectedRequestError' || (c as { code?: number }).code === 4001)) {
-    err = new ChainError('rejected', t('shell.ledger.error.walletDeclined'));
+    err = new ChainError('rejected', 'The wallet request was declined');
   } else if (
     causes.some((c) => NETWORK_NAMES.has((c as { name?: string }).name ?? '')) ||
     causes.some((c) => c instanceof TypeError && /fetch|network/i.test((c as Error).message))
   ) {
-    err = new ChainError('network', t('shell.ledger.error.network'));
+    err = new ChainError('network', 'Could not reach Arc testnet. Check your connection and try again.');
   } else {
     err = new ChainError('rejected', message);
   }

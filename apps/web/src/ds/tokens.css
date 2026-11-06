@@ -182,22 +182,6 @@
   --cc-ease-pixel: steps(4, end);
   --cc-ease-unfold: cubic-bezier(0.22, 1.25, 0.36, 1);
   --cc-ease-press: cubic-bezier(0.3, 0, 0.5, 1);
-  --cc-ease-sway: cubic-bezier(0.37, 0, 0.63, 1);
-  --cc-ease-linear: linear;
-  --cc-ease-blink: steps(2, jump-none);
-  --cc-ease-frame: steps(1, end);
-  --cc-ease-shake: steps(6, end);
-  --cc-loop-caret: 900ms;
-  --cc-loop-blink: 1000ms;
-  --cc-loop-spin: 800ms;
-  --cc-loop-shimmer: 1400ms;
-  --cc-loop-pulse: 1600ms;
-  --cc-loop-nudge: 2400ms;
-  --cc-loop-idle: 4800ms;
-  --cc-loop-sway: 6000ms;
-  --cc-stagger-tight: 60ms;
-  --cc-stagger-base: 70ms;
-  --cc-stagger-loose: 120ms;
   --cc-z-base: 0;
   --cc-z-raised: 10;
   --cc-z-sticky: 100;
@@ -323,17 +307,6 @@
   --cc-duration-slow: 0ms;
   --cc-duration-slower: 0ms;
   --cc-duration-dramatic: 0ms;
-  --cc-loop-caret: 0ms;
-  --cc-loop-blink: 0ms;
-  --cc-loop-spin: 0ms;
-  --cc-loop-shimmer: 0ms;
-  --cc-loop-pulse: 0ms;
-  --cc-loop-nudge: 0ms;
-  --cc-loop-idle: 0ms;
-  --cc-loop-sway: 0ms;
-  --cc-stagger-tight: 0ms;
-  --cc-stagger-base: 0ms;
-  --cc-stagger-loose: 0ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -344,16 +317,5 @@
     --cc-duration-slow: 0ms;
     --cc-duration-slower: 0ms;
     --cc-duration-dramatic: 0ms;
-    --cc-loop-caret: 0ms;
-    --cc-loop-blink: 0ms;
-    --cc-loop-spin: 0ms;
-    --cc-loop-shimmer: 0ms;
-    --cc-loop-pulse: 0ms;
-    --cc-loop-nudge: 0ms;
-    --cc-loop-idle: 0ms;
-    --cc-loop-sway: 0ms;
-    --cc-stagger-tight: 0ms;
-    --cc-stagger-base: 0ms;
-    --cc-stagger-loose: 0ms;
   }
 }

@@ -1,6 +1,5 @@
 import { viewerOf } from '@cringe-court/modes-versus';
 import { useParams } from 'react-router';
-import { t } from '@/i18n';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { EmptyState, ErrorState, LoadingState, PaperButtonLink } from '@/ds';
 import { CaseHeader } from '../components/CaseHeader';
@@ -16,13 +15,13 @@ export function CasePage() {
   const { trialId } = useParams();
   const { snapshot, error, persona, resetDemo } = useVersus();
   const c = snapshot?.cases.find((x) => x.trialId === trialId);
-  useDocumentTitle(c ? c.state.filing.title : t('versus.casePage.title'));
+  useDocumentTitle(c ? c.state.filing.title : 'Versus case');
 
   if (error) {
     return (
       <div className={styles.page}>
-        <ErrorState title={t('versus.casePage.error.title')} details={error.message} onRetry={resetDemo} retryLabel={t('versus.persona.reset.confirm')}>
-          {t('versus.casePage.error.body')}
+        <ErrorState title="The demo court could not load" details={error.message} onRetry={resetDemo} retryLabel="Reset demo court">
+          The case record in this browser could not be read.
         </ErrorState>
       </div>
     );
@@ -30,7 +29,7 @@ export function CasePage() {
   if (!snapshot) {
     return (
       <div className={styles.page}>
-        <LoadingState title={t('versus.casePage.loading')} />
+        <LoadingState title="Opening the case file…" />
       </div>
     );
   }
@@ -38,20 +37,20 @@ export function CasePage() {
     return (
       <div className={styles.page}>
         <EmptyState
-          title={t('versus.casePage.missing.title')}
+          title="No such case in this court"
           character="clerk"
           expression="shocked"
           headingLevel={1}
           actions={
             <>
-              <PaperButtonLink to={versusPaths.cases}>{t('versus.persona.myCases')}</PaperButtonLink>
+              <PaperButtonLink to={versusPaths.cases}>My cases</PaperButtonLink>
               <PaperButtonLink to={versusPaths.newCase} variant="maroon">
-                {t('versus.cases.start')}
+                Start a case
               </PaperButtonLink>
             </>
           }
         >
-          {t('versus.casePage.missing.body')}
+          The demo court lives in this browser. Case links only open in a tab of the browser where the case was filed.
         </EmptyState>
       </div>
     );

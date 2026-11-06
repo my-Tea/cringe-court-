@@ -1,25 +1,20 @@
-import { type Usdc } from '@cringe-court/core';
-import { formatAmount, pricingName } from '@/i18n/domain';
-import { CURRENT_PRICING, PRICING, crowdSize, marketingBudgetLeft, type PricingProfile } from '@cringe-court/modes-grand-jury';
-import type { ReactNode } from 'react';
+import { formatUsdc, type Usdc } from '@cringe-court/core';
+import { CURRENT_PRICING, FUNDING_PROMISES, PRICING, crowdSize, marketingBudgetLeft, type PricingProfile } from '@cringe-court/modes-grand-jury';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { t, tRich } from '@/i18n';
 import { Amount, Badge, Icon, PaperButtonLink, PaperPanel, PaperRibbon } from '@/ds';
 import { CourtPanel } from '../components/parts';
-import { fundingPromise, paths } from '../lib';
+import { paths } from '../lib';
 import { useCourtContext } from '../state/context';
 import styles from '../GrandJury.module.css';
-
-const bold = { b: (chunk: ReactNode) => <strong>{chunk}</strong> };
 
 const share = (part: Usdc, whole: Usdc) => (whole > 0n ? (Number(part) / Number(whole)) * 100 : 0);
 
 /** Where one case's target goes, as a stacked paper strip. */
 function TargetSplit({ p }: { p: PricingProfile }) {
   const parts = [
-    { key: 'pool', label: t('grandJury.pricing.split.pool', { jurors: p.jurors, reward: formatAmount(p.successBonus, { unit: false }) }), value: p.juryPool },
-    { key: 'protocol', label: t('grandJury.pricing.protocolFee'), value: p.protocolFee },
-    { key: 'ai', label: t('grandJury.pricing.aiCounselFee'), value: p.aiFee },
+    { key: 'pool', label: `Jury pool: ${p.jurors} × ${formatUsdc(p.successBonus, { unit: false })} rewards`, value: p.juryPool },
+    { key: 'protocol', label: 'Protocol fee', value: p.protocolFee },
+    { key: 'ai', label: 'AI counsel fee (0G Compute)', value: p.aiFee },
   ];
   return (
     <figure className={styles.split}>
@@ -39,7 +34,7 @@ function TargetSplit({ p }: { p: PricingProfile }) {
             </div>
           ))}
           <div data-part="total">
-            <dt>{t('grandJury.pricing.target')}</dt>
+            <dt>Crowdfund target</dt>
             <dd>
               <Amount value={p.target} size="sm" />
             </dd>
@@ -52,59 +47,45 @@ function TargetSplit({ p }: { p: PricingProfile }) {
 
 function PhaseColumn({ p, current }: { p: PricingProfile; current: boolean }) {
   return (
-    <PaperPanel
-      as="article"
-      tone={current ? 'cream' : 'kraft'}
-      edge="cut"
-      backing={current ? 'gold' : 'none'}
-      elevation={current ? 3 : 1}
-      padding="md"
-      className={styles.phaseCol}
-      aria-labelledby={`phase-${p.phase}`}
-    >
-      <p className={styles.panelEyebrow}>{p.phase === 'hackathon' ? t('grandJury.pricing.phase.hackathon') : t('grandJury.pricing.phase.launch')}</p>
+    <PaperPanel as="article" tone={current ? 'cream' : 'kraft'} edge="cut" backing={current ? 'gold' : 'none'} elevation={current ? 3 : 1} padding="md" className={styles.phaseCol} aria-labelledby={`phase-${p.phase}`}>
+      <p className={styles.panelEyebrow}>{p.phase === 'hackathon' ? 'Phase 1 · now, on testnet' : 'Phase 2 · launch pricing'}</p>
       <h3 id={`phase-${p.phase}`} className={styles.panelTitle}>
-        {pricingName(p.phase)} {current && <Badge tone="success">{t('grandJury.pricing.running')}</Badge>}
+        {p.name} {current && <Badge tone="success">Running</Badge>}
       </h3>
       <dl className={styles.terms}>
         <div>
-          <dt>{t('grandJury.pricing.term.protocol')}</dt>
-          <dd>{formatAmount(p.protocolFee)}</dd>
+          <dt>Protocol fee</dt>
+          <dd>{formatUsdc(p.protocolFee)}</dd>
         </div>
         <div>
-          <dt>{t('grandJury.pricing.term.ai')}</dt>
-          <dd>{formatAmount(p.aiFee)}</dd>
+          <dt>AI fee</dt>
+          <dd>{formatUsdc(p.aiFee)}</dd>
         </div>
         <div>
-          <dt>{t('grandJury.pricing.target')}</dt>
+          <dt>Crowdfund target</dt>
           <dd>
-            {formatAmount(p.target)}{' '}
-            <span className={styles.termsNote}>{t('grandJury.pricing.term.people', { people: crowdSize(p.target), ticket: formatAmount(p.typicalTicket, { unit: false }) })}</span>
+            {formatUsdc(p.target)} <span className={styles.termsNote}>≈ {crowdSize(p.target)} people at {formatUsdc(p.typicalTicket, { unit: false })}</span>
           </dd>
         </div>
         <div>
-          <dt>{t('grandJury.pricing.term.sponsor')}</dt>
-          <dd>
-            {p.sponsorRequired
-              ? t('grandJury.pricing.term.sponsorRequired', { floor: formatAmount(p.sponsorFloor!) })
-              : t('grandJury.pricing.term.sponsorOptional', { floor: formatAmount(p.sponsorFloor!) })}
-          </dd>
+          <dt>Sponsor</dt>
+          <dd>{p.sponsorRequired ? `≥ ${formatUsdc(p.sponsorFloor!)} per funded case, committed before publishing` : `Optional slot (≥ ${formatUsdc(p.sponsorFloor!)}); the budget assumes none`}</dd>
         </div>
         <div>
-          <dt>{t('grandJury.pricing.term.review')}</dt>
-          <dd>{t('grandJury.pricing.term.reviewBody', { cost: formatAmount(p.reviewCost) })}</dd>
+          <dt>Review cost target</dt>
+          <dd>≤ {formatUsdc(p.reviewCost)} per case, a human signs off every case</dd>
         </div>
         <div>
-          <dt>{t('grandJury.pricing.term.publication')}</dt>
-          <dd>{p.marketingCap !== null ? t('grandJury.pricing.term.publicationCap', { cap: p.marketingCap }) : t('grandJury.pricing.term.publicationSponsor')}</dd>
+          <dt>Publication rule</dt>
+          <dd>{p.marketingCap !== null ? `At most ${p.marketingCap} editorially chosen cases` : 'Only with a sponsor commitment, or inside an explicit marketing cap'}</dd>
         </div>
         <div>
-          <dt>{t('grandJury.pricing.term.modelled')}</dt>
+          <dt>Modelled result per case</dt>
           <dd>
             <span className={styles.modelled} data-sign={p.modelledContribution.startsWith('-') ? 'neg' : 'pos'}>
               {p.modelledContribution.replace('-', '−')}
             </span>{' '}
-            <span className={styles.termsNote}>({t('grandJury.pricing.term.fullAttendance', { value: p.contributionFullAttendance.replace('-', '−') })})</span>
+            <span className={styles.termsNote}>({p.contributionFullAttendance.replace('-', '−')} if every juror shows up)</span>
           </dd>
         </div>
       </dl>
@@ -114,7 +95,7 @@ function PhaseColumn({ p, current }: { p: PricingProfile; current: boolean }) {
 
 /** D10, in plain words: who pays for a Grand Jury case, where it goes, and how the court plans to break even. */
 export function PricingPage() {
-  useDocumentTitle(t('grandJury.pricing.docTitle'));
+  useDocumentTitle('Who pays: Grand Jury pricing');
   const { demo } = useCourtContext();
   const p = CURRENT_PRICING;
   const used = demo.court.docket.list().filter((c) => c.basis === 'marketing-cap').length;
@@ -124,42 +105,38 @@ export function PricingPage() {
     <div className={styles.page}>
       <header className={styles.docketHero}>
         <p className={styles.kicker}>
-          <Icon name="scales" /> {t('grandJury.pricing.kicker')}
+          <Icon name="scales" /> Decision D10
         </p>
         <PaperRibbon as="h1" tone="maroon" size="lg" sparks className={styles.heroRibbon}>
-          {t('grandJury.pricing.title')}
+          Who pays for a public trial
         </PaperRibbon>
-        <p className={styles.heroLede}>{t('grandJury.pricing.lede')}</p>
+        <p className={styles.heroLede}>
+          A Grand Jury case is a show the crowd buys a ticket to. Nobody bets, nobody gets odds, and nothing a summoner gets depends on the verdict. Here is every number.
+        </p>
       </header>
 
       <div className={styles.pricingGrid}>
-        <CourtPanel
-          id="split-title"
-          tone="cream"
-          backing="gold"
-          eyebrow={t('grandJury.pricing.split.eyebrow')}
-          title={t('grandJury.pricing.split.title', { amount: formatAmount(p.target) })}
-          icon="sparkle"
-        >
+        <CourtPanel id="split-title" tone="cream" backing="gold" eyebrow="One case, today" title={`Where ${formatUsdc(p.target)} goes`} icon="sparkle">
           <TargetSplit p={p} />
           <p className={styles.panelLede}>
-            {t('grandJury.pricing.split.lede', { bond: formatAmount(p.bond), reward: formatAmount(p.successBonus), threshold: p.threshold, jurors: p.jurors })}
+            Jurors post a {formatUsdc(p.bond)} bond each and get it back with a {formatUsdc(p.successBonus)} reward for sealing and opening on time. {p.threshold} of {p.jurors}{' '}
+            matching votes make a verdict.
           </p>
         </CourtPanel>
 
-        <CourtPanel id="promise-title" tone="cream" eyebrow={t('grandJury.pricing.promise.eyebrow')} title={t('grandJury.pricing.promise.title')} icon="shield">
+        <CourtPanel id="promise-title" tone="cream" eyebrow="What a summoner is promised" title="Refunds, credit, no odds" icon="shield">
           <ul className={styles.promises}>
             <li>
-              <Icon name="refresh" /> {fundingPromise('refund')}
+              <Icon name="refresh" /> {FUNDING_PROMISES.refund}
             </li>
             <li>
-              <Icon name="star" /> {fundingPromise('summoner')}
+              <Icon name="star" /> {FUNDING_PROMISES.summoner}
             </li>
             <li>
-              <Icon name="scales" /> {fundingPromise('odds')}
+              <Icon name="scales" /> {FUNDING_PROMISES.noOdds}
             </li>
             <li>
-              <Icon name="crown" /> {fundingPromise('sponsor')}
+              <Icon name="crown" /> {FUNDING_PROMISES.sponsor}
             </li>
           </ul>
         </CourtPanel>
@@ -167,7 +144,7 @@ export function PricingPage() {
 
       <section aria-labelledby="phases-title">
         <h2 id="phases-title" className={styles.sectionTitle}>
-          <Icon name="clock" /> {t('grandJury.pricing.phases')}
+          <Icon name="clock" /> Two phases, both decided now
         </h2>
         <div className={styles.phaseGrid}>
           <PhaseColumn p={PRICING.hackathon} current={p.phase === 'hackathon'} />
@@ -176,49 +153,53 @@ export function PricingPage() {
       </section>
 
       {p.marketingCap !== null && p.marketingBudget !== null && left !== null && (
-        <CourtPanel id="budget-title" tone="kraft" elevation={1} eyebrow={t('grandJury.pricing.budget.eyebrow')} title={t('grandJury.pricing.budget.title')} icon="trophy">
+        <CourtPanel id="budget-title" tone="kraft" elevation={1} eyebrow="Hackathon dashboard" title="Marketing budget" icon="trophy">
           <div className={styles.meter}>
             <div className={styles.meterTop}>
               <span className={styles.meterRaised}>{used}</span>
-              <span className={styles.meterTarget}>{t('grandJury.pricing.budget.published', { cap: p.marketingCap })}</span>
+              <span className={styles.meterTarget}>/ {p.marketingCap} unsponsored cases published</span>
             </div>
             <div
               className={styles.meterTrack}
               role="progressbar"
-              aria-label={t('grandJury.pricing.budget.label')}
+              aria-label="Marketing cap used"
               aria-valuemin={0}
               aria-valuemax={p.marketingCap}
               aria-valuenow={used}
-              aria-valuetext={t('grandJury.pricing.budget.valuetext', { used, cap: p.marketingCap })}
+              aria-valuetext={`${used} of ${p.marketingCap} cases`}
             >
               <div className={styles.meterFill} style={{ ['--_pct' as string]: `${(used / p.marketingCap) * 100}%` }} />
             </div>
           </div>
           <p className={styles.panelLede}>
-            {t('grandJury.pricing.budget.lede', {
-              budget: formatAmount(p.marketingBudget),
-              cap: p.marketingCap,
-              each: p.modelledContribution.replace('-', ''),
-              left: formatAmount(left),
-              next: p.marketingCap + 1,
-            })}
+            Modelled budget {formatUsdc(p.marketingBudget)} ({p.marketingCap} × {p.modelledContribution.replace('-', '')}), {formatUsdc(left)} left. The cost is editor time and 0G
+            testnet compute; the publishing tool refuses case {p.marketingCap + 1}.
           </p>
         </CourtPanel>
       )}
 
-      <CourtPanel id="why-title" tone="cream" edge="clean" eyebrow={t('grandJury.pricing.why.eyebrow')} title={t('grandJury.pricing.why.title')} icon="book">
+      <CourtPanel id="why-title" tone="cream" edge="clean" eyebrow="Why the blend" title="Three moderate moves beat one extreme move" icon="book">
         <ul className={styles.whyList}>
-          <li>{tRich('grandJury.pricing.why.fee', bold)}</li>
-          <li>{tRich('grandJury.pricing.why.sponsor', bold)}</li>
-          <li>{tRich('grandJury.pricing.why.review', bold)}</li>
-          <li>{tRich('grandJury.pricing.why.blend', bold)}</li>
+          <li>
+            <strong>Fee only</strong> (protocol 2.97) works only if fans ignore a 34 % higher target, and charges them for a safety review they never see.
+          </li>
+          <li>
+            <strong>Sponsor only</strong> (2.05) breaks even with 0.0053 to spare; one sponsor slipping sinks the case.
+          </li>
+          <li>
+            <strong>Review only</strong> (0.84) means cutting the safety review that keeps public-figure cases out of defamation territory.
+          </li>
+          <li>
+            <strong>The Sponsored Docket</strong> raises the fee by 0.50, asks a sponsor for about 1.00 per 1,000 views, and trims review through tooling. It is the only option that
+            stays positive at every tested funding elasticity and with zero forfeit revenue.
+          </li>
         </ul>
-        <p className={styles.fineprint}>{t('grandJury.pricing.why.fineprint')}</p>
+        <p className={styles.fineprint}>Numbers are modelled per published case (docs/DECISIONS.md D10). Before launch they are re-solved with measured funding, review time and views.</p>
       </CourtPanel>
 
       <div className={styles.centerRow}>
         <PaperButtonLink to={paths.docket} size="lg" iconEnd={<Icon name="arrow-right" />}>
-          {t('grandJury.backToDocket')}
+          Back to the docket
         </PaperButtonLink>
       </div>
     </div>

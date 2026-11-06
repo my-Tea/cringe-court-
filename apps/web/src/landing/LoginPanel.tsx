@@ -1,13 +1,11 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { Icon, Logo, PaperButton, PaperField, PaperPanel, PaperRibbon, PaperTile, useToast } from '@/ds';
-import { t } from '@/i18n';
 import { paths } from '@/app/routes';
 import styles from './LandingPage.module.css';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Provider names are brand names, shown as written. */
 const SOCIAL = [
   { icon: 'discord', name: 'Discord', tone: 'blue' },
   { icon: 'google', name: 'Google', tone: 'cream' },
@@ -33,8 +31,8 @@ export function LoginPanel() {
     const email = String(form.get('email') ?? '').trim();
     const hasPassword = String(form.get('password') ?? '').length > 0;
     const next = {
-      email: !email ? t('shell.login.error.emailEmpty') : EMAIL.test(email) ? undefined : t('shell.login.error.emailInvalid'),
-      password: hasPassword ? undefined : t('shell.login.error.passwordEmpty'),
+      email: !email ? 'Enter an email to sign in, or play as a guest.' : EMAIL.test(email) ? undefined : 'That email is missing an @ or a domain.',
+      password: hasPassword ? undefined : 'Enter a password, or play as a guest.',
     };
     if (password.current) password.current.value = '';
     setErrors(next);
@@ -43,71 +41,71 @@ export function LoginPanel() {
       first?.focus();
       return;
     }
-    toast({ tone: 'success', title: t('shell.login.ribbon'), description: t('shell.login.toast.session') });
+    toast({ tone: 'success', title: 'The court is now in session', description: 'Demo entry: accounts are not live yet, so nothing was sent or saved.' });
     navigate(paths.court);
   }
 
   function guest() {
-    toast({ tone: 'info', title: t('shell.login.guest.title'), description: t('shell.login.guest.body') });
+    toast({ tone: 'info', title: 'Playing as a guest', description: 'Pick a court. Guests can watch and file practice cases.' });
     navigate(paths.court);
   }
 
   return (
     <PaperPanel as="section" tone="maroon" edge="cut" elevation={4} backing="gold" padding="lg" className={styles.panel} aria-labelledby="landing-title">
       <h1 id="landing-title" className={styles.logo}>
-        <Logo layout="stacked" title={t('common.app.name')} />
+        <Logo layout="stacked" title="CringeCourt" />
       </h1>
       <PaperRibbon as="h2" sparks className={styles.ribbon}>
-        {t('shell.login.ribbon')}
+        The court is now in session
       </PaperRibbon>
       <PaperRibbon as="p" size="sm" tails={false} className={styles.tagline}>
-        {t('shell.login.tagline')}
+        Make your case. Lose your dignity.
       </PaperRibbon>
 
-      <form className={styles.form} onSubmit={enter} noValidate aria-label={t('shell.login.formLabel')}>
+      <form className={styles.form} onSubmit={enter} noValidate aria-label="Sign in">
         <PaperField
-          label={t('shell.login.email')}
+          label="Email"
           icon="mail"
           name="email"
           type="email"
           inputMode="email"
           autoComplete="off"
-          placeholder={t('shell.login.email.placeholder')}
+          placeholder="Enter your email"
           error={errors.email}
           onChange={() => errors.email && setErrors((e) => ({ ...e, email: undefined }))}
         />
         <PaperField
           ref={password}
-          label={t('shell.login.password')}
+          label="Password"
           icon="lock"
           name="password"
           type="password"
           autoComplete="off"
-          placeholder={t('shell.login.password.placeholder')}
+          placeholder="Enter your password"
           revealable
           error={errors.password}
           onChange={() => errors.password && setErrors((e) => ({ ...e, password: undefined }))}
         />
         <PaperButton type="submit" size="xl" fullWidth iconStart={<Icon name="gavel" />} className={styles.enter}>
-          {t('shell.login.enter')}
+          Enter the court
         </PaperButton>
         <PaperButton variant="maroon" size="lg" fullWidth iconStart={<Icon name="gamepad" />} onClick={guest}>
-          {t('shell.login.guest')}
+          Play as guest
         </PaperButton>
       </form>
 
       <div className={styles.social}>
         <p className={styles.divider}>
-          <span>{t('shell.login.or')}</span>
+          <span>Or continue with</span>
         </p>
         <ul role="list" className={styles.tiles}>
           {SOCIAL.map((s) => (
             <li key={s.name}>
               <PaperTile
                 icon={s.icon}
-                label={t('shell.login.social.label', { name: s.name })}
+                label={`Continue with ${s.name}`}
                 tone={s.tone}
-                onClick={() => toast({ tone: 'info', title: t('shell.login.social.soon.title', { name: s.name }), description: t('shell.login.social.soon.body') })}
+                onClick={() => toast({ tone: 'info', title: `${s.name} sign-in is coming soon`, description: 'Play as a guest for now: every court is open to guests on testnet.' })}
               />
             </li>
           ))}
@@ -116,7 +114,7 @@ export function LoginPanel() {
 
       <p className={styles.demoNote}>
         <Icon name="shield" />
-        <span>{t('shell.login.demoNote')}</span>
+        <span>Demo sign-in. Accounts are not live yet: nothing you type here leaves this page.</span>
       </p>
     </PaperPanel>
   );

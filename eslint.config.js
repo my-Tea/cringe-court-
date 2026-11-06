@@ -39,9 +39,4 @@ export default tseslint.config(
     files: ['**/*.config.{ts,js}', 'apps/web/scripts/**'],
     languageOptions: { globals: { ...globals.node } },
   },
-  {
-    // Browser-driving audit scripts: Node at the top level, page code inside evaluate().
-    files: ['tools/**/*.mjs'],
-    languageOptions: { globals: { ...globals.node, ...globals.browser, axe: 'readonly' } },
-  },
 );

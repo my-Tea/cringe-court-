@@ -1,7 +1,6 @@
 import { buildShareCard, renderShareSvg, shareText, type DocketEntry } from '@cringe-court/modes-grand-jury';
 import { useMemo, useState } from 'react';
 import { Button, Icon, PaperButton, useToast } from '@/ds';
-import { t } from '@/i18n';
 import { paths, sharePalette } from '../lib';
 import styles from '../GrandJury.module.css';
 import { CourtPanel } from './parts';
@@ -46,14 +45,14 @@ export function SharePanel({ entry }: { entry: DocketEntry }) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      toast({ tone: 'success', title: t('common.action.copied'), description: t('grandJury.share.copied.body') });
+      toast({ tone: 'success', title: 'Copied', description: 'The verdict and link are on your clipboard.' });
     } catch {
-      toast({ tone: 'warning', title: t('grandJury.share.copyFailed.title'), description: t('grandJury.share.copyFailed.body') });
+      toast({ tone: 'warning', title: 'Could not copy', description: 'Your browser blocked the clipboard.' });
     }
   };
   const share = async () => {
     try {
-      await navigator.share({ title: t('grandJury.share.native.title', { label: card.caseLabel, question: card.question }), text, url });
+      await navigator.share({ title: `${card.caseLabel}: ${card.question}`, text, url });
     } catch (err) {
       if ((err as Error)?.name !== 'AbortError') await copy();
     }
@@ -64,7 +63,7 @@ export function SharePanel({ entry }: { entry: DocketEntry }) {
       download(await toPng(svg), `${file}.png`);
     } catch {
       download(src, `${file}.svg`);
-      toast({ tone: 'info', title: t('grandJury.share.svg.title'), description: t('grandJury.share.svg.body') });
+      toast({ tone: 'info', title: 'Saved as SVG', description: 'This browser could not draw a PNG, so you got the vector card.' });
     } finally {
       setBusy(false);
     }
@@ -72,19 +71,19 @@ export function SharePanel({ entry }: { entry: DocketEntry }) {
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   return (
-    <CourtPanel id="share-title" tone="kraft" elevation={1} className={styles.shareCard} eyebrow={card.tone === 'live' ? t('grandJury.share.eyebrow.live') : t('grandJury.share.eyebrow.done')} title={t('grandJury.share.title')}>
-        <img className={styles.sharePreview} src={src} width={1200} height={630} alt={t('grandJury.share.alt', { label: card.caseLabel, question: card.question, headline: card.headline, subline: card.subline })} />
+    <CourtPanel id="share-title" tone="kraft" elevation={1} className={styles.shareCard} eyebrow={card.tone === 'live' ? 'Rally the crowd' : 'The screenshot moment'} title="Share this case">
+        <img className={styles.sharePreview} src={src} width={1200} height={630} alt={`Share card: ${card.caseLabel}, ${card.question} ${card.headline}. ${card.subline}`} />
         <div className={styles.buttonRow}>
           {canShare && (
             <PaperButton onClick={share} iconStart={<Icon name="external" />}>
-              {t('common.action.share')}
+              Share
             </PaperButton>
           )}
           <Button variant={canShare ? 'secondary' : 'gold'} onClick={copy} iconStart={<Icon name="copy" />}>
-            {t('grandJury.share.copyText')}
+            Copy text + link
           </Button>
           <Button variant="ghost" onClick={png} loading={busy} iconStart={<Icon name="arrow-right" />}>
-            {t('grandJury.share.downloadImage')}
+            Download image
           </Button>
         </div>
     </CourtPanel>

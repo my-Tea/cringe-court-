@@ -1,9 +1,7 @@
-import { ZERO_USDC, addUsdc, type Usdc } from '@cringe-court/core';
-import { ballotLabel, caseLabel, formatAmount } from '@/i18n/domain';
+import { ZERO_USDC, addUsdc, formatUsdc, type Usdc } from '@cringe-court/core';
 import type { CaseDetail } from '@cringe-court/modes-grand-jury';
 import { Link } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { t } from '@/i18n';
 import { Amount, Countdown, EmptyState, ErrorState, Icon, PaperButtonLink, PaperPanel, PaperRibbon, Skeleton, type IconName } from '@/ds';
 import { BallotChip, StatusBadge } from '../components/parts';
 import { deadlineLabel, paths } from '../lib';
@@ -24,51 +22,11 @@ function todosOf(cases: readonly CaseDetail[]): Todo[] {
   const out: Todo[] = [];
   for (const d of cases) {
     const v = d.viewer;
-    if (v.offer)
-      out.push({
-        detail: d,
-        icon: 'gavel',
-        title: t('grandJury.duty.todo.offer.title'),
-        body: t('grandJury.duty.todo.offer.body', { bond: formatAmount(d.terms.bondPerJuror) }),
-        cta: t('grandJury.duty.todo.offer.cta'),
-        urgent: true,
-      });
-    if (v.seat !== null && d.phase === 'commit' && !v.committed)
-      out.push({
-        detail: d,
-        icon: 'lock',
-        title: t('grandJury.duty.todo.seal.title', { n: v.seat }),
-        body: t('grandJury.duty.todo.seal.body'),
-        cta: t('grandJury.ballot.seal'),
-        urgent: true,
-      });
-    if (v.seat !== null && d.phase === 'reveal' && v.committed && !v.revealed)
-      out.push({
-        detail: d,
-        icon: 'unlock',
-        title: t('grandJury.duty.todo.open.title', { n: v.seat }),
-        body: t('grandJury.duty.todo.open.body'),
-        cta: t('grandJury.reveal.open'),
-        urgent: true,
-      });
-    if (d.phase === 'finalizing' && (v.seat !== null || v.contributed > 0n))
-      out.push({
-        detail: d,
-        icon: 'scales',
-        title: t('grandJury.duty.todo.settle.title'),
-        body: t('grandJury.duty.todo.settle.body'),
-        cta: t('grandJury.juror.settle.title'),
-        urgent: false,
-      });
-    if (v.claim && !v.claim.claimed && v.claim.amount > 0n)
-      out.push({
-        detail: d,
-        icon: 'sparkle',
-        title: t('grandJury.duty.todo.collect.title', { amount: formatAmount(v.claim.amount) }),
-        body: v.claim.lines.some((l) => l.kind === 'refund') ? t('grandJury.duty.todo.collect.refund') : t('grandJury.duty.todo.collect.payout'),
-        cta: t('grandJury.duty.todo.collect.cta'),
-        urgent: false,
-      });
+    if (v.offer) out.push({ detail: d, icon: 'gavel', title: 'A jury seat is offered to you', body: `Accept to post a ${formatUsdc(d.terms.bondPerJuror)} bond, or decline for free.`, cta: 'Answer the offer', urgent: true });
+    if (v.seat !== null && d.phase === 'commit' && !v.committed) out.push({ detail: d, icon: 'lock', title: `Seal your ballot (seat ${v.seat})`, body: 'Your bond is forfeited if you miss this window.', cta: 'Seal my ballot', urgent: true });
+    if (v.seat !== null && d.phase === 'reveal' && v.committed && !v.revealed) out.push({ detail: d, icon: 'unlock', title: `Open your scroll (seat ${v.seat})`, body: 'Unopened scrolls are not counted and the bond is forfeited.', cta: 'Open my scroll', urgent: true });
+    if (d.phase === 'finalizing' && (v.seat !== null || v.contributed > 0n)) out.push({ detail: d, icon: 'scales', title: 'Ready to settle', body: 'Every deadline has passed. Anyone can settle it, including you.', cta: 'Settle the case', urgent: false });
+    if (v.claim && !v.claim.claimed && v.claim.amount > 0n) out.push({ detail: d, icon: 'sparkle', title: `Collect ${formatUsdc(v.claim.amount)}`, body: v.claim.lines.some((l) => l.kind === 'refund') ? 'Your refund is waiting.' : 'Your bond and reward are waiting.', cta: 'Collect', urgent: false });
   }
   return out.sort((a, b) => Number(b.urgent) - Number(a.urgent) || (a.detail.phaseEndsAt ?? Infinity) - (b.detail.phaseEndsAt ?? Infinity));
 }
@@ -82,7 +40,7 @@ function CaseRow({ d, nowMs, children }: { d: CaseDetail; nowMs: number; childre
   return (
     <li className={styles.dutyRow}>
       <div className={styles.dutyRowMain}>
-        <span className={styles.caseLabel}>{caseLabel(d.label)}</span>
+        <span className={styles.caseLabel}>{d.label}</span>
         <Link to={paths.case(d.caseNumber)} className={styles.dutyRowLink}>
           {d.file.question}
         </Link>
@@ -111,7 +69,7 @@ function Section({ id, title, icon, children }: { id: string; title: string; ico
 
 /** "My court": the viewer's seats, summons, gallery calls and money across the whole docket. */
 export function DutyPage() {
-  useDocumentTitle(t('grandJury.layout.nav.duty'));
+  useDocumentTitle('My court');
   const cases = useAllCases();
   const wallet = useWallet();
   const nowMs = useCourtNowMs();
@@ -120,7 +78,7 @@ export function DutyPage() {
     return (
       <div className={styles.page} aria-busy="true">
         <p className="cc-visually-hidden" role="status">
-          {t('grandJury.duty.loading')}
+          Loading your court…
         </p>
         <Skeleton height="6rem" />
         <Skeleton height="14rem" />
@@ -130,8 +88,8 @@ export function DutyPage() {
   if (cases.state === 'error') {
     return (
       <div className={styles.page}>
-        <ErrorState title={t('grandJury.duty.error.title')} headingLevel={1} onRetry={cases.retry} details={cases.error.message}>
-          {t('grandJury.duty.error.body')}
+        <ErrorState title="Your court would not load" headingLevel={1} onRetry={cases.retry} details={cases.error.message}>
+          We couldn’t read your cases from the ledger.
         </ErrorState>
       </div>
     );
@@ -151,69 +109,69 @@ export function DutyPage() {
     <div className={styles.page}>
       <header className={styles.docketHero}>
         <PaperRibbon as="h1" tone="maroon" size="lg" sparks className={styles.heroRibbon}>
-          {t('grandJury.layout.nav.duty')}
+          My court
         </PaperRibbon>
-        <p className={styles.heroLede}>{t('grandJury.duty.lede')}</p>
+        <p className={styles.heroLede}>Your seats, your summons and your calls from the gallery, with every deadline that matters to you.</p>
       </header>
 
-      <ul className={styles.statRow} aria-label={t('grandJury.duty.stats.label')}>
+      <ul className={styles.statRow} aria-label="Your numbers">
         <PaperPanel as="li" tone="gold" edge="cut" padding="sm" className={styles.stat}>
-          <p className={styles.statLabel}>{t('grandJury.layout.wallet.label')}</p>
+          <p className={styles.statLabel}>Test wallet</p>
           <p className={styles.statValue}>{balance === null ? '…' : <Amount value={balance} size="lg" />}</p>
         </PaperPanel>
         <PaperPanel as="li" tone="cream" edge="cut" padding="sm" className={styles.stat}>
-          <p className={styles.statLabel}>{t('grandJury.duty.stats.seats')}</p>
+          <p className={styles.statLabel}>Seats held</p>
           <p className={styles.statNum}>{seats.length}</p>
         </PaperPanel>
         <PaperPanel as="li" tone="cream" edge="cut" padding="sm" className={styles.stat}>
-          <p className={styles.statLabel}>{t('grandJury.duty.stats.chipped')}</p>
+          <p className={styles.statLabel}>Chipped in</p>
           <p className={styles.statValue}>
             <Amount value={contributed} size="lg" />
           </p>
         </PaperPanel>
         <PaperPanel as="li" tone="cream" edge="cut" padding="sm" className={styles.stat}>
-          <p className={styles.statLabel}>{t('grandJury.duty.stats.collected')}</p>
+          <p className={styles.statLabel}>Collected / waiting</p>
           <p className={styles.statValue}>
-            <Amount value={collected} size="lg" /> <span className={styles.statSub}>/ {formatAmount(waiting)}</span>
+            <Amount value={collected} size="lg" /> <span className={styles.statSub}>/ {formatUsdc(waiting)}</span>
           </p>
         </PaperPanel>
       </ul>
 
       {mine.length === 0 && todos.length === 0 ? (
         <EmptyState
-          title={t('grandJury.duty.empty.title')}
+          title="You haven’t joined a case yet"
           character="juror"
           actions={
             <PaperButtonLink to={paths.docket} iconEnd={<Icon name="arrow-right" />}>
-              {t('grandJury.duty.empty.action')}
+              Browse the docket
             </PaperButtonLink>
           }
         >
-          {t('grandJury.duty.empty.body')}
+          Chip in to summon a court, volunteer for a jury seat, or call it from the gallery. Everything you do shows up here.
         </EmptyState>
       ) : (
         <>
-          <Section id="todo-title" title={todos.length ? t('grandJury.duty.needs', { count: todos.length }) : t('grandJury.duty.nothing')} icon="alert">
+          <Section id="todo-title" title={todos.length ? `Needs you (${todos.length})` : 'Nothing needs you right now'} icon="alert">
             {todos.length === 0 ? (
-              <p className={styles.panelLede}>{t('grandJury.duty.nothingBody')}</p>
+              <p className={styles.panelLede}>No open offers, ballots or claims. We’ll list them here the moment one needs you.</p>
             ) : (
               <ul className={styles.todos}>
-                {todos.map((todo) => (
-                  <li key={`${todo.detail.caseNumber}-${todo.title}`} className={styles.todo} data-urgent={todo.urgent || undefined}>
+                {todos.map((t) => (
+                  <li key={`${t.detail.caseNumber}-${t.title}`} className={styles.todo} data-urgent={t.urgent || undefined}>
                     <span className={styles.todoIcon} aria-hidden>
-                      <Icon name={todo.icon} />
+                      <Icon name={t.icon} />
                     </span>
                     <div className={styles.todoText}>
                       <p className={styles.todoTitle}>
-                        {todo.title} <span className={styles.caseLabel}>{caseLabel(todo.detail.label)}</span>
+                        {t.title} <span className={styles.caseLabel}>{t.detail.label}</span>
                       </p>
-                      <p className={styles.todoBody}>{todo.body}</p>
+                      <p className={styles.todoBody}>{t.body}</p>
                     </div>
-                    {todo.detail.phaseEndsAt !== null && todo.detail.phaseStartedAt !== null && todo.urgent && (
-                      <Countdown compact label={deadlineLabel(todo.detail)} startsAt={todo.detail.phaseStartedAt * 1000} endsAt={todo.detail.phaseEndsAt * 1000} now={nowMs} />
+                    {t.detail.phaseEndsAt !== null && t.detail.phaseStartedAt !== null && t.urgent && (
+                      <Countdown compact label={deadlineLabel(t.detail)} startsAt={t.detail.phaseStartedAt * 1000} endsAt={t.detail.phaseEndsAt * 1000} now={nowMs} />
                     )}
-                    <PaperButtonLink to={paths.case(todo.detail.caseNumber)} size="sm" variant={todo.urgent ? 'maroon' : 'gold'} iconEnd={<Icon name="arrow-right" />}>
-                      {todo.cta}
+                    <PaperButtonLink to={paths.case(t.detail.caseNumber)} size="sm" variant={t.urgent ? 'maroon' : 'gold'} iconEnd={<Icon name="arrow-right" />}>
+                      {t.cta}
                     </PaperButtonLink>
                   </li>
                 ))}
@@ -222,15 +180,12 @@ export function DutyPage() {
           </Section>
 
           {seats.length > 0 && (
-            <Section id="seats-title" title={t('grandJury.duty.seats')} icon="gavel">
+            <Section id="seats-title" title="Jury seats" icon="gavel">
               <ul className={styles.dutyList}>
                 {seats.map((d) => (
                   <CaseRow key={d.caseNumber} d={d} nowMs={nowMs}>
                     <span className={styles.dutyNote}>
-                      {t('grandJury.duty.seatRow', {
-                        n: d.viewer.seat ?? 0,
-                        state: d.viewer.revealed ? t('grandJury.jury.seat.opened') : d.viewer.committed ? t('grandJury.jury.seat.sealed') : t('grandJury.jury.seat.sworn'),
-                      })}
+                      Seat {d.viewer.seat} · {d.viewer.revealed ? 'scroll opened' : d.viewer.committed ? 'ballot sealed' : 'sworn in'}
                     </span>
                   </CaseRow>
                 ))}
@@ -239,13 +194,11 @@ export function DutyPage() {
           )}
 
           {summoned.length > 0 && (
-            <Section id="summoned-title" title={t('grandJury.duty.summoned')} icon="sparkle">
+            <Section id="summoned-title" title="Cases you summoned" icon="sparkle">
               <ul className={styles.dutyList}>
                 {summoned.map((d) => (
                   <CaseRow key={d.caseNumber} d={d} nowMs={nowMs}>
-                    <span className={styles.dutyNote}>
-                      {d.viewer.isSponsor ? t('grandJury.duty.sponsor') : t('grandJury.duty.chippedIn', { amount: formatAmount(d.viewer.contributed) })}
-                    </span>
+                    <span className={styles.dutyNote}>{d.viewer.isSponsor ? 'Sponsor' : `You chipped in ${formatUsdc(d.viewer.contributed)}`}</span>
                   </CaseRow>
                 ))}
               </ul>
@@ -253,17 +206,15 @@ export function DutyPage() {
           )}
 
           {calls.length > 0 && (
-            <Section id="calls-title" title={t('grandJury.duty.calls')} icon="megaphone">
+            <Section id="calls-title" title="Your calls from the gallery" icon="megaphone">
               <ul className={styles.dutyList}>
                 {calls.map((d) => (
                   <CaseRow key={d.caseNumber} d={d} nowMs={nowMs}>
                     <BallotChip bench={d.viewer.galleryVote!} size="sm">
-                      {ballotLabel(d.ballot[d.viewer.galleryVote!])}
+                      {d.ballot[d.viewer.galleryVote!]}
                     </BallotChip>
                     {d.verdict && d.verdict.kind !== 'no-verdict' && (
-                      <span className={styles.dutyNote}>
-                        {(d.verdict.kind === 'ballot-0' ? 0 : 1) === d.viewer.galleryVote ? t('grandJury.duty.calledIt') : t('grandJury.duty.differently')}
-                      </span>
+                      <span className={styles.dutyNote}>{(d.verdict.kind === 'ballot-0' ? 0 : 1) === d.viewer.galleryVote ? 'You called it' : 'The jury saw it differently'}</span>
                     )}
                   </CaseRow>
                 ))}

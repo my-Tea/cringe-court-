@@ -328,7 +328,7 @@
   border-radius: var(--cc-radius-pill);
   box-shadow: var(--cc-shadow-1);
   animation: cc-paper-slide-in var(--cc-duration-slow) var(--cc-ease-enter) both;
-  animation-delay: calc(var(--_i, 0) * var(--cc-stagger-tight));
+  animation-delay: calc(var(--_i, 0) * 60ms);
 }
 
 .howNum {
@@ -1722,7 +1722,7 @@
   border: 2px solid var(--cc-neutral-100);
   border-radius: 50%;
   animation: cc-paper-pop var(--cc-duration-slow) var(--cc-ease-stamp) both;
-  animation-delay: calc(var(--cc-duration-slower) + var(--_i, 0) * var(--cc-stagger-loose));
+  animation-delay: calc(400ms + var(--_i, 0) * 120ms);
 }
 
 .pip[data-bench='0'] {

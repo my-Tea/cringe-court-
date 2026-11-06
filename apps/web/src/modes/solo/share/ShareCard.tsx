@@ -3,10 +3,9 @@ import { NPC_PERSONAS, type ShareSummary } from '@cringe-court/modes-solo';
 import { portrait } from '@/art/art';
 import { Alert, Icon, PaperButton, Skeleton, buttonClassName, useToast } from '@/ds';
 import { fontFamily } from '@/ds/tokens';
-import { t } from '@/i18n';
 import { jurorArt } from '../lib/art';
 import { SoloIcon } from '../lib/SoloIcon';
-import { SHARE_SIZES, shareFormatLabel, drawShareCard, type ShareAssets, type ShareFormat } from './drawShareCard';
+import { SHARE_SIZES, drawShareCard, type ShareAssets, type ShareFormat } from './drawShareCard';
 import styles from './ShareCard.module.css';
 
 export interface ShareCardProps {
@@ -97,7 +96,7 @@ export function ShareCard({ summary, onShared }: ShareCardProps) {
   const download = async () => {
     const blob = await toBlob();
     if (!blob) {
-      toast({ title: t('solo.share.toast.exportFailed'), description: t('solo.share.toast.exportFailedBody'), tone: 'danger' });
+      toast({ title: 'Could not export the image', description: 'Try another browser, or copy the caption instead.', tone: 'danger' });
       return;
     }
     const url = URL.createObjectURL(blob);
@@ -109,13 +108,13 @@ export function ShareCard({ summary, onShared }: ShareCardProps) {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
     onShared?.('image');
-    toast({ title: t('solo.share.toast.saved'), description: fileName, tone: 'success' });
+    toast({ title: 'Share card saved', description: fileName, tone: 'success' });
   };
 
   const nativeShare = async () => {
     const blob = await toBlob();
     const file = blob ? new File([blob], fileName, { type: 'image/png' }) : null;
-    const data: ShareData = { title: t('solo.share.nativeTitle', { caseLabel: summary.caseLabel, app: t('common.app.name') }), text: summary.shareText };
+    const data: ShareData = { title: `${summary.caseLabel} · CringeCourt`, text: summary.shareText };
     if (file && navigator.canShare?.({ files: [file] })) data.files = [file];
     try {
       await navigator.share(data);
@@ -129,37 +128,26 @@ export function ShareCard({ summary, onShared }: ShareCardProps) {
     try {
       await navigator.clipboard.writeText(summary.shareText);
       onShared?.('link');
-      toast({ title: t('solo.share.toast.copied'), tone: 'success' });
+      toast({ title: 'Caption copied', tone: 'success' });
     } catch {
-      toast({ title: t('solo.share.toast.copyFailed'), description: t('solo.share.toast.copyFailedBody'), tone: 'warning' });
+      toast({ title: 'Copy failed', description: 'Select the caption text and copy it by hand.', tone: 'warning' });
     }
   };
 
-  const descriptionParams = {
-    caseLabel: summary.caseLabel,
-    category: summary.category,
-    title: summary.title,
-    verdict: summary.verdictLabel,
-    a: summary.tally[0],
-    b: summary.tally[1],
-    headline: summary.headline,
-  };
-  const description = summary.quote
-    ? t('solo.share.descriptionQuote', { ...descriptionParams, by: summary.quote.by, text: summary.quote.text })
-    : t('solo.share.description', descriptionParams);
+  const description = `Share card. ${summary.caseLabel}, ${summary.category}: “${summary.title}”. Verdict ${summary.verdictLabel}, ${summary.tally[0]} to ${summary.tally[1]}. ${summary.headline}${summary.quote ? ` Quote from ${summary.quote.by}: “${summary.quote.text}”` : ''}`;
 
   return (
     <section className={styles.share} aria-labelledby="share-title">
       <div className={styles.head}>
         <h2 id="share-title" className={styles.title}>
-          {t('solo.share.heading')}
+          Share the verdict
         </h2>
         <fieldset className={styles.formats}>
-          <legend className="cc-visually-hidden">{t('solo.share.formats')}</legend>
+          <legend className="cc-visually-hidden">Card format</legend>
           {(Object.keys(SHARE_SIZES) as ShareFormat[]).map((f) => (
             <label key={f} className={styles.format} data-checked={f === format || undefined}>
               <input type="radio" name="share-format" value={f} checked={f === format} onChange={() => setFormat(f)} />
-              {shareFormatLabel(f)}
+              {SHARE_SIZES[f].label}
             </label>
           ))}
         </fieldset>
@@ -167,8 +155,8 @@ export function ShareCard({ summary, onShared }: ShareCardProps) {
 
       <div className={styles.preview} data-format={format}>
         {status === 'unsupported' ? (
-          <Alert tone="warning" title={t('solo.share.unsupported.title')}>
-            {t('solo.share.unsupported.body')}
+          <Alert tone="warning" title="This browser cannot draw the card">
+            The caption below still works: copy it or post it.
           </Alert>
         ) : (
           <>
@@ -188,21 +176,21 @@ export function ShareCard({ summary, onShared }: ShareCardProps) {
       </div>
 
       <p className={styles.caption}>
-        <span className="cc-visually-hidden">{t('solo.share.captionLabel')} </span>
+        <span className="cc-visually-hidden">Caption: </span>
         {summary.shareText}
       </p>
 
       <div className={styles.actions}>
         <PaperButton onClick={download} disabled={status !== 'ready'} iconStart={<SoloIcon name="download" />}>
-          {t('solo.share.download')}
+          Download PNG
         </PaperButton>
         {canNativeShare && (
           <PaperButton variant="maroon" onClick={nativeShare} disabled={status !== 'ready'} iconStart={<SoloIcon name="share" />}>
-            {t('solo.share.native')}
+            Share…
           </PaperButton>
         )}
         <PaperButton variant="maroon" onClick={copyCaption} iconStart={<Icon name="copy" />}>
-          {t('solo.share.copy')}
+          Copy caption
         </PaperButton>
         <a
           href={`https://x.com/intent/post?text=${encodeURIComponent(summary.shareText)}`}
@@ -211,11 +199,11 @@ export function ShareCard({ summary, onShared }: ShareCardProps) {
           className={buttonClassName({ variant: 'ghost' })}
           onClick={() => onShared?.('x')}
         >
-          {t('solo.share.postX')} <Icon name="external" />
-          <span className="cc-visually-hidden"> {t('solo.share.newTab')}</span>
+          Post on X <Icon name="external" />
+          <span className="cc-visually-hidden"> (opens in a new tab)</span>
         </a>
       </div>
-      <p className={styles.note}>{t('solo.share.note')}</p>
+      <p className={styles.note}>No names, handles or wallets: everything on the card already passed the redaction step.</p>
     </section>
   );
 }

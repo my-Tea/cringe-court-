@@ -32,8 +32,7 @@ export const DEFAULT_BINDINGS: Readonly<Record<string, RoamAction>> = {
   Enter: 'interact',
   Escape: 'pause',
   KeyP: 'pause',
-  // Not Tab: Tab must always move focus out of the room (WCAG 2.1.2, no keyboard trap).
-  KeyX: 'skip',
+  Tab: 'skip',
 };
 
 /** One-shot actions fire on key-down; the rest are held. */

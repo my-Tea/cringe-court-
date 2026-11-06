@@ -7,7 +7,6 @@ import type { Mode} from '@cringe-court/chain-client';
 import { quoteFor, type Terms } from '@cringe-court/chain-client';
 import { MODES, MODE_IDS, termsFor, type ModeId, type Usdc } from '@cringe-court/core';
 import { chainModeOf, diffTerms, termsFromChain, toChainError, usdcOf } from './mapping';
-import { t } from '@/i18n';
 
 export interface ModeProbe {
   mode: ModeId;
@@ -29,16 +28,16 @@ export async function probeLedger(port: LedgerTermsSource): Promise<readonly Mod
     return await Promise.all(
       MODE_IDS.map(async (mode): Promise<ModeProbe> => {
         const m = chainModeOf(mode);
-        const onChain = await port.termsOf(m);
-        const chain = termsFromChain(mode, onChain);
+        const t = await port.termsOf(m);
+        const chain = termsFromChain(mode, t);
         const diffs = diffTerms(termsFor(MODES[mode]), chain);
-        if (!onChain.enabled) diffs.push(t('shell.ledger.diff.disabled'));
+        if (!t.enabled) diffs.push('mode is disabled on the ledger');
         return {
           mode,
-          price: usdcOf(quoteFor(m, onChain, true, false)),
-          jurorBond: usdcOf(onChain.bond),
+          price: usdcOf(quoteFor(m, t, true, false)),
+          jurorBond: usdcOf(t.bond),
           seats: chain.jurySize,
-          enabled: onChain.enabled,
+          enabled: t.enabled,
           matches: diffs.length === 0,
           diffs,
         };

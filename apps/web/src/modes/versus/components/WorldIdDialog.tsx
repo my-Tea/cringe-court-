@@ -1,5 +1,4 @@
 import { useState, type ReactElement } from 'react';
-import { t } from '@/i18n';
 import { Badge, Dialog, DialogContent, DialogTrigger, Icon, PaperButton } from '@/ds';
 import styles from '../versus.module.css';
 
@@ -31,7 +30,7 @@ export function WorldIdDialog({ title, purpose, confirmLabel, onVerified, trigge
         footer={
           <>
             <PaperButton variant="ghost" onClick={() => setOpen(false)} disabled={busy}>
-              {t('common.action.cancel')}
+              Cancel
             </PaperButton>
             <PaperButton
               iconStart={<Icon name="check" />}
@@ -57,17 +56,17 @@ export function WorldIdDialog({ title, purpose, confirmLabel, onVerified, trigge
           </span>
           <div>
             <p className={styles.worldIdTitle}>
-              {t('versus.world.name')} <Badge tone="info">{t('versus.world.badge')}</Badge>
+              World ID <Badge tone="info">Staging · mock verifier</Badge>
             </p>
             <ul className={styles.worldIdList} role="list">
               <li>
-                <Icon name="check" aria-hidden /> {t('versus.world.shared')}
+                <Icon name="check" aria-hidden /> Shared with the court: a one-time code for this case (a nullifier). No name, face or wallet history.
               </li>
               <li>
-                <Icon name="check" aria-hidden /> {t('versus.world.oneRole')}
+                <Icon name="check" aria-hidden /> One human, one role: the same person cannot be both sides, or a side and a juror.
               </li>
               <li>
-                <Icon name="info" aria-hidden /> {t('versus.world.mock')}
+                <Icon name="info" aria-hidden /> This demo build verifies with a mock; nothing is sent to World.
               </li>
             </ul>
           </div>

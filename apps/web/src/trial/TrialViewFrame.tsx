@@ -6,7 +6,6 @@
  */
 import { Component, Suspense, lazy, type ReactNode } from 'react';
 import { Alert, Spinner } from '@/ds';
-import { t } from '@/i18n';
 import type { RoamTrialProps } from './RoamTrial';
 import { TrialViewToggle } from './TrialViewToggle';
 import { useTrialView } from './trialView';
@@ -40,14 +39,14 @@ export function TrialViewFrame({ classic, roam, toolbar }: TrialViewFrameProps) 
     <div className={styles.frame} data-view={showRoam ? 'roam' : 'classic'}>
       <div className={styles.toolbar}>
         <TrialViewToggle />
-        {!available && <p className={styles.note}>{t('trial.view.noWebgl')}</p>}
+        {!available && <p className={styles.note}>This browser has no WebGL2, so the hearing plays on the classic stage.</p>}
         {toolbar}
       </div>
       {showRoam ? (
         <RoamBoundary
           fallback={(error) => (
             <>
-              <Alert tone="warning" title={t('trial.view.stopped')}>
+              <Alert tone="warning" title="The roaming courtroom stopped, so here is the classic stage">
                 {error.message}
               </Alert>
               {classic}
@@ -57,7 +56,7 @@ export function TrialViewFrame({ classic, roam, toolbar }: TrialViewFrameProps) 
           <Suspense
             fallback={
               <div className={styles.loading} role="status">
-                <Spinner label={null} /> {t('trial.view.opening')}
+                <Spinner label={null} /> Opening the courtroom doors…
               </div>
             }
           >

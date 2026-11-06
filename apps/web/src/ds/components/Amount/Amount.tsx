@@ -1,6 +1,4 @@
-import { type Usdc } from '@cringe-court/core';
-import { formatAmount } from '@/i18n/domain';
-import { t } from '@/i18n';
+import { formatUsdc, type Usdc } from '@cringe-court/core';
 import { cx } from '../../lib/cx';
 import styles from './Amount.module.css';
 
@@ -17,9 +15,9 @@ export interface AmountProps {
  * columns of money line up. Screen readers hear "1.20 test USDC".
  */
 export function Amount({ value, size = 'md', direction, className }: AmountProps) {
-  const number = formatAmount(value, { unit: false });
+  const number = formatUsdc(value, { unit: false });
   const sign = direction === 'credit' ? '+' : direction === 'debit' ? '−' : '';
-  const spoken = t('common.unit.usdc', { amount: `${direction === 'credit' ? `${t('ds.amount.plus')} ` : direction === 'debit' ? `${t('ds.amount.minus')} ` : ''}${number}` });
+  const spoken = `${direction === 'credit' ? 'plus ' : direction === 'debit' ? 'minus ' : ''}${number} test USDC`;
   return (
     <span className={cx(styles.amount, size !== 'md' && styles[size], direction && styles[direction], className)}>
       <span aria-hidden>
@@ -27,7 +25,7 @@ export function Amount({ value, size = 'md', direction, className }: AmountProps
         {number}
       </span>
       <span className={styles.unit} aria-hidden>
-        {t('ds.amount.unit')}
+        USDC
       </span>
       <span className="cc-visually-hidden">{spoken}</span>
     </span>

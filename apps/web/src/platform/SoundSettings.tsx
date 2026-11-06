@@ -1,21 +1,20 @@
 import type { VolumeChannel } from '@cringe-court/audio';
 import { useId, useState } from 'react';
 import { Dialog, DialogContent, DialogTrigger, IconButton, Icon, PaperButton, RadioCards, RoundIconButton, Switch, Tooltip, cx } from '@/ds';
-import { formatNumber, t, type MessageKey } from '@/i18n';
 import { appAudio, useAudioSettings } from './audio';
 import styles from './SoundSettings.module.css';
 
-const CHANNELS: readonly { channel: VolumeChannel; label: MessageKey }[] = [
-  { channel: 'master', label: 'shell.sound.channel.master' },
-  { channel: 'sfx', label: 'shell.sound.channel.sfx' },
-  { channel: 'music', label: 'shell.sound.channel.music' },
+const CHANNELS: readonly { channel: VolumeChannel; label: string }[] = [
+  { channel: 'master', label: 'Master' },
+  { channel: 'sfx', label: 'Effects' },
+  { channel: 'music', label: 'Music' },
 ];
 
-const REDUCE_OPTIONS: readonly { value: 'system' | 'reduced' | 'full'; label: MessageKey; description: MessageKey }[] = [
-  { value: 'system', label: 'shell.sound.reduce.system.label', description: 'shell.sound.reduce.system.description' },
-  { value: 'reduced', label: 'shell.sound.reduce.reduced.label', description: 'shell.sound.reduce.reduced.description' },
-  { value: 'full', label: 'shell.sound.reduce.full.label', description: 'shell.sound.reduce.full.description' },
-];
+const REDUCE_OPTIONS = [
+  { value: 'system', label: 'Match my motion setting', description: 'Quieter when your device or the app asks for reduced motion.' },
+  { value: 'reduced', label: 'Reduced', description: 'Soft cues only, no crowd or room ambience.' },
+  { value: 'full', label: 'Full', description: 'Every cue, always.' },
+] as const;
 
 function VolumeSlider({ channel, label }: { channel: VolumeChannel; label: string }) {
   const id = useId();
@@ -33,13 +32,13 @@ function VolumeSlider({ channel, label }: { channel: VolumeChannel; label: strin
         max={100}
         step={1}
         value={pct}
-        aria-valuetext={t('shell.sound.percent', { pct })}
+        aria-valuetext={`${pct} percent`}
         className={styles.range}
         style={{ ['--_fill' as string]: `${pct}%` }}
         onChange={(e) => appAudio().setVolume(channel, Number(e.target.value) / 100)}
       />
       <output htmlFor={id} className={styles.sliderValue}>
-        {formatNumber(pct / 100, { style: 'percent' })}
+        {pct}%
       </output>
     </div>
   );
@@ -61,8 +60,8 @@ export function SoundSettings({ className }: { className?: string }) {
   return (
     <div className={cx(styles.panel, className)}>
       <Switch
-        label={t('shell.sound.on')}
-        description={unavailable ? t('shell.sound.unavailable') : t('shell.sound.on.description')}
+        label="Sound on"
+        description={unavailable ? 'This browser has no Web Audio, so the court stays silent.' : 'Gavels, stamps, the gallery and the courtroom hum.'}
         checked={!settings.muted}
         disabled={unavailable}
         onCheckedChange={(on) => {
@@ -70,24 +69,24 @@ export function SoundSettings({ className }: { className?: string }) {
           if (on) void appAudio().unlock();
         }}
       />
-      <div className={styles.sliders} role="group" aria-label={t('shell.sound.volume')}>
+      <div className={styles.sliders} role="group" aria-label="Volume">
         {CHANNELS.map((c) => (
-          <VolumeSlider key={c.channel} channel={c.channel} label={t(c.label)} />
+          <VolumeSlider key={c.channel} channel={c.channel} label={c.label} />
         ))}
       </div>
       <RadioCards
-        legend={t('shell.sound.reduce.legend')}
+        legend="Reduce sound"
         name="cc-reduce-sound"
-        options={REDUCE_OPTIONS.map((o) => ({ value: o.value, label: t(o.label), description: t(o.description) }))}
+        options={REDUCE_OPTIONS}
         value={settings.reduceSound}
         onValueChange={(v) => appAudio().setReduceSound(v as 'system' | 'reduced' | 'full')}
       />
       <div className={styles.test}>
         <PaperButton size="sm" variant="maroon" iconStart={<Icon name="gavel" />} disabled={unavailable} onClick={() => void playTest()}>
-          {t('shell.sound.test')}
+          Play a test sound
         </PaperButton>
         <p className={styles.testNote} role="status">
-          {tested === 'played' ? t('shell.sound.test.played') : tested === 'silent' ? t(settings.muted ? 'shell.sound.test.muted' : 'shell.sound.test.silent') : ''}
+          {tested === 'played' ? 'Order in the court!' : tested === 'silent' ? (settings.muted ? 'Sound is off. Turn it on to hear the gavel.' : 'Nothing played. Check your device volume.') : ''}
         </p>
       </div>
     </div>
@@ -108,16 +107,16 @@ export function SoundButton({ className }: { className?: string }) {
   };
   return (
     <div className={cx(styles.button, className)}>
-      <Tooltip content={muted ? t('shell.sound.state.off') : t('shell.sound.state.on')}>
-        <RoundIconButton icon={muted ? 'volume-off' : 'volume'} label={muted ? t('shell.sound.unmute') : t('shell.sound.mute')} tone={muted ? 'royal' : 'gold'} onClick={toggle} />
+      <Tooltip content={muted ? 'Sound is off' : 'Sound is on'}>
+        <RoundIconButton icon={muted ? 'volume-off' : 'volume'} label={muted ? 'Unmute sound' : 'Mute sound'} tone={muted ? 'royal' : 'gold'} onClick={toggle} />
       </Tooltip>
       <Dialog>
-        <Tooltip content={t('shell.sound.settings')}>
+        <Tooltip content="Sound settings">
           <DialogTrigger asChild>
-            <IconButton label={t('shell.sound.settings')} icon={<Icon name="chevron-down" />} size="sm" />
+            <IconButton label="Sound settings" icon={<Icon name="chevron-down" />} size="sm" />
           </DialogTrigger>
         </Tooltip>
-        <DialogContent title={t('shell.sound.settings')} description={t('shell.sound.settings.description')} size="sm">
+        <DialogContent title="Sound settings" description="Volumes are saved on this device." size="sm">
           <SoundSettings />
         </DialogContent>
       </Dialog>
@@ -131,8 +130,8 @@ export function SoundMuteSwitch() {
   if (state === 'unavailable') return null;
   return (
     <Switch
-      label={t('shell.sound.switch')}
-      description={settings.muted ? t('shell.sound.switch.muted') : t('shell.sound.switch.on')}
+      label="Sound"
+      description={settings.muted ? 'Muted on this device' : 'Gavels, stamps and the courtroom hum'}
       checked={!settings.muted}
       onCheckedChange={(on) => {
         appAudio().setMuted(!on);

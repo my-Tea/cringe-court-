@@ -1,8 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'vitest-axe';
-import { I18nProvider } from '@/i18n';
-import { setActiveLocale } from '@/i18n/runtime';
 import { renderWithProviders } from '@/test/render';
 import { readPlatformConfig } from '@/platform/config';
 import { ConnectionsPanel } from './ConnectionsPanel';
@@ -51,30 +49,6 @@ describe('Settings page', () => {
   });
 });
 
-describe('Language setting', () => {
-  beforeEach(() => localStorage.clear());
-  afterEach(() => {
-    localStorage.clear();
-    setActiveLocale('en');
-  });
-
-  it('offers English and the pseudo-locale, and switches the whole page', async () => {
-    const { container } = renderWithProviders(
-      <I18nProvider>
-        <SettingsPage />
-      </I18nProvider>,
-    );
-    expect(screen.getByRole('heading', { level: 2, name: 'Language' })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /^English/ })).toBeChecked();
-    await userEvent.click(screen.getByRole('radio', { name: /Pseudo-locale \(testing\)/ }));
-    expect(localStorage.getItem('cc:locale')).toBe('en-XA');
-    // Everything re-renders against the pseudo catalog: the English heading is gone.
-    expect(screen.queryByRole('heading', { level: 2, name: 'Language' })).not.toBeInTheDocument();
-    expect(container.querySelector('input[value="en-XA"]')).toBeChecked();
-    expect(container.querySelector('input[value="en"]')).not.toBeChecked();
-  });
-});
-
 describe('readPlatformConfig', () => {
   it('defaults to the demo adapters', () => {
     expect(readPlatformConfig({})).toEqual({ ledger: 'demo', arc: null, identity: 'mock', world: null, warnings: [] });
@@ -98,6 +72,6 @@ describe('readPlatformConfig', () => {
   });
 
   it('rejects unknown kinds with a warning', () => {
-    expect(readPlatformConfig({ VITE_LEDGER: 'mainnet' }).warnings[0]).toEqual({ key: 'shell.config.unknownLedger', params: { value: 'mainnet' } });
+    expect(readPlatformConfig({ VITE_LEDGER: 'mainnet' }).warnings[0]).toMatch(/Unknown VITE_LEDGER "mainnet"/);
   });
 });

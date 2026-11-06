@@ -1,11 +1,9 @@
-import { SPEAKER_CHARACTER, type CourtLine } from '@cringe-court/core';
+import { CHARACTER_NAMES, SPEAKER_CHARACTER, type CourtLine } from '@cringe-court/core';
 import type { CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DialogueBox, ImpactText, PaperPanel, Portrait, RoundIconButton, cx, useMotion } from '@/ds';
-import { t } from '@/i18n';
 import { hearingLines, portraitOf, sound } from '../lib';
 import styles from '../GrandJury.module.css';
-import { ballotLabel, characterName } from '@/i18n/domain';
 
 /**
  * The seam where the hearing is staged. Today it is a papercraft "spotlight"
@@ -106,10 +104,11 @@ export function TrialView({ detail, startAt = 0, onBeat }: TrialViewProps) {
     <PaperPanel as="section" tone="maroon" edge="cut" elevation={3} backing="gold" padding="md" className={styles.trialView} aria-labelledby="hearing-title" data-side={side}>
       <header className={styles.trialHead}>
         <h2 id="hearing-title" className={styles.trialTitle}>
-          {t('grandJury.trial.title')}
+          The hearing
         </h2>
         <p className={styles.trialCounter} aria-live="polite">
-          {t(detail.transcriptTeaser ? 'grandJury.trial.counterTeaser' : 'grandJury.trial.counter', { n: index + 1, total: lines.length })}
+          Line {index + 1} of {lines.length}
+          {detail.transcriptTeaser && ' · free teaser'}
         </p>
       </header>
       <div className={styles.trialStage}>
@@ -117,35 +116,21 @@ export function TrialView({ detail, startAt = 0, onBeat }: TrialViewProps) {
         <ul className={styles.risers} aria-hidden>
           {RISERS.map((r) => (
             <li key={r.key} className={cx(styles.riser, r.key === side && styles.riserLit)} data-riser={r.key}>
-              <Portrait
-                character={r.character}
-                expression={r.key === side ? expression : 'neutral'}
-                size="lg"
-                ring={r.bench === 0 ? 'accent' : r.bench === 1 ? 'side-a' : 'highlight'}
-                alt=""
-              />
+              <Portrait character={r.character} expression={r.key === side ? expression : 'neutral'} size="lg" ring={r.bench === 0 ? 'accent' : r.bench === 1 ? 'side-a' : 'highlight'} alt="" />
               <span className={styles.riserName}>
-                {characterName(r.character)}
-                {r.bench !== undefined && <span className={styles.riserSide}>{ballotLabel(detail.ballot[r.bench])}</span>}
+                {CHARACTER_NAMES[r.character]}
+                {r.bench !== undefined && <span className={styles.riserSide}>{detail.ballot[r.bench]}</span>}
               </span>
             </li>
           ))}
         </ul>
         {impact && !reduced && <ImpactText key={line.id} kind={impact} size="md" animate className={styles.trialImpact} />}
       </div>
-      <DialogueBox
-        key={line.id}
-        speaker={character}
-        speakerName={characterName(speaker)}
-        expression={expression}
-        text={line.text}
-        onDone={onDone}
-        className={styles.trialDialogue}
-      />
+      <DialogueBox key={line.id} speaker={character} speakerName={CHARACTER_NAMES[speaker]} expression={expression} text={line.text} onDone={onDone} className={styles.trialDialogue} />
       <div className={styles.trialControls}>
-        <RoundIconButton label={t('grandJury.trial.prev')} icon="arrow-left" tone="gold" onClick={() => go(index - 1)} disabled={index === 0} />
+        <RoundIconButton label="Previous line" icon="arrow-left" tone="gold" onClick={() => go(index - 1)} disabled={index === 0} />
         <RoundIconButton
-          label={playing ? t('grandJury.trial.pause') : t('grandJury.trial.play')}
+          label={playing ? 'Pause the hearing' : 'Play the hearing'}
           icon={playing ? 'close' : 'gavel'}
           tone="royal"
           size="lg"
@@ -156,7 +141,7 @@ export function TrialView({ detail, startAt = 0, onBeat }: TrialViewProps) {
             setAutoplay(true);
           }}
         />
-        <RoundIconButton label={t('grandJury.trial.next')} icon="arrow-right" tone="gold" onClick={() => go(index + 1)} disabled={last} />
+        <RoundIconButton label="Next line" icon="arrow-right" tone="gold" onClick={() => go(index + 1)} disabled={last} />
       </div>
     </PaperPanel>
   );

@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { CATEGORY_COPY, PRIVATE_NOTES_MAX, STORY_MAX, TITLE_MAX, redact, validateDraft, type DraftErrors, type SoloDraft } from '@cringe-court/modes-solo';
+import { CATEGORY_COPY, PRIVATE_NOTES_MAX, STORY_MAX, TITLE_MAX, categoryCopy, redact, validateDraft, type DraftErrors, type SoloDraft } from '@cringe-court/modes-solo';
 import { Alert, Button, Icon, PaperButton, PaperField, PaperRibbon, TextArea, cx } from '@/ds';
-import { t } from '@/i18n';
 import styles from './FilePage.module.css';
-import { soloCategoryExample } from '@/i18n/domain';
 
 export interface ConfessStepProps {
   draft: SoloDraft;
@@ -31,22 +29,22 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
     if (Object.keys(found).length === 0) onSubmit(draft);
   };
 
-  const example = draft.category ? soloCategoryExample(draft.category) : null;
+  const example = draft.category ? categoryCopy(draft.category) : null;
   const errorList = Object.entries(errors);
 
   return (
     <form className={styles.form} onSubmit={submit} noValidate aria-labelledby="confess-title">
       <header className={styles.stepHead}>
-        <p className={styles.eyebrow}>{t('solo.file.stepOf', { n: 1, total: 5 })}</p>
+        <p className={styles.eyebrow}>Step 1 of 5</p>
         <PaperRibbon as="h2" id="confess-title" className={styles.stepTitle}>
-          {t('solo.confess.title')}
+          Confess your crime against common sense
         </PaperRibbon>
-        <p className={styles.lede}>{t('solo.confess.lede')}</p>
+        <p className={styles.lede}>Counsel Chaos will defend you. Miss Ratio will try to cook you. Three jurors decide.</p>
       </header>
 
       {errorList.length > 0 && (
         <div ref={summaryRef} tabIndex={-1} className={styles.errorSummary}>
-          <Alert tone="danger" title={t('solo.confess.errors.title')}>
+          <Alert tone="danger" title="A few things before the court can hear this">
             <ul>
               {errorList.map(([field, message]) => (
                 <li key={field}>
@@ -58,31 +56,28 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
         </div>
       )}
       {serverError && (
-        <Alert tone="danger" title={t('solo.confess.serverError.title')} live="assertive">
+        <Alert tone="danger" title="The clerk rejected the filing" live="assertive">
           {serverError}
         </Alert>
       )}
 
       <fieldset className={styles.categories} aria-describedby={errors.category ? 'solo-category-error' : undefined}>
-        <legend className={styles.legend}>{t('solo.confess.category.legend')}</legend>
+        <legend className={styles.legend}>What kind of crime?</legend>
         <div className={styles.categoryGrid}>
-          {CATEGORY_COPY.map((cc, i) => {
-            const c = { id: cc.id, ...soloCategoryExample(cc.id) };
-            return (
-              <label key={c.id} className={cx(styles.category, draft.category === c.id && styles.categoryOn)}>
-                <input
-                  id={i === 0 ? 'solo-category' : undefined}
-                  type="radio"
-                  name="category"
-                  value={c.id}
-                  checked={draft.category === c.id}
-                  onChange={() => set({ category: c.id })}
-                />
-                <span className={styles.categoryName}>{c.name}</span>
-                <span className={styles.categoryBlurb}>{c.blurb}</span>
-              </label>
-            );
-          })}
+          {CATEGORY_COPY.map((c, i) => (
+            <label key={c.id} className={cx(styles.category, draft.category === c.id && styles.categoryOn)}>
+              <input
+                id={i === 0 ? 'solo-category' : undefined}
+                type="radio"
+                name="category"
+                value={c.id}
+                checked={draft.category === c.id}
+                onChange={() => set({ category: c.id })}
+              />
+              <span className={styles.categoryName}>{c.name}</span>
+              <span className={styles.categoryBlurb}>{c.blurb}</span>
+            </label>
+          ))}
         </div>
         {errors.category && (
           <p id="solo-category-error" className={styles.fieldError}>
@@ -93,11 +88,11 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
 
       <PaperField
         id="solo-title"
-        label={t('solo.confess.caseTitle.label')}
-        hint={t('solo.confess.caseTitle.hint')}
+        label="Case title"
+        hint="Short and public. The jury reads it first."
         value={draft.title}
         maxLength={TITLE_MAX}
-        placeholder={example?.exampleTitle ?? t('solo.confess.caseTitle.placeholder')}
+        placeholder={example?.exampleTitle ?? 'Reply-all to the whole company'}
         error={errors.title}
         onChange={(e) => set({ title: e.target.value })}
         autoComplete="off"
@@ -105,65 +100,54 @@ export function ConfessStep({ draft, onChange, onSubmit, serverError }: ConfessS
 
       <TextArea
         id="solo-story"
-        label={t('solo.confess.story.label')}
-        hint={t('solo.confess.story.hint')}
+        label="Your confession"
+        hint="What happened, in your words. This becomes public after the redaction step: no real names needed."
         value={draft.story}
         maxLength={STORY_MAX}
         rows={6}
-        placeholder={example?.example ?? t('solo.confess.story.placeholder')}
+        placeholder={example?.example ?? 'Tell the court what you did.'}
         error={errors.story}
         onChange={(e) => set({ story: e.target.value })}
       />
       {example && !draft.story && (
         <div>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            iconStart={<Icon name="sparkle" />}
-            onClick={() => set({ story: example.example, title: draft.title || example.exampleTitle })}
-          >
-            {t('solo.confess.example')}
+          <Button type="button" size="sm" variant="ghost" iconStart={<Icon name="sparkle" />} onClick={() => set({ story: example.example, title: draft.title || example.exampleTitle })}>
+            Use the example confession
           </Button>
         </div>
       )}
 
       <TextArea
         id="solo-privateNotes"
-        label={t('solo.confess.notes.label')}
+        label="Private notes for Counsel Chaos"
         optional
-        hint={t('solo.confess.notes.hint')}
+        hint="Only your lawyer reads these. Miss Ratio, the jury and the public never see them (D1)."
         value={draft.privateNotes}
         maxLength={PRIVATE_NOTES_MAX}
         rows={3}
-        placeholder={t('solo.confess.notes.placeholder')}
+        placeholder="The context that makes you look better. Your lawyer will use it carefully."
         error={errors.privateNotes}
         onChange={(e) => set({ privateNotes: e.target.value })}
       />
 
       <PaperField
         id="solo-names"
-        label={t('solo.confess.names.label')}
+        label="Names or handles to hide"
         optional
-        hint={autoHits ? t('solo.confess.names.hintFound', { count: autoHits }) : t('solo.confess.names.hint')}
+        hint={`Comma-separated. Emails, links, phone numbers, @handles and wallets are hidden automatically${autoHits ? ` (${autoHits} found so far)` : ''}.`}
         value={namesText}
         onChange={(e) => {
           setNamesText(e.target.value);
-          set({
-            hiddenNames: e.target.value
-              .split(',')
-              .map((n) => n.trim())
-              .filter(Boolean),
-          });
+          set({ hiddenNames: e.target.value.split(',').map((n) => n.trim()).filter(Boolean) });
         }}
         autoComplete="off"
       />
 
       <div className={styles.formActions}>
         <PaperButton type="submit" size="lg" iconEnd={<Icon name="arrow-right" />}>
-          {t('solo.confess.submit')}
+          File the confession
         </PaperButton>
-        <p className={styles.small}>{t('solo.confess.footnote')}</p>
+        <p className={styles.small}>Free until you take it to a jury. Your draft is saved in this browser.</p>
       </div>
     </form>
   );

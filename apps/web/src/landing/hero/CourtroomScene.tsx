@@ -1,4 +1,3 @@
-import { t } from '@/i18n';
 import { Chibi } from './chibi';
 import { ring, type Swatch } from './geometry';
 import { Block, Cut, Layer, Line, Poly, Scales, Sparks } from './paper';
@@ -409,16 +408,16 @@ function Lawyers() {
   );
 }
 
-function Folder({ x, y, rot, t: swatch, shade, letter }: { x: number; y: number; rot: number; t: Swatch; shade: Swatch; letter: string }) {
+function Folder({ x, y, rot, t, shade, letter }: { x: number; y: number; rot: number; t: Swatch; shade: Swatch; letter: string }) {
   return (
     <g transform={`translate(${x} ${y}) rotate(${rot})`}>
       <Poly t={shade} p={[[-46, -58], [46, -58], [46, 58], [-46, 58]]} />
-      <Poly t={swatch} p={[[-42, -62], [50, -62], [50, 54], [-42, 54]]} />
+      <Poly t={t} p={[[-42, -62], [50, -62], [50, 54], [-42, 54]]} />
       <Poly t={shade} o={0.5} p={[[14, -62], [50, -62], [50, 54], [6, 54]]} />
       <Poly t="neutral-100" p={[[-30, -48], [38, -50], [38, -6], [-30, -4]]} />
       <Poly t="neutral-300" o={0.6} p={[[18, -50], [38, -50], [38, -6], [16, -5]]} />
       <text x={4} y={-31} className={styles.exhibitWord}>
-        {t('shell.landing.scene.exhibit')}
+        EXHIBIT
       </text>
       <text x={4} y={-9} className={styles.exhibitLetter}>
         {letter}
@@ -520,7 +519,7 @@ export function CourtroomScene({ className }: { className?: string }) {
       className={className}
       preserveAspectRatio="xMidYMid slice"
       role="img"
-      aria-label={t('shell.landing.scene.alt')}
+      aria-label="A papercraft courtroom in full uproar: a bearded judge in sunglasses raises a gold gavel, a jury in chicken, frog, cat and pizza costumes laughs from the box, two lawyers trade blows at their desks, a bailiff folds his arms, and a Shiba sits sealed in a glass cube beside Exhibits A, B and C."
       focusable="false"
     >
       <Wall />

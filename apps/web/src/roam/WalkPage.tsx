@@ -1,35 +1,27 @@
 import { Courtroom, useCourtroom } from '@cringe-court/scene/react';
 import { BASE_MODES } from '@cringe-court/core';
 import { BEAT_IDS, MockRemotePlayers, QUALITY_LEVELS, type BeatId, type QualityLevel, type RoamController, type SpawnId, type VerdictKind } from '@cringe-court/scene/roam';
-import { RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
+import { BEAT_LABELS, RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Alert, Button, Spinner, useReducedMotion } from '@/ds';
-import { t, type MessageKey } from '@/i18n';
 import { appAudio } from '@/platform/audio';
-import { roamStrings } from '@/trial/roamStrings';
 import styles from './WalkPage.module.css';
 
-const VERDICTS: ReadonlyArray<{ id: VerdictKind; label: MessageKey }> = [
-  { id: 'guilty', label: 'trial.walk.verdict.guilty' },
-  { id: 'not-cooked', label: 'trial.walk.verdict.notCooked' },
-  { id: 'side-a', label: 'trial.walk.verdict.sideA' },
-  { id: 'mistrial', label: 'trial.walk.verdict.mistrial' },
+const VERDICTS: ReadonlyArray<{ id: VerdictKind; label: string }> = [
+  { id: 'guilty', label: 'Guilty' },
+  { id: 'not-cooked', label: 'Not cooked' },
+  { id: 'side-a', label: 'Side A wins' },
+  { id: 'mistrial', label: 'Mistrial' },
 ];
 
-const PLACES: ReadonlyArray<{ id: SpawnId; label: MessageKey }> = [
-  { id: 'lobby', label: 'trial.walk.jump.lobby' },
-  { id: 'aisle', label: 'trial.walk.jump.aisle' },
-  { id: 'well', label: 'trial.walk.jump.well' },
-  { id: 'bench-front', label: 'trial.walk.jump.bench' },
-  { id: 'jury-view', label: 'trial.walk.jump.juryBox' },
+const PLACES: ReadonlyArray<{ id: SpawnId; label: string }> = [
+  { id: 'lobby', label: 'Lobby' },
+  { id: 'aisle', label: 'Aisle' },
+  { id: 'well', label: 'Well' },
+  { id: 'bench-front', label: 'Bench' },
+  { id: 'jury-view', label: 'Jury box' },
 ];
-
-const QUALITY_LABELS: Readonly<Record<QualityLevel, MessageKey>> = {
-  low: 'trial.hud.quality.low',
-  medium: 'trial.hud.quality.medium',
-  high: 'trial.hud.quality.high',
-};
 
 const SPAWNS = new Set<string>(['lobby', 'doorway', 'aisle', 'well', 'defendant', 'witness', 'jury-view', 'bench-front']);
 
@@ -60,10 +52,10 @@ function MenuView({ onBack }: { onBack: () => void }) {
   }, [court]);
   return (
     <div className={styles.menuView}>
-      {court.state === 'ready' ? <Courtroom runtime={court.runtime} className={styles.canvas} label={t('trial.walk.menuViewLabel')} /> : <Spinner label={t('trial.walk.loadingLabel')} />}
+      {court.state === 'ready' ? <Courtroom runtime={court.runtime} className={styles.canvas} label="The courtroom from the entrance (menu view)." /> : <Spinner label="Loading the courtroom" />}
       <div className={styles.menuBar}>
         <Button ref={back} variant="primary" onClick={onBack}>
-          {t('trial.walk.backToWalking')}
+          Back to walking
         </Button>
       </div>
     </div>
@@ -71,12 +63,11 @@ function MenuView({ onBack }: { onBack: () => void }) {
 }
 
 export function WalkPage() {
-  useDocumentTitle(t('trial.walk.title'));
+  useDocumentTitle('Walk the court');
   const params = useMemo(() => initialParams(), []);
   const audio = appAudio();
   const remotes = useMemo(() => new MockRemotePlayers(), []);
   const roam = useRoamCourtroom({ audio, remotes, spawn: params.spawn });
-  const strings = roamStrings();
   const [view, setView] = useState<'roam' | 'menu'>('roam');
   const [quality, setQuality] = useState<QualityLevel>(params.quality);
   const [verdict, setVerdict] = useState<VerdictKind>('guilty');
@@ -115,85 +106,85 @@ export function WalkPage() {
   return (
     <div className={styles.page}>
       <header className={styles.head}>
-        <p className={styles.eyebrow}>{t('trial.walk.eyebrow')}</p>
-        <h1 className={styles.title}>{t('trial.walk.title')}</h1>
-        <p className={styles.lede}>{t('trial.walk.lede')}</p>
+        <p className={styles.eyebrow}>Sandbox · first person</p>
+        <h1 className={styles.title}>Walk the court</h1>
+        <p className={styles.lede}>Roam the voxel courtroom as the defendant: start in the lobby, take the stand, inspect the exhibits, then run the trial beats and watch the jury react.</p>
       </header>
 
       <div className={styles.layout}>
-        <section className={styles.stage} aria-label={t('trial.walk.stage')}>
+        <section className={styles.stage} aria-label="Courtroom">
           {view === 'menu' ? (
             <MenuView onBack={() => setView('roam')} />
           ) : roam.status === 'ready' ? (
-            <RoamCourtroom controller={roam.controller} data={roam.data} quality={quality} onQualityChange={setQuality} autoQuality={params.auto} strings={strings} touch={params.touch} onExit={() => setView('menu')} onRenderer={params.debug ? setRenderer : undefined} />
+            <RoamCourtroom controller={roam.controller} data={roam.data} quality={quality} onQualityChange={setQuality} autoQuality={params.auto} touch={params.touch} onExit={() => setView('menu')} onRenderer={params.debug ? setRenderer : undefined} />
           ) : roam.status === 'error' ? (
-            <Alert tone="danger" title={t('trial.walk.error')}>
+            <Alert tone="danger" title="The courtroom could not load">
               {roam.error.message}
             </Alert>
           ) : (
             <div className={styles.loading}>
-              <Spinner label={t('trial.walk.buildingLabel')} />
-              <span>{t('trial.walk.building')}</span>
+              <Spinner label="Building the courtroom" />
+              <span>Building the courtroom…</span>
             </div>
           )}
         </section>
 
-        <aside className={styles.panel} aria-label={t('trial.walk.controls')}>
+        <aside className={styles.panel} aria-label="Sandbox controls">
           <div className={styles.group}>
-            <h2 className={styles.groupTitle}>{t('trial.walk.beats.title')}</h2>
-            <p className={styles.hint}>{t('trial.walk.beats.hint')}</p>
+            <h2 className={styles.groupTitle}>Trial beats</h2>
+            <p className={styles.hint}>Each beat seats you at the defendant&apos;s table and takes the camera while someone speaks.</p>
             <div className={styles.beats}>
               {BEAT_IDS.map((id, i) => (
                 <Button key={id} variant={running === id ? 'primary' : 'secondary'} size="sm" disabled={!controller || view !== 'roam'} onClick={() => beat(id)} aria-pressed={running === id}>
-                  {t('trial.walk.beats.item', { number: i + 1, label: strings.beatLabels[id] })}
+                  {i + 1}. {BEAT_LABELS[id]}
                 </Button>
               ))}
             </div>
             <label className={styles.field}>
-              <span>{t('trial.walk.verdict')}</span>
+              <span>Verdict</span>
               <select value={verdict} onChange={(e) => setVerdict(e.target.value as VerdictKind)}>
                 {VERDICTS.map((v) => (
                   <option key={v.id} value={v.id}>
-                    {t(v.label)}
+                    {v.label}
                   </option>
                 ))}
               </select>
             </label>
             <Button variant="ghost" size="sm" disabled={!running} onClick={() => controller?.skipBeat()}>
-              {t('trial.walk.skipCurrent')}
+              Skip current beat
             </Button>
           </div>
 
           <div className={styles.group}>
-            <h2 className={styles.groupTitle}>{t('trial.walk.jump.title')}</h2>
+            <h2 className={styles.groupTitle}>Jump to</h2>
             <div className={styles.places}>
               {PLACES.map((p) => (
                 <Button key={p.id} variant="ghost" size="sm" disabled={!controller || view !== 'roam'} onClick={() => controller?.teleport(p.id)}>
-                  {t(p.label)}
+                  {p.label}
                 </Button>
               ))}
               <Button variant="ghost" size="sm" disabled={!controller || view !== 'roam'} onClick={() => controller?.sit('witness')}>
-                {t('trial.walk.jump.witness')}
+                Witness stand
               </Button>
               <Button variant="ghost" size="sm" disabled={!controller || view !== 'roam'} onClick={() => controller?.sit('defendant')}>
-                {t('trial.walk.jump.defendant')}
+                Defendant&apos;s table
               </Button>
             </div>
           </div>
 
           <div className={styles.group}>
-            <h2 className={styles.groupTitle}>{t('trial.walk.graphics.title')}</h2>
+            <h2 className={styles.groupTitle}>Graphics</h2>
             <label className={styles.field}>
-              <span>{t('trial.walk.graphics.quality')}</span>
+              <span>Quality</span>
               <select value={quality} onChange={(e) => setQuality(e.target.value as QualityLevel)}>
                 {QUALITY_LEVELS.map((q) => (
                   <option key={q} value={q}>
-                    {t(QUALITY_LABELS[q])}
+                    {q[0]!.toUpperCase() + q.slice(1)}
                   </option>
                 ))}
               </select>
             </label>
-            <p className={styles.hint}>{t('trial.walk.graphics.hint')}</p>
+            <p className={styles.hint}>Drops a level by itself if the frame rate sags. Three remote visitors are mocked (no network) to show how Versus and Grand Jury players will appear.</p>
           </div>
         </aside>
       </div>

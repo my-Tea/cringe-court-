@@ -1,10 +1,9 @@
-import { ballotLabel, formatAmount } from '@/i18n/domain';
+import { CATEGORIES, formatUsdc } from '@cringe-court/core';
 import { parseCaseParam, type CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Countdown, EmptyState, ErrorState, Icon, PaperButtonLink, PaperPanel, PhaseStepper, Skeleton, SkeletonText } from '@/ds';
-import { t } from '@/i18n';
 import { beatsFromLines, type PlannedVerdict } from '@/trial/beats';
 import { TrialViewFrame } from '@/trial/TrialViewFrame';
 import { ArgumentFeed, CourtRecord } from '../components/ArgumentFeed';
@@ -15,7 +14,7 @@ import { Benches, CourtPanel, StatusBadge } from '../components/parts';
 import { SharePanel } from '../components/SharePanel';
 import { TrialView } from '../components/TrialView';
 import { VerdictPanel } from '../components/VerdictPanel';
-import { categoryLabel, deadlineLabel, hearingLines, isClosed, paths, steps, stepOf } from '../lib';
+import { STEPS, deadlineLabel, hearingLines, isClosed, paths, stepOf } from '../lib';
 import { useCase, useCourtNow } from '../state/hooks';
 import styles from '../GrandJury.module.css';
 
@@ -24,14 +23,14 @@ const SOURCE_ICON = { definition: 'book', poll: 'users', history: 'clock', quote
 function CaseContext({ detail }: { detail: CaseDetail }) {
   const f = detail.file;
   return (
-    <CourtPanel id="context-title" tone="cream" edge="clean" eyebrow={t('grandJury.case.context.eyebrow')} title={t('grandJury.case.context.title')} icon="book">
+    <CourtPanel id="context-title" tone="cream" edge="clean" eyebrow="Reviewed context card" title="The facts both sides agree on" icon="book">
       <p className={styles.contextText}>{f.context}</p>
       {f.sources.length > 0 && (
-        <ul className={styles.sources} aria-label={t('grandJury.case.exhibits')}>
+        <ul className={styles.sources} aria-label="Exhibits">
           {f.sources.map((s) => (
             <li key={s.id} className={styles.source}>
               <span className={styles.sourceTag}>
-                <Icon name={SOURCE_ICON[s.kind]} /> {t('grandJury.case.exhibit', { id: s.id })}
+                <Icon name={SOURCE_ICON[s.kind]} /> Exhibit {s.id}
               </span>
               <span className={styles.sourceLabel}>{s.label}</span>
               <span className={styles.sourceNote}>{s.note}</span>
@@ -41,9 +40,11 @@ function CaseContext({ detail }: { detail: CaseDetail }) {
       )}
       <details className={styles.breakdown}>
         <summary>
-          <Icon name="shield" /> {t('grandJury.case.review.summary')}
+          <Icon name="shield" /> Editorial review
         </summary>
-        <p>{t('grandJury.case.review.body', { editor: f.review.editor, date: f.review.signedOff, minutes: f.review.minutes })}</p>
+        <p>
+          Signed off by {f.review.editor} on {f.review.signedOff} after {f.review.minutes} minutes. Grand Jury cases are about public issues, never private people.
+        </p>
         <ul className={styles.checks}>
           {f.review.checks.map((c) => (
             <li key={c}>
@@ -59,25 +60,17 @@ function CaseContext({ detail }: { detail: CaseDetail }) {
 function SummonerWall({ detail }: { detail: CaseDetail }) {
   if (detail.summonerList.length === 0 && !detail.sponsor) return null;
   return (
-    <CourtPanel
-      id="summoners-title"
-      tone="kraft"
-      elevation={1}
-      eyebrow={t('grandJury.case.summoners.eyebrow')}
-      title={t('grandJury.case.summoners.title', { count: detail.summoners })}
-      icon="crown"
-    >
+    <CourtPanel id="summoners-title" tone="kraft" elevation={1} eyebrow="Cosmetic credit · same whatever the verdict" title={`${detail.summoners} ${detail.summoners === 1 ? 'Summoner' : 'Summoners'}`} icon="crown">
       {detail.sponsor && (
         <p className={styles.sponsorLine}>
-          <Icon name="star" /> {detail.sponsor.line}{' '}
-          <span className={styles.sponsorAmount}>({t('grandJury.case.summoners.commitment', { amount: formatAmount(detail.sponsor.amount) })})</span>
+          <Icon name="star" /> {detail.sponsor.line} <span className={styles.sponsorAmount}>({formatUsdc(detail.sponsor.amount)} sponsor commitment)</span>
         </p>
       )}
       <ul className={styles.summoners}>
         {detail.summonerList.map((s) => (
           <li key={s.label} className={styles.summoner} data-you={s.isViewer || undefined}>
             <span className={styles.summonerName}>{s.label}</span>
-            <span className={styles.summonerAmount}>{formatAmount(s.amount, { unit: false })}</span>
+            <span className={styles.summonerAmount}>{formatUsdc(s.amount, { unit: false })}</span>
           </li>
         ))}
       </ul>
@@ -93,17 +86,17 @@ function CaseHeader({ detail }: { detail: CaseDetail }) {
       <div className={styles.caseHeaderTop}>
         <span className={styles.caseLabelLg}>{detail.label}</span>
         <StatusBadge status={detail.status} />
-        <span className={styles.caseCategory}>{categoryLabel(detail.file.category)}</span>
+        <span className={styles.caseCategory}>{CATEGORIES[detail.file.category]}</span>
       </div>
       <p className={styles.caseEyebrow}>{detail.file.title}</p>
       <h1 className={styles.caseQuestion}>{detail.file.question}</h1>
       <p className={styles.caseHook}>{detail.file.hook}</p>
       {detail.sponsor && (
         <p className={styles.presentedBy}>
-          <Icon name="star" /> {t('grandJury.case.presented', { name: detail.sponsor.name })}
+          <Icon name="star" /> Presented by {detail.sponsor.name}. The sponsor has no say over the case, the arguments or the verdict.
         </p>
       )}
-      <PhaseStepper steps={steps()} current={stepOf(detail.status)} label={t('grandJury.case.progress')} className={styles.caseStepper} />
+      <PhaseStepper steps={STEPS} current={stepOf(detail.status)} label="Case progress" className={styles.caseStepper} />
       {(hasWindow || detail.demoTiming) && (
         <div className={styles.caseClock}>
           {hasWindow && <Countdown label={deadlineLabel(detail)} startsAt={detail.phaseStartedAt! * 1000} endsAt={detail.phaseEndsAt! * 1000} now={now * 1000} />}
@@ -118,7 +111,7 @@ function CaseSkeleton() {
   return (
     <div className={styles.page} aria-busy="true">
       <p className="cc-visually-hidden" role="status">
-        {t('grandJury.case.loading')}
+        Loading the case…
       </p>
       <PaperPanel tone="cream" edge="torn" padding="lg" className={styles.caseHeader}>
         <Skeleton variant="text" width="30%" />
@@ -141,9 +134,9 @@ function CaseSkeleton() {
 function verdictOf(detail: CaseDetail): PlannedVerdict | undefined {
   const v = detail.verdict;
   if (!v) return undefined;
-  if (v.kind === 'no-verdict') return { kind: 'mistrial', text: t('grandJury.case.noVerdictBeat') };
+  if (v.kind === 'no-verdict') return { kind: 'mistrial', text: 'NO VERDICT' };
   const i = v.kind === 'ballot-0' ? 0 : 1;
-  return { kind: i === 0 ? 'side-a' : 'side-b', text: ballotLabel(detail.ballot[i]).toUpperCase() };
+  return { kind: i === 0 ? 'side-a' : 'side-b', text: detail.ballot[i].toUpperCase() };
 }
 
 /** The hearing: the roaming courtroom from the public gallery (or the jury box for a seated juror), the spotlight stage as fallback. */
@@ -159,10 +152,10 @@ function Hearing({ detail }: { detail: CaseDetail }) {
       classic={<TrialView detail={detail} />}
       roam={{
         beats,
-        label: t('grandJury.case.courtroom', { label: detail.label }),
+        label: `Courtroom: ${detail.label}`,
         role: juror ? 'juror' : 'spectator',
         spawn: juror ? 'jury-view' : 'aisle',
-        avatar: { model: 'creator', name: t('grandJury.case.you') },
+        avatar: { model: 'creator', name: 'You' },
       }}
     />
   );
@@ -175,23 +168,23 @@ export function CasePage() {
   const c = useCase(n);
   const now = useCourtNow();
   const detail = c.state === 'ready' ? c.data : null;
-  useDocumentTitle(detail ? t('grandJury.case.docTitle', { label: detail.label, question: detail.file.question }) : t('grandJury.case.docTitleFallback'));
+  useDocumentTitle(detail ? `${detail.label}: ${detail.file.question}` : 'Grand Jury case');
 
   if (n === null || (c.state === 'ready' && !detail)) {
     return (
       <div className={styles.page}>
         <EmptyState
-          title={t('grandJury.case.missing.title')}
+          title="No such case on the docket"
           character="bailiff"
           expression="shocked"
           headingLevel={1}
           actions={
             <PaperButtonLink to={paths.docket} iconStart={<Icon name="arrow-left" />}>
-              {t('grandJury.backToDocket')}
+              Back to the docket
             </PaperButtonLink>
           }
         >
-          {caseNumber ? t('grandJury.case.missing.withId', { id: caseNumber }) : t('grandJury.case.missing.noId')}
+          {caseNumber ? `There is no Grand Jury case “${caseNumber}”.` : 'That link is missing a case number.'} It may have been mistyped.
         </EmptyState>
       </div>
     );
@@ -200,8 +193,8 @@ export function CasePage() {
   if (c.state === 'error') {
     return (
       <div className={styles.page}>
-        <ErrorState title={t('grandJury.case.error.title')} headingLevel={1} onRetry={c.retry} details={c.error.message}>
-          {t('grandJury.case.error.body')}
+        <ErrorState title="This case would not load" headingLevel={1} onRetry={c.retry} details={c.error.message}>
+          We couldn’t read it from the ledger. Nothing was charged.
         </ErrorState>
       </div>
     );
@@ -211,9 +204,9 @@ export function CasePage() {
 
   return (
     <div className={styles.page}>
-      <nav aria-label={t('grandJury.case.breadcrumb')} className={styles.crumbs}>
+      <nav aria-label="Breadcrumb" className={styles.crumbs}>
         <Link to={paths.docket}>
-          <Icon name="arrow-left" /> {t('grandJury.layout.nav.docket')}
+          <Icon name="arrow-left" /> Docket
         </Link>
         <span aria-hidden>/</span>
         <span aria-current="page">{d.label}</span>
@@ -240,7 +233,7 @@ export function CasePage() {
           <ArgumentFeed detail={d} />
           <CaseContext detail={d} />
         </div>
-        <aside className={styles.caseAside} aria-label={t('grandJury.case.takePart')}>
+        <aside className={styles.caseAside} aria-label="Take part">
           {d.status === 'summoning' && <FundingPanel detail={d} />}
           {!closed && d.status !== 'summoning' && <JurorPanel detail={d} />}
           {!closed && <ClaimPanel detail={d} />}

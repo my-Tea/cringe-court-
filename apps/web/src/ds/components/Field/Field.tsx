@@ -8,7 +8,6 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
-import { formatNumber, t } from '@/i18n';
 import { cx } from '../../lib/cx';
 import { Icon } from '../Icon/Icon';
 import styles from './Field.module.css';
@@ -38,7 +37,7 @@ function FieldShell({ id, label, hint, error, optional, hintId, errorId, counter
       <div className={styles.labelRow}>
         <label htmlFor={id} className={styles.label}>
           {label}
-          {optional && <span className={styles.optional}>{t('ds.field.optional')}</span>}
+          {optional && <span className={styles.optional}>(optional)</span>}
         </label>
         {counter}
       </div>
@@ -74,11 +73,7 @@ function Counter({ length, max }: { length: number; max: number }) {
   return (
     <span className={cx(styles.counter, left < 0 && styles.counterOver)} aria-live={near ? 'polite' : 'off'}>
       {length}/{max}
-      <span className="cc-visually-hidden">
-        {' '}
-        {t('ds.field.counter.characters')}
-        {left < 0 ? t('ds.field.counter.over', { count: formatNumber(-left) }) : ''}
-      </span>
+      <span className="cc-visually-hidden"> characters{left < 0 ? `, ${-left} over the limit` : ''}</span>
     </span>
   );
 }

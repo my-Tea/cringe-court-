@@ -1,7 +1,6 @@
 import type { CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useState } from 'react';
 import { Button, Icon, Tooltip } from '@/ds';
-import { t } from '@/i18n';
 import { useCourtContext } from '../state/context';
 import { useCourtNow } from '../state/hooks';
 import styles from '../GrandJury.module.css';
@@ -33,10 +32,10 @@ export function DemoControls({ detail }: { detail: CaseDetail }) {
   return (
     <div className={styles.demoControls}>
       <Icon name="clock" />
-      <span>{t('grandJury.demo.clock')}</span>
-      <Tooltip content={t('grandJury.demo.skip.tooltip')}>
+      <span>Demo clock</span>
+      <Tooltip content="Moves the demo ledger's clock to this window's deadline. The simulated jurors seal and open their ballots first, as they would have before the deadline.">
         <Button size="sm" variant="ghost" onClick={skip} loading={busy}>
-          {t('grandJury.demo.skip.button')}
+          Skip to the deadline
         </Button>
       </Tooltip>
     </div>

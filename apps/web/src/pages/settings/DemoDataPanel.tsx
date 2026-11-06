@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Dialog, DialogClose, DialogContent, DialogTrigger, Icon, PaperButton, useToast } from '@/ds';
-import { t } from '@/i18n';
 import { DEMO_DATA_GROUPS, clearDemoData, countDemoData } from './demoData';
 import styles from './Settings.module.css';
 
@@ -13,23 +12,24 @@ export function DemoDataPanel({ onCleared = () => window.location.reload() }: { 
   const reset = () => {
     const removed = clearDemoData();
     setCounts(countDemoData());
-    toast({ tone: 'success', title: t('shell.demoData.cleared.title'), description: t('shell.demoData.cleared.body', { count: removed }) });
+    toast({ tone: 'success', title: 'Demo court cleared', description: `${removed} saved ${removed === 1 ? 'entry' : 'entries'} removed. Fresh docket, fresh drama.` });
     onCleared();
   };
 
   return (
     <div className={styles.stack}>
       <p className={styles.body}>
-        {t('shell.demoData.intro')}
+        The demo courts run entirely in this browser. Cases, drafts, Versus personas and sealed ballots are saved here and nowhere
+        else. Your sound and motion choices are kept when you reset.
       </p>
       <dl className={styles.rows}>
         {DEMO_DATA_GROUPS.map((g) => {
           const n = counts.get(g.prefix) ?? 0;
           return (
             <div key={g.prefix} className={styles.row}>
-              <dt>{t(g.label)}</dt>
+              <dt>{g.label}</dt>
               <dd>
-                {t('shell.demoData.entries', { count: n })}
+                {n} {n === 1 ? 'entry' : 'entries'}
               </dd>
             </div>
           );
@@ -38,22 +38,22 @@ export function DemoDataPanel({ onCleared = () => window.location.reload() }: { 
       <Dialog>
         <DialogTrigger asChild>
           <PaperButton variant="maroon" size="md" iconStart={<Icon name="refresh" />} disabled={total === 0}>
-            {t('shell.demoData.reset')}
+            Reset demo court
           </PaperButton>
         </DialogTrigger>
         <DialogContent
-          title={t('shell.demoData.confirm.title')}
-          description={t('shell.demoData.confirm.body')}
+          title="Reset the demo court?"
+          description="Every demo case, draft, persona and sealed ballot in this browser is deleted. Sealed ballots you have not revealed yet can never be revealed afterwards."
           tone="danger"
         >
           <div className={styles.dialogActions}>
             <DialogClose asChild>
               <PaperButton variant="ghost" size="md">
-                {t('shell.demoData.confirm.keep')}
+                Keep my cases
               </PaperButton>
             </DialogClose>
             <PaperButton variant="maroon" size="md" onClick={reset}>
-              {t('shell.demoData.confirm.reset')}
+              Reset everything
             </PaperButton>
           </div>
         </DialogContent>

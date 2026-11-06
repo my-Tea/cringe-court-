@@ -1,5 +1,4 @@
 import * as RadixToast from '@radix-ui/react-toast';
-import { t } from '@/i18n';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { cx } from '../../lib/cx';
 import { Button, IconButton } from '../Button/Button';
@@ -41,12 +40,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return id;
   }, []);
 
-  const close = (id: number) => setToasts((list) => list.map((r) => (r.id === id ? { ...r, open: false } : r)));
-  const remove = (id: number) => setToasts((list) => list.filter((r) => r.id !== id));
+  const close = (id: number) => setToasts((list) => list.map((t) => (t.id === id ? { ...t, open: false } : t)));
+  const remove = (id: number) => setToasts((list) => list.filter((t) => t.id !== id));
 
   return (
     <ToastContext.Provider value={toast}>
-      <RadixToast.Provider swipeDirection="right" label={t('ds.toast.region')}>
+      <RadixToast.Provider swipeDirection="right" label="Notifications">
         {children}
         {toasts.map(({ id, open, title, description, tone = 'info', action, duration }) => (
           <RadixToast.Root
@@ -65,7 +64,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               {description && <RadixToast.Description className={styles.description}>{description}</RadixToast.Description>}
             </div>
             <RadixToast.Close asChild>
-              <IconButton label={t('ds.toast.dismiss')} icon={<Icon name="close" />} size="sm" className={styles.close} />
+              <IconButton label="Dismiss notification" icon={<Icon name="close" />} size="sm" className={styles.close} />
             </RadixToast.Close>
             {action && (
               <RadixToast.Action altText={action.altText} asChild>

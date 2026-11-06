@@ -15,8 +15,6 @@
  *   VITE_WORLD_APP_ID      World Developer Portal app id        (required for world-idkit)
  *   VITE_WORLD_BACKEND_URL Verifier backend: /rp-context and /verify (required for world-idkit)
  */
-import type { MessageKey, MessageParams } from '@/i18n';
-
 export type LedgerKind = 'demo' | 'arc-testnet';
 export type IdentityKind = 'mock' | 'world-idkit';
 
@@ -35,19 +33,13 @@ export interface WorldConfig {
   backendUrl: string;
 }
 
-/** A deploy-config problem as catalog key + params, so the UI can translate it. */
-export interface ConfigWarning {
-  key: MessageKey;
-  params: MessageParams;
-}
-
 export interface PlatformConfig {
   ledger: LedgerKind;
   arc: ArcConfig | null;
   identity: IdentityKind;
   world: WorldConfig | null;
-  /** Why a requested adapter fell back to its demo stand-in. Translated where shown (config is read once, at load). */
-  warnings: readonly ConfigWarning[];
+  /** Human-readable reasons a requested real adapter fell back to the demo. */
+  warnings: readonly string[];
 }
 
 export const ARC_TESTNET_CHAIN_ID = 5042002 as const;
@@ -59,7 +51,7 @@ const isAddress = (v: unknown): v is Address => typeof v === 'string' && /^0x[0-
 const str = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
 
 export function readPlatformConfig(env: Env): PlatformConfig {
-  const warnings: ConfigWarning[] = [];
+  const warnings: string[] = [];
 
   let ledger: LedgerKind = 'demo';
   let arc: ArcConfig | null = null;
@@ -85,10 +77,10 @@ export function readPlatformConfig(env: Env): PlatformConfig {
         registry: registry as Address,
       };
     } else {
-      warnings.push({ key: 'shell.config.arcMissing', params: { vars: missing.join(', '), count: missing.length } });
+      warnings.push(`Arc testnet was requested but ${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} missing or not an address; using the demo ledger.`);
     }
   } else if (wantLedger !== 'demo') {
-    warnings.push({ key: 'shell.config.unknownLedger', params: { value: wantLedger } });
+    warnings.push(`Unknown VITE_LEDGER "${wantLedger}"; using the demo ledger.`);
   }
 
   let identity: IdentityKind = 'mock';
@@ -102,10 +94,10 @@ export function readPlatformConfig(env: Env): PlatformConfig {
       identity = 'world-idkit';
       world = { appId: appId as `app_${string}`, backendUrl };
     } else {
-      warnings.push({ key: 'shell.config.worldMissing', params: { vars: missing.join(', '), count: missing.length } });
+      warnings.push(`World ID was requested but ${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} missing or invalid; using the mock verifier.`);
     }
   } else if (wantIdentity !== 'mock') {
-    warnings.push({ key: 'shell.config.unknownIdentity', params: { value: wantIdentity } });
+    warnings.push(`Unknown VITE_IDENTITY "${wantIdentity}"; using the mock verifier.`);
   }
 
   return { ledger, arc, identity, world, warnings };

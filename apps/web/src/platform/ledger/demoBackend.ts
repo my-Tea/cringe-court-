@@ -12,7 +12,6 @@ import { ChainError, type Hex } from '@cringe-court/core';
 import { keccak256, toHex } from 'viem';
 import { privateKeyToAccount, type PrivateKeyAccount } from 'viem/accounts';
 import type { CourtBackend, SeatOfferRequest, SeatOfferSource } from './arcLedger';
-import { t } from '@/i18n';
 
 const demoAccount = (role: string): PrivateKeyAccount => privateKeyToAccount(keccak256(toHex(`cringe-court/demo-only/${role}`)));
 
@@ -55,7 +54,7 @@ export class DemoBackend implements CourtBackend, SeatOfferSource {
   async offerFor(r: SeatOfferRequest): Promise<SeatOffer> {
     const k = `${r.caseId}:${r.nullifier.toLowerCase()}`;
     const holder = this.#nullifiers.get(k);
-    if (holder && holder !== r.juror.toLowerCase()) throw new ChainError('duplicate', t('shell.ledger.error.humanSeated'));
+    if (holder && holder !== r.juror.toLowerCase()) throw new ChainError('duplicate', 'This human already has a seat (World ID)');
     this.#nullifiers.set(k, r.juror.toLowerCase());
     this.attest(r.juror, Math.max(Level.DEVICE, this.chain.caseTerms(r.caseId).minJurorLevel));
     return signSeatOffer(this.assigner, {

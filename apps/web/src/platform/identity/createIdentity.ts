@@ -1,5 +1,4 @@
 import type { IdentityPort } from '@cringe-court/core';
-import { t } from '@/i18n';
 import type { PlatformConfig } from '../config';
 import { IdkitIdentityPort, type ConnectHandler } from './idkitIdentity';
 import { createMockIdentity } from './mockIdentity';
@@ -41,7 +40,7 @@ export function identityInfo(config: Pick<PlatformConfig, 'identity' | 'world'>)
     } catch {
       /* keep the raw value */
     }
-    return { kind: 'world-idkit', label: t('shell.identity.world.label'), detail: t('shell.identity.world.detail', { appId: config.world.appId, host }) };
+    return { kind: 'world-idkit', label: 'World ID', detail: `World ID · ${config.world.appId} · verifier backend ${host}` };
   }
-  return { kind: 'mock', label: t('shell.identity.mock.label'), detail: t('shell.identity.mock.detail') };
+  return { kind: 'mock', label: 'Mock World ID', detail: 'Mock World ID (demo personas)' };
 }

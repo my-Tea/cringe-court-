@@ -3,15 +3,14 @@
  * screenshot library. Colours come from the token palette only (no raw hex).
  */
 import type { ShareSummary, VerdictTone } from '@cringe-court/modes-solo';
-import { t } from '@/i18n';
 import { alpha, fontFamily, palette } from '@/ds/tokens';
-import { ballotLabel } from '@/i18n/domain';
 
 export type ShareFormat = 'landscape' | 'square';
 
-export const SHARE_SIZES: Readonly<Record<ShareFormat, { width: number; height: number }>> = { landscape: { width: 1200, height: 630 }, square: { width: 1080, height: 1080 } };
-
-export const shareFormatLabel = (format: ShareFormat): string => t(format === 'landscape' ? 'solo.share.format.landscape' : 'solo.share.format.square');
+export const SHARE_SIZES: Readonly<Record<ShareFormat, { width: number; height: number; label: string }>> = {
+  landscape: { width: 1200, height: 630, label: 'Landscape · 1200×630 (X, links)' },
+  square: { width: 1080, height: 1080, label: 'Square · 1080×1080 (feeds, stories)' },
+};
 
 export interface ShareAssets {
   /** Portrait of whoever is quoted. */
@@ -50,7 +49,11 @@ export type CardContext = Pick<
   imageSmoothingEnabled: boolean;
 };
 
-const TONE_COLOR: Readonly<Record<VerdictTone, string>> = { guilty: palette.royal[700], 'not-cooked': palette.green[700], 'no-verdict': palette.neutral[700] };
+const TONE_COLOR: Readonly<Record<VerdictTone, string>> = {
+  guilty: palette.royal[700],
+  'not-cooked': palette.green[700],
+  'no-verdict': palette.neutral[700],
+};
 
 const display = (px: number, weight = 700) => `${weight} ${px}px ${fontFamily.display}`;
 const body = (px: number, weight = 500) => `${weight} ${px}px ${fontFamily.body}`;
@@ -172,7 +175,7 @@ function stamp(ctx: CardContext, s: ShareSummary, cx: number, cy: number, scale:
   ctx.textBaseline = 'middle';
   ctx.fillText(label, 0, -8 * scale);
   ctx.font = pixel(Math.round(18 * scale), 600);
-  ctx.fillText(s.tone === 'no-verdict' ? t('solo.share.card.fullRefund') : t('solo.share.card.verdict', { caseLabel: s.caseLabel }), 0, 44 * scale);
+  ctx.fillText(s.tone === 'no-verdict' ? 'FULL REFUND' : `VERDICT · ${s.caseLabel}`, 0, 44 * scale);
   ctx.restore();
 }
 
@@ -184,7 +187,7 @@ function tally(ctx: CardContext, s: ShareSummary, cx: number, y: number): void {
   ctx.fillText(`${s.tally[0]} – ${s.tally[1]}`, cx, y);
   ctx.font = mono(16);
   ctx.fillStyle = palette.neutral[700];
-  ctx.fillText(`${ballotLabel(s.ballot[0])}  ·  ${ballotLabel(s.ballot[1])}`, cx, y + 30);
+  ctx.fillText(`${s.ballot[0]}  ·  ${s.ballot[1]}`, cx, y + 30);
 }
 
 function jurors(ctx: CardContext, assets: ShareAssets, cx: number, y: number, size: number): void {
@@ -222,7 +225,7 @@ function quote(ctx: CardContext, s: ShareSummary, assets: ShareAssets, x: number
   lines.forEach((l, i) => ctx.fillText(l, tx, y + pad + 26 + i * 34));
   ctx.font = display(18, 600);
   ctx.fillStyle = palette.royal[900];
-  ctx.fillText(t('solo.share.card.quoteBy', { by: s.quote.by }), tx, y + pad + 26 + lines.length * 34 + 6);
+  ctx.fillText(`— ${s.quote.by}`, tx, y + pad + 26 + lines.length * 34 + 6);
   return y + h;
 }
 
@@ -235,11 +238,11 @@ function footer(ctx: CardContext, s: ShareSummary, w: number, h: number): void {
   ctx.font = `italic 600 22px ${fontFamily.display}`;
   ctx.fillStyle = palette.gold[300];
   ctx.textAlign = 'left';
-  ctx.fillText(t('solo.share.card.footer', { app: t('common.app.name'), tagline: t('common.app.tagline') }), 58, y + bandH / 2);
+  ctx.fillText('CringeCourt ◆ Your Honor, Bro Is Cooked.', 58, y + bandH / 2);
   ctx.font = mono(14, 500);
   ctx.fillStyle = palette.gold[100];
   ctx.textAlign = 'right';
-  ctx.fillText(t('solo.share.card.testnet', { fingerprint: s.fingerprint }), w - 58, y + bandH / 2);
+  ctx.fillText(`TESTNET DEMO · transcript ${s.fingerprint}`, w - 58, y + bandH / 2);
 }
 
 function header(ctx: CardContext, s: ShareSummary, x: number, y: number): number {
@@ -249,11 +252,10 @@ function header(ctx: CardContext, s: ShareSummary, x: number, y: number): number
   ctx.fillStyle = palette.gold[700];
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
-  const brand = t('common.app.name');
-  ctx.fillText(brand, x + 2, top + 42);
+  ctx.fillText('CringeCourt', x + 2, top + 42);
   ctx.fillStyle = palette.royal[900];
-  ctx.fillText(brand, x, top + 40);
-  const markW = ctx.measureText(brand).width;
+  ctx.fillText('CringeCourt', x, top + 40);
+  const markW = ctx.measureText('CringeCourt').width;
   ctx.fillStyle = palette.gold[500];
   ctx.fillRect(x + markW + 18, top + 26, 120, 3);
   diamond(ctx, x + markW + 18, top + 27, 6, palette.gold[500]);
@@ -263,7 +265,7 @@ function header(ctx: CardContext, s: ShareSummary, x: number, y: number): number
   ctx.fillStyle = palette.gold[900];
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
-  const label = t('solo.share.card.header', { caseLabel: s.caseLabel, category: s.category.toUpperCase() });
+  const label = `${s.caseLabel}  ·  ${s.category.toUpperCase()}`;
   ctx.fillText(label, x, top + 18);
   return top + 36;
 }

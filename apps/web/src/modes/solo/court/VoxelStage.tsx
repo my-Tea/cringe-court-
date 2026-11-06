@@ -10,7 +10,6 @@
 import { useEffect, useRef } from 'react';
 import { directTrial } from '@cringe-court/engine';
 import { Courtroom as VoxelCanvas, useCourtroom } from '@cringe-court/scene/react';
-import { t } from '@/i18n';
 import type { TrialViewProps } from './TrialView';
 import styles from './Courtroom.module.css';
 
@@ -79,9 +78,9 @@ export default function VoxelStage({ line, cast, audio, reducedMotion: reduced, 
   if (status.state !== 'ready') {
     return status.state === 'loading' ? (
       <div className={styles.voxelLoading} aria-hidden>
-        <span>{t('solo.courtroom.voxel.loading', { pct: Math.round(status.progress * 100) })}</span>
+        <span>Building the courtroom… {Math.round(status.progress * 100)}%</span>
       </div>
     ) : null;
   }
-  return <VoxelCanvas runtime={status.runtime} className={styles.voxel} label={t('solo.courtroom.voxel.label')} />;
+  return <VoxelCanvas runtime={status.runtime} className={styles.voxel} label="The voxel courtroom" />;
 }

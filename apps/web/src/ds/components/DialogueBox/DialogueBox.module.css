@@ -95,7 +95,7 @@
   vertical-align: -0.12em;
   background: var(--cc-royal-700);
   clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
-  animation: caret var(--cc-loop-caret) var(--cc-ease-blink) infinite;
+  animation: caret 0.9s steps(2, jump-none) infinite;
 }
 
 @keyframes caret {

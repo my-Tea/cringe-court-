@@ -29,5 +29,4 @@ export * from './components/Tabs/Tabs';
 export * from './components/Toast/Toast';
 export * from './components/Tooltip/Tooltip';
 export * from './motion/MotionProvider';
-export { usePageEnter } from './motion/usePageEnter';
 export { cx } from './lib/cx';

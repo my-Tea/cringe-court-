@@ -2,8 +2,6 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* Cards keep their own height: a short card must not stretch into an empty sheet. */
-  align-items: start;
   gap: var(--cc-space-6);
 }
 
@@ -146,12 +144,6 @@
   color: var(--cc-color-text);
 }
 
-.termsScroll {
-  max-width: 100%;
-  overflow-x: auto;
-  border-radius: var(--cc-radius-sm);
-}
-
 .termsTable {
   width: 100%;
   border-collapse: collapse;
@@ -214,11 +206,4 @@
 .envList code {
   font-family: var(--cc-font-mono);
   font-size: var(--cc-text-xs);
-}
-
-@media (max-width: 30rem) {
-  .termsTable th,
-  .termsTable td {
-    padding: var(--cc-space-2);
-  }
 }

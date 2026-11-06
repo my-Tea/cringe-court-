@@ -12,7 +12,7 @@
     0 0 / 200% 100% no-repeat,
     var(--cc-paper-grain),
     color-mix(in srgb, var(--cc-color-text) 9%, var(--cc-color-surface));
-  animation: shimmer var(--cc-loop-shimmer) var(--cc-ease-linear) infinite;
+  animation: shimmer 1.4s linear infinite;
 }
 
 @keyframes shimmer {

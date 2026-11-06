@@ -1,11 +1,8 @@
 import type { SideId, TrialRules } from '@cringe-court/core';
-import { BRIEFING_QUESTIONS, briefingIssues, prepareBriefing, type BriefingDraft } from '@cringe-court/modes-versus';
+import { BRIEFING_QUESTIONS, ROUTE_OUT_COPY, briefingIssues, describeHits, prepareBriefing, type BriefingDraft } from '@cringe-court/modes-versus';
 import { useMemo, useState, type ReactNode } from 'react';
-import { t } from '@/i18n';
 import { Alert, Badge, Icon, PaperButton, TextArea, TextField } from '@/ds';
-import { agentName, letter } from '../copy';
 import styles from './Briefing.module.css';
-import { describeHits, routeOutCopy } from '@/i18n/domain';
 
 export interface BriefReviewProps {
   side: SideId;
@@ -28,54 +25,40 @@ export function BriefReview({ side, value, onChange, rules, actions, startInEdit
   const issues = useMemo(() => briefingIssues(value, rules), [value, rules]);
   const issue = (field: keyof BriefingDraft) => issues.find((i) => i.field === field)?.message;
   const ready = issues.length === 0 && prepared.screen.ok;
-  const agent = agentName(side);
+  const agent = `Agent ${side.toUpperCase()}`;
   const publicHits = [...prepared.redactions.story, ...prepared.redactions.nickname];
   const privateHits = [...prepared.redactions.privateNotes, ...prepared.redactions.angle];
 
   return (
     <div className={styles.review} data-side={side}>
       {!prepared.screen.ok && (
-        <Alert tone="danger" title={routeOutCopy(prepared.screen.topics[0]!).title} live="polite">
-          {t('versus.review.misunderstanding', { body: routeOutCopy(prepared.screen.topics[0]!).body })}
+        <Alert tone="danger" title={ROUTE_OUT_COPY[prepared.screen.topics[0]!].title} live="polite">
+          {ROUTE_OUT_COPY[prepared.screen.topics[0]!].body} Edit your brief if this was a misunderstanding.
         </Alert>
       )}
 
       <div className={styles.reviewGrid}>
         <section className={styles.reviewCard} data-visibility="public" aria-labelledby={`review-public-${side}`}>
           <header className={styles.reviewHead}>
-            <h3 id={`review-public-${side}`}>{t('versus.review.public.title')}</h3>
+            <h3 id={`review-public-${side}`}>What the jury will read</h3>
             <Badge tone="info">
-              <Icon name="eye" aria-hidden /> {t('versus.review.public.badge')}
+              <Icon name="eye" aria-hidden /> Public once approved
             </Badge>
           </header>
           {editing ? (
             <div className={styles.reviewFields}>
-              <TextArea
-                label={t('versus.review.field.happened')}
-                rows={5}
-                maxLength={BRIEFING_QUESTIONS.happened.maxChars}
-                value={value.happened}
-                onChange={(e) => onChange({ ...value, happened: e.target.value })}
-                error={issue('happened')}
-              />
-              <TextArea
-                label={t('versus.review.field.why')}
-                rows={3}
-                maxLength={BRIEFING_QUESTIONS.why.maxChars}
-                value={value.why}
-                onChange={(e) => onChange({ ...value, why: e.target.value })}
-                error={issue('why')}
-              />
+              <TextArea label="What happened" rows={5} maxLength={BRIEFING_QUESTIONS.happened.maxChars} value={value.happened} onChange={(e) => onChange({ ...value, happened: e.target.value })} error={issue('happened')} />
+              <TextArea label="Why you are right" rows={3} maxLength={BRIEFING_QUESTIONS.why.maxChars} value={value.why} onChange={(e) => onChange({ ...value, why: e.target.value })} error={issue('why')} />
             </div>
           ) : (
             <div className={styles.storyPreview}>
-              {prepared.patch.story ? prepared.patch.story.split('\n\n').map((p, i) => <p key={i}>{p}</p>) : <p className={styles.muted}>{t('versus.review.empty')}</p>}
+              {prepared.patch.story ? prepared.patch.story.split('\n\n').map((p, i) => <p key={i}>{p}</p>) : <p className={styles.muted}>Nothing yet.</p>}
             </div>
           )}
           <TextField
-            label={t('versus.review.field.nickname')}
+            label="Nickname on the verdict"
             optional
-            hint={t('versus.review.field.nicknameHint', { side: letter(side), nickname: prepared.patch.nickname ?? t('versus.review.field.nicknameFallback') })}
+            hint={`Shown as SIDE ${side.toUpperCase()} “${prepared.patch.nickname ?? 'your nickname'}”. No real names (D5).`}
             maxLength={rules.nicknameMaxChars}
             value={value.nickname}
             onChange={(e) => onChange({ ...value, nickname: e.target.value })}
@@ -83,57 +66,43 @@ export function BriefReview({ side, value, onChange, rules, actions, startInEdit
           />
           <p className={styles.redactionNote} data-hit={publicHits.length > 0 || undefined}>
             <Icon name={publicHits.length ? 'sparkle' : 'check'} aria-hidden />
-            {t('versus.review.redaction', { hits: describeHits(publicHits) })}
+            Redaction pass: {describeHits(publicHits)}
           </p>
         </section>
 
         <section className={styles.reviewCard} data-visibility="private" aria-labelledby={`review-private-${side}`}>
           <header className={styles.reviewHead}>
-            <h3 id={`review-private-${side}`}>{t('versus.review.private.title', { agent })}</h3>
+            <h3 id={`review-private-${side}`}>Only {agent} sees</h3>
             <Badge tone="accent">
-              <Icon name="lock" aria-hidden /> {t('versus.review.private.badge')}
+              <Icon name="lock" aria-hidden /> Private
             </Badge>
           </header>
           {editing ? (
             <div className={styles.reviewFields}>
-              <TextArea
-                label={t('versus.review.field.notes')}
-                optional
-                rows={3}
-                maxLength={BRIEFING_QUESTIONS.private.maxChars}
-                value={value.privateNotes}
-                onChange={(e) => onChange({ ...value, privateNotes: e.target.value })}
-                error={issue('privateNotes')}
-              />
-              <TextField
-                label={t('versus.review.field.angle')}
-                maxLength={rules.angleMaxChars}
-                value={value.angle}
-                onChange={(e) => onChange({ ...value, angle: e.target.value })}
-                error={issue('angle')}
-              />
+              <TextArea label="Lawyer-only notes" optional rows={3} maxLength={BRIEFING_QUESTIONS.private.maxChars} value={value.privateNotes} onChange={(e) => onChange({ ...value, privateNotes: e.target.value })} error={issue('privateNotes')} />
+              <TextField label="Your one angle" maxLength={rules.angleMaxChars} value={value.angle} onChange={(e) => onChange({ ...value, angle: e.target.value })} error={issue('angle')} />
             </div>
           ) : (
             <dl className={styles.privateList}>
               <div>
-                <dt>{t('versus.review.list.notes')}</dt>
-                <dd>{prepared.patch.privateNotes || <span className={styles.muted}>{t('versus.review.list.notesNone')}</span>}</dd>
+                <dt>Notes</dt>
+                <dd>{prepared.patch.privateNotes || <span className={styles.muted}>None. Arguing clean.</span>}</dd>
               </div>
               <div>
-                <dt>{t('versus.review.list.angle')}</dt>
-                <dd>{prepared.patch.angle ? `“${prepared.patch.angle}”` : <span className={styles.muted}>{t('versus.review.list.angleNone')}</span>}</dd>
+                <dt>Angle</dt>
+                <dd>{prepared.patch.angle ? `“${prepared.patch.angle}”` : <span className={styles.muted}>Not set</span>}</dd>
               </div>
             </dl>
           )}
           <p className={styles.redactionNote} data-hit={privateHits.length > 0 || undefined}>
             <Icon name={privateHits.length ? 'sparkle' : 'check'} aria-hidden />
-            {privateHits.length ? describeHits(privateHits) : t('versus.review.private.note', { other: side === 'a' ? 'B' : 'A' })}
+            {privateHits.length ? describeHits(privateHits) : 'Never shown to Side ' + (side === 'a' ? 'B' : 'A') + ', the jury or the public.'}
           </p>
         </section>
       </div>
 
       {!editing && issues.length > 0 && (
-        <Alert tone="warning" title={t('versus.review.issues')}>
+        <Alert tone="warning" title="A few things to fix first">
           <ul className={styles.issueList}>
             {issues.map((i) => (
               <li key={i.field + i.message}>{i.message}</li>
@@ -144,7 +113,7 @@ export function BriefReview({ side, value, onChange, rules, actions, startInEdit
 
       <div className={styles.reviewActions}>
         <PaperButton variant="ghost" iconStart={<Icon name={editing ? 'check' : 'document'} />} onClick={() => setEditing(!editing)}>
-          {editing ? t('versus.review.preview') : t('versus.review.edit')}
+          {editing ? 'Preview' : 'Edit brief'}
         </PaperButton>
         {actions(ready)}
       </div>

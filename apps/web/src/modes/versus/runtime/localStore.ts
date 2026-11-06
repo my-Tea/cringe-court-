@@ -8,7 +8,6 @@
  * private notes live in this browser's storage, which is fine for a same-device
  * demo and wrong for real use; a networked FactStore must keep them apart.
  */
-import { t } from '@/i18n';
 import { decodeFacts, encodeFacts, type Fact, type FactStore } from '@cringe-court/modes-versus';
 
 export const LOG_KEY = 'cc:versus:log';
@@ -37,7 +36,7 @@ export class LocalFactStore implements FactStore {
       try {
         facts = raw ? decodeFacts(raw) : [];
       } catch {
-        throw new Error(t('versus.error.damaged'));
+        throw new Error('The demo court record on this device is damaged. Reset the demo court to start again.');
       }
       this.#cache = { raw, facts };
     }
@@ -51,7 +50,7 @@ export class LocalFactStore implements FactStore {
     try {
       this.#storage.setItem(LOG_KEY, encodeFacts(next));
     } catch {
-      throw new Error(t('versus.error.storage'));
+      throw new Error('This browser is out of storage for the demo court. Reset the demo court to free space.');
     }
     this.#channel?.postMessage({ length: next.length });
     this.#emit();

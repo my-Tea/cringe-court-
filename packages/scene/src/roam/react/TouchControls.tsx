@@ -2,13 +2,10 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { RoamController } from '../controller';
 import { joystickIntent, joystickKnob, lookDelta } from '../input';
 
-import { useRoamStrings } from './strings';
-
 const RADIUS = 52;
 
 /** Left: floating virtual joystick. Right: drag to look. Buttons: interact, hop, pause. */
 export function TouchControls({ controller, prompt }: { controller: RoamController; prompt: string | null }) {
-  const S = useRoamStrings();
   const stick = useRef<{ id: number; x: number; y: number } | null>(null);
   const look = useRef<{ id: number; x: number; y: number } | null>(null);
   const [ui, setUi] = useState<{ x: number; y: number; kx: number; ky: number } | null>(null);
@@ -71,21 +68,20 @@ export function TouchControls({ controller, prompt }: { controller: RoamControll
             <div className="ccr-stick" style={{ left: 92, bottom: 30, top: 'auto', marginTop: 0, marginBottom: 0 }}>
               <div className="ccr-knob" />
             </div>
-            <span className="ccr-stick-hint ccr-pixel">{S.touchDragHint}</span>
+            <span className="ccr-stick-hint ccr-pixel">drag to walk</span>
           </>
         )}
       </div>
       <div className="ccr-touch-buttons">
-        <button type="button" className="ccr-btn ccr-btn--ghost" aria-label={S.touchPause} onClick={() => controller.setPaused(true)}>
-          {/* i18n-ignore: glyphs are decoration; the aria-label is the name (WCAG 2.5.3). */}
-          <span aria-hidden="true">II</span>
+        <button type="button" className="ccr-btn ccr-btn--ghost" aria-label="Pause" onClick={() => controller.setPaused(true)}>
+          II
         </button>
         <span />
-        <button type="button" className="ccr-btn ccr-btn--ghost" aria-label={S.touchHop} onClick={() => controller.jump()}>
-          <span aria-hidden="true">⤒</span>
+        <button type="button" className="ccr-btn ccr-btn--ghost" aria-label="Hop" onClick={() => controller.jump()}>
+          ⤒
         </button>
-        <button type="button" className={`ccr-btn ccr-act ${prompt ? 'ccr-btn--gold' : ''}`} aria-label={prompt ? S.touchInteractWith(prompt) : S.touchInteract} onClick={() => controller.interact()}>
-          <span aria-hidden="true">✋</span>
+        <button type="button" className={`ccr-btn ccr-act ${prompt ? 'ccr-btn--gold' : ''}`} aria-label={prompt ? `Interact: ${prompt}` : 'Interact'} onClick={() => controller.interact()}>
+          ✋
         </button>
       </div>
     </div>

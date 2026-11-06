@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { Icon, PaperButtonLink, PaperNavBar, PaperTab, TestnetBadge, useReducedMotion } from '@/ds';
-import { t, tRich } from '@/i18n';
 import { NAV_ITEMS, paths } from '@/app/routes';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { CourtroomScene } from './hero/CourtroomScene';
@@ -68,7 +67,7 @@ export function LandingPage() {
   return (
     <div className={styles.page}>
       <a className={styles.skip} href="#landing-main">
-        {t('shell.landing.skip')}
+        Skip to sign in
       </a>
       <span className={styles.corner} data-corner="tl" aria-hidden />
       <span className={styles.corner} data-corner="tr" aria-hidden />
@@ -77,20 +76,20 @@ export function LandingPage() {
 
       <header className={styles.top}>
         <PaperNavBar
-          label={t('shell.nav.label')}
+          label="Main"
           className={styles.nav}
           end={
             <>
               <TestnetBadge className={styles.testnet} />
               <PaperButtonLink to={paths.court} size="sm" iconStart={<Icon name="gavel" />} className={styles.navCta}>
-                {t('shell.landing.enterCourt')}
+                Enter court
               </PaperButtonLink>
             </>
           }
         >
           {NAV_ITEMS.map((item) => (
             <PaperTab key={item.to} to={item.to} icon={item.icon} end={item.to === paths.home} {...(item.activeFor ? { activeFor: item.activeFor } : {})}>
-              {t(item.labelKey)}
+              {item.label}
             </PaperTab>
           ))}
         </PaperNavBar>
@@ -109,12 +108,12 @@ export function LandingPage() {
 
       <footer className={styles.footer}>
         <p>
-          {tRich('shell.landing.footer.note', { b: (chunk) => <strong>{chunk}</strong> })}
+          <strong>Testnet only.</strong> Every amount is test USDC on Arc testnet. Entertainment, not legal advice.
         </p>
-        <nav aria-label={t('shell.footer.more')} className={styles.footerLinks}>
-          <Link to={paths.howToPlay}>{t('shell.howTo.trial.title')}</Link>
-          <Link to={paths.courtroom}>{t('shell.nav.courts.demo')}</Link>
-          <Link to={paths.gallery}>{t('shell.nav.gallery')}</Link>
+        <nav aria-label="More" className={styles.footerLinks}>
+          <Link to={paths.howToPlay}>How a trial works</Link>
+          <Link to={paths.courtroom}>Demo court</Link>
+          <Link to={paths.gallery}>Design gallery</Link>
         </nav>
       </footer>
     </div>

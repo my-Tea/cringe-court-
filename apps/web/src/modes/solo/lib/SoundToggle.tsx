@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react';
 import { Button } from '@/ds';
-import { t } from '@/i18n';
 import { setSound, soundEngine } from './sound';
 import { SoloIcon } from './SoloIcon';
 
@@ -12,7 +11,7 @@ export function SoundToggle() {
   const on = snap.state === 'running' && !snap.settings.muted;
   return (
     <Button size="sm" variant="ghost" aria-pressed={on} onClick={() => void setSound(!on)} iconStart={<SoloIcon name={on ? 'sound' : 'muted'} />}>
-      {t('solo.sound.toggle')}
+      Sound
     </Button>
   );
 }

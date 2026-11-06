@@ -14,7 +14,7 @@
   );
   transition: transform var(--cc-duration-slower) var(--cc-ease-standard);
   animation: cc-paper-slide-in var(--cc-duration-slower) var(--cc-ease-unfold) backwards;
-  animation-delay: calc(var(--cc-stagger, 0) * var(--cc-stagger-base));
+  animation-delay: calc(var(--cc-stagger, 0) * 70ms);
 }
 
 .drop2 {
@@ -32,14 +32,14 @@
 .sway {
   transform-box: fill-box;
   transform-origin: 50% 0;
-  animation: cc-paper-sway calc(var(--cc-loop-sway) * 7 / 6) var(--cc-ease-sway) infinite;
+  animation: cc-paper-sway 7s ease-in-out infinite;
 }
 
 /* The judge winds up and bangs, every few seconds. Pivot: the elbow. */
 .gavel {
   transform-box: view-box;
   transform-origin: 704px 298px;
-  animation: cc-hero-gavel var(--cc-loop-idle) var(--cc-ease-standard) infinite;
+  animation: cc-hero-gavel 4.8s var(--cc-ease-standard) infinite;
 }
 
 @keyframes cc-hero-gavel {

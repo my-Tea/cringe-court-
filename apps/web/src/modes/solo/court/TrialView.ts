@@ -1,6 +1,5 @@
 import { lazy, type ComponentType } from 'react';
 import type { AudioPort, CastMember, CourtLine } from '@cringe-court/core';
-import { t } from '@/i18n';
 
 /**
  * The seam between the Solo trial (Courtroom.tsx: dialogue, transport,
@@ -39,9 +38,7 @@ export interface TrialView {
 
 export const voxelTrialView: TrialView = {
   Component: lazy(() => import('./VoxelStage')),
-  get label() {
-    return t('solo.trialView.voxel');
-  },
+  label: '3D courtroom (preview)',
   requiresWebGL: true,
   ownsSound: true,
 };

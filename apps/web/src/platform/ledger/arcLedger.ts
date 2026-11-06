@@ -64,7 +64,6 @@ import {
   usdcOf,
   verdictKindOf,
 } from './mapping';
-import { t } from '@/i18n';
 
 export interface SeatOfferRequest {
   caseNumber: CaseNumber;
@@ -92,7 +91,7 @@ export interface CourtBackend {
 /** Arc testnet has no relayer yet: say so instead of faking an offer. */
 export class RelayerSeatOffers implements SeatOfferSource {
   async offerFor(): Promise<SeatOffer> {
-    throw new ChainError('not-allowed', t('shell.ledger.error.noRelayer'));
+    throw new ChainError('not-allowed', 'Seat offers come from the court relayer, which is not deployed on Arc testnet yet');
   }
 }
 
@@ -165,7 +164,7 @@ export class ArcLedger implements ChainPort {
 
   /** A view over the same ledger signing as `account` (memory chain only). */
   as(account: Hex): ArcLedger {
-    if (!this.#o.accountFor) throw new ChainError('not-allowed', t('shell.ledger.error.demoOnly'));
+    if (!this.#o.accountFor) throw new ChainError('not-allowed', 'Only the demo ledger can act as another account');
     return new ArcLedger({ ...this.#o, port: this.#o.accountFor(account) }, this.#s);
   }
 
@@ -195,18 +194,18 @@ export class ArcLedger implements ChainPort {
       const mode = params.terms.mode;
       const chainTerms = await this.#port.termsOf(chainModeOf(mode));
       const diffs = diffTerms(params.terms, termsFromChain(mode, chainTerms));
-      if (diffs.length > 0) throw new ChainError('bad-amount', t('shell.ledger.error.termsDiffer', { diffs: diffs.join('; ') }));
+      if (diffs.length > 0) throw new ChainError('bad-amount', `The ledger's terms differ from the app's: ${diffs.join('; ')}`);
       const contentHash = params.transcriptHash;
       let caseId: bigint;
       let txHash: Hex;
       if (mode === 'solo') {
-        if (params.payers.length !== 1 || lower(params.payers[0]!) !== lower(me)) throw new ChainError('not-allowed', t('shell.ledger.error.soloFiler'));
+        if (params.payers.length !== 1 || lower(params.payers[0]!) !== lower(me)) throw new ChainError('not-allowed', 'A Solo case is filed and paid by its filer');
         await this.#o.backend?.verifyParty?.(me);
         await this.#allowance(me, params.terms.target);
         ({ caseId, txHash } = await this.#port.fileSolo({ contentHash }));
       } else if (mode === 'versus') {
         const [a, b] = params.payers;
-        if (!a || !b || lower(a) !== lower(me)) throw new ChainError('not-allowed', t('shell.ledger.error.versusSideA'));
+        if (!a || !b || lower(a) !== lower(me)) throw new ChainError('not-allowed', 'A Versus case is opened and paid by Side A');
         await this.#o.backend?.verifyParty?.(me);
         await this.#allowance(me, params.terms.payerShares[0] ?? params.terms.target);
         ({ caseId, txHash } = await this.#port.openVersus({ sideB: b, contentHash }));
@@ -259,13 +258,13 @@ export class ArcLedger implements ChainPort {
       const me = this.#me();
       const id = caseIdOf(caseNumber);
       const v = await this.#port.getCase(id);
-      if (v.status === Status.None) throw new ChainError('not-found', t('shell.ledger.error.noCase', { caseNumber: String(caseNumber) }));
+      if (v.status === Status.None) throw new ChainError('not-found', `No case ${caseNumber}`);
       const mode = modeIdOf(v.mode);
-      const terms = await this.#port.caseTerms(id);
+      const t = await this.#port.caseTerms(id);
       if (mode === 'grand-jury') {
         const remaining = v.target - v.raised;
-        if (amount < terms.minContribution && amount < remaining) throw new ChainError('bad-amount', t('shell.ledger.error.minContribution'));
-        if (amount > remaining) throw new ChainError('bad-amount', t('shell.ledger.error.leftToRaise', { amount: String(remaining) }));
+        if (amount < t.minContribution && amount < remaining) throw new ChainError('bad-amount', 'Contributions start at the minimum contribution');
+        if (amount > remaining) throw new ChainError('bad-amount', `Only ${remaining} micro-USDC left to raise`);
         await this.#allowance(me, amount);
         const r = await this.#port.contribute(id, amount);
         const book = this.#s.contributors.get(id) ?? new Map<string, bigint>();
@@ -275,11 +274,11 @@ export class ArcLedger implements ChainPort {
       }
       const isCreator = lower(me) === lower(v.creator);
       const share = await this.#port.quote(chainModeOf(mode), isCreator, false);
-      if (amount !== share) throw new ChainError('bad-amount', t('shell.ledger.error.yourShare', { amount: String(share) }));
+      if (amount !== share) throw new ChainError('bad-amount', `Your share is ${share} micro-USDC`);
       if (isCreator) {
         const k = key(id, me);
         const done = this.#s.created.get(k);
-        if (!done) throw new ChainError('duplicate', t('shell.ledger.error.alreadyPaid'));
+        if (!done) throw new ChainError('duplicate', 'Already paid');
         this.#s.created.delete(k);
         return done;
       }
@@ -290,7 +289,7 @@ export class ArcLedger implements ChainPort {
   }
 
   async sponsor(): Promise<TxReceipt> {
-    throw new ChainError('not-allowed', t('shell.ledger.error.sponsorDeposit'));
+    throw new ChainError('not-allowed', 'The contract takes the sponsor deposit when a Grand Jury case is published; use publishGrandJury');
   }
 
   /* ── the jury ── */
@@ -310,7 +309,7 @@ export class ArcLedger implements ChainPort {
   }
 
   commitmentFor(caseNumber: CaseNumber, juror: Hex, choice: BallotChoice, salt: Hex): Hex {
-    if (!/^0x[0-9a-fA-F]{64}$/.test(salt)) throw new ChainError('bad-reveal', t('shell.ledger.error.salt'));
+    if (!/^0x[0-9a-fA-F]{64}$/.test(salt)) throw new ChainError('bad-reveal', 'Salt must be 32 bytes');
     return commitmentOf({ chainId: this.#port.chainId, court: this.#port.court, caseId: caseIdOf(caseNumber), juror, choice, salt });
   }
 
@@ -329,7 +328,7 @@ export class ArcLedger implements ChainPort {
     return this.#run(async () => {
       const id = caseIdOf(caseNumber);
       const phase = await this.#port.phaseOf(id);
-      if (phase === ChainPhase.None) throw new ChainError('not-found', t('shell.ledger.error.noCase', { caseNumber: String(caseNumber) }));
+      if (phase === ChainPhase.None) throw new ChainError('not-found', `No case ${caseNumber}`);
       if (phase === ChainPhase.Expired) return this.#receipt((await this.#port.cancelExpired(id)).txHash);
       if (phase === ChainPhase.Preparing) await this.#openCourt(id);
       return this.#receipt(ZERO_HASH);
@@ -346,12 +345,12 @@ export class ArcLedger implements ChainPort {
       const me = this.#me();
       const id = caseIdOf(caseNumber);
       let phase = await this.#port.phaseOf(id);
-      if (phase === ChainPhase.None) throw new ChainError('not-found', t('shell.ledger.error.noCase', { caseNumber: String(caseNumber) }));
+      if (phase === ChainPhase.None) throw new ChainError('not-found', `No case ${caseNumber}`);
       if (phase === ChainPhase.Expired) {
         await this.#port.cancelExpired(id);
         phase = ChainPhase.Cancelled;
       }
-      if (phase !== ChainPhase.Finalized && phase !== ChainPhase.Cancelled) throw new ChainError('wrong-phase', t('shell.ledger.error.nothingYet'));
+      if (phase !== ChainPhase.Finalized && phase !== ChainPhase.Cancelled) throw new ChainError('wrong-phase', 'Nothing to claim yet');
       let last: TxReceipt | null = null;
       if ((await this.#port.isRefundable(id)) && (await this.#port.paidBy(id, me)) > 0n) {
         const r = await this.#port.claimRefund(id);
@@ -363,7 +362,7 @@ export class ArcLedger implements ChainPort {
         last = this.#receipt(r.txHash);
         this.#emit({ type: 'claimed', caseNumber, account: lower(me), amount: usdcOf(r.amount) });
       }
-      if (!last) throw new ChainError('not-allowed', t('shell.ledger.error.nothingToClaim'));
+      if (!last) throw new ChainError('not-allowed', 'Nothing to claim');
       return last;
     });
   }
@@ -373,7 +372,7 @@ export class ArcLedger implements ChainPort {
       const id = caseIdOf(caseNumber);
       const v = await this.#port.getCase(id);
       const c = await this.#load(id);
-      if (!c || v.status === Status.None) throw new ChainError('not-found', t('shell.ledger.error.noCase', { caseNumber: String(caseNumber) }));
+      if (!c || v.status === Status.None) throw new ChainError('not-found', `No case ${caseNumber}`);
       if (c.phase !== 'settled' && c.phase !== 'cancelled') return [];
       const outcome: SettlementOutcome = c.phase === 'settled' ? 'trial' : v.cancelReason === CancelReason.ProtectiveCancel ? 'protective' : 'cancelled';
       const jurors: JurorRecord[] = c.seats.map((s) => {
@@ -418,7 +417,7 @@ export class ArcLedger implements ChainPort {
 
   #me(): Hex {
     const a = this.#port.account;
-    if (!a) throw new ChainError('not-allowed', t('shell.ledger.error.connectWallet'));
+    if (!a) throw new ChainError('not-allowed', 'Connect a wallet first');
     return a;
   }
 
@@ -438,7 +437,7 @@ export class ArcLedger implements ChainPort {
 
   async #publish(contentHash: Hex, sponsor: { sponsor?: Hex; sponsorAmount?: bigint } = {}): Promise<{ caseId: bigint; txHash: Hex }> {
     const backend = this.#o.backend;
-    if (!backend) throw new ChainError('not-allowed', t('shell.ledger.error.curator'));
+    if (!backend) throw new ChainError('not-allowed', 'Grand Jury cases are published by the court curator, which is not available here');
     return backend.publishGrandJury({ contentHash, ...sponsor });
   }
 

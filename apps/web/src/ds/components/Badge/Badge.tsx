@@ -1,5 +1,4 @@
 import type { HTMLAttributes } from 'react';
-import { t } from '@/i18n';
 import { cx } from '../../lib/cx';
 import styles from './Badge.module.css';
 
@@ -39,9 +38,9 @@ export function Badge({ tone = 'neutral', solid, dot, className, ...rest }: Badg
  */
 export function TestnetBadge({ className }: { className?: string }) {
   return (
-    <span className={cx(styles.badge, styles.testnet, className)} title={t('ds.testnet.title')}>
-      {t('ds.testnet.label')}
-      <span className="cc-visually-hidden">{t('ds.testnet.explainer')}</span>
+    <span className={cx(styles.badge, styles.testnet, className)} title="Arc testnet: test USDC only, no real money">
+      Testnet
+      <span className="cc-visually-hidden">: Arc testnet, test USDC only, no real money</span>
     </span>
   );
 }

@@ -1,5 +1,4 @@
 import * as RadixDialog from '@radix-ui/react-dialog';
-import { t } from '@/i18n';
 import type { ReactNode } from 'react';
 import { cx } from '../../lib/cx';
 import { IconButton } from '../Button/Button';
@@ -56,7 +55,7 @@ export function DialogContent({
           </div>
           {!hideClose && (
             <RadixDialog.Close asChild>
-              <IconButton label={t('common.action.close')} icon={<Icon name="close" />} size="sm" className={styles.close} />
+              <IconButton label="Close" icon={<Icon name="close" />} size="sm" className={styles.close} />
             </RadixDialog.Close>
           )}
         </div>

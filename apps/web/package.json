@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "tokens": "tsx scripts/gen-tokens.ts",
     "cutouts": "tsx scripts/gen-cutouts.ts",
-    "guide-art": "python3 -I scripts/gen-guide-art.py"
+    "guide-art": "python3 -I scripts/gen-guide-art.py",
+    "playtest": "node e2e/playtest/run.mjs"
   },
   "dependencies": {
     "@cringe-court/ai": "*",
@@ -42,6 +43,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
+    "playwright-core": "^1.64.1",
     "vite": "^8.3.5"
   }
 }
