@@ -253,7 +253,6 @@ export function TrialPanel({ initial, chosen, onChoose, onClose }: { initial: Mo
 /* ── Quest tracker ────────────────────────────────────────────────── */
 
 const STEPS: ReadonlyArray<{ id: QuestStep; label: MessageKey; hint: MessageKey }> = [
-  { id: 'wardrobe', label: 'play.quest.wardrobe', hint: 'play.quest.hint.wardrobe' },
   { id: 'trial', label: 'play.quest.trial', hint: 'play.quest.hint.trial' },
   { id: 'enter', label: 'play.quest.enter', hint: 'play.quest.hint.enter' },
 ];

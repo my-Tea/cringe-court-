@@ -9,7 +9,7 @@ import { normalizeLook, randomLook, type GateId, type PlayerLook } from '@cringe
  */
 export interface PlayerProfile {
   look: PlayerLook;
-  /** True once the look was confirmed at the wardrobe (a rolled look is not yet chosen). */
+  /** True once the look was confirmed at the wardrobe (a rolled look is not yet chosen). Optional. */
   dressed: boolean;
   verified: { nullifier: string; at: number } | null;
   mode: ModeId | null;
@@ -63,24 +63,16 @@ export function savedLook(storage: Storage | undefined = safeStorage()): PlayerL
   }
 }
 
-/**
- * Seals already lifted. The shrine is optional, so the verify bridge starts open.
- * Wardrobe, then the trial gate, then the courthouse.
- */
+/** Seals already lifted. The shrine and the wardrobe are optional; only the court needs a mode. */
 export function openGatesFor(p: PlayerProfile): GateId[] {
-  const out: GateId[] = ['verify'];
-  if (p.dressed) out.push('wardrobe');
-  if (p.dressed && p.mode) out.push('trials');
-  return out;
+  return p.mode ? ['verify', 'wardrobe', 'trials'] : ['verify', 'wardrobe'];
 }
 
-export type QuestStep = 'verify' | 'wardrobe' | 'trial' | 'enter';
+export type QuestStep = 'trial' | 'enter';
 
-/** The step the player is on. Verification is optional and does not block the walk. */
+/** The step the player is on. Neither verifying nor dressing blocks the walk. */
 export function currentStep(p: PlayerProfile): QuestStep {
-  if (!p.dressed) return 'wardrobe';
-  if (!p.mode) return 'trial';
-  return 'enter';
+  return p.mode ? 'enter' : 'trial';
 }
 
 function safeStorage(): Storage | undefined {
