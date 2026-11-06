@@ -249,11 +249,9 @@ export class IsoRenderer {
    */
   setViewport(width: number, height: number, pixelHeight = 0): void {
     const aspect = width / Math.max(1, height);
-    const interior = this.#controller.world.spec.mood === 'interior';
-    // Interiors use a tighter frustum so a room fills the view instead of
-    // floating in the middle of a plaza-sized camera. Outdoors stay wide.
-    const outdoor = height < 480 ? 190 : height < 760 ? 250 : 300;
-    this.#frustum = interior ? Math.min(210, outdoor) : outdoor;
+    // Same world-units-per-screen indoors and out. A tighter interior frustum
+    // made the hall fill the view and read as a small room.
+    this.#frustum = height < 480 ? 190 : height < 760 ? 250 : 300;
     this.camera.left = -this.#frustum * aspect;
     this.camera.right = this.#frustum * aspect;
     this.camera.top = this.#frustum;

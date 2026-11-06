@@ -69,40 +69,69 @@ const chip: CSSProperties = {
  */
 export function Minimap({ world, snap }: { world: TownWorld; snap: IsoSnapshot }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const scale = world.cols > 40 ? 3 : 5;
+  const base = useRef<HTMLCanvasElement | null>(null);
+  // The courthouse is hundreds of cells across. One pixel per cell keeps the
+  // HUD small, and the terrain is cached so walking does not repaint it.
+  const scale = world.cols > 180 ? 1 : world.cols > 40 ? 3 : 5;
+  const display = Math.min(168, world.cols * scale);
 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const w = world.cols * scale;
+    const h = world.rows * scale;
+    const off = document.createElement('canvas');
+    off.width = w;
+    off.height = h;
+    const ctx = off.getContext('2d');
     if (!ctx) return;
-    canvas.width = world.cols * scale;
-    canvas.height = world.rows * scale;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let r = 0; r < world.rows; r++) {
-      for (let c = 0; c < world.cols; c++) {
-        const tile = world.tiles[r]?.[c];
-        if (!tile) continue;
-        // Void is transparent: the map outline is the map's own shape.
+      let c = 0;
+      while (c < world.cols) {
         const src = world.spec.floor[r]?.[c] ?? '.';
-        if (src === '.' || src === ' ') continue;
-        ctx.fillStyle = tile.walk ? shade(tile.m) : '#4A3A32';
-        ctx.fillRect(c * scale, r * scale, scale, scale);
+        const tile = world.tiles[r]?.[c];
+        if (!tile || src === '.' || src === ' ') {
+          c++;
+          continue;
+        }
+        const color = tile.walk ? shade(tile.m) : '#4A3A32';
+        let end = c;
+        while (end + 1 < world.cols) {
+          const nextSrc = world.spec.floor[r]?.[end + 1] ?? '.';
+          const next = world.tiles[r]?.[end + 1];
+          if (!next || nextSrc === '.' || nextSrc === ' ') break;
+          if ((next.walk ? shade(next.m) : '#4A3A32') !== color) break;
+          end++;
+        }
+        ctx.fillStyle = color;
+        ctx.fillRect(c * scale, r * scale, (end - c + 1) * scale, scale);
+        c = end + 1;
       }
     }
 
-    // Portals.
     for (const p of world.portals) {
       ctx.fillStyle = '#F6C75B';
-      ctx.fillRect(p.tile[0] * scale, p.tile[1] * scale, scale, scale);
+      ctx.fillRect(p.tile[0] * scale, p.tile[1] * scale, Math.max(scale, 2), Math.max(scale, 2));
     }
-
-    // NPCs.
     for (const n of world.npcs) {
       ctx.fillStyle = '#A32D3F';
-      ctx.fillRect((n.pos[0] / CELL) * scale - 1, (n.pos[2] / CELL) * scale - 1, scale * 0.9, scale * 0.9);
+      ctx.fillRect((n.pos[0] / CELL) * scale - 1, (n.pos[2] / CELL) * scale - 1, Math.max(scale, 2), Math.max(scale, 2));
     }
+
+    base.current = off;
+    canvas.width = w;
+    canvas.height = h;
+  }, [world, scale]);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    const off = base.current;
+    if (!canvas || !off) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(off, 0, 0);
 
     // The player, as an arrow so facing is legible.
     const px = (snap.pos[0] / CELL) * scale;
@@ -121,11 +150,11 @@ export function Minimap({ world, snap }: { world: TownWorld; snap: IsoSnapshot }
     ctx.fill();
     ctx.stroke();
     ctx.restore();
-  }, [world, snap.pos, snap.yaw]);
+  }, [world, scale, snap.pos, snap.yaw]);
 
   return (
     <div className="ccr-panel" style={mapFrame} aria-hidden="true">
-      <canvas ref={ref} style={{ display: 'block', imageRendering: 'pixelated' }} />
+      <canvas ref={ref} style={{ display: 'block', imageRendering: 'pixelated', width: display, height: 'auto' }} />
     </div>
   );
 }

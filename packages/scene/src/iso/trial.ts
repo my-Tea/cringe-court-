@@ -46,11 +46,11 @@ export interface IsoTrialOptions {
 
 /** Seat names in the iso courthouse map, by the beat script's seat ids. */
 const SEAT_TILES: Readonly<Record<string, readonly [number, number]>> = {
-  defendant: [11, 8],
-  witness: [9, 7],
-  'gallery-left': [4, 16],
-  'gallery-right': [14, 16],
-  'lobby-bench': [9, 19],
+  defendant: [272, 252],
+  witness: [242, 212],
+  'gallery-left': [132, 452],
+  'gallery-right': [352, 452],
+  'lobby-bench': [242, 532],
 };
 
 export class IsoTrial implements BeatHost {

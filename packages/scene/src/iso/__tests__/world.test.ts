@@ -111,7 +111,9 @@ describe.each(MAP_ORDER)('map: %s', (id) => {
     // An interior without a wall ring is walkable off the edge of the art —
     // the iso camera would show the void. Only the square, market and streets
     // are outdoor maps.
-    const interiors = (['archive', 'tavern', 'courthouse'] as const).map((id) => built[id]!);
+    // The courthouse keeps its grounds on the same map, so its outer edge is
+    // lawn rather than a wall. Archive and tavern are still sealed rooms.
+    const interiors = (['archive', 'tavern'] as const).map((id) => built[id]!);
     for (const world of interiors) {
       const { cols, rows } = world;
       let gaps = 0;
@@ -181,7 +183,24 @@ describe('the outdoor town is one map', () => {
     const world = built.square!;
     expect(world.cols).toBeGreaterThan(50);
     expect(world.rows).toBeGreaterThan(40);
-    expect(world.spec.regions?.map((r) => r.name).sort()).toEqual(['Lantern Row', 'Market Row']);
+    expect(world.spec.regions?.map((r) => r.name).sort()).toEqual(['Courthouse grounds', 'Lantern Row', 'Market Row']);
+  });
+
+  it('lets you walk around the courthouse on every side', () => {
+    const world = built.square!;
+    const index = new SolidIndex(world.solids);
+    // Samples sit outside the facade's collision (cols 26–34, rows 46–49).
+    const around = [
+      [12, 48],
+      [44, 48],
+      [30, 42],
+      [30, 60],
+    ] as const;
+    for (const [c, r] of around) {
+      const [x, z] = tileXZ([c, r]);
+      expect(isWalkable(world, x, z), `courthouse side ${c},${r}`).toBe(true);
+      expect(freeAt(index, x, z), `courthouse side ${c},${r} is blocked`).toBe(true);
+    }
   });
 
   it('does not teleport between the outdoor districts', () => {
@@ -202,6 +221,21 @@ describe('the outdoor town is one map', () => {
       const landing = world.spawns[world.spec.defaultSpawn]!;
       expect(freeAt(index, landing.pos[0], landing.pos[2]), `${id} default spawn is inside a solid`).toBe(true);
     }
+  });
+});
+
+describe('the courthouse', () => {
+  const world = built.courthouse!;
+
+  it('is ten times the previous hall on each side, with grounds around it', () => {
+    expect(world.cols).toBeGreaterThanOrEqual(42 * 10);
+    expect(world.rows).toBeGreaterThanOrEqual(56 * 10);
+    const midC = Math.floor(world.cols / 2);
+    const midR = Math.floor(world.rows / 2);
+    expect(world.tiles[0]![midC]!.walk, 'north grounds').toBe(true);
+    expect(world.tiles[world.rows - 1]![midC]!.walk, 'south grounds').toBe(true);
+    expect(world.tiles[midR]![0]!.walk, 'west grounds').toBe(true);
+    expect(world.tiles[midR]![world.cols - 1]!.walk, 'east grounds').toBe(true);
   });
 });
 

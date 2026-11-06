@@ -12,11 +12,13 @@
  *                          │
  *                     courthouse, tavern, archive          entered through doors
  *
- * The courthouse faces the square across its forecourt; the market and archive
- * sit off the square's east side; the tavern is on the west approach; the
- * residential streets wrap the north.
+ * The courthouse faces the square. A lawn runs around all four sides of the
+ * facade, and the archive stands far enough east that the east side stays open.
+ * The market is past that lawn. The tavern is on the west approach; the
+ * residential streets wrap the north. The courtroom map is the hall plus its
+ * own grounds, so leaving the room is a walk, not a loading step.
  */
-import type { TownMapSpec } from '../world';
+import type { PropPlacement, TownMapSpec } from '../world';
 
 
 /** A wall ring for an interior: solid '#' border, gaps where doors are. */
@@ -43,7 +45,7 @@ const square: TownMapSpec = {
   id: 'square',
   name: 'Town Square',
   cols: COLS,
-  rows: 34,
+  rows: 56,
   mood: 'day',
   floor: [
     row('..gggggggggggggggggggggggggggggg..', COLS),
@@ -80,6 +82,9 @@ const square: TownMapSpec = {
     row('......CCCCCCCCCCCCCCCCCCCCC.......', COLS),
     row('.......gggggggggggggggggggg.......', COLS),
     row('........gggggggggggggggggg........', COLS),
+    // Courthouse grounds: a long lawn and a processional path south of the steps,
+    // wide enough to walk around the building instead of stopping at the door.
+    ...Array.from({ length: 22 }, () => row('gggggggggggggCCCCCCCCCgggggggggggg', COLS)),
   ],
   props: [
     // The fountain, dead centre of the plaza.
@@ -112,7 +117,8 @@ const square: TownMapSpec = {
     // is the front the player sees from the square.
     { prop: 'courthouse', tile: [16, 26] },
     { prop: 'tavern', tile: [2, 9], rotY: 90 },
-    { prop: 'archive', tile: [25, 24] },
+    // Set back east of the courthouse so the east lawn stays open.
+    { prop: 'archive', tile: [42, 24] },
     // A small produce row along the east edge, so the square feels inhabited.
     { prop: 'stall', tile: [27, 8] },
     { prop: 'stall', tile: [27, 15] },
@@ -128,11 +134,32 @@ const square: TownMapSpec = {
     { prop: 'crate', tile: [28, 21] },
     { prop: 'barrel', tile: [29, 22] },
     { prop: 'handcart', tile: [5, 22], rotY: 90 },
+    // Grounds south of the courthouse. Kept off the centre path (cols 13–19).
+    { prop: 'column', tile: [11, 36] },
+    { prop: 'column', tile: [23, 36] },
+    { prop: 'lampStandard', tile: [8, 38] },
+    { prop: 'lampStandard', tile: [26, 38] },
+    { prop: 'lampStandard', tile: [8, 48] },
+    { prop: 'lampStandard', tile: [26, 48] },
+    { prop: 'tree_round', tile: [4, 40] },
+    { prop: 'tree_pine', tile: [30, 40] },
+    { prop: 'tree_round', tile: [5, 50] },
+    { prop: 'tree_pine', tile: [29, 50] },
+    { prop: 'bench', tile: [9, 44], rotY: 90 },
+    { prop: 'bench', tile: [25, 44], rotY: 270 },
+    { prop: 'flower_bed', tile: [10, 42] },
+    { prop: 'flower_bed', tile: [24, 42] },
+    { prop: 'flower_bed', tile: [10, 52] },
+    { prop: 'flower_bed', tile: [24, 52] },
+    { prop: 'bush', tile: [3, 46] },
+    { prop: 'bush', tile: [31, 46] },
+    { prop: 'potted_plant', tile: [12, 36] },
+    { prop: 'potted_plant', tile: [22, 36] },
   ],
   portals: [
     { id: 'to-tavern', tile: [4, 12], to: 'tavern', spawn: 'from-square', prompt: 'Enter the tavern', style: 'door' },
-    { id: 'to-archive', tile: [25, 28], to: 'archive', spawn: 'from-square', prompt: 'Enter the evidence archive', style: 'door' },
-    { id: 'to-courthouse', tile: [16, 30], to: 'courthouse', spawn: 'entrance', prompt: 'Climb the courthouse steps', style: 'stairs' },
+    { id: 'to-archive', tile: [42, 28], to: 'archive', spawn: 'from-square', prompt: 'Enter the evidence archive', style: 'door' },
+    { id: 'to-courthouse', tile: [16, 30], to: 'courthouse', spawn: 'forecourt', prompt: 'Climb the courthouse steps', style: 'stairs' },
   ],
   npcs: [
     { id: 'vera', name: 'Vera', model: 'clerk', tile: [13, 8], yaw: 2.2, lines: 'vera' },
@@ -142,10 +169,10 @@ const square: TownMapSpec = {
   ],
   spawns: {
     'from-square': { tile: [16, 20], yaw: 0 },
-    'from-courthouse': { tile: [16, 31], yaw: Math.PI },
+    'from-courthouse': { tile: [16, 46], yaw: Math.PI },
     'from-market': { tile: [31, 11], yaw: Math.PI / 2 },
     'from-tavern': { tile: [3, 12], yaw: Math.PI / 2 },
-    'from-archive': { tile: [24, 22], yaw: 0 },
+    'from-archive': { tile: [42, 31], yaw: 0 },
     'from-streets': { tile: [16, 3], yaw: Math.PI },
   },
   defaultSpawn: 'from-square',
@@ -154,6 +181,10 @@ const square: TownMapSpec = {
     { tile: [27, 4], y: 40, kind: 'warm' },
     { tile: [6, 20], y: 40, kind: 'warm' },
     { tile: [27, 20], y: 40, kind: 'warm' },
+    { tile: [8, 38], y: 40, kind: 'warm' },
+    { tile: [26, 38], y: 40, kind: 'warm' },
+    { tile: [8, 48], y: 40, kind: 'warm' },
+    { tile: [26, 48], y: 40, kind: 'warm' },
   ],
 };
 
@@ -480,107 +511,204 @@ const streets: TownMapSpec = {
 };
 
 /**
- * The courthouse interior: the explorable version of the trial room.
+ * The courthouse: a hall ten times the previous one on each side, with a lawn
+ * on every side of the building.
  *
- * This is the map where the trial lives. It uses the same axis: the bench is at
- * −Z, the gallery at +Z, exactly as the first-person courtroom does, so the
- * existing beat scripts describe the same space.
+ * The previous hall was 42×56. Each of those cells is now a 10×10 block, so the
+ * aisle, the well and the gallery keep the same arrangement and the cast is no
+ * longer standing on the furniture. A grass apron with a cobble terrace and a
+ * path runs around all four walls. Each wall has a door you walk through; the
+ * paths lead back to the town square.
  */
+const HALL_SCALE = 10;
+const APRON = 32;
+const HALL_COLS = 42 * HALL_SCALE;
+const HALL_ROWS = 56 * HALL_SCALE;
+const COURT_COLS = HALL_COLS + APRON * 2;
+const COURT_ROWS = HALL_ROWS + APRON * 2;
+const HALL_C0 = APRON;
+const HALL_R0 = APRON;
+const HALL_C1 = APRON + HALL_COLS - 1;
+const HALL_R1 = APRON + HALL_ROWS - 1;
+/** Centre of the old south door, in the scaled hall. */
+const DOOR_C = APRON + 21 * HALL_SCALE + Math.floor((HALL_SCALE - 1) / 2);
+const SIDE_R = APRON + 28 * HALL_SCALE + Math.floor((HALL_SCALE - 1) / 2);
+const DOOR_HALF = 5;
+
+function scaled(c: number, r: number): [number, number] {
+  return [APRON + c * HALL_SCALE, APRON + r * HALL_SCALE];
+}
+
+function oldHallFloor(oc: number, orow: number): string {
+  let ch = 's';
+  if (orow >= 36 && orow <= 50 && oc >= 6 && oc <= 35) ch = 'S';
+  if (orow >= 14 && orow <= 22 && ((oc >= 8 && oc <= 13) || (oc >= 28 && oc <= 33))) ch = 'm';
+  if (orow >= 10 && orow <= 52 && oc >= 18 && oc <= 23) ch = 'm';
+  return ch;
+}
+
+function courtFloor(): string[] {
+  const grid = Array.from({ length: COURT_ROWS }, () => Array.from({ length: COURT_COLS }, () => 'g'));
+  const terrace = 8;
+  for (let r = 0; r < COURT_ROWS; r++) {
+    const row = grid[r]!;
+    for (let c = 0; c < COURT_COLS; c++) {
+      const inHall = c >= HALL_C0 && c <= HALL_C1 && r >= HALL_R0 && r <= HALL_R1;
+      if (inHall) {
+        row[c] = oldHallFloor(Math.floor((c - HALL_C0) / HALL_SCALE), Math.floor((r - HALL_R0) / HALL_SCALE));
+        continue;
+      }
+      const dc = c < HALL_C0 ? HALL_C0 - c : c > HALL_C1 ? c - HALL_C1 : 0;
+      const dr = r < HALL_R0 ? HALL_R0 - r : r > HALL_R1 ? r - HALL_R1 : 0;
+      if (Math.max(dc, dr) > 0 && Math.max(dc, dr) <= terrace) row[c] = 'C';
+    }
+  }
+  for (let c = DOOR_C - DOOR_HALF; c <= DOOR_C + DOOR_HALF; c++) {
+    for (let r = 0; r < HALL_R0; r++) grid[r]![c] = 'C';
+    for (let r = HALL_R1 + 1; r < COURT_ROWS; r++) grid[r]![c] = 'C';
+  }
+  for (let r = SIDE_R - DOOR_HALF; r <= SIDE_R + DOOR_HALF; r++) {
+    for (let c = 0; c < HALL_C0; c++) grid[r]![c] = 'C';
+    for (let c = HALL_C1 + 1; c < COURT_COLS; c++) grid[r]![c] = 'C';
+  }
+  return grid.map((row) => row.join(''));
+}
+
+function courtWalls(): string[] {
+  const grid = Array.from({ length: COURT_ROWS }, () => Array.from({ length: COURT_COLS }, () => '.'));
+  const door = (c: number, r: number) =>
+    ((r === HALL_R0 || r === HALL_R1) && Math.abs(c - DOOR_C) <= DOOR_HALF) ||
+    ((c === HALL_C0 || c === HALL_C1) && Math.abs(r - SIDE_R) <= DOOR_HALF);
+  for (let c = HALL_C0; c <= HALL_C1; c++) {
+    if (!door(c, HALL_R0)) grid[HALL_R0]![c] = '#';
+    if (!door(c, HALL_R1)) grid[HALL_R1]![c] = '#';
+  }
+  for (let r = HALL_R0; r <= HALL_R1; r++) {
+    if (!door(HALL_C0, r)) grid[r]![HALL_C0] = '#';
+    if (!door(HALL_C1, r)) grid[r]![HALL_C1] = '#';
+  }
+  return grid.map((row) => row.join(''));
+}
+
+function courtProps(): PropPlacement[] {
+  const props: PropPlacement[] = [
+    { prop: 'dais_step', tile: scaled(23, 8) },
+    { prop: 'judge_bench', tile: scaled(22, 3), y: 8 },
+    { prop: 'throne_chair', tile: scaled(22, 3), y: 16 },
+    { prop: 'court_seal', tile: scaled(21, 2), y: 70 },
+    { prop: 'banner_scales', tile: scaled(8, 2), y: 44 },
+    { prop: 'banner_scales', tile: scaled(34, 2), y: 44 },
+    { prop: 'prosecutor_desk', tile: scaled(11, 16) },
+    { prop: 'defense_desk', tile: scaled(32, 16) },
+    { prop: 'witness_stand', tile: scaled(21, 14) },
+    { prop: 'evidence_screen', tile: scaled(7, 6), y: 34, interact: { id: 'evidence-screen', prompt: 'Review the evidence', kind: 'exhibit' } },
+    { prop: 'sealed_ballot_box', tile: scaled(34, 8), interact: { id: 'ballot-box', prompt: 'Inspect the sealed ballot box', kind: 'inspect', lines: 'ballot-box' } },
+    { prop: 'jury_box', tile: scaled(37, 18) },
+    { prop: 'gallery_bench', tile: scaled(10, 40) },
+    { prop: 'gallery_bench', tile: scaled(21, 40) },
+    { prop: 'gallery_bench', tile: scaled(32, 40) },
+    { prop: 'gallery_bench', tile: scaled(10, 46) },
+    { prop: 'gallery_bench', tile: scaled(21, 46) },
+    { prop: 'gallery_bench', tile: scaled(32, 46) },
+    { prop: 'railing', tile: scaled(21, 30) },
+    { prop: 'ceiling_ring', tile: scaled(21, 8), y: 80 },
+    { prop: 'spotlight_rig', tile: scaled(21, 20), y: 72 },
+    { prop: 'courtroom_door', tile: [DOOR_C, HALL_R1 - 2] },
+    { prop: 'potted_plant', tile: [DOOR_C - 8, HALL_R1 + 2] },
+    { prop: 'potted_plant', tile: [DOOR_C + 8, HALL_R1 + 2] },
+    { prop: 'potted_plant', tile: [DOOR_C - 8, HALL_R0 - 2] },
+    { prop: 'potted_plant', tile: [DOOR_C + 8, HALL_R0 - 2] },
+    { prop: 'potted_plant', tile: [HALL_C0 - 2, SIDE_R - 8] },
+    { prop: 'potted_plant', tile: [HALL_C0 - 2, SIDE_R + 8] },
+    { prop: 'potted_plant', tile: [HALL_C1 + 3, SIDE_R - 8] },
+    { prop: 'potted_plant', tile: [HALL_C1 + 3, SIDE_R + 8] },
+    { prop: 'bench', tile: [DOOR_C - 14, HALL_R1 + 16], rotY: 180 },
+    { prop: 'bench', tile: [DOOR_C + 14, HALL_R1 + 16], rotY: 180 },
+    { prop: 'bench', tile: [DOOR_C - 14, HALL_R0 - 14] },
+    { prop: 'bench', tile: [DOOR_C + 14, HALL_R0 - 14] },
+    { prop: 'bench', tile: [HALL_C0 - 16, SIDE_R - 14], rotY: 90 },
+    { prop: 'bench', tile: [HALL_C1 + 16, SIDE_R + 14], rotY: 270 },
+    { prop: 'tree_round', tile: [HALL_C0 - 18, HALL_R1 + 18] },
+    { prop: 'tree_pine', tile: [HALL_C1 + 12, HALL_R1 + 18] },
+    { prop: 'tree_round', tile: [HALL_C0 + 20, HALL_R0 - 16] },
+    { prop: 'tree_pine', tile: [HALL_C1 - 16, HALL_R0 - 16] },
+    { prop: 'tree_round', tile: [HALL_C0 - 20, SIDE_R + 18] },
+    { prop: 'tree_pine', tile: [HALL_C1 + 16, SIDE_R - 18] },
+    { prop: 'flower_bed', tile: [DOOR_C - 16, HALL_R1 + 10] },
+    { prop: 'flower_bed', tile: [DOOR_C + 12, HALL_R1 + 10] },
+    { prop: 'flower_bed', tile: [DOOR_C - 16, HALL_R0 - 10] },
+    { prop: 'flower_bed', tile: [DOOR_C + 12, HALL_R0 - 10] },
+    { prop: 'lampStandard', tile: [HALL_C0 - 14, HALL_R0 - 14] },
+    { prop: 'lampStandard', tile: [HALL_C1 + 10, HALL_R0 - 14] },
+    { prop: 'lampStandard', tile: [HALL_C0 - 14, HALL_R1 + 14] },
+    { prop: 'lampStandard', tile: [HALL_C1 + 10, HALL_R1 + 14] },
+    { prop: 'lampStandard', tile: [HALL_C0 - 16, SIDE_R + 16] },
+    { prop: 'lampStandard', tile: [HALL_C1 + 14, SIDE_R - 16] },
+  ];
+  let bay = 0;
+  for (let r = HALL_R0 + 24; r < HALL_R1 - 12; r += 40) {
+    if (Math.abs(r - SIDE_R) <= DOOR_HALF + 4) continue;
+    props.push({ prop: 'column', tile: [HALL_C0 + 4, r] });
+    props.push({ prop: 'column', tile: [HALL_C1 - 2, r] });
+    if (bay % 2 === 0) {
+      props.push({ prop: 'arch_window', tile: [HALL_C0 + 2, r], y: 40 });
+      props.push({ prop: 'arch_window', tile: [HALL_C1 - 1, r], y: 40 });
+      props.push({ prop: 'sconce', tile: [HALL_C0 + 2, r + 8], y: 36 });
+      props.push({ prop: 'sconce', tile: [HALL_C1 - 1, r + 8], y: 36 });
+    }
+    bay++;
+  }
+  return props;
+}
+
+function courtLights(): NonNullable<TownMapSpec['lights']> {
+  const lights: Array<NonNullable<TownMapSpec['lights']>[number]> = [];
+  for (let r = HALL_R0 + 40; r < HALL_R1; r += 70) {
+    lights.push({ tile: [DOOR_C, r], y: 72, kind: 'warm' });
+  }
+  lights.push(
+    { tile: [DOOR_C, HALL_R1 + 14], y: 40, kind: 'warm' },
+    { tile: [DOOR_C, HALL_R0 - 12], y: 40, kind: 'warm' },
+    { tile: [HALL_C0 - 14, SIDE_R + 16], y: 40, kind: 'warm' },
+    { tile: [HALL_C1 + 14, SIDE_R - 16], y: 40, kind: 'warm' },
+  );
+  return lights;
+}
+
 const courthouse: TownMapSpec = {
   id: 'courthouse',
   name: 'The Courtroom',
-  cols: 18,
-  rows: 22,
-  mood: 'interior',
-  floor: [
-    row('TTTTTTTTTTTTTTTTTT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TsssmmmsssssmmmssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TssssssssssssssssT', 18),
-    row('TmmmmmmmmmmmmmmmmT', 18),
-    row('TmmmmmmmmmmmmmmmmT', 18),
-    row('TmmmmmmmmmmmmmmmmT', 18),
-    row('TmmmmmmmmmmmmmmmmT', 18),
-    row('TmmmmmmmmmmmmmmmmT', 18),
-    row('TmmmmmmmmmmmmmmmmT', 18),
-    row('TmmmmmmmmmmmmmmmmT', 18),
-    row('TTTTTTTTTTTTTTTTTT', 18),
-  ],
-  props: [
-    // The bench and the judge, at the north end.
-    { prop: 'dais_step', tile: [9, 3] },
-    { prop: 'judge_bench', tile: [9, 1], y: 8 },
-    { prop: 'throne_chair', tile: [9, 1], y: 16 },
-    { prop: 'court_seal', tile: [9, 1], y: 62 },
-    { prop: 'banner_scales', tile: [4, 1], y: 40 },
-    { prop: 'banner_scales', tile: [14, 1], y: 40 },
-    // Counsel tables.
-    { prop: 'prosecutor_desk', tile: [5, 7] },
-    { prop: 'defense_desk', tile: [13, 7] },
-    { prop: 'witness_stand', tile: [9, 6] },
-    // Evidence and the ballot box.
-    { prop: 'evidence_screen', tile: [4, 2], y: 34, interact: { id: 'evidence-screen', prompt: 'Review the evidence', kind: 'exhibit' } },
-    { prop: 'sealed_ballot_box', tile: [14, 4], interact: { id: 'ballot-box', prompt: 'Inspect the sealed ballot box', kind: 'inspect', lines: 'ballot-box' } },
-    // The jury box and the gallery.
-    { prop: 'jury_box', tile: [15, 6] },
-    { prop: 'gallery_bench', tile: [4, 16] },
-    { prop: 'gallery_bench', tile: [9, 16] },
-    { prop: 'gallery_bench', tile: [14, 16] },
-    { prop: 'gallery_bench', tile: [4, 18] },
-    { prop: 'gallery_bench', tile: [9, 18] },
-    { prop: 'gallery_bench', tile: [14, 18] },
-    { prop: 'railing', tile: [9, 12] },
-    // Architecture dressing.
-    { prop: 'column', tile: [1, 4] },
-    { prop: 'column', tile: [16, 4] },
-    { prop: 'column', tile: [1, 12] },
-    { prop: 'column', tile: [16, 12] },
-    { prop: 'arch_window', tile: [1, 8], y: 40 },
-    { prop: 'arch_window', tile: [16, 8], y: 40 },
-    { prop: 'sconce', tile: [1, 6], y: 36 },
-    { prop: 'sconce', tile: [16, 6], y: 36 },
-    { prop: 'ceiling_ring', tile: [9, 4], y: 76 },
-    { prop: 'spotlight_rig', tile: [9, 8], y: 66 },
-    { prop: 'courtroom_door', tile: [9, 21] },
-    { prop: 'potted_plant', tile: [2, 20] },
-    { prop: 'potted_plant', tile: [15, 20] },
-  ],
-  walls: ring(18, 22, [[9, 21]]),
+  cols: COURT_COLS,
+  rows: COURT_ROWS,
+  mood: 'day',
+  floor: courtFloor(),
+  props: courtProps(),
+  walls: courtWalls(),
   portals: [
-    { id: 'to-square', tile: [9, 20], to: 'square', spawn: 'from-courthouse', prompt: 'Leave the courtroom', style: 'door' },
+    { id: 'to-square-south', tile: [DOOR_C, COURT_ROWS - 3], to: 'square', spawn: 'from-courthouse', prompt: 'Return to the town square', style: 'arch' },
+    { id: 'to-square-north', tile: [DOOR_C, 3], to: 'square', spawn: 'from-courthouse', prompt: 'Return to the town square', style: 'arch' },
+    { id: 'to-square-west', tile: [3, SIDE_R], to: 'square', spawn: 'from-courthouse', prompt: 'Return to the town square', style: 'arch' },
+    { id: 'to-square-east', tile: [COURT_COLS - 4, SIDE_R], to: 'square', spawn: 'from-courthouse', prompt: 'Return to the town square', style: 'arch' },
   ],
   npcs: [
-    { id: 'judge', name: 'Judge Gavel.exe', model: 'judge', tile: [9, 2], yaw: 0, lines: 'judge', radius: 0 },
-    { id: 'prosecutor', name: 'Miss Ratio', model: 'prosecutor', tile: [5, 6], yaw: 1.4, lines: 'prosecutor', radius: 0 },
-    { id: 'defense', name: 'Counsel Chaos', model: 'defense', tile: [13, 6], yaw: -1.4, lines: 'defense', radius: 0 },
-    { id: 'bailiff', name: 'The Bailiff', model: 'bailiff', tile: [12, 3], yaw: -0.8, lines: 'bailiff', radius: 0 },
-    { id: 'clerk-court', name: 'The Clerk', model: 'clerk', tile: [6, 3], yaw: 0.8, lines: 'clerk', radius: 0 },
+    { id: 'judge', name: 'Judge Gavel.exe', model: 'judge', tile: scaled(21, 6), yaw: 0, lines: 'judge', radius: 0 },
+    { id: 'prosecutor', name: 'Miss Ratio', model: 'prosecutor', tile: scaled(12, 20), yaw: 0.6, lines: 'prosecutor', radius: 0 },
+    { id: 'defense', name: 'Counsel Chaos', model: 'defense', tile: scaled(30, 20), yaw: -0.6, lines: 'defense', radius: 0 },
+    { id: 'bailiff', name: 'The Bailiff', model: 'bailiff', tile: scaled(26, 12), yaw: -0.4, lines: 'bailiff', radius: 0 },
+    { id: 'clerk-court', name: 'The Clerk', model: 'clerk', tile: scaled(16, 12), yaw: 0.4, lines: 'clerk', radius: 0 },
   ],
   spawns: {
-    entrance: { tile: [9, 19], yaw: 0 },
-    aisle: { tile: [9, 14], yaw: 0 },
-    well: { tile: [9, 9], yaw: 0 },
-    defendant: { tile: [11, 8], yaw: 0 },
-    witness: { tile: [9, 7], yaw: 0 },
-    bench: { tile: [9, 5], yaw: 0 },
+    // Just outside the south door, so arriving from town lands on the grounds.
+    forecourt: { tile: [DOOR_C, HALL_R1 + 6], yaw: 0 },
+    entrance: { tile: [DOOR_C, HALL_R1 - 14], yaw: 0 },
+    aisle: { tile: scaled(21, 36), yaw: 0 },
+    well: { tile: scaled(21, 24), yaw: 0 },
+    defendant: { tile: scaled(24, 22), yaw: 0 },
+    witness: { tile: scaled(21, 18), yaw: 0 },
+    bench: { tile: scaled(21, 11), yaw: 0 },
   },
   defaultSpawn: 'entrance',
-  lights: [
-    { tile: [9, 3], y: 66, kind: 'warm', intensity: 1.4 },
-    { tile: [4, 10], y: 40, kind: 'warm' },
-    { tile: [14, 10], y: 40, kind: 'warm' },
-    { tile: [9, 17], y: 36, kind: 'warm' },
-  ],
+  lights: courtLights(),
 };
 
 /**
@@ -593,9 +721,9 @@ const courthouse: TownMapSpec = {
  */
 const STREETS_AT = [16, 0] as const;
 const SQUARE_AT = [14, 22] as const;
-const MARKET_AT = [48, 26] as const;
-const OVER_COLS = 70;
-const OVER_ROWS = 58;
+const MARKET_AT = [68, 26] as const;
+const OVER_COLS = 92;
+const OVER_ROWS = 80;
 
 function setCell(grid: string[], c: number, r: number, ch: string): void {
   const line = grid[r];
@@ -616,6 +744,37 @@ function stampFloor(grid: string[], floor: readonly string[], ox: number, oy: nu
 
 const OUTDOOR_LINKS = new Set<TownMapSpec['id']>(['square', 'market', 'streets']);
 
+/**
+ * Walkable ground on every side of the courthouse facade.
+ *
+ * The building's collision sits on cols 26–34, rows 46–49. West of it was void
+ * or a pinched strip, and the archive used to stand in the east passage. This
+ * fills a lawn around that footprint and a grass pad under the archive, which
+ * now stands further east. Existing plaza and path tiles are left alone.
+ */
+function paintCourthouseApron(grid: string[]): void {
+  const fill = (c0: number, r0: number, c1: number, r1: number, ch: string) => {
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) if (grid[r]?.[c] === '.') setCell(grid, c, r, ch);
+    }
+  };
+  fill(4, 40, 24, 78, 'g');
+  fill(35, 40, 54, 78, 'g');
+  fill(52, 42, 66, 56, 'g');
+  // A cobble circuit tight against the facade, so the way around reads as a path.
+  for (let r = 43; r <= 53; r++) {
+    for (let c = 22; c <= 38; c++) {
+      const solid = c >= 26 && c <= 34 && r >= 46 && r <= 49;
+      const onRing = c <= 25 || c >= 35 || r <= 45 || r >= 50;
+      if (solid || !onRing) continue;
+      const ch = grid[r]?.[c];
+      if (ch === '.' || ch === 'g' || ch === 'd') setCell(grid, c, r, 'C');
+    }
+  }
+  // Door apron in front of the relocated archive.
+  for (let r = 48; r <= 54; r++) setCell(grid, 56, r, 'C');
+}
+
 function composeOverworld(): TownMapSpec {
   const grid = Array.from({ length: OVER_ROWS }, () => '.'.repeat(OVER_COLS));
   stampFloor(grid, streets.floor, STREETS_AT[0], STREETS_AT[1]);
@@ -628,10 +787,12 @@ function composeOverworld(): TownMapSpec {
     for (let c = 28; c <= 34; c++) setCell(grid, c, r, 'd');
   }
   // Cobble from the plaza's east edge into Market Row. Only fill void, so a
-  // stall that already owns the tile keeps its ground.
-  for (let r = 30; r <= 40; r++) {
-    for (let c = 44; c <= 52; c++) if (grid[r]?.[c] === '.') setCell(grid, c, r, 'C');
+  // stall that already owns the tile keeps its ground. The market sits further
+  // east so the courthouse can have a lawn on that side.
+  for (let r = 32; r <= 38; r++) {
+    for (let c = 44; c <= MARKET_AT[0] + 4; c++) if (grid[r]?.[c] === '.') setCell(grid, c, r, 'C');
   }
+  paintCourthouseApron(grid);
 
   const parts = [
     { spec: streets, at: STREETS_AT },
@@ -639,7 +800,20 @@ function composeOverworld(): TownMapSpec {
     { spec: market, at: MARKET_AT },
   ] as const;
 
-  const props = parts.flatMap(({ spec, at }) => spec.props.map((p) => ({ ...p, tile: [p.tile[0] + at[0], p.tile[1] + at[1]] as [number, number] })));
+  const props = [
+    ...parts.flatMap(({ spec, at }) => spec.props.map((p) => ({ ...p, tile: [p.tile[0] + at[0], p.tile[1] + at[1]] as [number, number] }))),
+    // Dressing on the west and east lawns, clear of the building and the doors.
+    { prop: 'tree_round', tile: [8, 52] as [number, number] },
+    { prop: 'tree_pine', tile: [10, 66] as [number, number] },
+    { prop: 'lampStandard', tile: [12, 60] as [number, number] },
+    { prop: 'bench', tile: [14, 72] as [number, number], rotY: 90 as const },
+    { prop: 'flower_bed', tile: [16, 48] as [number, number] },
+    { prop: 'tree_round', tile: [46, 54] as [number, number] },
+    { prop: 'tree_pine', tile: [48, 68] as [number, number] },
+    { prop: 'lampStandard', tile: [44, 62] as [number, number] },
+    { prop: 'bench', tile: [50, 74] as [number, number], rotY: 270 as const },
+    { prop: 'flower_bed', tile: [42, 70] as [number, number] },
+  ];
   const npcs = parts.flatMap(({ spec, at }) => (spec.npcs ?? []).map((n) => ({ ...n, tile: [n.tile[0] + at[0], n.tile[1] + at[1]] as [number, number] })));
   const portals = parts.flatMap(({ spec, at }) =>
     (spec.portals ?? [])
@@ -670,6 +844,7 @@ function composeOverworld(): TownMapSpec {
     regions: [
       { name: 'Lantern Row', c0: STREETS_AT[0], r0: STREETS_AT[1], c1: STREETS_AT[0] + streets.cols - 1, r1: STREETS_AT[1] + streets.rows - 1 },
       { name: 'Market Row', c0: MARKET_AT[0], r0: MARKET_AT[1], c1: MARKET_AT[0] + market.cols - 1, r1: MARKET_AT[1] + market.rows - 1 },
+      { name: 'Courthouse grounds', c0: 4, r0: 44, c1: 52, r1: 78 },
     ],
   };
 }
