@@ -29,6 +29,8 @@ export const routes: RouteObject[] = [
       { path: 'courtroom', lazy: async () => ({ Component: (await import('@/stage/DemoCourtPage')).DemoCourtPage }) },
       // First-person roaming courtroom sandbox (three.js, own chunk).
       { path: 'court/walk', lazy: async () => ({ Component: (await import('@/roam/WalkPage')).WalkPage }) },
+      // Explorable isometric town (three.js, own chunk).
+      { path: 'town', lazy: async () => ({ Component: (await import('@/town/TownPage')).TownPage }) },
       { path: 'gallery', lazy: async () => ({ Component: (await import('@/gallery/GalleryPage')).GalleryPage }) },
       { path: '*', element: <NotFoundPage /> },
     ],

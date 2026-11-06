@@ -13,12 +13,13 @@ export const paths = {
   mode: (id: ModeId) => `/${id}`,
   courtroom: '/courtroom',
   walk: '/court/walk',
+  town: '/town',
   gallery: '/gallery',
 } as const;
 
 /** Paths that live under "The court" tab (the lobby and every courtroom). */
 export const isCourtPath = (pathname: string) =>
-  pathname === paths.court || ['/solo', '/versus', '/grand-jury', paths.courtroom, paths.walk].some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  pathname === paths.court || ['/solo', '/versus', '/grand-jury', paths.courtroom, paths.walk, paths.town].some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 /** The reference's four paper tabs. */
 export const NAV_ITEMS: ReadonlyArray<{ to: string; labelKey: MessageKey; icon: 'home' | 'scales' | 'trophy' | 'book'; activeFor?: (pathname: string) => boolean }> = [
@@ -35,4 +36,5 @@ export const COURT_LINKS: ReadonlyArray<{ to: string; labelKey: MessageKey }> = 
   { to: paths.mode('grand-jury'), labelKey: 'shell.nav.courts.grandJury' },
   { to: paths.courtroom, labelKey: 'shell.nav.courts.demo' },
   { to: paths.walk, labelKey: 'shell.nav.courts.walk' },
+  { to: paths.town, labelKey: 'shell.nav.courts.town' },
 ];

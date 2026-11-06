@@ -18,6 +18,7 @@ export const shell = {
   'nav.courts.grandJury': 'Grand Jury',
   'nav.courts.demo': 'Demo court',
   'nav.courts.walk': 'Walk the court',
+  'nav.courts.town': 'Explore the town',
 
   // ── app shell
   'skip': 'Skip to content',
