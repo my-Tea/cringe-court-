@@ -3,17 +3,24 @@
  * controller every frame (camera, NPC heads/poses, remote avatars, focus,
  * mood) and never writes back. Quality presets switch shadows, lights and the
  * far plane; the pixel-art downscale itself is the canvas resolution (see
- * RoamCourtroom), so there is no extra full-screen pass.
+ * RoamCourtroom). Post-processing runs at that low resolution, so it is cheap:
+ * medium adds bloom on lamps and glass, high adds ambient occlusion in the
+ * corners. Every level tone-maps (neutral, so palette hues hold).
  */
 import type { LightingMood } from '@cringe-court/core';
 import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import type { CastFile } from '../cast';
 import type { RoamController } from '../controller';
-import { ISO_RAKE, cameraMode, isoRig, type PerspectiveChoice } from '../perspective';
-import { BODY } from '../physics';
+import { THIRD_RIG, cameraMode, type PerspectiveChoice } from '../perspective';
 import { QUALITY, type QualityLevel, type QualityPreset } from '../quality';
 import { ROOM_SCALE } from '../scale';
-import type { PlayerState } from '../types';
+import { castWithLook, lookKey } from '../look';
+import type { AvatarSpec, GateId, PlayerState } from '../types';
 import type { RoamBox } from '../world';
 import { VoxelAvatar } from './avatar';
 import { buildPlazaSky } from './sky';
@@ -53,10 +60,8 @@ export interface RoamRendererOptions {
 export class RoamRenderer {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(58, 16 / 9, 0.6, 1400);
-  readonly #isoCam = new THREE.OrthographicCamera(-120, 120, 120, -120, 0.6, 4000);
-  /** Cuts the roof off in the indoor isometric view. Constant is the clip height. */
-  readonly #clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
-  #cutY: number | null = null;
+  /** Third-person boom length after wall pull-in, eased back out. */
+  #boom: number = THIRD_RIG.distance;
   readonly #controller: RoamController;
   readonly #cast: CastFile;
   readonly #world: WorldMeshes;
@@ -68,6 +73,8 @@ export class RoamRenderer {
   readonly #points: THREE.PointLight[] = [];
   readonly #focus: THREE.LineSegments;
   readonly #fog = new THREE.Fog(C.neutral900, 200, 420);
+  /** Outdoor aerial perspective: the far islands fade into the sky. */
+  readonly #haze = new THREE.Fog(C.blue300, 900, 3000);
   #mood: Mood = ROAM_MOODS.house;
   #moodName: LightingMood = 'house';
   #flash = 0;
@@ -78,11 +85,15 @@ export class RoamRenderer {
   #frame = 0;
   #openSky = false;
   #perspective: PerspectiveChoice = 'first';
-  #viewW = 16;
-  #viewH = 9;
   readonly #sky = buildPlazaSky();
-  readonly #player: VoxelAvatar | null;
+  #player: VoxelAvatar | null = null;
+  #playerSeated: VoxelAvatar | null = null;
+  /** The avatar spec the player's meshes were built from (rebuilt when the wardrobe changes it). */
+  #playerSpec: AvatarSpec | null = null;
+  readonly #gates = new Map<GateId, THREE.Group>();
+  readonly #gateMeshes: WorldMeshes[] = [];
   readonly #unsub: () => void;
+  #post: Post | null = null;
   preset: QualityPreset;
 
   constructor(options: RoamRendererOptions) {
@@ -93,14 +104,18 @@ export class RoamRenderer {
     this.scene.background = new THREE.Color(C.neutral900);
     this.scene.fog = this.#fog;
     this.scene.add(this.#sky);
-    const model = options.controller.avatar.model;
-    this.#player = options.cast.models[model] ? new VoxelAvatar(options.cast, model, false, 'you') : null;
-    if (this.#player) {
-      this.#player.object.visible = false;
-      this.scene.add(this.#player.object);
-    }
+    this.#buildPlayer(options.controller.avatar);
     this.#world = buildWorldMeshes(options.boxes);
     this.scene.add(this.#world.group);
+    for (const g of options.controller.world.gates ?? []) {
+      const meshes = buildWorldMeshes(g.boxes);
+      meshes.group.name = `gate:${g.id}`;
+      meshes.group.visible = !options.controller.isGateOpen(g.id);
+      for (const m of meshes.group.children) (m as THREE.Mesh).castShadow = false;
+      this.#gates.set(g.id, meshes.group);
+      this.#gateMeshes.push(meshes);
+      this.scene.add(meshes.group);
+    }
 
     // Key light: sunlight through the stained glass behind the bench, raking down the room.
     this.#key.position.set(-40 * ROOM_SCALE, 170, -110 * ROOM_SCALE);
@@ -118,7 +133,7 @@ export class RoamRenderer {
     const world = options.controller.world;
     for (const l of world.lights) {
       if (l.kind === 'spot') continue;
-      const p = new THREE.PointLight(l.kind === 'window' ? '#BFD7F5' : '#FFD79A', l.kind === 'window' ? 260 : 420, (l.kind === 'window' ? 90 : 110) * ROOM_SCALE, 1.6);
+      const p = new THREE.PointLight(l.kind === 'window' ? C.blue300 : C.royal100, l.kind === 'window' ? 260 : 420, (l.kind === 'window' ? 90 : 110) * ROOM_SCALE, 1.6);
       p.position.set(...l.pos);
       p.userData.base = p.intensity;
       this.#points.push(p);
@@ -164,60 +179,46 @@ export class RoamRenderer {
       this.#key.shadow.map = null;
     }
     this.#points.forEach((l, i) => (l.visible = i < p.pointLights));
-    this.camera.far = p.far;
+    this.camera.far = this.#openSky ? Math.max(p.far, SUN.far) : p.far;
     this.#fog.far = p.fogFar;
     this.#fog.near = p.fogFar * 0.45;
     this.camera.updateProjectionMatrix();
   }
 
-  /** `auto` is the isometric third person. First person keeps the eye camera. */
+  /** `auto` is the trailing third person. First person keeps the eye camera. */
   setPerspective(choice: PerspectiveChoice): void {
     this.#perspective = choice;
-    this.#fitIso();
   }
 
-  /** The camera render() will use. */
+  /** The camera render() will use (one perspective camera for both views). */
   get viewCamera(): THREE.Camera {
-    return cameraMode(this.#perspective) === 'iso' ? this.#isoCam : this.camera;
+    return this.camera;
   }
 
   setViewport(width: number, height: number): void {
-    this.#viewW = width;
-    this.#viewH = height;
     this.camera.aspect = width / Math.max(1, height);
     this.camera.updateProjectionMatrix();
-    this.#fitIso();
-  }
-
-  #fitIso(): void {
-    const aspect = this.#viewW / Math.max(1, this.#viewH);
-    const outside = this.#controller.zone === 'outside';
-    const f = isoRig(outside).frustum;
-    this.#isoCam.left = -f * aspect;
-    this.#isoCam.right = f * aspect;
-    this.#isoCam.top = f;
-    this.#isoCam.bottom = -f;
-    this.#isoCam.updateProjectionMatrix();
   }
 
   update(dt: number): void {
     const c = this.#controller;
     this.#frame++;
     const view = c.view();
-    const iso = cameraMode(this.#perspective) === 'iso';
-    if (iso) this.#placeIso(view.eye, c.zone === 'outside');
-    else {
-      this.#setCutaway(null);
-      this.camera.position.set(...view.eye);
-      this.camera.rotation.set(view.pitch + view.shakePitch, view.yaw + view.shakeYaw, 0, 'YXZ');
-    }
-    if (this.#player) {
-      const show = iso && !c.seat;
-      this.#player.object.visible = show;
-      if (show) {
-        this.#player.place(view.eye[0], view.eye[1] - BODY.eye, view.eye[2], view.yaw);
-        this.#player.update(dt, { pose: 'stand', headYaw: 0, headPitch: 0, talking: false, speed: c.playerState().speed }, c.reducedMotion);
-      }
+    const third = cameraMode(this.#perspective) === 'third';
+    const pitch = view.pitch + view.shakePitch;
+    const yaw = view.yaw + view.shakeYaw;
+    this.camera.rotation.set(pitch, yaw, 0, 'YXZ');
+    if (c.avatar !== this.#playerSpec) this.#buildPlayer(c.avatar);
+    const showcase = c.panel === 'wardrobe';
+    if (this.#attract) this.#placeAttract(dt);
+    else if (showcase) this.#placeShowcase(dt);
+    else if (third) this.#placeThird(view.eye, view.yaw, view.pitch, c.control === 'cinematic', dt);
+    else this.camera.position.set(...view.eye);
+    if (!this.#attract) this.#easeFromAttract(dt);
+    this.#showPlayer(!this.#attract && (showcase || (third && this.#boom > THIRD_RIG.hideBelow)), dt);
+    for (const [id, g] of this.#gates) {
+      g.visible = !c.isGateOpen(id);
+      if (g.visible && !c.reducedMotion) g.position.y = Math.sin(performance.now() / 500) * 0.6;
     }
 
     // Mood blend and the gavel flash: only while something is changing (a settled room
@@ -264,81 +265,149 @@ export class RoamRenderer {
     }
     if (this.#focus.visible) (this.#focus.material as THREE.LineBasicMaterial).opacity = reducedMotion ? 0.9 : 0.65 + Math.sin(performance.now() / 260) * 0.25;
 
-    this.#applyOutside(c.zone);
+    this.#applyOutside(this.#attract ? 'outside' : c.zone);
     if (this.#sky.visible) this.#sky.position.copy(this.viewCamera.position);
   }
 
   /**
-   * Fixed rake behind the player. Indoors the roof slab is clipped off and the
-   * camera sits above the room. Collision solids are extruded to the ceiling
-   * and would pin the camera on every lamp, so only a point that actually sits
-   * inside a visible box is walked forward.
+   * Minecraft's third person: the camera hangs `distance` behind the head along
+   * the look direction. A ray from the head finds the first wall in the way and
+   * the boom snaps in to it; once clear, the boom eases back out.
    */
-  #placeIso(eye: readonly [number, number, number], outside: boolean): void {
-    const rig = isoRig(outside);
-    const tx = eye[0];
-    const ty = eye[1] - BODY.eye + rig.lookY;
-    const tz = eye[2];
-    const dist = rig.distance;
-    let cx = tx + Math.sin(ISO_RAKE.yaw) * Math.cos(ISO_RAKE.pitch) * dist;
-    let cy = ty + Math.sin(ISO_RAKE.pitch) * dist;
-    let cz = tz + Math.cos(ISO_RAKE.yaw) * Math.cos(ISO_RAKE.pitch) * dist;
-    cy = Math.min(cy, rig.ceiling);
-    const room = this.#roomAt(tx, tz);
-    if (room) {
-      const b = room.bounds;
-      const m = 14;
-      if (b.min[0] + m < b.max[0] - m) cx = Math.min(Math.max(cx, b.min[0] + m), b.max[0] - m);
-      if (b.min[2] + m < b.max[2] - m) cz = Math.min(Math.max(cz, b.min[2] + m), b.max[2] - m);
-      this.#setCutaway(room.id === 'outside' ? null : b.max[1] - 8);
-    } else this.#setCutaway(null);
-    const cleared = this.#clearOfBoxes(tx, ty, tz, cx, cy, cz);
-    this.#isoCam.position.set(cleared[0], cleared[1], cleared[2]);
-    this.#isoCam.lookAt(tx, ty, tz);
-    this.#fitIso();
+  #placeThird(eye: readonly [number, number, number], yaw: number, pitch: number, cinematic: boolean, dt: number): void {
+    const px = eye[0];
+    const py = eye[1] + THIRD_RIG.lift;
+    const pz = eye[2];
+    // Backward along the view: lookDir is (-sin·cos, sin, -cos·cos).
+    const dx = Math.sin(yaw) * Math.cos(pitch);
+    const dy = -Math.sin(pitch);
+    const dz = Math.cos(yaw) * Math.cos(pitch);
+    const want = cinematic ? THIRD_RIG.cinematic : THIRD_RIG.distance;
+    const hit = this.#rayToBoxes(px, py, pz, dx, dy, dz, want);
+    const reach = Math.max(0, Math.min(want, hit - THIRD_RIG.margin));
+    this.#boom = reach < this.#boom ? reach : this.#boom + (reach - this.#boom) * (1 - Math.exp(-THIRD_RIG.easeOut * dt));
+    this.camera.position.set(px + dx * this.#boom, py + dy * this.#boom, pz + dz * this.#boom);
   }
 
-  /** Hide the roof slab so the isometric view looks into the room. */
-  #setCutaway(y: number | null): void {
-    if (y === this.#cutY) return;
-    this.#cutY = y;
-    if (y != null) this.#clip.constant = y;
-    const planes = y == null ? null : [this.#clip];
-    this.scene.traverse((obj) => {
-      const mesh = obj as THREE.Mesh;
-      if (!mesh.isMesh || mesh === this.#sky) return;
-      const mats = mesh.material;
-      if (!mats) return;
-      for (const m of Array.isArray(mats) ? mats : [mats]) m.clippingPlanes = planes;
-    });
-  }
-
-  #roomAt(x: number, z: number) {
-    return this.#controller.world.rooms.find((r) => x >= r.bounds.min[0] && x <= r.bounds.max[0] && z >= r.bounds.min[2] && z <= r.bounds.max[2]);
-  }
-
-  /** Step the camera toward the player until it is not buried in a visible box. */
-  #clearOfBoxes(ox: number, oy: number, oz: number, cx: number, cy: number, cz: number): [number, number, number] {
-    const boxes = this.#controller.world.boxes;
-    const pad = 2;
-    const inside = (x: number, y: number, z: number) => {
-      for (const b of boxes) {
-        if (y < b.f[1] - pad || y > b.t[1] + pad) continue;
-        if (x < b.f[0] - pad || x > b.t[0] + pad) continue;
-        if (z < b.f[2] - pad || z > b.t[2] + pad) continue;
-        return true;
+  /** Distance along the ray to the nearest visible box (slab test), or `max`. */
+  #rayToBoxes(ox: number, oy: number, oz: number, dx: number, dy: number, dz: number, max: number): number {
+    let best = max;
+    const inv = [1 / dx, 1 / dy, 1 / dz];
+    const o = [ox, oy, oz];
+    for (const b of this.#controller.world.boxes) {
+      let t0 = 0;
+      let t1 = best;
+      for (let k = 0; k < 3; k++) {
+        let near = (b.f[k]! - o[k]!) * inv[k]!;
+        let far = (b.t[k]! - o[k]!) * inv[k]!;
+        if (near > far) [near, far] = [far, near];
+        if (near > t0) t0 = near;
+        if (far < t1) t1 = far;
+        if (t0 > t1) break;
       }
-      return false;
-    };
-    if (!inside(cx, cy, cz)) return [cx, cy, cz];
-    for (let i = 1; i <= 16; i++) {
-      const k = i / 16;
-      const x = cx + (ox - cx) * k;
-      const y = cy + (oy - cy) * k;
-      const z = cz + (oz - cz) * k;
-      if (!inside(x, y, z)) return [x, y, z];
+      // Ignore boxes the head is already inside (a seat back, a hat brim).
+      if (t0 <= t1 && t0 > 0.01) best = t0;
     }
-    return [ox + (cx - ox) * 0.2, oy + (cy - oy) * 0.2, oz + (cz - oz) * 0.2];
+    return best;
+  }
+
+  /**
+   * The wardrobe mirror shot: the camera swings round in front of the player
+   * and looks back at them, so every change shows on the body itself. It aims
+   * past the player's left shoulder, which puts them on the left of the frame,
+   * clear of the wardrobe panel on the right.
+   */
+  #placeShowcase(dt: number): void {
+    const p = this.#controller.playerState();
+    const fx = -Math.sin(p.yaw);
+    const fz = -Math.cos(p.yaw);
+    // The player's own left (yaw 0 faces −Z with the right hand at +X, so left is −X).
+    const lx = -Math.cos(p.yaw);
+    const lz = Math.sin(p.yaw);
+    const want = new THREE.Vector3(p.pos[0] + fx * SHOWCASE.distance, p.pos[1] + SHOWCASE.height, p.pos[2] + fz * SHOWCASE.distance);
+    const k = this.#controller.reducedMotion ? 1 : 1 - Math.exp(-4 * dt);
+    this.#showcaseAt = this.#showcaseAt ? this.#showcaseAt.lerp(want, k) : want;
+    this.camera.position.copy(this.#showcaseAt);
+    this.camera.lookAt(p.pos[0] + lx * SHOWCASE.aside, p.pos[1] + SHOWCASE.look, p.pos[2] + lz * SHOWCASE.aside);
+    this.#boom = THIRD_RIG.hideBelow;
+  }
+
+  #showcaseAt: THREE.Vector3 | null = null;
+
+  /* ── Attract (title screen) ───────────────────────────────────── */
+
+  #attract = false;
+  #attractT = 0;
+  /** Camera pose when the attract orbit ended, eased away from over ATTRACT.blend seconds. */
+  #leave: { pos: THREE.Vector3; quat: THREE.Quaternion; t: number } | null = null;
+
+  /**
+   * Title-screen mode: the camera circles the courthouse slowly and the player
+   * is hidden. Turning it off glides the camera from the orbit into the
+   * player's own view instead of cutting.
+   */
+  setAttract(on: boolean): void {
+    if (on === this.#attract) return;
+    this.#attract = on;
+    this.#leave = on ? null : { pos: this.camera.position.clone(), quat: this.camera.quaternion.clone(), t: 0 };
+  }
+
+  get attract(): boolean {
+    return this.#attract;
+  }
+
+  #placeAttract(dt: number): void {
+    this.#attractT += this.#controller.reducedMotion ? 0 : dt;
+    const a = ATTRACT.start + this.#attractT * ATTRACT.speed;
+    const [cx, cy, cz] = ATTRACT.center;
+    this.camera.position.set(cx + Math.sin(a) * ATTRACT.radius, cy + ATTRACT.height, cz + Math.cos(a) * ATTRACT.radius);
+    this.camera.lookAt(cx, cy, cz);
+  }
+
+  #easeFromAttract(dt: number): void {
+    const l = this.#leave;
+    if (!l) return;
+    l.t += dt / ATTRACT.blend;
+    if (l.t >= 1 || this.#controller.reducedMotion) {
+      this.#leave = null;
+      return;
+    }
+    const k = l.t * l.t * (3 - 2 * l.t);
+    this.camera.position.lerpVectors(l.pos, this.camera.position, k);
+    this.camera.quaternion.slerpQuaternions(l.quat, this.camera.quaternion, k);
+  }
+
+  /** (Re)build the player's standing and seated avatars from a cast model or a wardrobe look. */
+  #buildPlayer(spec: AvatarSpec): void {
+    for (const a of [this.#player, this.#playerSeated]) {
+      if (!a) continue;
+      this.scene.remove(a.object);
+      a.dispose();
+    }
+    this.#playerSpec = spec;
+    const { cast, model, effect } = avatarSource(this.#cast, spec);
+    this.#player = cast.models[model] ? new VoxelAvatar(cast, model, false, 'you', effect) : null;
+    this.#playerSeated = cast.models[model]?.sit ? new VoxelAvatar(cast, model, true, 'you-seated') : null;
+    for (const a of [this.#player, this.#playerSeated]) {
+      if (!a) continue;
+      a.object.visible = false;
+      this.scene.add(a.object);
+    }
+  }
+
+  /** The player's own body: standing or seated, hidden in first person or with the camera in their face. */
+  #showPlayer(show: boolean, dt: number): void {
+    const c = this.#controller;
+    const seated = !!c.seat && !!this.#playerSeated;
+    const standing = this.#player;
+    if (standing) standing.object.visible = show && !seated;
+    if (this.#playerSeated) this.#playerSeated.object.visible = show && seated;
+    if (!show) return;
+    const a = seated ? this.#playerSeated! : standing;
+    if (!a) return;
+    const p = c.playerState();
+    a.place(p.pos[0], p.pos[1], p.pos[2], p.yaw);
+    a.update(dt, { pose: seated ? 'sit' : 'stand', headYaw: 0, headPitch: -p.pitch * 0.6, talking: false, speed: p.speed }, c.reducedMotion);
   }
 
   /** The gavel's white pop. */
@@ -361,24 +430,29 @@ export class RoamRenderer {
   }
 
   /**
-   * Outdoors the indoor fog colour is a flat brown. The plaza keeps a blue
-   * skydome and daylight, and drops distance fog so the facade stays readable.
+   * Outdoors the indoor fog colour is a flat brown. The grounds keep a blue
+   * skydome, a warm afternoon sun from the south-west (so the facade is lit),
+   * a pale haze toward the far islands, and a shadow frustum that follows the
+   * player instead of the courtroom's fixed one.
    */
   #applyOutside(zone: string | null): void {
-    const open = zone === 'outside';
+    const open = isOutdoor(zone);
     this.#sky.visible = open;
     if (open) {
-      this.scene.fog = null;
+      if (!this.#openSky) this.#sunMode(true);
+      this.scene.fog = this.#haze;
       this.#ambient.color.set(C.blue100);
-      this.#ambient.intensity = 0.75 + this.#flash * 1.6;
-      this.#hemi.color.set(C.blue300);
-      this.#hemi.groundColor.set(C.neutral300);
-      this.#hemi.intensity = 1.1;
+      this.#ambient.intensity = 0.62 + this.#flash * 1.6;
+      this.#hemi.color.set(C.blue100);
+      this.#hemi.groundColor.set(C.green700);
+      this.#hemi.intensity = 0.95;
       this.#key.color.set(C.gold100);
-      this.#key.intensity = 1.5;
+      this.#key.intensity = 2.1;
       (this.scene.background as THREE.Color).set(C.blue700);
+      this.#followSun();
     } else if (this.#openSky) {
       this.#openSky = false;
+      this.#sunMode(false);
       this.scene.fog = this.#fog;
       this.#applyMood();
       return;
@@ -386,15 +460,58 @@ export class RoamRenderer {
     this.#openSky = open;
   }
 
+  /** Swap the key light between the courtroom rake and the outdoor sun. */
+  #sunMode(outdoor: boolean): void {
+    const sc = this.#key.shadow.camera;
+    const r = outdoor ? SUN.reach : 1;
+    if (outdoor) {
+      sc.left = -r;
+      sc.right = r;
+      sc.top = r;
+      sc.bottom = -r;
+      sc.near = 10;
+      sc.far = SUN.distance * 2.2;
+      this.camera.far = Math.max(this.preset.far, SUN.far);
+    } else {
+      sc.left = -110 * ROOM_SCALE;
+      sc.right = 110 * ROOM_SCALE;
+      sc.top = 150 * ROOM_SCALE;
+      sc.bottom = -110 * ROOM_SCALE;
+      sc.near = 20;
+      sc.far = 420 * ROOM_SCALE;
+      this.#key.position.set(-40 * ROOM_SCALE, 170, -110 * ROOM_SCALE);
+      this.#key.target.position.set(10 * ROOM_SCALE, 0, 30 * ROOM_SCALE);
+      this.camera.far = this.preset.far;
+    }
+    sc.updateProjectionMatrix();
+    this.camera.updateProjectionMatrix();
+  }
+
+  /** Centre the sun's shadow box on the player, snapped to a grid so shadows do not crawl. */
+  #followSun(): void {
+    const p = this.#attract ? ATTRACT.center : this.#controller.playerState().pos;
+    const g = SUN.snap;
+    const tx = Math.round(p[0] / g) * g;
+    const tz = Math.round(p[2] / g) * g;
+    this.#key.target.position.set(tx, p[1], tz);
+    this.#key.position.set(tx + SUN.dir[0] * SUN.distance, p[1] + SUN.dir[1] * SUN.distance, tz + SUN.dir[2] * SUN.distance);
+  }
+
   #syncRemotes(list: readonly PlayerState[], dt: number, reduced: boolean): void {
     const seen = new Set<string>();
     for (const p of list) {
       seen.add(p.id);
       let a = this.#remotes.get(p.id);
-      if (!a || a.model !== p.avatar.model) {
-        if (a) this.scene.remove(a.object);
-        const model = this.#cast.models[p.avatar.model] ? p.avatar.model : 'creator';
-        a = new VoxelAvatar(this.#cast, model, false, p.id);
+      const key = p.avatar.look ? `look:${lookKey(p.avatar.look)}:${p.avatar.look.effect}` : p.avatar.model;
+      if (!a || a.object.userData.key !== key) {
+        if (a) {
+          this.scene.remove(a.object);
+          a.dispose();
+        }
+        const src = avatarSource(this.#cast, p.avatar);
+        const model = src.cast.models[src.model] ? src.model : 'creator';
+        a = new VoxelAvatar(src.cast, model, false, p.id, src.effect);
+        a.object.userData.key = key;
         this.#remotes.set(p.id, a);
         this.scene.add(a.object);
       }
@@ -414,15 +531,54 @@ export class RoamRenderer {
     // which three.js tracks in its light state and recompiles for.
     if (!gl.shadowMap.enabled) {
       gl.shadowMap.enabled = true;
-      gl.shadowMap.type = THREE.PCFShadowMap;
+      gl.shadowMap.type = THREE.PCFSoftShadowMap;
     }
-    const clip = this.#cutY != null;
-    if (gl.localClippingEnabled !== clip) gl.localClippingEnabled = clip;
-    gl.render(this.scene, this.viewCamera);
+    gl.toneMapping = THREE.NeutralToneMapping;
+    gl.toneMappingExposure = TONE_EXPOSURE;
+    const level = this.preset.level;
+    if (level === 'low') {
+      gl.render(this.scene, this.viewCamera);
+      return;
+    }
+    const post = this.#postFor(gl, level);
+    post.composer.render();
+  }
+
+  /** Build (or resize) the post chain for this level and the canvas's current pixel size. */
+  #postFor(gl: THREE.WebGLRenderer, level: QualityLevel): Post {
+    const size = gl.getSize(new THREE.Vector2());
+    const ratio = gl.getPixelRatio();
+    let post = this.#post;
+    if (!post || post.gl !== gl || post.level !== level) {
+      post?.composer.dispose();
+      const composer = new EffectComposer(gl);
+      composer.addPass(new RenderPass(this.scene, this.camera));
+      if (level === 'high') {
+        const ao = new GTAOPass(this.scene, this.camera, size.x, size.y);
+        ao.updateGtaoMaterial({ radius: 9, distanceExponent: 1.4, thickness: 6, scale: 1.1, samples: 12 });
+        ao.blendIntensity = 0.85;
+        composer.addPass(ao);
+      }
+      composer.addPass(new UnrealBloomPass(new THREE.Vector2(size.x, size.y), BLOOM.strength, BLOOM.radius, BLOOM.threshold));
+      composer.addPass(new OutputPass());
+      post = this.#post = { gl, level, composer, w: 0, h: 0, ratio: 0 };
+    }
+    if (post.w !== size.x || post.h !== size.y || post.ratio !== ratio) {
+      post.composer.setPixelRatio(ratio);
+      post.composer.setSize(size.x, size.y);
+      post.w = size.x;
+      post.h = size.y;
+      post.ratio = ratio;
+    }
+    return post;
   }
 
   dispose(): void {
     this.#unsub();
+    for (const g of this.#gateMeshes) g.dispose();
+    for (const a of [this.#player, this.#playerSeated, ...this.#remotes.values()]) a?.dispose();
+    this.#post?.composer.dispose();
+    this.#post = null;
     this.#world.dispose();
     this.#focus.geometry.dispose();
     (this.#focus.material as THREE.Material).dispose();
@@ -432,6 +588,50 @@ export class RoamRenderer {
     skyMat.dispose();
   }
 }
+
+/** Where an avatar's meshes come from: a cast model, or a wardrobe look built into a cast copy. */
+function avatarSource(cast: CastFile, spec: AvatarSpec): { cast: CastFile; model: string; effect: string } {
+  if (!spec.look) return { cast, model: spec.model, effect: 'none' };
+  const key = `${lookKey(spec.look)}`;
+  let built = lookCasts.get(cast)?.get(key);
+  if (!built) {
+    built = castWithLook(cast, spec.look);
+    let per = lookCasts.get(cast);
+    if (!per) lookCasts.set(cast, (per = new Map()));
+    per.set(key, built);
+  }
+  return { cast: built, model: 'player', effect: spec.look.effect };
+}
+const lookCasts = new WeakMap<CastFile, Map<string, CastFile>>();
+
+/** The title-screen orbit: around the plaza, the courthouse front in view. World units. */
+const ATTRACT = { center: [0, 20, 640] as [number, number, number], radius: 760, height: 250, speed: 0.045, start: 0.55, blend: 1.4 } as const;
+
+/** Wardrobe framing: distance in front of the player, camera height, look height, and how far aside to aim. */
+const SHOWCASE = { distance: 92, height: 34, look: 27, aside: 26 } as const;
+
+/** Outdoor zones get the sky, the sun and the haze. */
+const OUTDOOR = new Set(['outside', 'arrival', 'wardrobe', 'trials']);
+export function isOutdoor(zone: string | null): boolean {
+  return zone != null && OUTDOOR.has(zone);
+}
+
+/** The afternoon sun: direction toward it (unit-ish), distance, shadow reach, far plane. */
+const SUN = { dir: [-0.42, 0.78, 0.46] as const, distance: 900, reach: 520, snap: 48, far: 3400 } as const;
+
+interface Post {
+  gl: THREE.WebGLRenderer;
+  level: QualityLevel;
+  composer: EffectComposer;
+  w: number;
+  h: number;
+  ratio: number;
+}
+
+/** Neutral tone mapping darkens mid-tones a little; this brings the swatches back. */
+const TONE_EXPOSURE = 1.12;
+/** Above sunlit white: only glow materials (lamps, stained glass, screens) pass the threshold. */
+const BLOOM = { strength: 0.5, radius: 0.3, threshold: 1.08 } as const;
 
 /** How long a mood change blends before snapping to the target. */
 const MOOD_BLEND_SECONDS = 2.5;

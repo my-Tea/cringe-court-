@@ -3,8 +3,9 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { RoamController } from '../controller';
 import type { RoamData } from '../load';
 import { ROOM_SCALE } from '../scale';
+import { THIRD_RIG } from '../perspective';
 import { RoamRenderer } from '../three/renderer';
-import { surfaceFor, surfaceTexture, tilePixels, TILE } from '../three/textures';
+import { surfaceFor, surfaceGain, surfaceTexture, tilePixels, TILE } from '../three/textures';
 import { batchWorld } from '../three/worldMesh';
 import { roamData } from './fixtures';
 import { C } from '../palette';
@@ -18,11 +19,16 @@ describe('roam renderer (no GL needed)', () => {
   it('merges ~2,400 static boxes into a few dozen batches with world-space pixel UVs', () => {
     const batches = batchWorld(data.world.boxes);
     expect(data.world.boxes.length).toBeGreaterThan(2000);
-    expect(batches.length).toBeLessThan(45);
-    expect(batches.reduce((n, b) => n + b.boxes, 0)).toBe(data.world.boxes.length);
-    const b = batches[0]!;
-    expect(b.uvs.length / 2).toBe(b.positions.length / 3);
-    expect(b.indices.length).toBe(b.boxes * 36);
+    // Palette colour × glow × (side | top): the grounds and the arrival islands add the greens, roofs and water.
+    expect(batches.length).toBeLessThan(70);
+    // Every box lands in exactly one side batch; colours with a top tile add a tops-only batch.
+    expect(batches.filter((b) => b.face === 'side').reduce((n, b) => n + b.boxes, 0)).toBe(data.world.boxes.length);
+    for (const b of batches) {
+      expect(b.uvs.length / 2).toBe(b.positions.length / 3);
+      const top = batches.some((o) => o.face === 'top' && o.color === b.color && o.glow === b.glow);
+      expect(b.indices.length).toBe(b.boxes * 6 * (b.face === 'top' ? 1 : top ? 5 : 6));
+    }
+    expect(batches.some((b) => b.face === 'top' && surfaceFor(b.color, b.glow, 'top') === 'marble')).toBe(true);
   });
 
   it('pixel textures are nearest-neighbour only, 16×16, deterministic', () => {
@@ -36,12 +42,18 @@ describe('roam renderer (no GL needed)', () => {
     expect(surfaceFor(C.gold900)).toBe('wood');
     expect(surfaceFor(C.royal700)).toBe('fabric');
     expect(surfaceFor(C.blue700, 0.7)).toBe('glass');
+    expect(surfaceFor(C.neutral100, 0, 'top')).toBe('marble');
+    expect(surfaceFor(C.green700, 0, 'top')).toBe('grass');
+    // The gain brings a tile's average back to the flat swatch.
+    const px = tilePixels('stone');
+    const mean = px.reduce((n, v) => n + v, 0) / px.length;
+    expect((mean * surfaceGain('stone')) / 255).toBeCloseTo(1, 5);
   });
 
   it('builds the scene: world meshes, every NPC as a rigged voxel avatar, remote avatars from the feed', () => {
     const controller = new RoamController(data.world, { spawn: 'aisle' });
     const r = new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller, quality: 'medium' });
-    expect(r.drawCalls).toBeLessThan(45);
+    expect(r.drawCalls).toBeLessThan(70);
     expect(r.npcCount).toBe(data.world.npcs.length);
     controller.update(1 / 60);
     r.update(1 / 60);
@@ -76,7 +88,10 @@ describe('roam renderer (no GL needed)', () => {
     r.update(1 / 60);
     expect(controller.zone).toBe('outside');
     expect(sky.visible).toBe(true);
-    expect(r.scene.fog).toBeNull();
+    // Outdoors the indoor fog gives way to a pale sky haze far out (the islands fade into it).
+    expect(r.scene.fog).toBeTruthy();
+    expect((r.scene.fog as THREE.Fog).color.getHexString()).toBe(C.blue300.slice(1).toLowerCase());
+    expect((r.scene.fog as THREE.Fog).near).toBeGreaterThan(600);
     expect((r.scene.background as THREE.Color).getHexString()).toBe(C.blue700.slice(1).toLowerCase());
     controller.teleport('lobby');
     r.update(1 / 60);
@@ -85,23 +100,42 @@ describe('roam renderer (no GL needed)', () => {
     r.dispose();
   });
 
-  it('auto perspective is a third-person isometric camera above the player', () => {
+  it('auto perspective trails the camera behind the player, Minecraft style', () => {
     const controller = new RoamController(data.world, { spawn: 'aisle' });
     const r = new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller, quality: 'high' });
     r.setPerspective('auto');
     r.setViewport(1600, 900);
     controller.setPerspective('auto');
-    controller.update(1 / 60);
-    r.update(1 / 60);
-    const eye = controller.view().eye;
+    for (let i = 0; i < 90; i++) {
+      controller.update(1 / 60);
+      r.update(1 / 60);
+    }
+    const { eye, yaw } = controller.view();
     const cam = r.viewCamera;
-    expect(cam).toBeInstanceOf(THREE.OrthographicCamera);
-    expect(cam.position.y).toBeGreaterThan(eye[1] + 20);
+    expect(cam).toBe(r.camera);
+    // Behind the head: the offset points against the look direction (yaw 0 looks toward -Z).
+    const back = (cam.position.x - eye[0]) * Math.sin(yaw) + (cam.position.z - eye[2]) * Math.cos(yaw);
+    expect(back).toBeGreaterThan(THIRD_RIG.hideBelow);
+    expect(Math.hypot(cam.position.x - eye[0], cam.position.y - eye[1], cam.position.z - eye[2])).toBeLessThanOrEqual(THIRD_RIG.distance + THIRD_RIG.lift + 1);
     expect(r.scene.getObjectByName('avatar:you')?.visible).toBe(true);
     r.setPerspective('first');
     r.update(1 / 60);
-    expect(r.viewCamera).toBe(r.camera);
+    expect(r.camera.position.toArray()).toEqual([...controller.view().eye]);
     expect(r.scene.getObjectByName('avatar:you')?.visible).toBe(false);
+    r.dispose();
+  });
+
+  it('a wall behind the player pulls the third-person camera in', () => {
+    // Stand a step in front of the lobby's back wall, facing into the room.
+    const lobby = data.world.rooms.find((room) => room.id === 'lobby')!.bounds;
+    const controller = new RoamController(data.world, { spawn: { pos: [0, 0.8, lobby.max[2] - 20], yaw: 0, pitch: 0 } });
+    const r = new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller });
+    r.setPerspective('auto');
+    controller.update(1 / 60);
+    r.update(1 / 60);
+    const eye = controller.view().eye;
+    expect(r.camera.position.z - eye[2]).toBeLessThan(THIRD_RIG.distance / 2);
+    expect(r.camera.position.z).toBeLessThan(lobby.max[2]);
     r.dispose();
   });
 
