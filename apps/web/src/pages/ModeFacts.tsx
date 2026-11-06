@@ -1,16 +1,27 @@
-import { MODES, caseCharge, jurySize, verdictThreshold, type ModeId } from '@cringe-court/core';
+import { MODES, caseCharge, jurySize, verdictThreshold, type Deadlines, type ModeId } from '@cringe-court/core';
 import { Amount } from '@/ds';
 import { t } from '@/i18n';
 import styles from './pages.module.css';
 import { ballotLabel } from '@/i18n/domain';
+import { webModes } from '@/modes/registry';
 
 const minutes = (s: number) => t('shell.facts.minutes', { count: Math.round(s / 60) });
 const hours = (s: number) => t('shell.facts.hours', { count: Math.round(s / 3600) });
+
+function deadlineList(id: ModeId, deadlines: Readonly<Partial<Deadlines>>): string {
+  return [
+    ...(deadlines.preTrial != null ? [t(id === 'versus' ? 'shell.facts.deadline.consent' : 'shell.facts.deadline.funding', { time: deadlines.preTrial >= 3600 ? hours(deadlines.preTrial) : minutes(deadlines.preTrial) })] : []),
+    ...(deadlines.recruitment != null ? [t('shell.facts.deadline.jury', { time: minutes(deadlines.recruitment) })] : []),
+    ...(deadlines.commit != null ? [t('shell.facts.deadline.seal', { time: minutes(deadlines.commit) })] : []),
+    ...(deadlines.reveal != null ? [t('shell.facts.deadline.reveal', { time: minutes(deadlines.reveal) })] : []),
+  ].join(t('shell.facts.join'));
+}
 
 /** The numbers that matter before paying (V4 §6.2), straight from the core constants. */
 export function ModeFacts({ id, detailed = false }: { id: ModeId; detailed?: boolean }) {
   const mode = MODES[id];
   const { economics, deadlines, ballot } = mode;
+  const demo = webModes.get(id)?.demoDeadlines;
   return (
     <dl className={styles.facts}>
       <div>
@@ -44,16 +55,15 @@ export function ModeFacts({ id, detailed = false }: { id: ModeId; detailed?: boo
             </dd>
           </div>
           <div>
-            <dt>{t('shell.facts.deadlines')}</dt>
-            <dd>
-              {[
-                ...(deadlines.preTrial !== null ? [t(id === 'versus' ? 'shell.facts.deadline.consent' : 'shell.facts.deadline.funding', { time: hours(deadlines.preTrial) })] : []),
-                t('shell.facts.deadline.jury', { time: minutes(deadlines.recruitment) }),
-                t('shell.facts.deadline.seal', { time: minutes(deadlines.commit) }),
-                t('shell.facts.deadline.reveal', { time: minutes(deadlines.reveal) }),
-              ].join(t('shell.facts.join'))}
-            </dd>
+            <dt>{t(demo ? 'shell.facts.deadlines.live' : 'shell.facts.deadlines')}</dt>
+            <dd>{deadlineList(id, deadlines)}</dd>
           </div>
+          {demo && (
+            <div>
+              <dt>{t('shell.facts.deadlines.demo')}</dt>
+              <dd>{deadlineList(id, demo)}</dd>
+            </div>
+          )}
         </>
       )}
     </dl>

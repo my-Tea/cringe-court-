@@ -16,6 +16,7 @@ import {
   CounselError,
   briefsFor,
   keccak256,
+  monotonicUnixClock,
   seededRandom,
   type AiCounselPort,
   type AngleSuggestion,
@@ -27,6 +28,7 @@ import {
   type FilingPatch,
   type Hex,
   type IdentityPort,
+  type JuryState,
   type ProofRequest,
   type SaltVault,
   type ShareRecord,
@@ -54,7 +56,7 @@ export interface VersusDeskOptions {
   counsel: AiCounselPort;
   identity: IdentityPort;
   salts: SaltVault;
-  /** Wall clock, unix seconds. */
+  /** Unix seconds. Default: wall clock at start, then monotonic (B19). */
   clock?: () => number;
   /** [0, 1); used for invite codes and trial ids. Pass a CSPRNG-backed source in the browser. */
   random?: () => number;
@@ -123,6 +125,13 @@ export const DEMO_JUROR_STAGGER = 4;
 
 export type DemoJuryPlan = 'reliable' | 'one-no-show' | 'two-no-shows';
 
+/** Every seated juror has sealed (commit window) or every sealed scroll is open (reveal window). */
+function everyoneActed(s: JuryState): boolean {
+  if (s.step === 'commit') return s.seats.length > 0 && s.seats.every((x) => x.committed);
+  if (s.step === 'reveal') return s.seats.filter((x) => x.committed).every((x) => x.revealed);
+  return false;
+}
+
 export class VersusDesk {
   readonly store: FactStore;
   persona: Persona;
@@ -140,7 +149,8 @@ export class VersusDesk {
     this.counsel = options.counsel;
     this.identity = options.identity;
     this.salts = options.salts;
-    this.#clock = options.clock ?? (() => Math.floor(Date.now() / 1000));
+    const real = monotonicUnixClock();
+    this.#clock = options.clock ?? (() => Math.floor(real()));
     this.#random = options.random ?? Math.random;
     this.#demo = options.demo ?? true;
   }
@@ -402,6 +412,10 @@ export class VersusDesk {
     let wrote = false;
     for (const c of w.cases()) {
       const s = c.state;
+      if (this.#demo && s.stage === 'jury' && everyoneActed(s)) {
+        wrote = (await this.#closeWindowEarly(c.trialId)) || wrote;
+        continue;
+      }
       const mine = Object.values(c.parties).some((p) => p?.account === this.account.toLowerCase());
       if (s.stage === 'counsel' && s.step === 'drafting' && (options.counsel ?? mine)) {
         // Errors surface on the next tick as state (a failed draft closes the case); never as an unhandled rejection.
@@ -430,6 +444,24 @@ export class VersusDesk {
         }
       }
     }
+    return wrote;
+  }
+
+  /**
+   * Demo only (D14): once every seated juror has acted in the running window,
+   * jump the court clock to its deadline instead of making everyone wait it
+   * out. Same transition the deadline itself makes; the facts say so.
+   */
+  async #closeWindowEarly(trialId: string): Promise<boolean> {
+    let wrote = false;
+    await this.#write((w) => {
+      const s = w.case(trialId)?.state;
+      if (s?.stage !== 'jury' || !everyoneActed(s)) return [];
+      const endsAt = s.step === 'commit' ? s.commitEndsAt : s.revealEndsAt;
+      if (endsAt === null || endsAt <= w.now) return [];
+      wrote = true;
+      return [{ type: 'clock', seconds: endsAt - w.now }];
+    }, 'clerk');
     return wrote;
   }
 

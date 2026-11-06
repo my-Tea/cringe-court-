@@ -109,7 +109,7 @@ export const npcPersona = (id: string) => ({
   says: [t(`domain.npc.${id}.says0` as MessageKey), t(`domain.npc.${id}.says1` as MessageKey)] as const,
 });
 
-type HitKind = 'email' | 'url' | 'phone' | 'wallet' | 'ens' | 'handle' | 'number';
+type HitKind = 'email' | 'url' | 'phone' | 'wallet' | 'ens' | 'handle' | 'number' | 'name';
 /** "2 phone numbers and 1 link" for the review screen. */
 export function describeHits(hits: readonly { kind: HitKind }[]): string {
   if (hits.length === 0) return t('domain.hits.none');

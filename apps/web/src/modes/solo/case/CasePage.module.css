@@ -80,8 +80,33 @@
 
 .trial {
   display: grid;
-  /* B15: scrolled into view (focus, links, scripts), the heading clears the sticky header (4rem bar + its top gap). */
-  scroll-margin-top: calc(4rem + var(--cc-space-2) + var(--cc-space-6));
+}
+
+/* B15: whatever scrolls a section into view (focus, a link, the browser) keeps
+   its heading clear of the sticky site header. */
+.trial,
+.closed,
+.verdict {
+  scroll-margin-top: calc(var(--cc-space-24) + var(--cc-space-16));
+}
+
+.closed {
+  display: grid;
+  gap: var(--cc-space-5);
+}
+
+.closedRefund {
+  justify-self: center;
+  width: min(100%, 32rem);
+  padding: var(--cc-space-5);
+  border: 2px dashed var(--cc-color-border-strong);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-color-surface);
+}
+
+.h3 {
+  margin-bottom: var(--cc-space-3);
+  font-size: var(--cc-text-xl);
 }
 
 /* ── Verdict ── */

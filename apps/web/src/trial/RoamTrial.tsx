@@ -1,21 +1,15 @@
 /**
- * The trial as the first-person roaming courtroom: you sit where your role
- * sits (a party at their table, a juror in the jury box, a spectator in the
- * gallery), and the hearing plays as roam beats driven by the mode's frozen
- * transcript and verdict. Loaded lazily: it carries three.js.
- *
- * Pace (scene/roam pace.ts): Standard by default (~60–75 s for a typical
- * hearing), Highlights, or Full; Fast-forward and Skip to the verdict sit in the
- * bar. Nothing skips the verdict beat itself.
+ * The trial as the first-person roaming courtroom: you sit at the defendant's
+ * table (or in the gallery), and the hearing plays as roam beats driven by the
+ * mode's frozen transcript and verdict. Loaded lazily: it carries three.js.
  */
-import { HEARING_PACES, type AvatarSpec, type HearingPace, type PlayerRole, type RemotePlayerFeed, type SpawnId } from '@cringe-court/scene/roam';
+import type { AvatarSpec, PlayerRole, RemotePlayerFeed, SpawnId } from '@cringe-court/scene/roam';
 import { RoamCourtroom, useRoamCourtroom } from '@cringe-court/scene/roam/react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Icon, Spinner } from '@/ds';
 import { t } from '@/i18n';
 import { appAudio } from '@/platform/audio';
 import { playBeats, type PlannedBeat } from './beats';
-import { setHearingPace, useHearingPace } from './hearingPace';
 import { roamStrings } from './roamStrings';
 import styles from './Trial.module.css';
 
@@ -24,10 +18,7 @@ export interface RoamTrialProps {
   /** Accessible name of the room. */
   label: string;
   role?: PlayerRole;
-  /** Where the player stands before the first beat seats them. Defaults to their role's seat. */
   spawn?: SpawnId;
-  /** Jurors in this hearing, the player included (Solo and Versus 3, Grand Jury 7). Default 3. */
-  jurors?: number;
   avatar?: AvatarSpec;
   remotes?: RemotePlayerFeed;
   /** Switch to the classic stage ("Skip to menu view"). */
@@ -38,36 +29,18 @@ export interface RoamTrialProps {
   onDone?: () => void;
 }
 
-/** Before the first beat seats you: at your table, in the jury box, or walking in from the aisle. */
-const ROLE_SPAWN: Readonly<Record<PlayerRole, SpawnId>> = { defendant: 'defendant', 'side-a': 'prosecution', 'side-b': 'defendant', juror: 'jury-box', spectator: 'aisle' };
-
-const PACE_KEYS = { standard: 'trial.roam.pace.standard', highlights: 'trial.roam.pace.highlights', full: 'trial.roam.pace.full' } as const;
-
-/**
- * The room is rebuilt when the viewer's role or the jury size changes (taking a
- * Grand Jury seat turns a spectator into a juror): the controller seats by role
- * and fills the jury box when it is created.
- */
-export function RoamTrial(props: RoamTrialProps) {
-  return <RoamTrialRoom key={`${props.role ?? 'defendant'}:${props.jurors ?? 3}`} {...props} />;
-}
-
-function RoamTrialRoom({
+export function RoamTrial({
   beats,
   label,
   role = 'defendant',
-  spawn,
-  jurors = 3,
+  spawn = 'defendant',
   avatar = { model: 'creator', name: t('trial.roam.you') },
   remotes,
   onExit,
   onBeat,
   onDone,
 }: RoamTrialProps) {
-  const pace = useHearingPace();
-  const roam = useRoamCourtroom({ audio: appAudio(), role, spawn: spawn ?? ROLE_SPAWN[role], avatar, jurors, pace, ...(remotes ? { remotes } : {}) });
-  const [fast, setFast] = useState(false);
-  const skipping = useRef(false);
+  const roam = useRoamCourtroom({ audio: appAudio(), role, spawn, avatar, ...(remotes ? { remotes } : {}) });
   const [run, setRun] = useState(0);
   const [current, setCurrent] = useState<number | null>(null);
   const [done, setDone] = useState(false);
@@ -88,8 +61,6 @@ function RoamTrialRoom({
     cb.current = { onBeat, onDone };
   });
   const controller = roam.status === 'ready' ? roam.controller : null;
-  useEffect(() => controller?.setPace(pace), [controller, pace]);
-  useEffect(() => controller?.setFastForward(fast), [controller, fast]);
   // Re-plan only when the transcript changes, not on every parent render.
   const plan = JSON.stringify(beats);
 
@@ -99,17 +70,10 @@ function RoamTrialRoom({
     const planned = JSON.parse(plan) as PlannedBeat[];
     // eslint-disable-next-line react-hooks/set-state-in-effect -- resets the finished flag when a new run starts
     setDone(false);
-    skipping.current = false;
-    void playBeats(
-      controller,
-      planned,
-      abort.signal,
-      (i) => {
-        setCurrent(i);
-        cb.current.onBeat?.(i);
-      },
-      () => skipping.current,
-    ).then((all) => {
+    void playBeats(controller, planned, abort.signal, (i) => {
+      setCurrent(i);
+      cb.current.onBeat?.(i);
+    }).then((all) => {
       if (!all) return;
       setCurrent(null);
       setDone(true);
@@ -133,12 +97,6 @@ function RoamTrialRoom({
 
   const strings = roamStrings();
   const beat = current !== null ? beats[current] : undefined;
-  const hasVerdict = beats.some((b) => b.id === 'verdict');
-  const inVerdict = beat?.id === 'verdict';
-  const skipToVerdict = () => {
-    skipping.current = true;
-    roam.controller.skipBeat();
-  };
   return (
     <div className={styles.roam} ref={box}>
       <RoamCourtroom controller={roam.controller} data={roam.data} onExit={onExit} label={label} strings={strings} className={styles.canvas} />
@@ -155,29 +113,9 @@ function RoamTrialRoom({
           )}
         </p>
         <div className={styles.roamActions}>
-          <label className={styles.pace}>
-            <span>{t('trial.roam.pace.label')}</span>
-            <select value={pace} onChange={(e) => setHearingPace(e.target.value as HearingPace)} title={t('trial.roam.pace.hint')}>
-              {HEARING_PACES.map((p) => (
-                <option key={p} value={p}>
-                  {t(PACE_KEYS[p])}
-                </option>
-              ))}
-            </select>
-          </label>
           {beat && (
-            <Button size="sm" variant="ghost" aria-pressed={fast} onClick={() => setFast((f) => !f)}>
-              {t('trial.roam.fastForward')}
-            </Button>
-          )}
-          {beat && !inVerdict && (
             <Button size="sm" variant="ghost" onClick={() => roam.controller.skipBeat()}>
               {t('trial.roam.skipBeat')}
-            </Button>
-          )}
-          {beat && hasVerdict && !inVerdict && (
-            <Button size="sm" variant="ghost" onClick={skipToVerdict}>
-              {t('trial.roam.skipToVerdict')}
             </Button>
           )}
           <Button size="sm" variant="ghost" iconStart={<Icon name="refresh" />} onClick={() => setRun((n) => n + 1)}>

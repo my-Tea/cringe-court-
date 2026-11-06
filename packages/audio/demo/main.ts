@@ -109,14 +109,14 @@ const setAmbUi = segmented<AmbiencePreset>(
 
 // ---------- cue board ----------
 const COLORS: Record<string, string> = {
-  gavel: 'var(--cc-gold-300)',
-  drama: 'var(--cc-royal-500)',
-  crowd: 'var(--cc-teal-900)',
-  verdict: 'var(--cc-royal-700)',
-  jury: 'var(--cc-teal-700)',
-  timer: 'var(--cc-royal-300)',
-  foley: 'var(--cc-neutral-300)',
-  ui: 'var(--cc-neutral-500)',
+  gavel: '#F6C75B',
+  drama: '#CE4A44',
+  crowd: '#2E5F73',
+  verdict: '#A32D3F',
+  jury: '#3F8FA8',
+  timer: '#E07A3F',
+  foley: '#DCC8B0',
+  ui: '#A9917D',
 };
 const pads = new Map<CueId, HTMLButtonElement>();
 const padOrder: CueId[] = [];
@@ -202,7 +202,7 @@ for (const cat of CUE_CATEGORIES) {
   board.append(
     h(
       'section',
-      { class: 'cat', style: `--cat:${COLORS[cat.id] ?? 'var(--cc-neutral-500)'}`, 'aria-labelledby': `cat-${cat.id}` },
+      { class: 'cat', style: `--cat:${COLORS[cat.id] ?? '#A9917D'}`, 'aria-labelledby': `cat-${cat.id}` },
       h('h3', { id: `cat-${cat.id}`, class: 'pixel cat-title' }, cat.label),
       grid,
     ),

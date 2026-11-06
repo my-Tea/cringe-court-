@@ -7,11 +7,11 @@ import { versusBeats } from '../roam/beats';
 import { useVersus } from '../runtime/context';
 import { TrialView, type TrialViewProps } from './TrialView';
 
-/** Where each kind of viewer sits: Side A at the prosecution table, Side B at the defence table, jurors in the box, everyone else in the aisle. */
+/** Where each kind of viewer sits: the parties at the table, jurors in the box, everyone else in the aisle. */
 function roamSeating(viewer: Viewer): { role: PlayerRole; spawn: SpawnId } {
-  if (viewer === 'a') return { role: 'side-a', spawn: 'prosecution' };
+  if (viewer === 'a') return { role: 'side-a', spawn: 'defendant' };
   if (viewer === 'b') return { role: 'side-b', spawn: 'defendant' };
-  if (viewer === 'juror') return { role: 'juror', spawn: 'jury-box' };
+  if (viewer === 'juror') return { role: 'juror', spawn: 'jury-view' };
   return { role: 'spectator', spawn: 'aisle' };
 }
 

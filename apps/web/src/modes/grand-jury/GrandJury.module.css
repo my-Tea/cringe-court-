@@ -1015,6 +1015,20 @@
   scroll-margin-top: var(--cc-space-16);
 }
 
+/* The verdict scrolls into view under the sticky site header and court bar. */
+.verdictCard {
+  scroll-margin-top: calc(var(--cc-space-24) + var(--cc-space-16));
+}
+
+.verdictCard h2:focus {
+  outline: none;
+}
+
+.verdictCard h2:focus-visible {
+  outline: 2px solid var(--cc-gold-300);
+  outline-offset: 4px;
+}
+
 /* ── Hearing (TrialView seam) ── */
 .trialView > div {
   display: flex;

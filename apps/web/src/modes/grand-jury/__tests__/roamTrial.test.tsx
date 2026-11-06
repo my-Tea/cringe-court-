@@ -90,8 +90,7 @@ describe('Grand Jury hearing in the roaming courtroom', () => {
     await user.click(await within(dialog).findByRole('button', { name: /Verify with World ID/ }));
     await user.click(await screen.findByRole('button', { name: /I swear to show up/ }));
     await waitFor(() => expect(seen.at(-1)!.role).toBe('juror'));
-    expect(seen.at(-1)!.spawn).toBe('jury-box');
-    expect(seen.at(-1)!.jurors).toBe(7);
+    expect(seen.at(-1)!.spawn).toBe('jury-view');
     expect(seen.at(-1)!.beats.some((b) => b.id === 'verdict')).toBe(false);
   });
 });

@@ -7,25 +7,24 @@
  */
 import type { Box } from '../../courtroom/geometry';
 import { box } from './boxes';
-import { C } from '../palette';
 
 export const LOBBY = { x: 91, z0: 76, z1: 146, ceiling: 104 } as const;
 
-const STONE = C.neutral100;
-const STONE_SH = C.neutral300;
-const STONE_DK = C.neutral500;
-const WOOD = C.gold900;
-const WOOD_LT = C.gold700;
-const WOOD_DK = C.neutral900;
-const GOLD = C.gold500;
-const GOLD_LT = C.gold300;
-const PARCH = C.gold100;
-const MAROON = C.royal900;
-const RED = C.royal700;
-const LEAF = C.green700;
-const LEAF_LT = C.green500;
-const SEA = C.teal700;
-const SKY = C.blue300;
+const STONE = '#FFF9ED';
+const STONE_SH = '#DCC8B0';
+const STONE_DK = '#A9917D';
+const WOOD = '#8B5E2A';
+const WOOD_LT = '#B77D3A';
+const WOOD_DK = '#4A3A32';
+const GOLD = '#D9A046';
+const GOLD_LT = '#F6C75B';
+const PARCH = '#FFF2C7';
+const MAROON = '#7A1C2E';
+const RED = '#A32D3F';
+const LEAF = '#3E7F50';
+const LEAF_LT = '#6EBF73';
+const SEA = '#3F8FA8';
+const SKY = '#BFD7F5';
 
 function column(out: Box[], x: number, z: number, h: number): void {
   out.push(box([x - 6, 0, z - 6], [x + 6, 4, z + 6], STONE_SH));
@@ -74,7 +73,7 @@ function window(out: Box[], wx: number, face: 1 | -1, z: number): void {
 function sconce(out: Box[], wx: number, face: 1 | -1, z: number): void {
   out.push(box([wx, 40, z - 2.5], [wx + face * 2, 46, z + 2.5], GOLD));
   out.push(box([wx + face * 1, 46, z - 2], [wx + face * 4.5, 48, z + 2], GOLD));
-  out.push(box([wx + face * 1.8, 48, z - 1.2], [wx + face * 3.6, 53, z + 1.2], C.royal100));
+  out.push(box([wx + face * 1.8, 48, z - 1.2], [wx + face * 3.6, 53, z + 1.2], '#FFD79A'));
 }
 
 export function lobbyBoxes(): Box[] {

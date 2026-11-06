@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useParams } from 'react-router';
-import { isDemoTerms, soloMode } from '@cringe-court/modes-solo';
+import { filerReceipt, isDemoTerms, soloMode, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
+import { addUsdc, type ReceiptLine } from '@cringe-court/core';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { t } from '@/i18n';
-import { Badge, EmptyState, Icon, PaperButton, PaperButtonLink, PaperRibbon, PhaseStepper, TestnetBadge } from '@/ds';
+import { Alert, Amount, Badge, EmptyState, Icon, PaperButton, PaperButtonLink, PaperRibbon, PhaseStepper, TestnetBadge } from '@/ds';
 import { beatsFromLines } from '@/trial/beats';
 import { TrialViewFrame } from '@/trial/TrialViewFrame';
 import { Courtroom } from '../court/Courtroom';
@@ -14,7 +15,8 @@ import { useSessionSnapshot } from '../lib/useSession';
 import { CaseSounds } from './CaseSounds';
 import { VerdictPanel } from './VerdictPanel';
 import styles from './CasePage.module.css';
-import { cancelLabel, formatCaseNo } from '@/i18n/domain';
+import { cancelLabel, formatAmount, formatCaseNo } from '@/i18n/domain';
+import { LapsedNote } from './LapsedNote';
 
 const steps = () => [t('solo.case.steps.jury'), t('solo.case.steps.trial'), t('solo.case.steps.deliberation'), t('solo.case.steps.verdict'), t('solo.case.steps.share')];
 
@@ -152,16 +154,53 @@ export function CasePage() {
       {(tState.stage === 'verdict' || tState.stage === 'share') && <VerdictPanel snap={{ ...snap, trial: tState }} session={session} />}
 
       {tState.stage === 'closed' && (
-        <EmptyState
-          title={t('solo.case.closed.title')}
-          headingLevel={2}
-          character="judge"
-          expression="shocked"
-          actions={<PaperButtonLink to={soloPaths.file}>{t('solo.case.closed.again')}</PaperButtonLink>}
-        >
-          {t('solo.case.closed.body', { reason: cancelLabel(tState.reason) })}
-        </EmptyState>
+        <div className={styles.closed}>
+          <LapsedNote lapsed={snap.lapsed} />
+          <EmptyState
+            title={t('solo.case.closed.title')}
+            headingLevel={2}
+            character="judge"
+            expression="shocked"
+            actions={<PaperButtonLink to={soloPaths.file}>{t('solo.case.closed.again')}</PaperButtonLink>}
+          >
+            {t('solo.case.closed.body', { reason: cancelLabel(tState.reason) })}
+          </EmptyState>
+          {tState.settlement && <ClosedRefund snap={snap} refund={filerReceipt(tState.settlement, snap.filer)} session={session} />}
+        </div>
       )}
     </div>
+  );
+}
+
+/** A dismissed paid case (the jury never filled): the filer's refund, claimable here. */
+function ClosedRefund({ snap, refund, session }: { snap: SoloSnapshot; refund: readonly ReceiptLine[]; session: SoloSession | null }) {
+  const owed = refund.filter((l) => l.kind === 'refund');
+  if (!owed.length) return null;
+  const amount = addUsdc(...owed.map((l) => l.amount));
+  return (
+    <section className={styles.closedRefund} aria-labelledby="closed-refund-title">
+      <h3 id="closed-refund-title" className={styles.h3}>
+        {t('solo.case.closed.refundTitle')}
+      </h3>
+      <dl className={styles.ledger}>
+        {owed.map((l, i) => (
+          <div key={i}>
+            <dt>{l.label}</dt>
+            <dd>
+              <Amount value={l.amount} direction="credit" />
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {snap.claimed ? (
+        <Alert tone="success" title={t('solo.verdict.refund.claimedTitle')} live="polite">
+          {t('solo.verdict.refund.claimedBody', { amount: formatAmount(amount) })}
+        </Alert>
+      ) : session ? (
+        <PaperButton onClick={() => void session.claimRefund()} loading={snap.busy === 'claiming'}>
+          {t('solo.verdict.refund.claim', { amount: formatAmount(amount) })}
+        </PaperButton>
+      ) : null}
+    </section>
   );
 }

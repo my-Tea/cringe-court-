@@ -5,7 +5,7 @@ import { prepareBriefing } from '../briefing';
 import { VersusCounsel } from '../counsel';
 import { VersusDesk, demoJurorAccount } from '../desk';
 import { MemoryFactStore, decodeFacts, encodeFacts } from '../store';
-import { claimable, nextStep, sideStatus, viewerOf, visibleBrief } from '../view';
+import { claimable, mistrialCause, nextStep, sideStatus, viewerOf, visibleBrief } from '../view';
 import { World } from '../world';
 import { shareCardModel } from '../share';
 
@@ -233,6 +233,11 @@ describe('Versus end to end', () => {
     // Timely juror: bond back + failed-trial bonus from the forfeits.
     expect(formatUsdc(claimable(c, t.j.account))).toBe('0.60 USDC');
     expect(c.state.settlement.protocol.forfeits).toBe(usdc('0.60'));
+    // B13: a mistrial is not "a verdict is in"; sides are told to claim a refund, and the cause is the no-shows.
+    expect(nextStep(c, 'a', t.a.account).label).toBe('Mistrial: no verdict. Claim your refund.');
+    expect(nextStep(c, 'a', t.a.account).label).not.toMatch(/Verdict is in|payout/);
+    expect(mistrialCause(c.state.verdict)).toBe('no-shows');
+    expect(mistrialCause({ completedDuty: 4, appointed: 4 })).toBe('split');
   });
 
   it('lets a side withdraw before paying, and tracks who approved what', async () => {

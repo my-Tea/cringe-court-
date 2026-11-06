@@ -20,7 +20,6 @@ const ZONE_KEYS: Readonly<Record<ZoneId, MessageKey>> = {
   'defendant-table': 'trial.hud.zone.defendantTable',
   'prosecution-table': 'trial.hud.zone.prosecutionTable',
   'witness-stand': 'trial.hud.zone.witnessStand',
-  'jury-box': 'trial.hud.zone.juryBox',
 };
 
 const QUALITY_KEYS: Readonly<Record<QualityLevel, MessageKey>> = {
@@ -74,7 +73,6 @@ export function roamStrings(): RoamStrings {
     keyInteract: t('trial.hud.keyInteract'),
     continueTouch: t('trial.hud.continueTouch'),
     continueKey: t('trial.hud.continueKey'),
-    continueTap: t('trial.hud.continueTap'),
     beatChip: (label, cinematic) => t(cinematic ? 'trial.hud.beat.chipCinematic' : 'trial.hud.beat.chip', { label }),
     skipBeat: t('trial.hud.skipBeat'),
     exhibitStamp: t('trial.hud.exhibit.stamp'),
@@ -96,7 +94,6 @@ export function roamStrings(): RoamStrings {
     captureKeyboard: row('trial.hud.capture.keyboard'),
     captureClick: t('trial.hud.capture.click'),
     captureKeyboardOnly: t('trial.hud.capture.keyboardOnly'),
-    captureDismiss: t('trial.hud.capture.dismiss'),
     touchPause: t('trial.hud.touch.pause'),
     touchHop: t('trial.hud.touch.hop'),
     touchInteract: t('trial.hud.touch.interact'),

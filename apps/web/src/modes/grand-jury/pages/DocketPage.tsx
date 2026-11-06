@@ -1,4 +1,3 @@
-import { CATEGORIES, type Category } from '@cringe-court/core';
 import { formatAmount } from '@/i18n/domain';
 import { CURRENT_PRICING, FILTER_STATUSES, crowdSize, type DocketEntry, type DocketFilter } from '@cringe-court/modes-grand-jury';
 import { useDeferredValue, useMemo, useState } from 'react';
@@ -7,7 +6,7 @@ import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { t, tRich, type MessageKey } from '@/i18n';
 import { EmptyState, ErrorState, Icon, PaperButton, PaperButtonLink, PaperPanel, PaperRibbon, Skeleton, SkeletonText, cx } from '@/ds';
 import { CaseCard } from '../components/CaseCard';
-import { categoryLabel, paths, steps } from '../lib';
+import { GRAND_JURY_TOPICS, isTopic, paths, steps, topicLabel, topicOf, type GrandJuryTopic } from '../lib';
 import { useCourtNowMs, useDocket } from '../state/hooks';
 import styles from '../GrandJury.module.css';
 
@@ -27,7 +26,7 @@ function sortDocket(list: readonly DocketEntry[]): DocketEntry[] {
 
 function matches(e: DocketEntry, q: string): boolean {
   if (!q) return true;
-  const hay = [e.label, e.file.title, e.file.question, e.file.hook, ...e.ballot, ...e.file.tags, categoryLabel(e.file.category)].join(' ').toLowerCase();
+  const hay = [e.label, e.file.title, e.file.question, e.file.hook, ...e.ballot, ...e.file.tags, topicLabel(topicOf(e.file))].join(' ').toLowerCase();
   return q
     .toLowerCase()
     .split(/\s+/)
@@ -63,7 +62,8 @@ export function DocketPage() {
   const nowMs = useCourtNowMs();
   const [params, setParams] = useSearchParams();
   const filter: DocketFilter = isFilter(params.get('show')) ? (params.get('show') as DocketFilter) : 'all';
-  const category = (params.get('topic') as Category | null) ?? null;
+  const topicParam = params.get('topic');
+  const category: GrandJuryTopic | null = isTopic(topicParam) ? topicParam : null;
   const [query, setQuery] = useState(params.get('q') ?? '');
   const q = useDeferredValue(query.trim());
 
@@ -90,7 +90,7 @@ export function DocketPage() {
   const visible = useMemo(
     () =>
       sortDocket(
-        (all ?? []).filter((e) => (filter === 'all' || FILTER_STATUSES[filter].includes(e.status)) && (category === null || e.file.category === category) && matches(e, q)),
+        (all ?? []).filter((e) => (filter === 'all' || FILTER_STATUSES[filter].includes(e.status)) && (category === null || topicOf(e.file) === category) && matches(e, q)),
       ),
     [all, filter, category, q],
   );
@@ -122,7 +122,7 @@ export function DocketPage() {
             {tRich(
               'grandJury.docket.facts.summon',
               { b: (chunk) => <strong>{chunk}</strong> },
-              { target: formatAmount(p.target), people: crowdSize(p.target), ticket: formatAmount(p.typicalTicket, { unit: false }) },
+              { target: formatAmount(p.target), people: crowdSize(p.target, p.typicalTicket), ticket: formatAmount(p.typicalTicket, { unit: false }) },
             )}
           </span>
           <span aria-hidden>·</span>
@@ -187,7 +187,7 @@ export function DocketPage() {
             <button type="button" className={cx(styles.topicChip, category === null && styles.topicChipOn)} aria-pressed={category === null} onClick={() => set('topic', null)}>
               {t('grandJury.docket.topic.any')}
             </button>
-            {(Object.keys(CATEGORIES) as Category[]).map((c) => (
+            {GRAND_JURY_TOPICS.map((c) => (
               <button
                 key={c}
                 type="button"
@@ -195,7 +195,7 @@ export function DocketPage() {
                 aria-pressed={category === c}
                 onClick={() => set('topic', category === c ? null : c)}
               >
-                {categoryLabel(c)}
+                {topicLabel(c)}
               </button>
             ))}
           </div>

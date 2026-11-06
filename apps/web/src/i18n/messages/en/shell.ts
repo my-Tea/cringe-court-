@@ -108,6 +108,8 @@ export const shell = {
   'facts.bond': 'Juror bond',
   'facts.reward': 'Juror reward on a verdict',
   'facts.deadlines': 'Deadlines',
+  'facts.deadlines.live': 'Deadlines (live cases)',
+  'facts.deadlines.demo': 'Deadlines (this demo court)',
   'facts.deadline.consent': '{time} consent',
   'facts.deadline.funding': '{time} funding',
   'facts.deadline.jury': '{time} jury',
@@ -130,6 +132,9 @@ export const shell = {
   'mode.alert.versus.title': 'Playable on the demo court',
   'mode.alert.versus.body':
     'This court runs on this browser with test USDC on a memory twin of the Arc testnet contract, offline AI counsel and a mock World ID verifier. Open the invite in a second tab to play the other side. Nothing here touches real money.',
+  'mode.alert.grandJury.title': 'Playable on the demo court: you are a verified juror',
+  'mode.alert.grandJury.body':
+    'This court runs end to end in your browser: scripted counsel stands in for 0G Compute, an in-browser twin of the Arc testnet contract holds free test USDC, and a mock World ID verifies you as a human juror. The other summoners and jurors are simulated crowd members. Nothing here touches real money.',
   'mode.alert.demo.title': 'Testnet demo court',
   'mode.alert.demo.body':
     'This court runs end to end in your browser: scripted counsel stands in for 0G Compute, an in-browser twin of the Arc testnet contract holds free test USDC, and NPC jurors stand in for World ID–verified humans. Nothing here touches real money.',
@@ -329,7 +334,7 @@ export const shell = {
   'ledger.demo.note': 'An in-memory twin of the court contract with the same rules, errors and settlement. No real money moves.',
   'ledger.arc.label': 'Arc testnet',
   'ledger.arc.note':
-    'Test USDC only (D14). Seat offers come from the court relayer, which is not deployed yet, so jury seats cannot be taken from the browser.',
+    'Test USDC only. Seat offers come from the court relayer, which is not deployed yet, so jury seats cannot be taken from the browser.',
   'ledger.diff.value': '{label}: app {app}, ledger {ledger}',
   'ledger.diff.shares': 'payer shares: app [{app}], ledger [{ledger}]',
   'ledger.diff.disabled': 'mode is disabled on the ledger',

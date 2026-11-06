@@ -55,24 +55,14 @@ export function beatsFromLines(lines: readonly CourtLine[], verdict?: PlannedVer
   return out;
 }
 
-/**
- * Plays beats in order; resolves true when all ran, false when aborted (the current beat is skipped).
- * `pass(i)` lets the host skip beats wholesale (Skip to the verdict); it is never asked about a verdict beat.
- */
-export async function playBeats(
-  roam: RoamBeatPort,
-  beats: readonly PlannedBeat[],
-  signal?: AbortSignal,
-  onBeat?: (index: number) => void,
-  pass?: (index: number) => boolean,
-): Promise<boolean> {
+/** Plays beats in order; resolves true when all ran, false when aborted (the current beat is skipped). */
+export async function playBeats(roam: RoamBeatPort, beats: readonly PlannedBeat[], signal?: AbortSignal, onBeat?: (index: number) => void): Promise<boolean> {
   const onAbort = () => roam.skipBeat();
   signal?.addEventListener('abort', onAbort, { once: true });
   try {
     for (let i = 0; i < beats.length; i++) {
       if (signal?.aborted) return false;
       const b = beats[i]!;
-      if (b.id !== 'verdict' && pass?.(i)) continue;
       onBeat?.(i);
       await roam.runBeat(b.id, b.options);
     }

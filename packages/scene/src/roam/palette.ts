@@ -19,36 +19,6 @@ export type PaletteHex = (typeof PALETTE)[keyof typeof PALETTE][number];
 
 export const SWATCHES: readonly PaletteHex[] = Object.values(PALETTE).flat();
 
-/**
- * Named swatches, with the web token names (apps/web/src/ds/tokens.ts:
- * `--cc-royal-900` is `C.royal900`). Every colour the roam world, renderer and
- * HUD use comes from here: this module is roam's token layer, and no other roam
- * file may hold a colour literal (enforced in apps/web/src/ds/tokens.test.ts).
- */
-const STEPS = [900, 700, 500, 300, 100] as const;
-type Family = keyof typeof PALETTE;
-type Step = (typeof STEPS)[number];
-export type SwatchName = `${Family}${Step}`;
-
-export const C = Object.fromEntries(
-  (Object.keys(PALETTE) as Family[]).flatMap((family) => STEPS.map((step, i) => [`${family}${step}`, PALETTE[family][i]])),
-) as Readonly<Record<SwatchName, PaletteHex>>;
-
-/** A swatch with alpha, as CSS `rgb(r g b / a)`: the only way to get a translucent colour. */
-export function alpha(hex: PaletteHex, a: number): string {
-  const n = parseInt(hex.slice(1), 16);
-  return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / ${a})`;
-}
-
-/**
- * Source-art colours the world code matches on before the remap (cc-art's
- * courtroom generator output). They never reach the screen raw.
- */
-export const ART = {
-  /** The bench windows' glass in the cutaway. */
-  windowGlass: '#BDF5FF',
-} as const;
-
 const SWATCH_SET = new Set<string>(SWATCHES);
 
 export function isPaletteColor(hex: string): hex is PaletteHex {

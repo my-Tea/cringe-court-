@@ -35,10 +35,13 @@ export function CourtProvider({ children, fallback, tick = true }: { children: R
     const id = window.setInterval(() => {
       if (document.hidden || ticking.current) return;
       ticking.current = true;
-      void demo.sim.tick().finally(() => {
-        ticking.current = false;
-        setVersion((v) => v + 1);
-      });
+      demo.sim
+        .tick()
+        .catch((e: unknown) => console.warn('[grand-jury] simulation tick failed', e))
+        .finally(() => {
+          ticking.current = false;
+          setVersion((v) => v + 1);
+        });
     }, 1000);
     return () => window.clearInterval(id);
   }, [demo, tick]);

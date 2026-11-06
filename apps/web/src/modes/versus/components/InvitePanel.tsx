@@ -49,6 +49,9 @@ export function InvitePanel({ c }: { c: VersusCase }) {
             </PaperButton>
           )}
         </div>
+        <p className={styles.fine} data-testid="invite-same-browser">
+          {t('versus.invite.sameBrowser')}
+        </p>
         <p className={styles.linkText}>
           <span className="cc-visually-hidden">{t('versus.invite.linkLabel')}</span>
           {url}
