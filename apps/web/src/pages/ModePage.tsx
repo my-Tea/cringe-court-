@@ -29,16 +29,9 @@ export function ModePage({ id }: { id: ModeId }) {
             <p className={styles.modeLede}>{m.pitch}</p>
             <div className={styles.heroActions}>
               {playable ? (
-                <>
-                  <PaperButtonLink to={playable.to} size="lg" iconEnd={<Icon name="arrow-right" />}>
-                    {playable.label}
-                  </PaperButtonLink>
-                  {playable.secondary && (
-                    <PaperButtonLink to={playable.secondary.to} size="lg" variant="maroon">
-                      {playable.secondary.label}
-                    </PaperButtonLink>
-                  )}
-                </>
+                <PaperButtonLink to={playable.to} size="lg" iconEnd={<Icon name="arrow-right" />}>
+                  {playable.label}
+                </PaperButtonLink>
               ) : (
                 <Tooltip content="Filing opens when the contracts and AI counsel phases land.">
                   <PaperButton size="lg" disabled iconStart={<Icon name="lock" />}>
@@ -108,17 +101,10 @@ export function ModePage({ id }: { id: ModeId }) {
         </Card>
 
         {playable ? (
-          id === 'versus' ? (
-            <Alert tone="info" title="Playable on the demo court" className={styles.modeAlert}>
-              This court runs on this browser with test USDC on a memory twin of the Arc testnet contract, offline AI counsel and a mock
-              World ID verifier. Open the invite in a second tab to play the other side. Nothing here touches real money.
-            </Alert>
-          ) : (
-            <Alert tone="info" title="Testnet demo court" className={styles.modeAlert}>
-              This court runs end to end in your browser: scripted counsel stands in for 0G Compute, an in-browser twin of the Arc testnet
-              contract holds free test USDC, and NPC jurors stand in for World ID–verified humans. Nothing here touches real money.
-            </Alert>
-          )
+          <Alert tone="info" title="Testnet demo court" className={styles.modeAlert}>
+            This court runs end to end in your browser: scripted counsel stands in for 0G Compute, an in-browser twin of the Arc testnet
+            contract holds free test USDC, and NPC jurors stand in for World ID–verified humans. Nothing here touches real money.
+          </Alert>
         ) : (
           <Alert tone="warning" title="You are looking at the app shell" className={styles.modeAlert}>
             This build has the courts, design system and rules, but no filing yet. Contracts on Arc testnet, AI counsel on 0G and

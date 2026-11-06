@@ -20,7 +20,7 @@ export interface WebModeModule {
   /** Child routes under `/<mode id>/`. */
   routes?: RouteObject[];
   /** The landing page's primary call to action, once the mode is playable. */
-  landing?: { label: string; to: string; secondary?: { label: string; to: string } };
+  landing?: { label: string; to: string };
 }
 
 const discovered = import.meta.glob<WebModeModule>('./*/mode.{ts,tsx}', { eager: true, import: 'default' });

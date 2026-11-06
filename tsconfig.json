@@ -17,10 +17,10 @@
       "path": "./packages/audio"
     },
     {
-      "path": "./packages/modes-solo"
+      "path": "./packages/modes-grand-jury"
     },
     {
-      "path": "./packages/modes-versus"
+      "path": "./packages/modes-solo"
     },
     {
       "path": "./apps/web"
