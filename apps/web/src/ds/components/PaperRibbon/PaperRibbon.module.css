@@ -1,0 +1,138 @@
+/*
+ * PaperRibbon (STYLE-GUIDE §9.4): band in front, swallowtail ends folded behind.
+ * The band's outline is a slightly irregular cut (the paper was trimmed by hand).
+ */
+.ribbon {
+  --_band: var(--cc-neutral-100);
+  --_tail: var(--cc-paper-cream-shade);
+  --_fold: var(--cc-neutral-300);
+  --_ink: var(--cc-neutral-900);
+  --_spark: var(--cc-gold-500);
+  --_h: 3.25rem;
+  --_tail-w: 1.6em;
+  --_drop: var(--cc-paper-drop-2);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: var(--_h);
+  margin: 0;
+  padding: 0.35em 1.1em;
+  color: var(--_ink);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-2xl);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ribbon[data-tails] {
+  margin-inline: var(--_tail-w);
+}
+
+.layers {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  filter: var(--_drop);
+}
+
+.band,
+.tail {
+  position: absolute;
+  background-color: var(--_band);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-plate);
+}
+
+.band {
+  inset: 0;
+  /* hand-trimmed: each corner is nicked a different amount */
+  clip-path: polygon(0.6% 6%, 18% 0, 54% 3%, 82% 0, 99.4% 5%, 100% 52%, 99% 96%, 70% 100%, 34% 97%, 9% 100%, 0 94%, 0.8% 48%);
+}
+
+.tail {
+  top: 22%;
+  bottom: -22%;
+  width: calc(var(--_tail-w) + 1.2em);
+  background-color: var(--_tail);
+}
+
+.tail[data-side='start'] {
+  right: calc(100% - 1.2em);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 34% 50%);
+  background-image: var(--cc-paper-grain), linear-gradient(90deg, transparent 0 60%, color-mix(in srgb, var(--cc-neutral-900) 14%, transparent) 60%);
+}
+
+.tail[data-side='end'] {
+  left: calc(100% - 1.2em);
+  clip-path: polygon(0 0, 100% 0, 66% 50%, 100% 100%, 0 100%);
+  background-image: var(--cc-paper-grain), linear-gradient(270deg, transparent 0 60%, color-mix(in srgb, var(--cc-neutral-900) 14%, transparent) 60%);
+}
+
+.text {
+  position: relative;
+  text-wrap: balance;
+}
+
+/* Gold paper chevrons ("> <") either side of the text. */
+.spark {
+  flex-shrink: 0;
+  width: 0.7em;
+  height: 0.9em;
+  background: linear-gradient(180deg, var(--cc-gold-300) 0 50%, var(--cc-gold-700) 50%);
+  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--cc-neutral-900) 35%, transparent));
+}
+
+.spark[data-side='start'] {
+  clip-path: polygon(0 0, 100% 50%, 0 100%, 30% 50%);
+}
+
+.spark[data-side='end'] {
+  clip-path: polygon(100% 0, 70% 50%, 100% 100%, 0 50%);
+}
+
+/* Tones */
+.ribbon[data-tone='maroon'] {
+  --_band: var(--cc-royal-900);
+  --_tail: var(--cc-paper-maroon-deep);
+  --_ink: var(--cc-gold-100);
+}
+
+.ribbon[data-tone='gold'] {
+  --_band: var(--cc-gold-300);
+  --_tail: var(--cc-gold-700);
+  --_ink: var(--cc-royal-900);
+  --_spark: var(--cc-royal-900);
+}
+
+.ribbon[data-tone='gold'] .spark {
+  background: linear-gradient(180deg, var(--cc-royal-700) 0 50%, var(--cc-royal-900) 50%);
+}
+
+/* Sizes */
+.ribbon[data-size='sm'] {
+  --_h: 2.25rem;
+  --_tail-w: 1.1em;
+  --_drop: var(--cc-paper-drop-1);
+  padding: 0.3em 0.9em;
+  font-size: var(--cc-text-sm);
+  letter-spacing: 0.03em;
+}
+
+.ribbon[data-size='lg'] {
+  --_h: 4.5rem;
+  --_drop: var(--cc-paper-drop-3);
+  font-size: var(--cc-text-3xl);
+  padding: 0.35em 1.2em;
+}
+
+@media (forced-colors: active) {
+  .band {
+    border: 2px solid CanvasText;
+  }
+}

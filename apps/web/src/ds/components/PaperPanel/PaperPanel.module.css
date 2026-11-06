@@ -1,0 +1,160 @@
+/*
+ * PaperPanel: one sheet of card stock (STYLE-GUIDE §9.2).
+ *   .layers  drop-shadow filter (elevation), holds the backing and the sheet
+ *   .backing the offset sheet underneath (layering)
+ *   .sheet   paper fill + fold facets + grain, cut by the edge mask
+ */
+.panel {
+  --_paper: var(--cc-neutral-100);
+  --_backing: var(--cc-gold-500);
+  --_edge-size: 10px;
+  --_drop: var(--cc-paper-drop-2);
+
+  position: relative;
+  isolation: isolate;
+  color: var(--cc-color-text);
+}
+
+.layers {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  filter: var(--_drop);
+  pointer-events: none;
+}
+
+.sheet,
+.backing {
+  position: absolute;
+  inset: 0;
+}
+
+.sheet {
+  background-color: var(--_paper);
+  background-image: var(--cc-paper-grain);
+}
+
+.facets {
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+}
+
+.backing {
+  background: var(--_backing);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+  translate: 6px 7px;
+  rotate: 0.6deg;
+}
+
+.content {
+  position: relative;
+  padding: var(--_pad);
+}
+
+.pad-none {
+  --_pad: 0px;
+}
+
+.pad-sm {
+  --_pad: var(--cc-space-4);
+}
+
+.pad-md {
+  --_pad: var(--cc-space-6);
+}
+
+.pad-lg {
+  --_pad: clamp(var(--cc-space-6), 4vw, var(--cc-space-10));
+}
+
+/* Paper stock */
+.panel[data-tone='maroon'] {
+  --_paper: var(--cc-royal-900);
+  --_backing: var(--cc-gold-500);
+}
+
+.panel[data-tone='gold'] {
+  --_paper: var(--cc-gold-300);
+  --_backing: var(--cc-royal-900);
+  color: var(--cc-royal-900);
+}
+
+.panel[data-tone='kraft'] {
+  --_paper: var(--cc-neutral-300);
+  --_backing: var(--cc-gold-700);
+}
+
+.panel[data-backing='gold'] {
+  --_backing: var(--cc-gold-500);
+}
+
+.panel[data-backing='maroon'] {
+  --_backing: var(--cc-royal-900);
+}
+
+.panel[data-backing='cream'] {
+  --_backing: var(--cc-neutral-100);
+}
+
+/* Elevation: how many paper layers sit below */
+.panel[data-elevation='0'] {
+  --_drop: none;
+}
+
+.panel[data-elevation='1'] {
+  --_drop: var(--cc-paper-drop-1);
+}
+
+.panel[data-elevation='3'] {
+  --_drop: var(--cc-paper-drop-3);
+}
+
+.panel[data-elevation='4'] {
+  --_drop: var(--cc-paper-drop-4);
+}
+
+/* Edges. Each mask = solid middle + an edge tile repeated along the cut. */
+.panel[data-edge='cut'] :is(.sheet, .backing) {
+  clip-path: polygon(
+    var(--cc-paper-cut-lg) 0,
+    calc(100% - var(--cc-paper-cut-lg)) 0,
+    100% var(--cc-paper-cut-lg),
+    100% calc(100% - var(--cc-paper-cut-lg)),
+    calc(100% - var(--cc-paper-cut-lg)) 100%,
+    var(--cc-paper-cut-lg) 100%,
+    0 calc(100% - var(--cc-paper-cut-lg)),
+    0 var(--cc-paper-cut-lg)
+  );
+}
+
+.panel[data-edge='torn'] :is(.sheet, .backing) {
+  mask:
+    var(--cc-paper-edge-torn-top) top left / 120px var(--_edge-size) repeat-x,
+    linear-gradient(black, black) center / 100% calc(100% - 2 * var(--_edge-size) + 2px) no-repeat,
+    var(--cc-paper-edge-torn-bottom) bottom left / 120px var(--_edge-size) repeat-x;
+}
+
+.panel[data-edge='torn'] .backing {
+  mask-position:
+    37px 0,
+    center,
+    71px 100%;
+}
+
+.panel[data-edge='zigzag'] :is(.sheet, .backing) {
+  --_edge-size: 8px;
+  mask:
+    var(--cc-paper-edge-zigzag-top) top left / 16px var(--_edge-size) repeat-x,
+    linear-gradient(black, black) center / 100% calc(100% - 2 * var(--_edge-size) + 2px) no-repeat,
+    var(--cc-paper-edge-zigzag-bottom) bottom left / 16px var(--_edge-size) repeat-x;
+}
+
+.panel[data-edge='torn'] > .content,
+.panel[data-edge='zigzag'] > .content {
+  padding-block: calc(var(--_pad) + var(--_edge-size));
+}
+
+@media (forced-colors: active) {
+  .sheet {
+    border: 1px solid CanvasText;
+  }
+}

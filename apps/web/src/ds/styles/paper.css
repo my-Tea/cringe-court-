@@ -1,0 +1,135 @@
+/*
+ * Papercraft language: shared keyframes and helpers (docs/STYLE-GUIDE.md §9).
+ *
+ * Every animation here reads its timing from the duration tokens, which collapse
+ * to 0ms under reduced motion. On top of that each helper is switched off
+ * explicitly below, so a reduced-motion user never sees a sheet mid-fold.
+ */
+
+/* A sheet unfolds from its top edge (dialogs, panels, ribbons on entry). */
+@keyframes cc-paper-unfold {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateX(-72deg) translateY(-6px);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: perspective(900px) rotateX(0deg) translateY(0);
+  }
+}
+
+/* A cut-out slides in and settles onto the sheet below (cards, list items). */
+@keyframes cc-paper-slide-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--cc-slide-x, 0), var(--cc-slide-y, 18px), 0) rotate(var(--cc-slide-r, -1.5deg));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A folded tag pops open (badges, toasts, the verdict stamp's tail). */
+@keyframes cc-paper-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-6deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06) rotate(1deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The gavel bang: the whole sheet jolts down and shivers back into place. */
+@keyframes cc-gavel-bang {
+  0% {
+    transform: none;
+  }
+  12% {
+    transform: translate3d(0, 4px, 0) rotate(-0.6deg);
+  }
+  28% {
+    transform: translate3d(-3px, -1px, 0) rotate(0.5deg);
+  }
+  44% {
+    transform: translate3d(2px, 1px, 0) rotate(-0.3deg);
+  }
+  62% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* Hanging banners and paper props drift a little in the courtroom air. */
+@keyframes cc-paper-sway {
+  0%,
+  100% {
+    transform: rotate(-1.2deg);
+  }
+  50% {
+    transform: rotate(1.2deg);
+  }
+}
+
+.cc-unfold {
+  transform-origin: 50% 0;
+  animation: cc-paper-unfold var(--cc-duration-slower) var(--cc-ease-unfold) both;
+}
+
+.cc-slide-in {
+  animation: cc-paper-slide-in var(--cc-duration-slow) var(--cc-ease-enter) both;
+  animation-delay: calc(var(--cc-stagger, 0) * 70ms);
+}
+
+.cc-pop {
+  animation: cc-paper-pop var(--cc-duration-slow) var(--cc-ease-stamp) both;
+}
+
+.cc-gavel-bang {
+  animation: cc-gavel-bang var(--cc-duration-dramatic) var(--cc-ease-standard);
+}
+
+.cc-sway {
+  transform-origin: 50% 0;
+  animation: cc-paper-sway 6s ease-in-out infinite;
+}
+
+/*
+ * A cut corner: paper is trimmed with scissors, not rounded. Set --cc-cut to the
+ * chamfer size. Use on purely decorative sheets; interactive elements put the
+ * clip on a pseudo-element so focus rings stay visible.
+ */
+.cc-cut {
+  clip-path: polygon(
+    var(--cc-cut, var(--cc-paper-cut-md)) 0,
+    calc(100% - var(--cc-cut, var(--cc-paper-cut-md))) 0,
+    100% var(--cc-cut, var(--cc-paper-cut-md)),
+    100% calc(100% - var(--cc-cut, var(--cc-paper-cut-md))),
+    calc(100% - var(--cc-cut, var(--cc-paper-cut-md))) 100%,
+    var(--cc-cut, var(--cc-paper-cut-md)) 100%,
+    0 calc(100% - var(--cc-cut, var(--cc-paper-cut-md))),
+    0 var(--cc-cut, var(--cc-paper-cut-md))
+  );
+}
+
+/* Reduced motion: no unfolding, sliding, popping, shaking or swaying. */
+:root[data-reduced-motion='true'] :is(.cc-unfold, .cc-slide-in, .cc-pop, .cc-gavel-bang, .cc-sway) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-reduced-motion]) :is(.cc-unfold, .cc-slide-in, .cc-pop, .cc-gavel-bang, .cc-sway) {
+    animation: none;
+  }
+}

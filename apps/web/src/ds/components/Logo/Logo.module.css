@@ -1,0 +1,71 @@
+/* Logo (STYLE-GUIDE §9.8): fills come from palette variables, never literals. */
+.logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.paper {
+  filter: var(--cc-paper-drop-2);
+}
+
+.goldLit {
+  fill: var(--cc-gold-300);
+}
+
+.goldShade {
+  fill: var(--cc-gold-500);
+}
+
+.woodLit {
+  fill: var(--cc-gold-700);
+}
+
+.woodShade {
+  fill: var(--cc-gold-900);
+}
+
+.ink {
+  fill: var(--cc-gold-900);
+}
+
+.string {
+  fill: none;
+  stroke: var(--cc-gold-700);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.word {
+  font-family: var(--cc-font-display);
+  font-size: 46px;
+  letter-spacing: 0.02em;
+}
+
+.logo[data-layout='inline'] .word {
+  font-size: 34px;
+}
+
+.outline {
+  fill: var(--cc-royal-900);
+  stroke: var(--cc-paper-maroon-deep);
+  stroke-width: 9;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+.extrude {
+  fill: var(--cc-gold-900);
+  stroke: var(--cc-neutral-900);
+  stroke-width: 9;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+@media (forced-colors: active) {
+  .logo * {
+    fill: CanvasText;
+    stroke: none;
+  }
+}
