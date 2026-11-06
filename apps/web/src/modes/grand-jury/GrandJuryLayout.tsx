@@ -1,5 +1,6 @@
 import { formatUsdc, usdc } from '@cringe-court/core';
 import { NavLink, Outlet } from 'react-router';
+import { t, type MessageKey } from '@/i18n';
 import { Badge, Button, ErrorState, Icon, LoadingState, Tooltip, cx, useToast } from '@/ds';
 import { paths } from './lib';
 import { useCourtContext } from './state/context';
@@ -7,10 +8,10 @@ import { CourtProvider } from './state/CourtProvider';
 import { useWallet } from './state/hooks';
 import styles from './GrandJury.module.css';
 
-const NAV = [
-  { to: paths.docket, label: 'Docket', icon: 'document' as const },
-  { to: paths.duty, label: 'My court', icon: 'user' as const },
-  { to: paths.pricing, label: 'Who pays', icon: 'scales' as const },
+const NAV: readonly { to: string; label: MessageKey; icon: 'document' | 'user' | 'scales' }[] = [
+  { to: paths.docket, label: 'grandJury.layout.nav.docket', icon: 'document' },
+  { to: paths.duty, label: 'grandJury.layout.nav.duty', icon: 'user' },
+  { to: paths.pricing, label: 'grandJury.layout.nav.pricing', icon: 'scales' },
 ];
 
 function WalletChip() {
@@ -20,19 +21,19 @@ function WalletChip() {
   const balance = wallet.state === 'ready' ? wallet.data.balance : null;
   const topUp = () => {
     demo.faucet(usdc('10.00'));
-    toast({ tone: 'success', title: '10.00 test USDC added', description: 'Testnet money from the faucet. It has no value.' });
+    toast({ tone: 'success', title: t('grandJury.layout.faucet.toast.title'), description: t('grandJury.layout.faucet.toast.body') });
   };
   return (
     <div className={styles.wallet}>
       <span className={styles.walletLabel}>
-        <Icon name="star" /> Test wallet
+        <Icon name="star" /> {t('grandJury.layout.wallet.label')}
       </span>
       <span className={styles.walletBalance} aria-live="polite">
         {balance === null ? '…' : formatUsdc(balance)}
       </span>
-      <Tooltip content="Mint test USDC from the testnet faucet stand-in">
+      <Tooltip content={t('grandJury.layout.faucet.tooltip')}>
         <Button size="sm" variant="ghost" onClick={topUp} iconStart={<Icon name="plus" />}>
-          Faucet
+          {t('grandJury.layout.faucet.button')}
         </Button>
       </Tooltip>
     </div>
@@ -43,12 +44,12 @@ function CourtBar() {
   return (
     <div className={styles.courtBar}>
       <div className={styles.courtBarInner}>
-        <nav aria-label="Grand Jury" className={styles.subNav}>
+        <nav aria-label={t('grandJury.layout.nav.label')} className={styles.subNav}>
           <ul role="list">
             {NAV.map((n) => (
               <li key={n.to}>
                 <NavLink to={n.to} className={({ isActive }) => cx(styles.subNavLink, isActive && styles.subNavActive)}>
-                  <Icon name={n.icon} /> {n.label}
+                  <Icon name={n.icon} /> {t(n.label)}
                 </NavLink>
               </li>
             ))}
@@ -72,12 +73,12 @@ export function GrandJuryLayout() {
         fallback={(status, retry) =>
           status.state === 'loading' ? (
             <div className={styles.page}>
-              <LoadingState title="Calling the court to order…">Seeding the public docket on the testnet ledger twin.</LoadingState>
+              <LoadingState title={t('grandJury.layout.loading.title')}>{t('grandJury.layout.loading.body')}</LoadingState>
             </div>
           ) : (
             <div className={styles.page}>
-              <ErrorState title="The court could not sit" onRetry={retry} details={status.error.message}>
-                The Grand Jury ledger did not load. Nothing was charged.
+              <ErrorState title={t('grandJury.layout.error.title')} onRetry={retry} details={status.error.message}>
+                {t('grandJury.layout.error.body')}
               </ErrorState>
             </div>
           )
@@ -86,9 +87,9 @@ export function GrandJuryLayout() {
         <CourtBar />
         <p className={styles.demoRibbon}>
           <Badge tone="info" solid>
-            Testnet
+            {t('grandJury.layout.ribbon.badge')}
           </Badge>
-          <span>Demo docket with shortened deadlines (minutes, not days). Test USDC only, a mock World ID verifier, and a simulated crowd.</span>
+          <span>{t('grandJury.layout.ribbon.text')}</span>
         </p>
         <Outlet />
       </CourtProvider>

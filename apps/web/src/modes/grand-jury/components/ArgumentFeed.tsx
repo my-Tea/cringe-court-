@@ -2,18 +2,19 @@ import { CHARACTER_NAMES, SPEAKER_CHARACTER, type CourtLine, type Segment } from
 import type { CaseDetail, LogEntry } from '@cringe-court/modes-grand-jury';
 import { useEffect, useRef, useState } from 'react';
 import { Button, Icon, Portrait, cx, useMotion } from '@/ds';
+import { t, tRich, type MessageKey } from '@/i18n';
 import { ago, hearingLines, portraitOf } from '../lib';
 import styles from '../GrandJury.module.css';
 import { CourtPanel } from './parts';
 
-const SEGMENT_LABEL: Record<Segment, string> = {
-  'call-to-order': 'Call to order',
-  opening: 'Opening',
-  exhibit: 'Exhibit',
-  rebuttal: 'Rebuttal',
-  closing: 'Closing',
-  'jury-out': 'The jury is out',
-  sentence: 'Sentence',
+const SEGMENT_LABEL: Record<Segment, MessageKey> = {
+  'call-to-order': 'grandJury.feed.segment.callToOrder',
+  opening: 'grandJury.feed.segment.opening',
+  exhibit: 'grandJury.feed.segment.exhibit',
+  rebuttal: 'grandJury.feed.segment.rebuttal',
+  closing: 'grandJury.feed.segment.closing',
+  'jury-out': 'grandJury.feed.segment.juryOut',
+  sentence: 'grandJury.feed.segment.sentence',
 };
 
 const EXPRESSION: Partial<Record<NonNullable<CourtLine['beat']>, 'smug' | 'shocked' | 'defeated'>> = {
@@ -35,13 +36,13 @@ function Line({ line, detail }: { line: CourtLine; detail: CaseDetail }) {
       <div className={styles.bubble}>
         <p className={styles.lineMeta}>
           <span className={styles.lineSpeaker}>{CHARACTER_NAMES[SPEAKER_CHARACTER[line.speaker]]}</span>
-          {position && <span className={styles.linePosition}>for {position}</span>}
-          <span className={styles.lineSegment}>{SEGMENT_LABEL[line.segment]}</span>
+          {position && <span className={styles.linePosition}>{t('grandJury.feed.for', { position })}</span>}
+          <span className={styles.lineSegment}>{t(SEGMENT_LABEL[line.segment])}</span>
         </p>
         <p className={styles.lineText}>{line.text}</p>
         {exhibit && (
           <p className={styles.exhibit}>
-            <Icon name="document" /> Exhibit {exhibit.id}: {exhibit.label}
+            <Icon name="document" /> {t('grandJury.feed.exhibit', { id: exhibit.id, label: exhibit.label })}
           </p>
         )}
       </div>
@@ -77,19 +78,19 @@ export function ArgumentFeed({ detail }: { detail: CaseDetail }) {
       tone="cream"
       edge="torn"
       className={styles.feedCard}
-      eyebrow={detail.transcriptTeaser ? 'Free teaser' : 'Full transcript'}
-      title="The arguments"
+      eyebrow={detail.transcriptTeaser ? t('grandJury.feed.eyebrow.teaser') : t('grandJury.feed.eyebrow.full')}
+      title={t('grandJury.feed.title')}
       icon="megaphone"
       action={
         !reduced &&
         lines.length > 1 && (
           <Button size="sm" variant="ghost" iconStart={<Icon name={playing ? 'close' : 'refresh'} />} onClick={() => setShown(playing ? lines.length : 1)}>
-            {playing ? 'Show all' : 'Replay as a feed'}
+            {playing ? t('grandJury.feed.showAll') : t('grandJury.feed.replay')}
           </Button>
         )
       }
     >
-        <ol ref={listRef} className={styles.feed} aria-live={playing ? 'polite' : 'off'} aria-label="Transcript">
+        <ol ref={listRef} className={styles.feed} aria-live={playing ? 'polite' : 'off'} aria-label={t('grandJury.feed.transcriptLabel')}>
           {lines.slice(0, shown).map((l) => (
             <Line key={l.id} line={l} detail={detail} />
           ))}
@@ -98,17 +99,27 @@ export function ArgumentFeed({ detail }: { detail: CaseDetail }) {
           <div className={styles.locked}>
             <Icon name="lock" />
             <div>
-              <p className={styles.lockedTitle}>{detail.status === 'cancelled' ? 'The full hearing never ran.' : 'Exhibits, rebuttals and closings unlock when all seven jurors are sworn in.'}</p>
-              <p className={styles.lockedNote}>The whole transcript is already written and frozen, so nobody can tweak it after seeing the money.</p>
+              <p className={styles.lockedTitle}>{detail.status === 'cancelled' ? t('grandJury.feed.locked.cancelled') : t('grandJury.feed.locked.title')}</p>
+              <p className={styles.lockedNote}>{t('grandJury.feed.locked.note')}</p>
             </div>
           </div>
         )}
         <p className={styles.provenance}>
-          <Icon name="info" /> Drafted by {detail.provider === 'fixture' ? 'the demo fixture counsel (0G Compute in production)' : '0G Compute'}, same model and budget for both sides. Fingerprint{' '}
-          <code className={styles.hash} title={detail.transcriptHash}>
-            {detail.transcriptHash.slice(0, 10)}…{detail.transcriptHash.slice(-6)}
-          </code>{' '}
-          recorded on the ledger before any vote.
+          <Icon name="info" />{' '}
+          {tRich(
+            'grandJury.feed.provenance',
+            {
+              hash: (chunk) => (
+                <code className={styles.hash} title={detail.transcriptHash}>
+                  {chunk}
+                </code>
+              ),
+            },
+            {
+              provider: detail.provider === 'fixture' ? t('grandJury.feed.provider.fixture') : t('grandJury.feed.provider.live'),
+              hash: `${detail.transcriptHash.slice(0, 10)}…${detail.transcriptHash.slice(-6)}`,
+            },
+          )}
         </p>
     </CourtPanel>
   );
@@ -135,7 +146,7 @@ export function CourtRecord({ log, now, limit = 12 }: { log: readonly LogEntry[]
   const items = [...log].reverse();
   const visible = all ? items : items.slice(0, limit);
   return (
-    <CourtPanel id="record-title" tone="kraft" elevation={1} eyebrow="Public, on the ledger" title="Court record">
+    <CourtPanel id="record-title" tone="kraft" elevation={1} eyebrow={t('grandJury.record.eyebrow')} title={t('grandJury.record.title')}>
         <ol className={styles.record}>
           {visible.map((l) => (
             <li key={l.id} className={cx(styles.recordItem)} data-kind={l.kind}>
@@ -151,7 +162,7 @@ export function CourtRecord({ log, now, limit = 12 }: { log: readonly LogEntry[]
         </ol>
         {items.length > limit && (
           <Button size="sm" variant="ghost" onClick={() => setAll((a) => !a)}>
-            {all ? 'Show recent only' : `Show all ${items.length} entries`}
+            {all ? t('grandJury.record.showRecent') : t('grandJury.record.showAll', { count: items.length })}
           </Button>
         )}
     </CourtPanel>
