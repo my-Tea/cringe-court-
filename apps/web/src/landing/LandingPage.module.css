@@ -319,3 +319,12 @@
     display: none;
   }
 }
+
+/* Narrowest phones (320–360 px, and 400 % zoom): the header CTA would sit on top
+   of the last tab. "The court" tab and the big "Enter the court" plate below
+   do the same job, so the header copy steps aside. */
+@media (max-width: 22.5rem) {
+  .navCta {
+    display: none;
+  }
+}
