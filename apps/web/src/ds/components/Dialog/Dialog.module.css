@@ -24,10 +24,10 @@
   width: min(calc(100vw - 2rem), var(--_width, 32rem));
   max-height: calc(100dvh - 2rem);
   translate: -50% -50%;
-  border: 3px solid var(--cc-color-frame);
+  border: 1px solid var(--cc-color-border-strong);
   border-radius: var(--cc-radius-xl);
   background: var(--cc-color-surface-raised);
-  box-shadow: 0 0 0 1px var(--cc-color-frame-dark), var(--cc-shadow-bevel), var(--cc-shadow-4);
+  box-shadow: var(--cc-shadow-4);
   color: var(--cc-color-text);
 }
 
@@ -51,14 +51,14 @@
   --_width: 44rem;
 }
 
-/* A maroon rule over the header, like the banner rods in the style guide. */
+/* A dramatic gold rule over the header, like the dialogue-box art. */
 .header {
   display: flex;
   align-items: flex-start;
   gap: var(--cc-space-3);
   padding: var(--cc-space-6) var(--cc-space-6) var(--cc-space-2);
-  border-top: 4px solid var(--cc-color-accent);
-  border-radius: calc(var(--cc-radius-xl) - 3px) calc(var(--cc-radius-xl) - 3px) 0 0;
+  border-top: 4px solid var(--cc-color-highlight);
+  border-radius: var(--cc-radius-xl) var(--cc-radius-xl) 0 0;
 }
 
 .danger .header {
@@ -116,7 +116,7 @@
   height: 100dvh;
   max-height: none;
   translate: none;
-  border-width: 0 0 0 3px;
+  border-width: 0 0 0 1px;
   border-radius: 0;
 }
 

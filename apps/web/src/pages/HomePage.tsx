@@ -1,21 +1,7 @@
 import { MODE_IDS, MODES } from '@cringe-court/core';
-import { guideArt, stagePose, uiIcon, type UiIconName } from '@/art/art';
+import { brandArt, stagePose, uiIcon, type UiIconName } from '@/art/art';
 import { Link } from 'react-router';
-import {
-  ButtonLink,
-  buttonClassName,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  DialogueBox,
-  Icon,
-  type IconName,
-  ImpactText,
-  RoundIconTile,
-  Stamp,
-} from '@/ds';
+import { ButtonLink, buttonClassName, Card, CardBody, CardFooter, CardHeader, CardTitle, DialogueBox, Icon, ImpactText, Stamp } from '@/ds';
 import { paths } from '@/app/routes';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { MODE_PRESENTATION } from './modeContent';
@@ -29,14 +15,6 @@ const TRIAL_STEPS: ReadonlyArray<{ icon: UiIconName; title: string; body: string
   { icon: 'commit', title: 'Secret Verdict Scroll', body: 'Each juror seals a hidden vote. Nobody, not even the court, sees a tally.' },
   { icon: 'reveal', title: 'Open Your Scroll', body: 'Jurors reveal what they sealed. Only revealed votes count; a majority decides.' },
   { icon: 'refund', title: 'Verdict & receipts', body: 'Gavel. Bonds back, rewards paid or refunds sent, each with a receipt you can check.' },
-];
-
-/** The style guide's four round tiles (scales, document, gear, star) as quick links. */
-const HUD: ReadonlyArray<{ icon: IconName; label: string; to: string }> = [
-  { icon: 'scales', label: 'Courts', to: '#courts' },
-  { icon: 'document', label: 'The trial', to: '#how' },
-  { icon: 'gear', label: 'Fair play', to: '#fair' },
-  { icon: 'star', label: 'Gallery', to: paths.gallery },
 ];
 
 const PILLARS: ReadonlyArray<{ title: string; body: string }> = [
@@ -53,18 +31,12 @@ export function HomePage() {
       <section className={styles.hero} aria-labelledby="hero-title">
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <p className={styles.crest} aria-hidden>
-              <span className={styles.crestRule} />
-              <Icon name="scales" className={styles.crestIcon} />
-              <span className={styles.crestRule} />
-            </p>
             <h1 id="hero-title" className={styles.heroTitle}>
-              <span className={styles.heroWordmark}>CringeCourt</span>
-              <span className={styles.heroMotto}>Your Honor, Bro Is Cooked.</span>
+              <img className={styles.heroWordmark} src={brandArt('wordmark')} alt="CringeCourt" width={1114} height={186} data-pixel />
+              <span className={styles.heroTagline}>
+                The AI performs. <em>Humans decide.</em>
+              </span>
             </h1>
-            <p className={styles.heroTagline}>
-              The AI performs. <em>Humans decide.</em>
-            </p>
             <p className={styles.heroLede}>
               A comedy courtroom for the internet&apos;s dumbest crimes. AI lawyers make the case, a jury of verified strangers
               seals the verdict, and every test-USDC bond, reward and refund is on the record.
@@ -79,29 +51,14 @@ export function HomePage() {
                 How a trial works
               </a>
             </div>
-            <nav className={styles.hud} aria-label="Jump to">
-              <ul role="list">
-                {HUD.map((h) => (
-                  <li key={h.label}>
-                    {h.to.startsWith('#') ? (
-                      <a href={h.to} className={styles.hudLink}>
-                        <RoundIconTile icon={h.icon} />
-                        {h.label}
-                      </a>
-                    ) : (
-                      <Link to={h.to} className={styles.hudLink}>
-                        <RoundIconTile icon={h.icon} />
-                        {h.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
           </div>
 
           <div className={styles.stage} aria-hidden>
-            <img className={styles.courthouse} src={guideArt('courthouse')} alt="" width={662} height={770} />
+            <div className={styles.spotlight} />
+            <img className={`${styles.stageChar} ${styles.stageLeft}`} src={stagePose('defense', 'idle_a')} alt="" data-pixel />
+            <img className={`${styles.stageChar} ${styles.stageCenter}`} src={stagePose('judge', 'idle')} alt="" data-pixel />
+            <img className={`${styles.stageChar} ${styles.stageRight}`} src={stagePose('prosecutor', 'objection')} alt="" data-pixel />
+            <div className={styles.stageFloor} />
             <ImpactText kind="objection" size="sm" animate className={styles.stageImpact} />
             <Stamp tone="case-number" size="sm" animate className={styles.stageStamp}>
               Case #0069
@@ -175,7 +132,7 @@ export function HomePage() {
         </ol>
       </section>
 
-      <section id="fair" className={styles.section} aria-labelledby="fair-title">
+      <section className={styles.section} aria-labelledby="fair-title">
         <div className={styles.fairGrid}>
           <div>
             <div className={styles.sectionHead} data-align="start">
@@ -206,7 +163,7 @@ export function HomePage() {
       </section>
 
       <section className={styles.section} aria-labelledby="cta-title">
-        <Card tone="ornate" padding="lg" as="section" className={styles.ctaBand}>
+        <Card tone="neon" padding="lg" as="section" className={styles.ctaBand}>
           <div className={styles.ctaInner}>
             <div>
               <h2 id="cta-title" className={styles.ctaTitle}>
