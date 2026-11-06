@@ -4,6 +4,7 @@
 // the base centre (y=0 is the ground plane), so the game can drop them straight
 // onto a floor.
 import { MAT as M } from './palette.mjs';
+import { gavelBoxes, exhibitABoxes, popcornBoxes, papersBoxes, ANCHORS, standalone, handJoint, rotateVoxels } from './held-props.mjs';
 
 const b = (f, t, m) => ({ f, t, m });
 
@@ -476,7 +477,126 @@ export const PROPS = {
       ...[-7, 7].map((z) => b([-3, 0, z - 1], [3, 6, z + 1], M.ink)), // wheels (simplified)
     ],
   },
+
+  // ───────────────────── trial-moment props (art bible part 3) ─────────────────────
+  ballot_paper: {
+    label: 'Ballot paper ("Secret Verdict Scroll"), half-folded',
+    parts: [
+      b([-5, 0, -7], [5, 0.4, 0], M.parchment),                // lower half, flat
+      b([-5, 0.4, 0], [5, 4.4, 0.4], M.parchment),             // upper half, folded up
+      b([-4, 0.4, -6], [-1, 0.6, -3], M.velvet),               // GUILTY tick box
+      b([1, 0.4, -6], [4, 0.6, -3], M.teal),                   // NOT COOKED tick box
+      b([-4, 0.4, -2], [4, 0.6, -1.4], M.ink),                 // signature line
+      b([-3, 1.4, 0.4], [3, 3.4, 0.7], M.goldPale),            // crest on the fold
+    ],
+  },
+
+  ballot_envelope: {
+    label: 'Sealed ballot envelope (commit phase)',
+    parts: [
+      b([-7, 0, -4.5], [7, 1, 4.5], M.parchment),              // body
+      b([-7, 1, -4.5], [7, 1.3, 0], M.woodLight),              // flap shadow
+      b([-5, 1, -0.2], [5, 1.4, 1.6], M.parchment),            // flap tip
+      b([-2, 1.3, -1.6], [2, 2.3, 1.6], M.velvet),             // wax seal
+      b([-1, 2.3, -0.6], [1, 2.6, 0.6], M.velvetLight),        // seal emboss
+    ],
+  },
+
+  case_stamp: {
+    label: 'Case-number rubber stamp',
+    parts: [
+      b([-5, 0, -3], [5, 1.2, 3], M.ink),                      // rubber face
+      b([-5.4, 1.2, -3.4], [5.4, 4, 3.4], M.wood),             // block
+      b([-5.4, 3.6, -3.4], [5.4, 4, 3.4], M.gold),             // brass band
+      b([-1.4, 4, -1.4], [1.4, 10, 1.4], M.woodLight),         // neck
+      b([-3, 10, -3], [3, 14, 3], M.velvet),                   // knob
+      b([-2, 14, -2], [2, 14.6, 2], M.velvetLight),
+    ],
+  },
+
+  settlement_receipt: {
+    label: 'Settlement receipt slip (curled)',
+    parts: [
+      b([-4, 0, -9], [4, 0.3, 6], M.parchment),                // slip
+      b([-4, 0.3, 6], [4, 2.3, 6.4], M.parchment),             // curl
+      b([-4, 2.3, 4.6], [4, 2.6, 6.4], M.parchment),
+      ...[-6, -4, -2, 0, 2].map((z) => b([-3, 0.3, z], [z === 2 ? 3 : 1, 0.45, z + 0.6], M.ink)), // printed lines
+      b([-3, 0.3, 4], [3, 0.45, 4.8], M.velvet),               // total line
+      b([-4, 0, -9.6], [4, 0.3, -9], M.goldPale),              // torn edge
+    ],
+  },
+
+  podium_mic: {
+    label: 'Podium microphone (press / witness)',
+    parts: [
+      b([-4, 0, -4], [4, 1, 4], M.stoneDeep),                  // weighted base
+      b([-0.5, 1, -0.5], [0.5, 14, 0.5], M.stoneDark),         // stand
+      b([-0.5, 13, -0.5], [0.5, 14, 5], M.stoneDark),          // gooseneck, toward the speaker
+      b([-1.2, 12.4, 4], [1.2, 15.4, 8], M.ink),               // mic body
+      b([-1.4, 12.2, 7.6], [1.4, 15.6, 8.4], M.goldLight),     // grille ring
+      b([-1, 12.6, 8.4], [1, 15.2, 8.8], M.stone),             // grille
+    ],
+  },
+
+  potted_plant: {
+    label: 'Potted plant (corner dressing)',
+    parts: [
+      b([-4, 0, -4], [4, 7, 4], M.velvet),                     // pot
+      b([-4.6, 6, -4.6], [4.6, 8, 4.6], M.gold),               // rim
+      b([-3.6, 7, -3.6], [3.6, 7.6, 3.6], M.wood),             // soil
+      b([-0.6, 7.6, -0.6], [0.6, 12, 0.6], M.grassDark),       // stem
+      b([-4, 11, -4], [4, 17, 4], M.leaf),                     // canopy
+      b([-3, 16, -3], [3, 20, 3], M.leafLight),
+      b([-5, 12, -2], [-4, 16, 2], M.leaf),
+      b([4, 12, -2], [5, 16, 2], M.leaf),
+    ],
+  },
 };
+
+// ───────────────────── character props (GAP-ANALYSIS #12) ─────────────────────
+// Held items baked into the characters (vox-chars.mjs), extracted as standalone
+// sprites. Geometry + colours come from held-props.mjs — the SAME functions the
+// characters call — so they cannot drift. Each carries `hold`:
+//   anchor  = grip point in prop space (centre-x/z, ground y=0, front +z)
+//   hand    = 'left' | 'right' hand it is baked into on its character
+//   offset  = (character hand joint - grip) in prop space, as baked on the character;
+//             to attach: prop position = handJoint - anchor (+ offset to match the baked look)
+const heldProp = (label, boxes, grip, side, origin) => {
+  const s = standalone(boxes, { grip, hand: handJoint(side), origin });
+  return { label, parts: s.parts, hold: { anchor: s.holdAnchor, hand: side, offset: s.handOffset, character: null } };
+};
+const posedGavel = (deg, grip) => {
+  const rot = (p) => { const a = (deg * Math.PI) / 180; return [p[0] * Math.cos(a) - p[1] * Math.sin(a), p[0] * Math.sin(a) + p[1] * Math.cos(a), p[2]]; };
+  const g = heldProp('', rotateVoxels(gavelBoxes(0, 0), deg), rot(grip), 'right', [...ANCHORS.gavel(), 0]);
+  g.hold.offset = REST_OFFSET;   // the hand keeps the same grip on the handle in every pose
+  return g;
+};
+
+PROPS.judge_gavel = heldProp('Judge gavel, oversized, at rest (judge held prop)', gavelBoxes(0, 0), [0, 8, 0], 'right', [...ANCHORS.gavel(), 0]);
+const REST_OFFSET = PROPS.judge_gavel.hold.offset;
+PROPS.judge_gavel.hold.character = 'judge';
+PROPS.judge_gavel_raised = posedGavel(35, [0, 8, 0]);
+PROPS.judge_gavel_raised.keepOrder = true;
+PROPS.judge_gavel_raised.label = 'Judge gavel, raised for the strike (35 deg, voxel-snapped)';
+PROPS.judge_gavel_raised.hold.character = 'judge';
+PROPS.judge_gavel_strike = posedGavel(125, [0, 8, 0]);
+PROPS.judge_gavel_strike.keepOrder = true;
+PROPS.judge_gavel_strike.label = 'Judge gavel, mid-strike (125 deg, voxel-snapped)';
+PROPS.judge_gavel_strike.hold.character = 'judge';
+
+{
+  const [ex, ey] = ANCHORS.exhibit();
+  PROPS.exhibit_a_paper = heldProp('"EXHIBIT A" paper (defense held prop)', exhibitABoxes(ex, ey), [ex + 2.5, ey + 5, -5.3], 'left');
+  PROPS.exhibit_a_paper.hold.character = 'defense';
+  PROPS.exhibit_a_paper.keepOrder = true;   // red label sits on the sheet: draw in authored order
+  const [px, py] = ANCHORS.popcorn();
+  PROPS.popcorn_bucket = heldProp('Popcorn bucket (juror held prop)', popcornBoxes(px, py), [px - 7, py + 7, -3], 'left');
+  PROPS.popcorn_bucket.hold.character = 'juror';
+  PROPS.popcorn_bucket.keepOrder = true;
+  const [kx, ky] = ANCHORS.papers();
+  PROPS.papers_stack = heldProp('Armful of papers (clerk held prop)', papersBoxes(kx, ky), [kx - 2.5, ky + 3.5, -4.5], 'left');
+  PROPS.papers_stack.hold.character = 'clerk';
+}
 
 import { DETAILS } from './detail.mjs';
 

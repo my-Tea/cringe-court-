@@ -1,0 +1,197 @@
+{
+  "style": "voxel first-person viewmodel hands, hands + forearms only (art bible Part 2 #6)",
+  "frame": {
+    "w": 256,
+    "h": 256,
+    "scale2x": [
+      512,
+      512
+    ],
+    "transparent": true
+  },
+  "view": {
+    "yaw": 12,
+    "pitch": -24,
+    "projection": "orthographic, same two-light rig as the cast"
+  },
+  "note": "All frames share one framing so they swap in place. Anchor = wrist pixel (@1x, multiply by 2 for @2x); the forearm runs off the bottom edge, so pin the frame to the bottom of the screen. Left-hand files are x-mirrors of the right.",
+  "defaults": {
+    "skin": "#E8C4A8",
+    "sleeve": "#6E1B2A"
+  },
+  "skins": [
+    "#FBE0C8",
+    "#F5D2B4",
+    "#E8C4A8",
+    "#C49A7A",
+    "#A87B5C",
+    "#7C5842"
+  ],
+  "poses": {
+    "relaxed": {
+      "file": "relaxed.png",
+      "file2x": "relaxed@2x.png",
+      "size": [
+        256,
+        256
+      ],
+      "side": "both",
+      "desc": "Both hands empty, loosely curled (idle / walking)",
+      "anchor": {
+        "left": [
+          89,
+          221
+        ],
+        "right": [
+          191,
+          212
+        ]
+      },
+      "skinFiles": "skin/<hex-without-#>/relaxed.png"
+    },
+    "gavel_hold": {
+      "file": "gavel_hold.png",
+      "file2x": "gavel_hold@2x.png",
+      "size": [
+        256,
+        256
+      ],
+      "side": "right",
+      "desc": "Gavel gripped upright, resting",
+      "anchor": {
+        "wrist": [
+          183,
+          235
+        ]
+      },
+      "skinFiles": "skin/<hex-without-#>/gavel_hold.png",
+      "leftFile": "left/gavel_hold.png",
+      "leftAnchor": {
+        "wrist": [
+          73,
+          235
+        ]
+      }
+    },
+    "gavel_raised": {
+      "file": "gavel_raised.png",
+      "file2x": "gavel_raised@2x.png",
+      "size": [
+        256,
+        256
+      ],
+      "side": "right",
+      "desc": "Gavel wound up high (anticipation frame)",
+      "anchor": {
+        "wrist": [
+          183,
+          235
+        ]
+      },
+      "skinFiles": "skin/<hex-without-#>/gavel_raised.png",
+      "leftFile": "left/gavel_raised.png",
+      "leftAnchor": {
+        "wrist": [
+          73,
+          235
+        ]
+      }
+    },
+    "gavel_strike": {
+      "file": "gavel_strike.png",
+      "file2x": "gavel_strike@2x.png",
+      "size": [
+        256,
+        256
+      ],
+      "side": "right",
+      "desc": "Gavel driven down (impact frame)",
+      "anchor": {
+        "wrist": [
+          183,
+          235
+        ]
+      },
+      "skinFiles": "skin/<hex-without-#>/gavel_strike.png",
+      "leftFile": "left/gavel_strike.png",
+      "leftAnchor": {
+        "wrist": [
+          73,
+          235
+        ]
+      }
+    },
+    "point": {
+      "file": "point.png",
+      "file2x": "point@2x.png",
+      "size": [
+        256,
+        256
+      ],
+      "side": "right",
+      "desc": "Index finger extended — OBJECTION / accuse",
+      "anchor": {
+        "wrist": [
+          183,
+          235
+        ]
+      },
+      "skinFiles": "skin/<hex-without-#>/point.png",
+      "leftFile": "left/point.png",
+      "leftAnchor": {
+        "wrist": [
+          73,
+          235
+        ]
+      }
+    },
+    "phone_hold": {
+      "file": "phone_hold.png",
+      "file2x": "phone_hold@2x.png",
+      "size": [
+        256,
+        256
+      ],
+      "side": "right",
+      "desc": "Holding a phone, screen toward the player",
+      "anchor": {
+        "wrist": [
+          183,
+          235
+        ]
+      },
+      "skinFiles": "skin/<hex-without-#>/phone_hold.png",
+      "leftFile": "left/phone_hold.png",
+      "leftAnchor": {
+        "wrist": [
+          73,
+          235
+        ]
+      }
+    },
+    "evidence_hold": {
+      "file": "evidence_hold.png",
+      "file2x": "evidence_hold@2x.png",
+      "size": [
+        256,
+        256
+      ],
+      "side": "right",
+      "desc": "Holding an evidence sheet toward the player",
+      "anchor": {
+        "wrist": [
+          183,
+          235
+        ]
+      },
+      "skinFiles": "skin/<hex-without-#>/evidence_hold.png",
+      "leftFile": "left/evidence_hold.png",
+      "leftAnchor": {
+        "wrist": [
+          73,
+          235
+        ]
+      }
+    }
+  }
+}

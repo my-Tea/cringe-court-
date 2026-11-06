@@ -29,54 +29,147 @@
     "objection",
     "defeated"
   ],
+  "extraPoses": {
+    "note": "Rig-ready poses outside the shared 10. Only the listed characters build geometry for them.",
+    "seated": {
+      "characters": [
+        "juror"
+      ],
+      "files": [
+        "poses/seated.png",
+        "poses/seated_threeq.png"
+      ],
+      "definedIn": "vox-base.mjs EXTRA_POSES",
+      "params": {
+        "dy": -13,
+        "legR": {
+          "fwd": 90
+        },
+        "legL": {
+          "fwd": 90
+        },
+        "armR": {
+          "fwd": 38,
+          "out": 3
+        },
+        "armL": {
+          "fwd": 38,
+          "out": 3
+        },
+        "head": {
+          "nod": 3
+        }
+      }
+    }
+  },
+  "gallery": "gallery/manifest.json  (seated background NPCs, cc-art/gallery-npcs.mjs)",
+  "idleVariants": [
+    "idle_a",
+    "idle_b",
+    "idle_c"
+  ],
   "characters": [
     {
       "id": "judge",
       "label": "Judge Gavel.exe",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
     },
     {
       "id": "prosecutor",
       "label": "Miss Ratio",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
     },
     {
       "id": "defense",
       "label": "Counsel Chaos",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
     },
     {
       "id": "bailiff",
       "label": "Bailiff",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
     },
     {
       "id": "clerk",
       "label": "Clerk",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
     },
     {
       "id": "ai-narrator",
       "label": "AI Narrator (0G)",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
     },
     {
       "id": "juror",
       "label": "Juror / Voter",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
     },
     {
       "id": "creator",
       "label": "Creator / Defendant",
       "expressions": 8,
-      "poses": 10
+      "poses": 10,
+      "idleVariants": 3
+    },
+    {
+      "id": "side-a",
+      "label": "Side A (Versus)",
+      "expressions": 8,
+      "poses": 10,
+      "idleVariants": 3
+    },
+    {
+      "id": "side-b",
+      "label": "Side B (Versus)",
+      "expressions": 8,
+      "poses": 10,
+      "idleVariants": 3
+    }
+  ],
+  "jurorVariants": [
+    {
+      "id": "a",
+      "label": "Juror A — long hair, beanie",
+      "file": "juror/variants/a.png"
+    },
+    {
+      "id": "b",
+      "label": "Juror B — afro, no hat",
+      "file": "juror/variants/b.png"
+    },
+    {
+      "id": "c",
+      "label": "Juror C — bun, glasses",
+      "file": "juror/variants/c.png"
+    },
+    {
+      "id": "d",
+      "label": "Juror D — buzz cut, cap",
+      "file": "juror/variants/d.png"
+    },
+    {
+      "id": "e",
+      "label": "Juror E — blonde, long",
+      "file": "juror/variants/e.png"
+    },
+    {
+      "id": "f",
+      "label": "Juror F — silver, beanie",
+      "file": "juror/variants/f.png"
     }
   ]
 }

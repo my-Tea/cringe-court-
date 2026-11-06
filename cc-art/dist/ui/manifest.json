@@ -1,12 +1,21 @@
 {
-  "note": "9-slice panels, buttons at 240x64, icons at 48x48, stamps, callouts, verdict cards.",
+  "note": "9-slice panels, buttons at 240x64 (normal/hover/pressed), icons at 48x48, stamps, callouts, verdict cards, receipts. Receipt amounts/deadlines are illustrative demo values from the V4 brief.",
   "assets": [
     "dialogue_box",
     "name_plate",
     "button_primary",
+    "button_primary_hover",
+    "button_primary_pressed",
     "button_secondary",
+    "button_secondary_hover",
+    "button_secondary_pressed",
     "button_danger",
+    "button_danger_hover",
+    "button_danger_pressed",
     "button_disabled",
+    "button_swear",
+    "button_swear_hover",
+    "button_swear_pressed",
     "panel_journal",
     "panel_notebook",
     "panel_board",
@@ -14,9 +23,11 @@
     "stamp_not_cooked",
     "stamp_no_verdict",
     "stamp_charges_filed",
+    "stamp_case_number",
     "callout_order",
     "callout_objection",
     "callout_counter",
+    "callout_let_bro_cook",
     "icon_journal",
     "icon_notebook",
     "icon_board",
@@ -34,6 +45,9 @@
     "card_not_cooked",
     "card_no_verdict",
     "timer_widget",
-    "receipt_card"
+    "receipt_card",
+    "receipt_juror_example",
+    "receipt_jury_duty",
+    "card_mistrial"
   ]
 }

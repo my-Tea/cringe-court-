@@ -49,8 +49,23 @@ const pair = (f, t, m) => [b(f, t, m), b([-t[0], f[1], f[2]], [-f[0], t[1], t[2]
 
 /* ───────────────────────────── shared anatomy ───────────────────────────── */
 
-/** Head cube with chamfered jaw and face features. */
-function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral', faceHair = null, o = C.outline }) {
+/** Per-expression face rig. `eye`: open | wide | lidded | narrow | closed.
+ *  `brow`: [inner, outer] lift in units for the -x and +x brow (+ = up), so a
+ *  V (angry) is inner-down and a worried brow is inner-up. `fx`: extras. */
+export const FACE = {
+  neutral:  { eye: 'open',   brow: [[0, 0], [0, 0]] },
+  happy:    { eye: 'open',   brow: [[1, 1], [1, 1]] },
+  angry:    { eye: 'narrow', brow: [[-1.6, 0.6], [-1.6, 0.6]], fx: ['vein'] },
+  shocked:  { eye: 'wide',   brow: [[2.2, 2.2], [2.2, 2.2]], fx: ['sweat'] },
+  laughing: { eye: 'closed', brow: [[1.4, 0.8], [1.4, 0.8]] },
+  crying:   { eye: 'open',   brow: [[1.6, -0.6], [1.6, -0.6]], fx: ['tears'] },
+  confused: { eye: 'open',   brow: [[1.8, 1.8], [-1, -0.4]], fx: ['sweat'] },
+  smug:     { eye: 'lidded', brow: [[0, 0], [1.6, 1]] },
+};
+
+/** Head cube with chamfered jaw and face features. Passing `expr` drives eyes,
+ *  brows and extras from FACE; without it the face is the legacy neutral. */
+function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral', faceHair = null, expr = null, o = C.outline }) {
   const out = [];
   const w = H.headW, lo = H.headBot, hi = H.headTop;
   const d = w;                                  // depth = width (cube head)
@@ -59,13 +74,17 @@ function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral
   out.push(b([-w + 1, hi - 3, -d + 2], [w - 1, hi, d - 2], skin));
   out.push(b([-w + 1, lo, -d + 2], [w - 1, lo + 2, d - 2], skin));   // jaw
   // side shading (right side darker = volume)
+  const skinSh = skin === C.skin ? C.skinSh : shadeHex(skin, 0.88);
   out.push(b([w - 3, lo + 2, -d + 1], [w, hi - 3, d - 1], skin === C.skin ? C.skinSh : skin));
-  // ears
-  out.push(...pair([w - 0.5, H.eyeY - 6, -2], [w + 1.5, H.eyeY + 2, 2], C.skinSh));
+  // ears (shaded from the actual skin tone, not always the default)
+  out.push(...pair([w - 0.5, H.eyeY - 6, -2], [w + 1.5, H.eyeY + 2, 2], skinSh));
 
   // face plate (front of the head, slightly proud)
   const fz = -d - 0.6;
-  if (eyeStyle === 'shades') {
+  const F = expr ? FACE[expr] || FACE.neutral : null;
+  if (F) {
+    out.push(...face({ F, fz, skin, brow: hair || C.hairBr, shades: eyeStyle === 'shades', sharp: eyeStyle === 'sharp' }));
+  } else if (eyeStyle === 'shades') {
     // black pixel shades
     out.push(b([-w + 1.5, H.eyeY - 3.5, fz], [w - 1.5, H.eyeY + 3, fz + 1.4], C.ink));
     out.push(b([-w + 2.5, H.eyeY - 2.5, fz - 0.6], [-2.5, H.eyeY + 2, fz + 0.4], C.ink));
@@ -100,10 +119,87 @@ function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral
     out.push(b([-2.4, H.mouthY - 0.6, fz - 0.2], [2.4, H.mouthY + 0.8, fz + 0.7], C.white));
   } else if (mouth === 'frown') {
     out.push(b([-2, H.mouthY + 1, fz], [2, H.mouthY + 2, fz + 1], C.mouth));
+  } else if (mouth === 'grit' && expr) {
+    // clenched teeth
+    out.push(b([-3, H.mouthY - 0.6, fz], [3, H.mouthY + 1.8, fz + 1], C.mouth));
+    out.push(b([-2.4, H.mouthY - 0.2, fz - 0.2], [2.4, H.mouthY + 1.4, fz + 0.7], C.white));
+    out.push(b([-2.4, H.mouthY + 0.5, fz - 0.3], [2.4, H.mouthY + 0.7, fz + 0.6], C.mouth));
+  } else if (mouth === 'smirk' && expr) {
+    // lopsided: flat on the left, hooked up on the right
+    out.push(b([-1.8, H.mouthY, fz], [2.2, H.mouthY + 1.2, fz + 1], C.mouth));
+    out.push(b([2.2, H.mouthY + 1, fz], [3.4, H.mouthY + 2.2, fz + 1], C.mouth));
   } else {
     out.push(b([-1.8, H.mouthY, fz], [1.8, H.mouthY + 1.2, fz + 1], C.mouth));
   }
   if (faceHair) out.push(...faceHair);
+  return tag('head', out);
+}
+
+/** Eyes, brows and expression extras for one FACE entry. */
+function face({ F, fz, skin, brow, shades, sharp }) {
+  const out = [];
+  const ink = '#241A22';
+  if (shades) {
+    // the shades never come off — the brows above them carry the emotion
+    out.push(b([-H.headW + 1.5, H.eyeY - 3.5, fz], [H.headW - 1.5, H.eyeY + 3, fz + 1.4], C.ink));
+    out.push(b([-H.headW + 2.5, H.eyeY - 2.5, fz - 0.6], [-2.5, H.eyeY + 2, fz + 0.4], C.ink));
+    out.push(b([2.5, H.eyeY - 2.5, fz - 0.6], [H.headW - 2.5, H.eyeY + 2, fz + 0.4], C.ink));
+    out.push(b([-3.5, H.eyeY - 2, fz - 0.4], [-1.5, H.eyeY + 0.4, fz + 0.4], C.white));
+    out.push(b([4.5, H.eyeY - 2, fz - 0.4], [6.5, H.eyeY + 0.4, fz + 0.4], C.white));
+  } else {
+    for (const sx of [-1, 1]) {
+      const ex = sx * H.eyeX, y = H.eyeY;
+      if (F.eye === 'closed') {
+        // ^ ^ arcs
+        out.push(b([ex - 2.4, y + 0.2, fz - 0.4], [ex - 0.8, y + 1.2, fz + 0.6], ink));
+        out.push(b([ex - 0.9, y + 1.1, fz - 0.4], [ex + 0.9, y + 2.2, fz + 0.6], ink));
+        out.push(b([ex + 0.8, y + 0.2, fz - 0.4], [ex + 2.4, y + 1.2, fz + 0.6], ink));
+        continue;
+      }
+      const wide = F.eye === 'wide';
+      const sw = wide ? 2.7 : 2.2;
+      const top = wide ? y + 3 : y + 2.2;
+      out.push(b([ex - sw, y - (wide ? 1.8 : 1.2), fz], [ex + sw, top, fz + 0.9], C.white));
+      if (wide) {
+        // pinprick pupils read as shock
+        out.push(b([ex - 0.8, y - 0.1, fz - 0.5], [ex + 0.8, y + 1.5, fz + 0.4], ink));
+      } else {
+        out.push(b([ex - 1.6, y - 0.6, fz - 0.3], [ex + 1.6, y + 1.8, fz + 0.6], '#5A4234'));
+        out.push(b([ex - 0.9, y - 0.2, fz - 0.5], [ex + 0.9, y + 1.4, fz + 0.4], ink));
+        out.push(b([ex - 1.5, y - 0.3, fz - 0.6], [ex - 0.4, y + 0.7, fz + 0.2], C.white));
+      }
+      // upper lid drops for narrow / lidded, and a touch for sharp-eyed characters
+      const lid = F.eye === 'lidded' ? 1.6 : F.eye === 'narrow' ? 1.1 : sharp ? 0.4 : 0;
+      if (lid) out.push(b([ex - sw - 0.2, top - lid, fz - 0.7], [ex + sw + 0.2, top + 0.1, fz + 0.5], skin === C.skin ? C.skinSh : skin));
+      out.push(b([ex - sw - 0.2, top - lid, fz - 0.8], [ex + sw + 0.2, top - lid + 0.8, fz + 0.6], ink));
+    }
+  }
+  // brows: inner + outer half per side, lifted independently so they slant
+  const by = shades ? H.eyeY + 4 : H.eyeY + 3.6;
+  for (const [i, sx] of [[0, -1], [1, 1]]) {
+    const [inner, outer] = F.brow[i];
+    const xi = sx * 0.8, xm = sx * (H.eyeX - 0.6), xo = sx * (H.eyeX + 2.6);
+    out.push(b([xi, by + inner, fz - 0.2], [xm, by + inner + 1.1, fz + 0.7], brow));
+    out.push(b([xm, by + outer, fz - 0.2], [xo, by + outer + 1.1, fz + 0.7], brow));
+  }
+  // extras
+  for (const fx of F.fx || []) {
+    if (fx === 'tears') {
+      for (const sx of [-1, 1]) {
+        const ex = sx * H.eyeX;
+        out.push(b([ex - 0.8, H.eyeY - 6, fz - 1], [ex + 0.8, H.eyeY - 1, fz - 0.2], C.cyan));
+        out.push(b([ex - 0.6, H.eyeY - 8, fz - 1], [ex + 0.6, H.eyeY - 6, fz - 0.2], C.cyanLt));
+      }
+    } else if (fx === 'sweat') {
+      out.push(b([H.headW - 1.5, H.eyeY + 1, fz - 1], [H.headW + 0.5, H.eyeY + 5, fz + 1], C.cyanLt));
+      out.push(b([H.headW - 1, H.eyeY - 0.4, fz - 1], [H.headW, H.eyeY + 1, fz + 1], C.cyan));
+    } else if (fx === 'vein') {
+      // cartoon anger mark on the forehead corner
+      const vx = -H.headW + 3, vy = H.eyeY + 6.5;
+      out.push(b([vx, vy, fz - 1], [vx + 3.4, vy + 0.9, fz - 0.2], '#D23C4A'));
+      out.push(b([vx + 1.25, vy - 1.25, fz - 1], [vx + 2.15, vy + 2.15, fz - 0.2], '#D23C4A'));
+    }
+  }
   return out;
 }
 
@@ -166,14 +262,36 @@ function arms({ col, colSh, cuff = null, hand = C.skin, lift = 0, o = C.outline 
     if (cuff) out.push(b([lo, yBot, -aw - 0.4], [hi, yBot + 3, aw + 0.4], cuff));
     // hand
     out.push(b([lo + 0.5, yBot - 5, -aw + 0.5], [hi - 0.5, yBot, aw - 0.5], hand));
+    tag(sx > 0 ? 'armR' : 'armL', out.filter((bx) => !bx.g));
   }
   return out;
 }
 
-function legs({ col, shoe = C.ink, w = H.legW, o = C.outline }) {
+/** Legs. `seat` builds the rig-ready version: thigh and shin are separate boxes
+ *  (tags legL/legR and shinL/shinR) so the pose can fold the hip and knee.
+ *  Standing legs stay single boxes, so every non-seated render is unchanged. */
+function legs({ col, shoe = C.ink, w = H.legW, o = C.outline, seat = false }) {
   const out = [];
   for (const sx of [-1, 1]) {
     const x = sx * 6.5;
+    if (seat) {
+      const side = sx > 0 ? 'R' : 'L';
+      const ex = (a, c) => (sx > 0 ? [x + w - a, x + w - c] : [x - w + c, x - w + a]);
+      const [s0, s1] = ex(1.5, 0), [o0, o1] = sx > 0 ? [x + w, x + w + 0.5] : [x - w - 0.5, x - w];
+      // thigh: y 15..38, hinged at the hip (y 34 = centre line once horizontal)
+      tag('leg' + side, [
+        b([x - w, 15, -4], [x + w, 38, 4], col),
+        b([Math.min(s0, s1), 15, -4], [Math.max(s0, s1), 38, 4], shadeHex(col, 0.82)),
+        b([o0, 15, -4], [o1, 38, 4], o),
+      ]).forEach((bx) => out.push(bx));
+      // shin: hangs from the knee (orig y 15, z 0); extends 4 above so it hides inside the thigh
+      tag('shin' + side, [
+        b([x - w + 0.5, -4, 0], [x + w - 0.5, 19, 8], col),
+        b([Math.min(s0, s1), -4, 0], [Math.max(s0, s1), 19, 8], shadeHex(col, 0.82)),
+        b([x - w - 1, -6, -5.5], [x + w + 1, -4, 8], shoe),
+      ]).forEach((bx) => out.push(bx));
+      continue;
+    }
     out.push(b([x - w, 2, -4], [x + w, H.hipBot, 4], col));
     out.push(b([sx > 0 ? x + w - 1.5 : x - w, 2, -4], [sx > 0 ? x + w : x - w + 1.5, H.hipBot, 4], shadeHex(col, 0.82)));
     out.push(b([sx > 0 ? x + w : x - w - 0.5, 2, -4], [sx > 0 ? x + w + 0.5 : x - w, H.hipBot, 4], o));
@@ -190,4 +308,98 @@ function shadeHex(hex, f) {
   return `#${((r << 16) | (g << 8) | bl).toString(16).padStart(6, '0')}`;
 }
 
-export { b, pair, head, torso, arms, legs, shadeHex };
+/* ───────────────────────────────── posing ───────────────────────────────── */
+
+/** Mark boxes as belonging to a rig group: 'head' | 'armL' | 'armR'.
+ *  Untagged boxes are 'body'. Held props are tagged with the arm holding them. */
+function tag(g, boxes) {
+  for (const bx of boxes) bx.g = g;
+  return boxes;
+}
+
+/** Pose table, degrees. Arms: `out` swings away from the body, `fwd` swings
+ *  toward the camera. Head: `nod` (+ = chin down), `tilt` (sideways).
+ *  Body (whole character, pivot at the feet): `lean` (+ = toward camera),
+ *  `sway` (sideways), `dy` (units up). armR is the +x arm (the gavel hand). */
+export const POSES = {
+  idle:      {},
+  talking:   { armR: { fwd: 50, out: 15 }, head: { tilt: 5 }, lean: 2, sway: -3 },
+  happy:     { armR: { out: 150 }, armL: { out: 150 }, head: { nod: -8 }, dy: 3 },
+  angry:     { armR: { out: 22, fwd: 12 }, armL: { out: 22, fwd: 12 }, head: { nod: 8 }, lean: 8 },
+  shocked:   { armR: { out: 65 }, armL: { out: 65 }, head: { nod: -10 }, lean: -6, dy: 2 },
+  laughing:  { armR: { fwd: 28, out: -10 }, armL: { fwd: 28, out: -10 }, head: { nod: -16 }, lean: -10 },
+  crying:    { armR: { fwd: 140, out: -25 }, head: { nod: 14 }, lean: 4, sway: 3 },
+  confused:  { armR: { out: 140, fwd: 20 }, head: { tilt: -12 }, sway: 8 },
+  objection: { armR: { fwd: 60, out: 55 }, armL: { out: 10, fwd: -10 }, head: { nod: -4 }, lean: 6, sway: -5 },
+  defeated:  { armR: { out: 3, fwd: -4 }, armL: { out: 3, fwd: -4 }, head: { nod: 18 }, lean: 10, dy: -2 },
+};
+export const POSE_IDS = Object.keys(POSES);
+
+/** Poses that need rig-ready geometry, so they are NOT in POSE_IDS (the 10-pose
+ *  export set) and only apply to characters that build for them.
+ *  `seated`: legs{seat:true}. Thighs horizontal (hip 90 deg), shins vertical
+ *  (knee compensates), whole body dropped 13 units so the feet land on the floor
+ *  with the hips at seat height (~21). Legs: `fwd` = hip flexion, `knee` = extra
+ *  knee bend on top of keeping the shin vertical. */
+export const EXTRA_POSES = {
+  seated: { dy: -13, legR: { fwd: 90 }, legL: { fwd: 90 }, armR: { fwd: 38, out: 3 }, armL: { fwd: 38, out: 3 }, head: { nod: 3 } },
+};
+
+/** Idle variants: small, readable deltas from the base idle, one table per
+ *  character (see IDLE in vox-chars.mjs). They live outside POSES on purpose:
+ *  POSE_IDS stays the 10 core poses, and IDLE_IDS lists the extras. */
+export const IDLE_IDS = ['idle_a', 'idle_b', 'idle_c'];
+
+const D2R = Math.PI / 180;
+const IDENT = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+const rotX = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0]; };
+const rotY = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0]; };
+const rotZ = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0]; };
+const move = (x, y, z) => [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z];
+
+/** A∘B for 3x4 affine matrices (apply B first). */
+function mul(A, B) {
+  const o = new Array(12);
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) o[r * 4 + c] = A[r * 4] * B[c] + A[r * 4 + 1] * B[4 + c] + A[r * 4 + 2] * B[8 + c];
+    o[r * 4 + 3] = A[r * 4] * B[3] + A[r * 4 + 1] * B[7] + A[r * 4 + 2] * B[11] + A[r * 4 + 3];
+  }
+  return o;
+}
+const about = (p, R) => mul(move(p[0], p[1], p[2]), mul(R, move(-p[0], -p[1], -p[2])));
+const isIdent = (M) => M.every((v, i) => Math.abs(v - IDENT[i]) < 1e-9);
+
+/** Apply a pose to tagged boxes. Zero-angle groups are left untouched, so
+ *  `idle` renders exactly like the unposed model. `over` patches the table
+ *  per character (e.g. the Judge raises the gavel instead of pointing). */
+export function posed(boxes, pose = 'idle', over = {}) {
+  // EXTRA_POSES (seated) need rig-ready geometry; idle_a/b/c come in via `over`
+  const P = { ...(POSES[pose] || EXTRA_POSES[pose] || POSES.idle), ...(over[pose] || {}) };
+  // pitch is negated: +X rotation tips the top of a part away from the camera
+  const body = mul(move(0, P.dy || 0, 0), mul(rotZ(-(P.sway || 0)), rotX(-(P.lean || 0))));
+  const neck = [0, H.neck, 0];
+  const hd = P.head || {};
+  const group = {
+    body,
+    head: mul(body, about(neck, mul(rotZ(-(hd.tilt || 0)), rotX(-(hd.nod || 0))))),
+  };
+  for (const [g, sx] of [['armR', 1], ['armL', -1]]) {
+    const a = P[g] || {};
+    const shoulder = [sx * (H.torsoW + H.armW * 1.5), H.armTop - 2, 0];
+    group[g] = mul(body, about(shoulder, mul(rotZ(sx * (a.out || 0)), mul(rotY(sx * (a.across || 0)), rotX(a.fwd || 0)))));
+  }
+  // legs: thigh hinges at the hip, shin hinges at the knee and (by default)
+  // counter-rotates so it stays vertical
+  for (const [g, sx] of [['R', 1], ['L', -1]]) {
+    const a = P['leg' + g] || {};
+    const hip = [sx * 6.5, 34, 0], knee = [sx * 6.5, 15, 0];
+    group['leg' + g] = mul(body, about(hip, rotX(a.fwd || 0)));
+    group['shin' + g] = mul(group['leg' + g], about(knee, rotX(-(a.fwd || 0) + (a.knee || 0))));
+  }
+  return boxes.map((bx) => {
+    const M = group[bx.g || 'body'];
+    return isIdent(M) ? bx : { ...bx, M };
+  });
+}
+
+export { b, pair, head, torso, arms, legs, shadeHex, tag };

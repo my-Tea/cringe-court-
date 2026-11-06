@@ -119,6 +119,19 @@ sprite set with 6 states.
 
 ---
 
+### 2.7 The Defendant (anonymous) — `defendant/`
+
+Not a fixed character: a per-case stand-in for the accused. Hooded or masked
+voxel bust, no face, no skin, deliberately different from the Creator's pink
+hoodie so it never reveals who the creator is (pseudonymous, never a promise of
+perfect anonymity). Swappable parameters: mask (`bag` / `censor` / `hood`),
+hoodie accent (burgundy, magenta, near-black, mustard, plum), eye-glint colour,
+and a 6-bit booking-tag barcode. `variantForCase(caseId)` derives them
+deterministically (FNV-1a → mulberry32). Poses: neutral, smug, shocked, defeated,
+slump, celebrate, plus the "CHARGES FILED" composite and a 4-frame stamp-impact
+sequence for `case_accepted`. Implementation: `defendant-vox.mjs`,
+`export-defendant.mjs`; details in ASSET-COMPLETE.md.
+
 ## 3. Juror / Voter — `juror/`
 
 A **recognizable generic NPC**, and explicitly **not** the player's appearance.
@@ -135,6 +148,26 @@ Several variants share one silhouette so a jury reads as a group.
 
 Generate **6–8 colour variants** (cap and hoodie hue shifts) so three jurors in a
 box don't look cloned. Reactions matter more than detail here.
+
+**Seated pose (implemented, juror only):** `juror/poses/seated.png` (front) and
+`seated_threeq.png`, from `EXTRA_POSES.seated` in `vox-base.mjs`: thighs
+horizontal, shins vertical, body lowered 13 units. It needs the rig-ready
+`legs({ seat: true })` geometry, so it is outside the shared 10 poses and is not
+available on other characters yet. The 6-8 colour variants above are not part of
+this work. Animation: `seated_idle` (juror only) in `animations.json`.
+
+### Gallery / audience NPCs — `gallery/`
+
+8 seated, low-detail background NPCs for the gallery benches, generated from a
+seed by `gallery-npcs.mjs` (`node export-gallery.mjs [seed] [count]`, default
+seed `0xC0FFEE`, so output is reproducible). Parameters: 8 hair styles x 8 hair
+colours, 6 skin tones, 4 top styles x 9 top colours, 8 accessories (glasses,
+headphones, cap, beanie, scarf, backpack, earrings, none); leg and shoe colour
+vary too. Each NPC has `back` (camera behind the bench), `back3q` and `threeq`
+(front 3/4), transparent PNGs @1x/@2x sharing one framing so they align on a
+bench. Previews: `_previews/gallery.png`, `_previews/gallery_benches.png`.
+Back views are the identity carrier (hair back, backpack, band, cap strap, hood).
+Seated NPCs read best on a bench; the bench is only in the preview.
 
 ---
 
@@ -452,7 +485,9 @@ courtroom was built around). Scale the 512px sprite accordingly.
 
 **First-person caveat.** The player is first-person, so the avatar is mostly seen
 in profile/menus/case cards. Prioritise the **face layer quality** over full-body
-detail for the player — that's what actually gets seen.
+detail for the player — that's what actually gets seen. First-person hand sprites
+(gavel, point, phone, evidence, relaxed) live in `characters/player/hands/`; see
+ASSET-COMPLETE.md.
 
 **Asset loading.** Characters are independent of the scene — load them
 per-scene, not at startup (§7.4).
@@ -479,7 +514,7 @@ Honest status, so nobody plans against art that doesn't exist.
 |---|---|
 | `CHARACTER-SPEC.md` (this file) | ✅ Complete |
 | `ANIMATION-GUIDE.md` | ✅ Complete |
-| `animation/animations.json` | ✅ 8 characters, 54 animations, 10 system, validated |
+| `animation/animations.json` | ✅ 11 characters, 106 animations, 10 system, validated |
 | **Player avatar** | ❌ Not built — voxel parts plan in §6 |
 | **Characters (8)** | ✅ **Shipped** — 643 boxes total, 3 views each, see `characters/` |
 | Expressions for the cast | ⬜ None — neutral render only |

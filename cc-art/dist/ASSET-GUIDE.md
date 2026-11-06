@@ -36,12 +36,14 @@ mirror helper, so mirroring a whole prop is safe.
 ## 2. Models
 
 ### `CringeCourt_Props.bbmodel`
-One project containing **all 41 props**, each as a separate root group in the
+> Regenerate with `node export-bbmodel.mjs` (deterministic, uuids hashed from names) and check with `node validate-bbmodel.mjs`. Textures are flat 16x16 colours; hand edits in Blockbench are overwritten on regeneration, so edit `props.mjs` instead.
+
+One project containing **all 53 props**, each as a separate root group in the
 outliner.
 
 ```
 Project: CringeCourt_Props
-├── 995 cubes, 21 textures
+├── 1138 cubes, 27 textures
 ├── 41 root groups (one per prop, named exactly as in §4)
 └── meta: { format_version: "5.0", model_format: "free", box_uv: false }
 ```
@@ -67,6 +69,12 @@ subtree, so `group → mesh` is a 1:1 split with no cleanup.
   "height": 47, "pivot": [0,0,0], "image": "judge_bench.png" }
 ```
 Use `footprint` for collision, `height` for camera targeting and occlusion.
+
+Character-held props (`judge_gavel*`, `exhibit_a_paper`, `popcorn_bucket`, `papers_stack`)
+also carry `holdAnchor` (grip point in prop space; x/z centred, y=0 on the ground,
+front toward +z) and `heldBy: { character, hand, handOffset }`. To attach to a hand,
+put the prop at `handJoint - holdAnchor`; `handOffset` (hand joint minus grip) is the
+offset baked into the original character pose. Geometry source: `held-props.mjs`.
 
 ---
 
@@ -98,7 +106,7 @@ Verified with a seam test (wrap-edge delta ≈ interior delta).
 
 ---
 
-## 4. Prop catalogue (41)
+## 4. Prop catalogue (41 original + 12 added: 6 trial-moment, 6 character props; see manifest.json)
 
 Grouped by room. Names are the exact group names inside the `.bbmodel` and the
 PNG filenames.
@@ -240,7 +248,7 @@ node -e "import('./render.mjs').then(m=>m.propSheet('./out/props_sheet.png',4,7)
 |---|---|
 | `palette.mjs` | Brand palette + material aliases + ramps |
 | `props.mjs` | **All 41 base silhouettes** — large boxes. Add a prop here |
-| `detail.mjs` | **Detail layer** — appended geometry per prop (995 total boxes) |
+| `detail.mjs` | **Detail layer** — appended geometry per prop (1138 total boxes) |
 | `blocks.mjs` | 13 procedural 16×16 block textures |
 | `render.mjs` | Isometric renderer (1 unit = 1px, then integer upscale) |
 | `export.mjs` | Writes PNGs + `manifest.json` |
@@ -280,7 +288,7 @@ then rerun `export.mjs`. Mirror with `pair()` for symmetric parts.
    wants one mesh per prop.
 3. **`banner_scales` pivot is wrong** for its visual use — it's authored
    base-origin like everything else, but hangs. Documented above; anchor manually.
-4. **No LODs.** 995 boxes across 41 props is still light, but a full courtroom (60+ instances) will want instancing
+4. **No LODs.** 1138 boxes across 53 props is still light, but a full courtroom (60+ instances) will want instancing
    at this scale, but a full courtroom (60+ instances) will want instancing.
 5. **Village props are thinner than courtroom props** — the reference art
    emphasises the courtroom, so courtyard assets are functional, not hero-grade.
@@ -291,10 +299,10 @@ then rerun `export.mjs`. Mirror with `pair()` for symmetric parts.
 
 ```
 cc-art/dist/
-├── models/CringeCourt_Props.bbmodel   995 cubes · 21 textures · 41 groups
+├── models/CringeCourt_Props.bbmodel   1138 cubes · 27 textures · 53 groups
 ├── textures/blocks/*.png              13 tileable 16×16 surfaces
-├── sprites/props/*.png                41 props (+ @4x versions)
+├── sprites/props/*.png                53 props (+ @4x versions)
 ├── sprites/props/manifest.json        bounds, footprints, heights
 ├── preview_blocks.png                 texture contact sheet
-└── preview_props@4x.png               all 41 props, isometric
+└── preview_props@4x.png               all 53 props, isometric
 ```
