@@ -8,7 +8,7 @@
   align-items: start;
   padding: var(--cc-space-5);
   padding-top: var(--cc-space-6);
-  border: 2px solid var(--cc-burgundy-800);
+  border: 2px solid var(--cc-royal-900);
   border-radius: var(--cc-radius-lg);
   background: var(--cc-color-canvas);
   box-shadow:
@@ -25,8 +25,8 @@
   padding: var(--cc-space-1) var(--cc-space-3);
   border: 2px solid var(--cc-gold-500);
   border-radius: var(--cc-radius-sm);
-  background: var(--cc-burgundy-800);
-  color: var(--cc-cream-150);
+  background: var(--cc-royal-900);
+  color: var(--cc-neutral-100);
   font-family: var(--cc-font-display);
   font-size: var(--cc-text-sm);
   letter-spacing: var(--cc-tracking-wide);

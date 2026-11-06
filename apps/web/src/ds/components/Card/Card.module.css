@@ -16,14 +16,14 @@
 }
 
 /* The brand-card frame: neon rim plus gold corner brackets (share_card.png). */
-.neon {
+.ornate {
   background: var(--cc-color-surface);
   border-color: var(--cc-color-accent);
-  box-shadow: var(--cc-shadow-glow-accent), var(--cc-shadow-2);
+  box-shadow: var(--cc-shadow-ring-accent), var(--cc-shadow-2);
 }
 
-.neon::before,
-.neon::after {
+.ornate::before,
+.ornate::after {
   content: '';
   position: absolute;
   width: 14px;
@@ -32,14 +32,14 @@
   pointer-events: none;
 }
 
-.neon::before {
+.ornate::before {
   top: 8px;
   left: 8px;
   border-right: 0;
   border-bottom: 0;
 }
 
-.neon::after {
+.ornate::after {
   right: 8px;
   bottom: 8px;
   border-left: 0;
@@ -50,7 +50,7 @@
    burgundy frame. Uses data-surface so children re-map automatically. */
 .parchment {
   background: var(--cc-color-canvas);
-  border: 2px solid var(--cc-burgundy-800);
+  border: 2px solid var(--cc-royal-900);
   box-shadow:
     inset 0 4px 0 var(--cc-gold-500),
     0 0 0 2px var(--cc-gold-700),
@@ -72,7 +72,7 @@
 .interactive:hover,
 .interactive:focus-within {
   border-color: var(--cc-color-accent);
-  box-shadow: var(--cc-shadow-glow-accent), var(--cc-shadow-3);
+  box-shadow: var(--cc-shadow-ring-accent), var(--cc-shadow-3);
   transform: translateY(-2px);
 }
 

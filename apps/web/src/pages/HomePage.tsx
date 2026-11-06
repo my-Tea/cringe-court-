@@ -163,7 +163,7 @@ export function HomePage() {
       </section>
 
       <section className={styles.section} aria-labelledby="cta-title">
-        <Card tone="neon" padding="lg" as="section" className={styles.ctaBand}>
+        <Card tone="ornate" padding="lg" as="section" className={styles.ctaBand}>
           <div className={styles.ctaInner}>
             <div>
               <h2 id="cta-title" className={styles.ctaTitle}>

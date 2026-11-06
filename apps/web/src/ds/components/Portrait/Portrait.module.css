@@ -7,7 +7,7 @@
   width: var(--_size);
   height: var(--_size);
   border-radius: var(--cc-radius-md);
-  background: var(--cc-night-700);
+  background: var(--cc-royal-900);
   box-shadow: 0 0 0 2px var(--_ring);
   overflow: hidden;
 }
@@ -56,7 +56,7 @@
 .anonymous {
   display: inline-grid;
   place-items: center;
-  color: var(--cc-purple-400);
+  color: var(--cc-teal-700);
 }
 
 .anonymous svg {

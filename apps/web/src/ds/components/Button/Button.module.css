@@ -87,7 +87,7 @@
 /* The "I SWEAR TO SHOW UP" button: gold, reserved for committing money or duty. */
 .swear {
   --_bg: var(--cc-color-highlight);
-  --_bg-hover: var(--cc-gold-200);
+  --_bg-hover: var(--cc-gold-100);
   --_bg-pressed: var(--cc-gold-500);
   --_fg: var(--cc-color-on-highlight);
   --_edge: var(--cc-color-highlight-shadow);

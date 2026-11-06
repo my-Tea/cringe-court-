@@ -83,7 +83,7 @@
   --_tone: var(--cc-color-highlight);
   border: 1px solid var(--cc-color-highlight);
   background:
-    repeating-linear-gradient(-45deg, rgb(246 199 91 / 0.22) 0 6px, transparent 6px 12px),
-    rgb(246 199 91 / 0.08);
+    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--cc-gold-300) 22%, transparent) 0 6px, transparent 6px 12px),
+    color-mix(in srgb, var(--cc-gold-300) 8%, transparent);
   color: var(--cc-color-highlight);
 }

@@ -4,9 +4,9 @@
   padding: var(--cc-space-2) var(--cc-space-3);
   border: 1px solid var(--cc-color-border-strong);
   border-radius: var(--cc-radius-sm);
-  background: var(--cc-night-950);
+  background: var(--cc-neutral-900);
   box-shadow: var(--cc-shadow-3);
-  color: var(--cc-cream-150);
+  color: var(--cc-neutral-100);
   font-size: var(--cc-text-sm);
   line-height: var(--cc-leading-snug);
   transform-origin: var(--radix-tooltip-content-transform-origin);
@@ -14,7 +14,7 @@
 }
 
 .arrow {
-  fill: var(--cc-night-950);
+  fill: var(--cc-neutral-900);
 }
 
 @keyframes in {
