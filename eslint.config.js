@@ -9,7 +9,7 @@ export default tseslint.config(
   {
     // Only the app and its packages are linted; cc-art, judge and the sprite tools
     // are generator scripts with their own conventions.
-    ignores: ['**/dist/**', '**/node_modules/**', 'cc-art/**', 'judge/**', 'sprite-forge/**', 'pixel-art-sprites/**', 'docs/**', 'idea/**'],
+    ignores: ['**/dist/**', '**/node_modules/**', 'cc-art/**', 'judge/**', 'sprite-forge/**', 'pixel-art-sprites/**', 'docs/**', 'idea/**', 'contracts/typechain-types/**', 'contracts/artifacts/**', 'contracts/cache/**', 'contracts/coverage/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

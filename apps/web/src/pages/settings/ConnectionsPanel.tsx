@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import { Alert, Badge, Icon, PaperPanel, Spinner } from '@/ds';
 import { platformConfig, type PlatformConfig } from '@/platform/config';
 import { identityInfo } from '@/platform/identity/createIdentity';
+import type { ModeProbe } from '@/platform/ledger';
 import styles from './Settings.module.css';
 
-type Probe = Awaited<ReturnType<typeof import('@/platform/ledger').probeLedger>>;
+type Probe = readonly ModeProbe[];
 
 type ProbeState = { status: 'loading' } | { status: 'ready'; rows: Probe } | { status: 'error'; message: string };
 
