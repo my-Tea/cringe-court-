@@ -224,6 +224,7 @@ export function validateAnimationLibrary(lib, dir = null) {
 export function writeAnimationLibrary(outFile) {
   const lib = buildAnimationLibrary();
   validateAnimationLibrary(lib, outFile.replace(/animation\/[^/]*$/, 'characters'));
+  fs.mkdirSync(outFile.replace(/\/[^/]*$/, ''), { recursive: true });
   fs.writeFileSync(outFile, JSON.stringify(lib, null, 2));
   const n = Object.values(lib.characters).reduce((a, c) => a + c.animations.length, 0);
   return { file: outFile, characters: Object.keys(lib.characters).length, animations: n, system: Object.keys(lib.system).length };
