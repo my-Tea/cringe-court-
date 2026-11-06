@@ -7,24 +7,16 @@
  *   identity MockIdentity (stands in for World IDKit)
  * A real build swaps these for the 0G / Arc / World adapters behind the same ports.
  */
-import { monotonicUnixClock, usdc, type AudioPort, type Hex } from '@cringe-court/core';
+import { usdc, type AudioPort, type Hex } from '@cringe-court/core';
 import { MemoryChain, MemorySaltVault, testAddress } from '@cringe-court/core/testing';
 import { createMockIdentity } from '@/platform/identity/mockIdentity';
 import { soloAudioPort } from './sound';
 import { DemoCounsel, NpcJury, SoloSession, TeaserQuota, fromJson, memoryQuotaStore, toJson, type QuotaStore, type SoloSnapshot } from '@cringe-court/modes-solo';
 
-/**
- * Unix seconds plus a demo offset, so "skip to the deadline" works and
- * countdowns stay live. Monotonic after page load (B19): a wall-clock jump on
- * the device does not expire the jury's windows.
- */
+/** Wall-clock seconds plus a demo offset, so "skip to the deadline" works and countdowns stay live. */
 export class DemoClock {
   #offset = 0;
-  readonly #real: () => number;
-  constructor(real: () => number = monotonicUnixClock()) {
-    this.#real = real;
-  }
-  now = (): number => Math.floor(this.#real()) + this.#offset;
+  now = (): number => Math.floor(Date.now() / 1000) + this.#offset;
   advanceTo = (t: number): void => {
     const now = this.now();
     if (t > now) this.#offset += t - now;

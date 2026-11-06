@@ -6,6 +6,7 @@ import { RoamRenderer } from '../three/renderer';
 import { surfaceFor, surfaceTexture, tilePixels, TILE } from '../three/textures';
 import { batchWorld } from '../three/worldMesh';
 import { roamData } from './fixtures';
+import { C } from '../palette';
 
 let data: RoamData;
 beforeAll(async () => {
@@ -31,9 +32,9 @@ describe('roam renderer (no GL needed)', () => {
     expect(t.image.width).toBe(TILE);
     expect([...tilePixels('stone')]).toEqual([...tilePixels('stone')]);
     expect(new Set(tilePixels('wood')).size).toBeGreaterThan(3);
-    expect(surfaceFor('#8B5E2A')).toBe('wood');
-    expect(surfaceFor('#A32D3F')).toBe('fabric');
-    expect(surfaceFor('#4D7CC5', 0.7)).toBe('glass');
+    expect(surfaceFor(C.gold900)).toBe('wood');
+    expect(surfaceFor(C.royal700)).toBe('fabric');
+    expect(surfaceFor(C.blue700, 0.7)).toBe('glass');
   });
 
   it('builds the scene: world meshes, every NPC as a rigged voxel avatar, remote avatars from the feed', () => {

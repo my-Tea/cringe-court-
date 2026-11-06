@@ -11,7 +11,6 @@
 import {
   caseNumber as toCaseNumber,
   keccak256,
-  monotonicUnixClock,
   seededRandom,
   usdc,
   type BallotChoice,
@@ -37,8 +36,7 @@ export const DEMO_DEADLINES = { preTrial: 45 * 60, recruitment: 15 * 60, commit:
 export class DemoClock {
   #pinned: number | null = null;
   #offset = 0;
-  /** Default: the wall clock once, then monotonic (B19), so a device clock jump does not expire windows. */
-  constructor(private readonly realNow: () => number = monotonicUnixClock()) {}
+  constructor(private readonly realNow: () => number = () => Date.now() / 1000) {}
 
   now = (): number => this.#pinned ?? Math.floor(this.realNow() + this.#offset);
 
@@ -449,12 +447,8 @@ export class DemoSimulation {
         if (!plan.npcFunding || now - last < 30) return;
         const left = c.terms.target - c.raised;
         const pick = (['0.10', '0.25', '0.50', '0.50', '1.00'] as const)[Math.floor(this.#rand() * 5)]!;
-        const min = c.terms.funding.kind === 'crowdfund' ? c.terms.funding.minContribution : 0n;
-        let amount = (usdc(pick) > left ? left : usdc(pick)) as Usdc;
-        // Never leave a remainder smaller than the minimum (nobody could fill it but an exact top-up): close it instead.
-        if (left - amount > 0n && left - amount < min) amount = left as Usdc;
-        // Below the minimum only an exact final top-up is allowed (the contract's rule).
-        if (amount <= 0n || (amount < min && amount !== left)) return;
+        const amount = (usdc(pick) > left ? left : usdc(pick)) as Usdc;
+        if (amount <= 0n) return;
         this.#lastAction.set(n, now);
         await this.root.as(this.npc()).fund(n, amount);
         return;

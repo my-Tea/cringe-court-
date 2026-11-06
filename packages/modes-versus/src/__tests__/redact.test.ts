@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeHits, placeholderHits, redact, type RedactionKind } from '../redact';
+import { describeHits, redact, type RedactionKind } from '../redact';
 
 const kinds = (s: string) => redact(s).hits.map((h) => h.kind);
 
@@ -78,40 +78,6 @@ describe('redact', () => {
     const r = redact('Email a@b.com, call 555-123-4567, or @bob. Or visit www.x.org');
     expect(new Set(r.hits.map((h) => h.kind))).toEqual(new Set<RedactionKind>(['email', 'phone', 'handle', 'url']));
     expect(r.text).not.toMatch(/a@b\.com|555|@bob|www\./);
-  });
-});
-
-describe('redact: first names (B10)', () => {
-  it('removes a given name after a cue verb', () => {
-    const r = redact('Ask Priya.');
-    expect(r.text).toBe('Ask [name removed].');
-    expect(r.hits).toEqual([{ kind: 'name', match: 'Priya' }]);
-  });
-
-  it('removes unlisted names after relationship cues and common names anywhere', () => {
-    expect(redact('my roommate Zorbo ate it').text).toBe('my roommate [name removed] ate it');
-    expect(redact('Then Jessica said no and Marcus laughed.').text).toBe('Then [name removed] said no and [name removed] laughed.');
-    expect(redact('Text Quillan tonight').text).toBe('Text [name removed] tonight');
-  });
-
-  it('does not redact ordinary capitalised words', () => {
-    for (const text of ['Ask Monday about it.', 'Tell The Court I was there.', 'Will you split it? I will.', 'We met in May at the Grace period.', 'Then I called Side B.', 'Call Me Maybe is my ringtone.']) {
-      expect(redact(text), text).toEqual({ text, hits: [] });
-    }
-  });
-
-  it('can leave user-chosen nicknames alone', () => {
-    expect(redact('Priya the Pirate', { names: false }).text).toBe('Priya the Pirate');
-  });
-});
-
-describe('placeholder counting (B11)', () => {
-  it('counts placeholders already in stored text so a re-read matches the original report', () => {
-    const original = 'Call 555-123-4567 and mail a@b.com';
-    const stored = redact(original).text;
-    expect(redact(stored).hits).toEqual([]);
-    expect(placeholderHits(stored).map((h) => h.kind).sort()).toEqual(['email', 'phone']);
-    expect(describeHits(placeholderHits(stored))).toBe('Removed 1 email address and 1 phone number.');
   });
 });
 

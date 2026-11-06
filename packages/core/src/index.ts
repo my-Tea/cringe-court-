@@ -8,4 +8,3 @@ export * from './settlement';
 export * from './trial';
 export * from './registry';
 export * from './ports';
-export * from './clock';

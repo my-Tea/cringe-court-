@@ -347,7 +347,7 @@ export class World {
         this.#dispatch(c, { type: 'COUNSEL_DRAFTED', draft: f.draft, balance: f.balance });
         const s = c.state;
         if (s.stage === 'counsel' && s.step === 'review') this.#log(c, 'counsel', `Both agents finished the draft (attempt ${before})`);
-        else if (s.stage === 'counsel') this.#log(c, 'counsel', 'The balance check failed, so the weaker bench is being redrafted');
+        else if (s.stage === 'counsel') this.#log(c, 'counsel', 'The balance check failed, so the weaker bench is being redrafted (D1)');
         else this.#log(c, 'closed', 'The AI could not prepare a fair case. Nobody was charged.');
         return;
       }
@@ -457,7 +457,7 @@ export class World {
     if (f.terms.mode !== 'versus') throw new FactRejected('Not a Versus case');
     const filer = lower(f.account);
     const open = [...this.#cases.values()].filter((c) => c.parties.a?.account === filer && c.state.stage === 'filing').length;
-    if (open >= OPEN_INVITE_LIMIT) throw new FactRejected(`You already have ${OPEN_INVITE_LIMIT} invites waiting for an answer. Wait for one, or withdraw it.`);
+    if (open >= OPEN_INVITE_LIMIT) throw new FactRejected(`You already have ${OPEN_INVITE_LIMIT} invites waiting for an answer (D6). Wait for one, or withdraw it.`);
     const id = toTrialId(f.trialId);
     const state = createTrial({ id, mode: 'versus', terms: f.terms, rules: versusMode.rules, benches: versusMode.benches, category: f.category, title: f.title, filer, now: this.#now });
     const c: MutableCase = {

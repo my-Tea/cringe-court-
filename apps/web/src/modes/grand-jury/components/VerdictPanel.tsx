@@ -79,7 +79,6 @@ export function VerdictPanel({ detail }: { detail: CaseDetail }) {
     return (
       <CourtPanel
         id="verdict-title"
-        focusableTitle
         tone="cream"
         className={styles.verdictCard}
         data-outcome="cancelled"
@@ -108,7 +107,6 @@ export function VerdictPanel({ detail }: { detail: CaseDetail }) {
   return (
     <CourtPanel
       id="verdict-title"
-      focusableTitle
       tone="maroon"
       backing="gold"
       elevation={3}

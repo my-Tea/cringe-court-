@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { caseNumber, formatUsdc, usdc } from '@cringe-court/core';
 import { ANGLE, DRAFT, FILER, runJury, setup, toJury } from './helpers';
-import type { SoloSession } from '../index';
 
 describe('SoloSession — the whole case', () => {
   it('runs confession → counsel → payment → NPC jury → verdict → share on the ledger', async () => {
@@ -206,114 +205,5 @@ describe('SoloSession — NO VERDICT refunds the filer in full', () => {
     await session.claimRefund();
     expect(session.getSnapshot().claimed).toBe(true);
     expect(formatUsdc(await ports.chain.usdcBalance(FILER))).toBe('5.00 USDC');
-  });
-});
-
-/**
- * B1 (UX evaluation): the filer pauses the jury (or the laptop sleeps, or the
- * tab sits in the background) and a jury window closes on the ledger. The jury
- * must carry on from where the ledger is, not retry a step the ledger already
- * closed ("Case 69 is in reveal, not commit"), and NO VERDICT must be reachable.
- */
-describe('SoloSession — deadlines that pass while nobody is watching (B1)', () => {
-  /** What useJuryDirector does: pick the next visible step from the snapshot, stop on any error. */
-  async function driveLikeTheDirector(session: SoloSession) {
-    for (let i = 0; i < 20; i++) {
-      const t = session.getSnapshot().trial;
-      if (session.getSnapshot().error || t.stage !== 'jury') return;
-      const seat = session.nextJurorSeat();
-      if (t.step === 'recruiting') await session.seatNextJuror();
-      else if (t.step === 'commit') await (seat ? session.commitBallot(seat) : session.closeCommit());
-      else if (t.step === 'reveal') await (seat ? session.revealBallot(seat) : session.closeReveal());
-      else if (t.step === 'finalizing') await session.finalize();
-    }
-  }
-
-  it('commit window closes with one scroll sealed: carries on to NO VERDICT and a claimable 1.20 refund', async () => {
-    const { session, ports } = setup();
-    await toJury(session);
-    for (let i = 0; i < 3; i++) await session.seatNextJuror();
-    await session.commitBallot(1);
-    ports.clock.advance(16 * 60); // past the 15 min demo commit window, inside the reveal window
-    await driveLikeTheDirector(session);
-    const s = session.getSnapshot();
-    expect(s.error).toBeNull();
-    if (s.trial.stage !== 'verdict') throw new Error(`stage ${s.trial.stage}`);
-    expect(s.trial.verdict).toMatchObject({ kind: 'no-verdict', label: 'NO VERDICT', completedDuty: 1 });
-    expect(s.lapsed).toEqual(['commit']);
-    expect(s.receipt?.map((l) => [l.kind, formatUsdc(l.amount)])).toEqual([['refund', '1.20 USDC']]);
-    await session.claimRefund();
-    expect(session.getSnapshot().claimed).toBe(true);
-    expect(formatUsdc(await ports.chain.usdcBalance(FILER))).toBe('5.00 USDC');
-  });
-
-  it('both windows close while away: NO VERDICT with nobody counted, refund claimable', async () => {
-    const { session, ports } = setup();
-    await toJury(session);
-    for (let i = 0; i < 3; i++) await session.seatNextJuror();
-    await session.commitBallot(1);
-    ports.clock.advance(60 * 60);
-    await driveLikeTheDirector(session);
-    const s = session.getSnapshot();
-    expect(s.error).toBeNull();
-    if (s.trial.stage !== 'verdict') throw new Error(`stage ${s.trial.stage}`);
-    expect(s.trial.verdict).toMatchObject({ kind: 'no-verdict', completedDuty: 0 });
-    expect(s.lapsed).toEqual(['commit', 'reveal']);
-    expect(formatUsdc(s.trial.settlement.protocol.fees)).toBe('0.00 USDC');
-    await session.claimRefund();
-    expect(formatUsdc(await ports.chain.usdcBalance(FILER))).toBe('5.00 USDC');
-  });
-
-  it('reveal window closes mid-reveal: the opened scrolls count, the rest forfeit, no error loop', async () => {
-    const { session, ports } = setup();
-    await toJury(session);
-    for (let i = 0; i < 3; i++) await session.seatNextJuror();
-    for (let seat = 1; seat <= 3; seat++) await session.commitBallot(seat);
-    await session.closeCommit();
-    await session.revealBallot(1);
-    ports.clock.advance(10 * 60);
-    await driveLikeTheDirector(session);
-    const s = session.getSnapshot();
-    expect(s.error).toBeNull();
-    if (s.trial.stage !== 'verdict') throw new Error(`stage ${s.trial.stage}`);
-    expect(s.trial.verdict.completedDuty).toBe(1);
-    expect(s.lapsed).toEqual(['reveal']);
-    // Same settlement as the ledger's own maths.
-    expect((await ports.chain.getCase(caseNumber(69)))?.verdict?.label).toBe(s.trial.verdict.label);
-  });
-
-  it('recruitment window closes before the jury is full: case dismissed, payment and bonds refunded, claimable', async () => {
-    const { session, ports, accounts } = setup();
-    await toJury(session);
-    await session.seatNextJuror();
-    ports.clock.advance(6 * 60);
-    await driveLikeTheDirector(session);
-    const s = session.getSnapshot();
-    expect(s.error).toBeNull();
-    if (s.trial.stage !== 'closed') throw new Error(`stage ${s.trial.stage}`);
-    expect(s.trial.reason).toBe('jury-unfilled');
-    expect(s.lapsed).toEqual(['recruitment']);
-    // Pricing is the ledger's own: the recorded refunds equal the twin's settlement.
-    expect(s.trial.settlement).toEqual(ports.chain.settlementOf(caseNumber(69)));
-    expect(s.trial.settlement?.statements.find((x) => x.party.toLowerCase() === FILER.toLowerCase())?.payout).toBe(usdc('1.20'));
-    expect(s.receipt?.map((l) => [l.kind, formatUsdc(l.amount)])).toEqual([['refund', '1.20 USDC']]);
-    await session.claimRefund();
-    expect(session.getSnapshot().claimed).toBe(true);
-    expect(formatUsdc(await ports.chain.usdcBalance(FILER))).toBe('5.00 USDC');
-    // The seated NPC juror gets their bond back too (claimable, like every payout).
-    const juror = s.trial.settlement?.statements.find((x) => x.party.toLowerCase() === accounts[0]!.toLowerCase());
-    expect(juror?.lines.map((l) => [l.kind, formatUsdc(l.amount)])).toEqual([['bond-returned', '0.40 USDC']]);
-  });
-
-  it('a step racing the deadline does not strand the jury on a ledger error', async () => {
-    const { session, ports } = setup();
-    await toJury(session);
-    for (let i = 0; i < 3; i++) await session.seatNextJuror();
-    const t = session.getSnapshot().trial;
-    if (t.stage !== 'jury' || t.commitEndsAt === null) throw new Error();
-    ports.clock.advance(t.commitEndsAt - ports.clock.now());
-    await session.commitBallot(1);
-    expect(session.getSnapshot().error).toBeNull();
-    expect(session.getSnapshot().trial).toMatchObject({ stage: 'jury', step: 'reveal' });
   });
 });

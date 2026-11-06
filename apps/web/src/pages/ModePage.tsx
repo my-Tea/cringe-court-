@@ -114,10 +114,6 @@ export function ModePage({ id }: { id: ModeId }) {
             <Alert tone="info" title={t('shell.mode.alert.versus.title')} className={styles.modeAlert}>
               {t('shell.mode.alert.versus.body')}
             </Alert>
-          ) : id === 'grand-jury' ? (
-            <Alert tone="info" title={t('shell.mode.alert.grandJury.title')} className={styles.modeAlert}>
-              {t('shell.mode.alert.grandJury.body')}
-            </Alert>
           ) : (
             <Alert tone="info" title={t('shell.mode.alert.demo.title')} className={styles.modeAlert}>
               {t('shell.mode.alert.demo.body')}

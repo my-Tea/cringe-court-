@@ -11,7 +11,7 @@
  * Routes are mounted under `/<mode id>/` (e.g. `/solo/play`), beside the mode's
  * landing page.
  */
-import { createModeRegistry, type Deadlines, type ModeDefinition, type ModeId, type ModeRegistry } from '@cringe-court/core';
+import { createModeRegistry, type ModeDefinition, type ModeId, type ModeRegistry } from '@cringe-court/core';
 import type { RouteObject } from 'react-router';
 import { allKeys, en, t, type MessageKey } from '@/i18n';
 
@@ -28,8 +28,6 @@ export interface WebModeModule {
   landing?: { label: string; to: string; secondary?: { label: string; to: string } };
   /** Where a player finds their own cases in this mode (the lobby's "Your cases" row). */
   docket?: { label: string; to: string };
-  /** The shorter windows the playable demo court uses (D14), shown beside the live ones. */
-  demoDeadlines?: Readonly<Partial<Deadlines>>;
 }
 
 const discovered = import.meta.glob<WebModeModule>('./*/mode.{ts,tsx}', { eager: true, import: 'default' });

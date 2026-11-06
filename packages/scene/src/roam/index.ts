@@ -16,5 +16,6 @@ export * from './quality';
 export * from './audio';
 export * from './controller';
 export * from './load';
-export { buildRoamWorld, floorAt, solidFor, yawTo, pitchTo, zoneAt, COURT, LOBBY, EXHIBITS, EVIDENCE_TABLE, DEFENDANT_CHAIR, type RoamBox, type RoamWorldInput } from './world';
+export * from './pace';
+export { buildRoamWorld, floorAt, solidFor, yawTo, pitchTo, zoneAt, COURT, LOBBY, EXHIBITS, EVIDENCE_TABLE, DEFENDANT_CHAIR, PROSECUTION_CHAIR, JURY_BOX, JURY_SLOTS, PLAYER_JURY_SLOT, type RoamBox, type RoamWorldInput } from './world';
 export * from './three';

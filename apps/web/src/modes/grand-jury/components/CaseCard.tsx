@@ -2,7 +2,7 @@ import type { DocketEntry } from '@cringe-court/modes-grand-jury';
 import { Link } from 'react-router';
 import { t } from '@/i18n';
 import { Countdown, Icon, PaperPanel, Stamp, cx } from '@/ds';
-import { topicLabel, topicOf, deadlineLabel, isClosed, paths } from '../lib';
+import { categoryLabel, deadlineLabel, isClosed, paths } from '../lib';
 import styles from '../GrandJury.module.css';
 import { BallotChip, FundingMeter, JuryBox, StatusBadge } from './parts';
 import { ballotLabel, caseLabel, verdictLabel } from '@/i18n/domain';
@@ -29,7 +29,7 @@ export function CaseCard({ entry, nowMs }: { entry: DocketEntry; nowMs: number }
         <StatusBadge status={e.status} />
       </header>
       <p className={styles.caseCardEyebrow}>
-        {e.file.title} · {topicLabel(topicOf(e.file))}
+        {e.file.title} · {categoryLabel(e.file.category)}
       </p>
       <h3 id={titleId} className={styles.caseCardQuestion}>
         <Link to={paths.case(e.caseNumber)} className={styles.stretchedLink}>

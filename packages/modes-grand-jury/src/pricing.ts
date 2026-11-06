@@ -141,9 +141,9 @@ export function targetBreakdown(terms: CaseTerms): TargetBreakdown {
   };
 }
 
-/** About how many people it takes at a typical ticket: whole people, rounded up (7.30 at 0.50 is 15). */
+/** About how many people it takes at a typical ticket ("about 15.6 at 0.50"). */
 export function crowdSize(target: Usdc, ticket: Usdc = usdc('0.50')): number {
-  return Math.ceil(Number(target) / Number(ticket));
+  return Math.round((Number(target) / Number(ticket)) * 10) / 10;
 }
 
 export type PublicationDecision =
