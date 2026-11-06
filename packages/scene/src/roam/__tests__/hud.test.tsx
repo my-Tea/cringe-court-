@@ -59,7 +59,7 @@ describe('roam HUD', () => {
     c.setPaused(true);
     let q = 'medium';
     let restored = 0;
-    const view = render(<PauseMenu snap={c.snapshot()} controller={c} touch={false} quality="medium" onQuality={(v) => (q = v)} pixelated onPixelated={() => undefined} onExit={() => undefined} restoreFocus={() => restored++} />);
+    const view = render(<PauseMenu snap={c.snapshot()} controller={c} touch={false} quality="medium" onQuality={(v) => (q = v)} perspective="auto" onPerspective={() => undefined} pixelated onPixelated={() => undefined} onExit={() => undefined} restoreFocus={() => restored++} />);
     const dialog = screen.getByRole('dialog', { name: 'Court in recess' });
     expect(dialog).toHaveAttribute('aria-modal', 'true');
     expect(screen.getByRole('button', { name: 'Resume' })).toHaveFocus();
@@ -69,7 +69,7 @@ describe('roam HUD', () => {
     expect(c.reducedMotion).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: 'Resume' }));
     expect(c.paused).toBe(false);
-    view.rerender(<PauseMenu snap={c.snapshot()} controller={c} touch={false} quality="low" onQuality={() => undefined} pixelated onPixelated={() => undefined} restoreFocus={() => restored++} />);
+    view.rerender(<PauseMenu snap={c.snapshot()} controller={c} touch={false} quality="low" onQuality={() => undefined} perspective="auto" onPerspective={() => undefined} pixelated onPixelated={() => undefined} restoreFocus={() => restored++} />);
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(restored).toBe(1);
   });

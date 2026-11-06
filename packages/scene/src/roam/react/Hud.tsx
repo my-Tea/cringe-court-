@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import type { RoamController } from '../controller';
 import { EXHIBIT_CARDS } from '../dialogue';
+import { PERSPECTIVES, type PerspectiveChoice } from '../perspective';
 import { QUALITY_LEVELS, type QualityLevel } from '../quality';
 import type { BeatId, RoamSnapshot } from '../types';
 import { C } from '../palette';
@@ -223,6 +224,8 @@ export interface PauseMenuProps {
   touch: boolean;
   quality: QualityLevel;
   onQuality: (q: QualityLevel) => void;
+  perspective: PerspectiveChoice;
+  onPerspective: (p: PerspectiveChoice) => void;
   pixelated: boolean;
   onPixelated: (on: boolean) => void;
   onExit?: () => void;
@@ -230,7 +233,7 @@ export interface PauseMenuProps {
   autoNote?: string | null;
 }
 
-export function PauseMenu({ snap, controller, touch, quality, onQuality, pixelated, onPixelated, onExit, restoreFocus, autoNote }: PauseMenuProps) {
+export function PauseMenu({ snap, controller, touch, quality, onQuality, perspective, onPerspective, pixelated, onPixelated, onExit, restoreFocus, autoNote }: PauseMenuProps) {
   const S = useRoamStrings();
   const ref = useModalFocus(snap.paused, restoreFocus);
   if (!snap.paused) return null;
@@ -261,6 +264,16 @@ export function PauseMenu({ snap, controller, touch, quality, onQuality, pixelat
             </button>
           ) : null}
         </div>
+        <label className="ccr-field">
+          <span>{S.pausePerspective}</span>
+          <select value={perspective} onChange={(e) => onPerspective(e.target.value as PerspectiveChoice)}>
+            {PERSPECTIVES.map((p) => (
+              <option key={p} value={p}>
+                {S.perspectiveLabel(p)}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="ccr-field">
           <span>{S.pauseGraphicsQuality}</span>
           <select value={quality} onChange={(e) => onQuality(e.target.value as QualityLevel)}>
