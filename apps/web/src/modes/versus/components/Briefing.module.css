@@ -1,0 +1,258 @@
+/* Private briefing with your own agent, and the public/private brief review. */
+
+.chat,
+.review {
+  --_side: var(--cc-color-side-a);
+  --_side-soft: color-mix(in srgb, var(--cc-teal-100) 70%, var(--cc-neutral-100));
+}
+
+.chat[data-side='b'],
+.review[data-side='b'] {
+  --_side: var(--cc-color-side-b);
+  --_side-soft: color-mix(in srgb, var(--cc-royal-100) 55%, var(--cc-neutral-100));
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-5);
+}
+
+.chatHead {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-4);
+  padding-bottom: var(--cc-space-4);
+  border-bottom: 2px dashed color-mix(in srgb, var(--cc-color-frame) 70%, transparent);
+}
+
+.chatTitle {
+  font-size: var(--cc-text-2xl);
+}
+
+.chatSub {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-1_5);
+  margin-top: var(--cc-space-1);
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+}
+
+.log {
+  display: block;
+}
+
+.turns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+  animation: rise var(--cc-duration-slow) var(--cc-ease-enter) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+.agentBubble,
+.userBubble {
+  position: relative;
+  max-width: min(36rem, 88%);
+  padding: var(--cc-space-3) var(--cc-space-4);
+  border-radius: var(--cc-radius-lg);
+  line-height: var(--cc-leading-relaxed);
+}
+
+/* The agent speaks on parchment in a gold rim, like the style-guide frames. */
+.agentBubble {
+  align-self: flex-start;
+  border: 2px solid var(--cc-color-frame);
+  border-top-left-radius: var(--cc-radius-xs);
+  background: var(--cc-color-surface);
+  box-shadow: var(--cc-shadow-1), var(--cc-shadow-bevel);
+}
+
+.agentBubble[data-small] {
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+  border-style: dashed;
+}
+
+/* You answer in your side's colour. */
+.userBubble {
+  align-self: flex-end;
+  border: 2px solid var(--_side);
+  border-top-right-radius: var(--cc-radius-xs);
+  background: var(--_side-soft);
+  white-space: pre-wrap;
+}
+
+.privateTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+  margin-left: var(--cc-space-2);
+  padding: 0 var(--cc-space-2);
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-color-accent);
+  color: var(--cc-color-on-accent);
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-2xs);
+  letter-spacing: var(--cc-tracking-wide);
+  text-transform: uppercase;
+  vertical-align: 0.15em;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-4);
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-color-surface-sunken);
+  border: 2px solid var(--cc-color-border);
+}
+
+.composerActions,
+.reviewActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--cc-space-3);
+}
+
+.thinking {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  color: var(--cc-color-text-muted);
+}
+
+/* ── Review ─────────────────────────────────────────────────────── */
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-5);
+}
+
+.reviewGrid {
+  display: grid;
+  gap: var(--cc-space-5);
+}
+
+@media (min-width: 900px) {
+  .reviewGrid {
+    grid-template-columns: 1.25fr 1fr;
+  }
+}
+
+.reviewCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-4);
+  padding: var(--cc-space-5);
+  border-radius: var(--cc-radius-lg);
+  border: 2px solid var(--cc-color-frame);
+  background: var(--cc-color-surface);
+  box-shadow: var(--cc-shadow-2), var(--cc-shadow-bevel);
+}
+
+.reviewCard[data-visibility='private'] {
+  border-style: dashed;
+  border-color: var(--cc-color-accent);
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--cc-royal-100) 22%, transparent) 0 10px, transparent 10px 20px),
+    var(--cc-color-surface);
+}
+
+.reviewHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-2);
+}
+
+.reviewHead h3 {
+  font-size: var(--cc-text-xl);
+}
+
+.reviewFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-4);
+}
+
+.storyPreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-4) var(--cc-space-5);
+  border-left: 4px solid var(--_side);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-color-surface-sunken);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-lg);
+  font-variation-settings: 'SOFT' 100;
+  line-height: var(--cc-leading-relaxed);
+  white-space: pre-wrap;
+}
+
+.privateList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+  margin: 0;
+}
+
+.privateList dt {
+  font-family: var(--cc-font-pixel);
+  font-size: var(--cc-text-xs);
+  letter-spacing: var(--cc-tracking-caps);
+  text-transform: uppercase;
+  color: var(--cc-color-text-subtle);
+}
+
+.privateList dd {
+  margin: var(--cc-space-1) 0 0;
+  white-space: pre-wrap;
+}
+
+.redactionNote {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-success-text);
+}
+
+.redactionNote[data-hit] {
+  color: var(--cc-color-info-text);
+}
+
+.muted {
+  color: var(--cc-color-text-muted);
+  font-style: italic;
+}
+
+.issueList {
+  margin: 0;
+  padding-left: var(--cc-space-5);
+}
+
+:global(:root[data-reduced-motion='true']) .turn {
+  animation: none;
+}
