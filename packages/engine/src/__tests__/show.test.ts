@@ -69,7 +69,7 @@ describe('Director', () => {
     expect(guilty.cues).toContainEqual(expect.objectContaining({ kind: 'sound', cue: 'stinger.verdict-guilty' }));
     const none = directVerdict(v('no-verdict', 'NO VERDICT'), cast, null);
     expect(none.cues).toContainEqual({ kind: 'card', card: 'mistrial', text: 'MISTRIAL' });
-    expect(lineSeconds('x')).toBe(1.8);
+    expect(lineSeconds('x')).toBe(3);
   });
 });
 

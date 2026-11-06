@@ -125,7 +125,7 @@ const BEATS: Readonly<Record<Beat, BeatPlan>> = {
 };
 
 export function lineSeconds(text: string, options: DirectorOptions = {}): number {
-  const { msPerChar = 52, minLineSeconds = 1.8, maxLineSeconds = 7 } = options;
+  const { msPerChar = 75, minLineSeconds = 3, maxLineSeconds = 12 } = options;
   return Math.min(maxLineSeconds, Math.max(minLineSeconds, (text.length * msPerChar) / 1000));
 }
 

@@ -154,7 +154,7 @@ describe('beat runner', () => {
     expect(h.applied.map((s) => s.kind)).toEqual(['control', 'mood', 'wait']);
     r.advance(0.5);
     expect(h.applied).toHaveLength(3);
-    r.advance(0.6);
+    r.advance(2);
     expect(h.applied.map((s) => s.kind)).toEqual(['control', 'mood', 'wait', 'say']);
     expect(r.advance(5)).toBe(false); // still talking
     h.finishLine();

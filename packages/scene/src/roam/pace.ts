@@ -4,10 +4,10 @@
  * size things off them; `estimateHearingSeconds` predicts a hearing's length
  * without running it.
  *
- * - `standard` (default): the whole transcript, brisk: about 60–75 s for a
- *   typical 13-line hearing, close to the classic stage's 55 s.
+ * - `standard` (default): the whole transcript at a comfortable reading speed.
+ *   Players read about 15 to 20 characters a second, so a line must outlast that.
  * - `highlights`: the strongest lines of each beat only (about half as long).
- * - `full`: the original slow read (typewriter 48 cps, long holds).
+ * - `full`: the slowest read (typewriter 16 cps, long holds).
  *
  * Fast-forward multiplies beat and dialogue time by `FAST_FORWARD` without
  * dropping anything. Nothing here can skip the verdict beat.
@@ -32,9 +32,9 @@ export interface PaceSpec {
 }
 
 export const HEARING_PACE: Readonly<Record<HearingPace, PaceSpec>> = {
-  standard: { typeSpeed: 60, holdBase: 1.0, holdPerChar: 0.014, holdMax: 2.8, stepScale: 0.7, linesPerBeat: null },
-  highlights: { typeSpeed: 60, holdBase: 1.0, holdPerChar: 0.014, holdMax: 2.8, stepScale: 0.6, linesPerBeat: 2 },
-  full: { typeSpeed: 48, holdBase: 1.4, holdPerChar: 0.025, holdMax: Infinity, stepScale: 1, linesPerBeat: null },
+  standard: { typeSpeed: 24, holdBase: 2.0, holdPerChar: 0.045, holdMax: 7, stepScale: 1, linesPerBeat: null },
+  highlights: { typeSpeed: 24, holdBase: 2.0, holdPerChar: 0.045, holdMax: 7, stepScale: 0.8, linesPerBeat: 2 },
+  full: { typeSpeed: 16, holdBase: 3, holdPerChar: 0.06, holdMax: Infinity, stepScale: 1.2, linesPerBeat: null },
 };
 
 /** Fast-forward speeds the hearing up this many times (dialogue still types out, just quicker). */

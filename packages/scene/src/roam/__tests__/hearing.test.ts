@@ -67,19 +67,19 @@ async function watch(c: RoamController, beats = HEARING, dt = 1 / 30): Promise<n
 }
 
 describe('hearing pace', () => {
-  it('a standard first-person hearing runs about 60–75 s, not 3 minutes', () => {
+  it('a standard first-person hearing is slow enough to read: 2 to 3 minutes for 13 lines', () => {
     const standard = estimateSeconds(scripts('standard'), HEARING_PACE.standard);
     const full = estimateSeconds(scripts('full'), HEARING_PACE.full);
-    expect(standard).toBeGreaterThanOrEqual(60);
-    expect(standard).toBeLessThanOrEqual(75);
+    expect(standard).toBeGreaterThanOrEqual(120);
+    expect(standard).toBeLessThanOrEqual(180);
     expect(full).toBeGreaterThan(standard * 1.3);
   });
 
-  it('highlights keep the scene-setters and the punchlines, at well under a minute', () => {
+  it('highlights keep the scene-setters and the punchlines, and run far shorter than the whole hearing', () => {
     const steps = scripts('highlights');
     const said = steps.flat().filter((s) => s.kind === 'say');
     const secs = estimateSeconds(steps, HEARING_PACE.highlights);
-    expect(secs).toBeLessThan(45);
+    expect(secs).toBeLessThan(estimateSeconds(scripts('standard'), HEARING_PACE.standard) * 0.7);
     expect(said.some((s) => s.kind === 'say' && s.text.startsWith('OBJECTION!'))).toBe(true);
     expect(said.some((s) => s.kind === 'say' && s.text.startsWith('ORDER!'))).toBe(true);
     // The verdict is never trimmed: both judge lines and the callout stay.
@@ -117,7 +117,8 @@ describe('hearing pace', () => {
     const at = (dt: number) => watch(new RoamController(world, { spawn: 'defendant' }), HEARING.slice(0, 3), dt);
     const smooth = await at(1 / 60);
     const choppy = await at(0.5);
-    expect(Math.abs(choppy - smooth)).toBeLessThan(2);
+    // Each step rounds up to a frame, so a choppy run drifts a little. It must not lose whole lines.
+    expect(Math.abs(choppy - smooth) / smooth).toBeLessThan(0.1);
   });
 
   it('the previous beat’s last line is gone when the next beat starts (B18)', async () => {
