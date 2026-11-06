@@ -20,7 +20,7 @@ import { BODY } from '../physics';
 import type { Aabb, InteractableSpec, NpcSpec, RoamWorld, Seat, SeatId, Spawn, SpawnId, Vec3, Zone } from '../types';
 import { aabb } from './boxes';
 import { adaptCourtroom, COURT, WITNESS_STAND } from './courtroom';
-import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TABLE, EXHIBITS, PROSECUTION_CHAIR, stainedGlass } from './dressing';
+import { BENCH_GLASS, BENCH_WINDOWS, DEFENDANT_CHAIR, dressingBoxes, EVIDENCE_TABLE, EXHIBITS, isOldBenchMass, JUDGE_BENCH, PROSECUTION_CHAIR, stainedGlass } from './dressing';
 import { isOldJuryBox, JURY_BOX, JURY_SLOTS, juryBoxBoxes, PLAYER_JURY_SLOT } from './jury';
 import { ROOM_SCALE } from '../scale';
 import { LOBBY, lobbyBoxes } from './lobby';
@@ -113,7 +113,8 @@ const ZONES: readonly Zone[] = [
 ];
 
 /** On the throne platform behind the bench (the bench front tops out at 54). */
-const JUDGE_POS: Vec3 = [0, 21, -63];
+/** Standing on the bench platform, just behind the desk (JUDGE_BENCH). */
+const JUDGE_POS: Vec3 = [0, JUDGE_BENCH.platform, -53];
 
 function seats(): Record<SeatId, Seat> {
   const def: Vec3 = [DEFENDANT_CHAIR.x, 0, DEFENDANT_CHAIR.z];
@@ -242,7 +243,7 @@ export interface RoamWorldInput {
 export function buildRoamWorld({ courtroom, cast }: RoamWorldInput): RoamWorld & { boxes: readonly RoamBox[] } {
   const raw: RoamBox[] = [
     ...adaptCourtroom(courtroom)
-      .filter((b) => !isBenchGlass(b) && !isOldJuryBox(b))
+      .filter((b) => !isBenchGlass(b) && !isOldJuryBox(b) && !isOldBenchMass(b))
       .map((b) => (EMISSIVE[b.m] ? { ...b, glow: EMISSIVE[b.m] } : b)),
     ...dressingBoxes(),
     ...juryBoxBoxes(),

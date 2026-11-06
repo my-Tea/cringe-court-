@@ -222,8 +222,73 @@ export function stainedGlass(): GlowBox[] {
   return out;
 }
 
+/**
+ * The generator's bench is one solid block 38 deep with the judge's feet sunk
+ * 13 into it, and the floor plan's 2.5× stretch makes that a stage, not a desk.
+ * Its mass, its trims and the throne and ledger half-buried in it are dropped;
+ * `judgeBench` builds a real bench in their place. The front step, base and
+ * pilasters stay.
+ */
+export function isOldBenchMass(b: Box): boolean {
+  const inBench = b.f[0] >= -36.2 && b.t[0] <= 36.2 && b.f[2] >= -82.1 && b.t[2] <= -41.9 && b.f[1] >= 8.9 && b.t[1] <= 34.5;
+  if (inBench && b.t[2] - b.f[2] > 30) return true;
+  // The old throne (seat, back, gold posts) inside the mass.
+  if (b.f[0] >= -15.1 && b.t[0] <= 15.1 && b.f[2] >= -80.1 && b.t[2] <= -55.9 && b.f[1] >= 8.9 && b.t[1] <= 33.1) return true;
+  // The ledger left on top of the mass.
+  return b.f[0] >= 14 && b.t[0] <= 34 && b.f[1] >= 21.9 && b.t[1] <= 29.3 && b.f[2] >= -58 && b.t[2] <= -38;
+}
+
+/** The judge's bench: where the judge stands, the desk in front of them, the chair behind. */
+export const JUDGE_BENCH = { platform: 21, front: -43, back: -47, top: 36 } as const;
+
+/**
+ * A raised platform at the judge's feet, a desk front at chest height with
+ * raised panels and the scales, a desk top with a gavel, a ledger and a
+ * nameplate, and a tall red chair back. Shallow in Z on purpose: the floor
+ * plan stretches Z by 2.5.
+ */
+function judgeBench(out: Box[]): void {
+  const { platform, front, back, top } = JUDGE_BENCH;
+  out.push(box([-33, 9, -82], [33, platform, back], WOOD));
+  out.push(box([-33, platform - 0.6, -82], [33, platform, back], WOOD_LT));
+  // Desk front and its raised panels.
+  out.push(box([-34.2, 9, back], [34.2, top, front], WOOD));
+  for (const [x0, x1] of [[-31, -12], [12, 31]] as const) {
+    out.push(box([x0, 14, front], [x1, top - 4, front + 0.4], WOOD_LT));
+    out.push(box([x0 + 1.5, 15.5, front + 0.4], [x1 - 1.5, top - 5.5, front + 0.6], WOOD));
+  }
+  // Centre: a maroon field with the gold scales.
+  out.push(box([-10, 14, front], [10, top - 4, front + 0.4], MAROON));
+  out.push(box([-0.6, 17, front + 0.4], [0.6, 29.5, front + 0.8], GOLD_LT));
+  out.push(box([-7, 27, front + 0.4], [7, 28.2, front + 0.8], GOLD_LT));
+  for (const sx of [-6, 6]) {
+    out.push(box([sx - 0.3, 22.5, front + 0.4], [sx + 0.3, 27, front + 0.8], GOLD_LT));
+    out.push(box([sx - 2.4, 21.5, front + 0.4], [sx + 2.4, 22.7, front + 0.8], GOLD_LT));
+  }
+  out.push(box([-3, 17, front + 0.4], [3, 18.2, front + 0.8], GOLD_LT));
+  // Desk top with a gold edge.
+  out.push(box([-35.4, top, back - 1.5], [35.4, top + 2.5, front + 1], WOOD));
+  out.push(box([-35.4, top - 0.8, front + 0.6], [35.4, top, front + 1.2], GOLD_LT));
+  // Nameplate, gavel on its block, the ledger.
+  out.push(box([-7, top + 2.5, front - 2], [7, top + 5.5, front - 0.6], PARCH));
+  out.push(box([-5, top + 3.6, front - 0.6], [5, top + 4.6, front - 0.4], MAROON));
+  out.push(box([12, top + 2.5, back], [16, top + 3.5, back + 2], WOOD_DK));
+  out.push(box([12.5, top + 3.5, back + 0.2], [15.5, top + 6, back + 1.8], WOOD));
+  out.push(box([15.5, top + 4.3, back + 0.7], [21, top + 5.3, back + 1.3], WOOD_LT));
+  out.push(box([-20, top + 2.5, back - 0.5], [-12, top + 4, front - 1.5], RED));
+  out.push(box([-19.6, top + 2.6, back - 0.3], [-12.4, top + 3.7, front - 1.3], PARCH));
+  // Side partitions back to the wall.
+  for (const s of [-1, 1]) out.push(box([s > 0 ? 32 : -34.2, 9, -60], [s > 0 ? 34.2 : -32, top, back], WOOD_DK));
+  // The judge's chair: a tall red back in a gold frame.
+  out.push(box([-11, platform, -62], [11, 62, -58], MAROON));
+  out.push(box([-12, 62, -62.5], [12, 65, -57.5], GOLD));
+  for (const s of [-1, 1]) out.push(box([s > 0 ? 11 : -13, platform, -62.5], [s > 0 ? 13 : -11, 66, -57.5], GOLD));
+  out.push(box([-1.5, 65, -61], [1.5, 69, -59], GOLD_LT));
+}
+
 export function dressingBoxes(): Box[] {
   const out: Box[] = [];
+  judgeBench(out);
   evidenceTable(out);
   deskProps(out, -56, -22, -1);
   deskProps(out, 56, -22, 1);
