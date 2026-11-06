@@ -28,6 +28,7 @@ import { FAUCET_MAX, GrandJuryHall, type GjCommand } from './gj/hall';
 import { RateLimiter } from './ratelimit';
 import { InviteSigner, SessionFull, Sessions, type Session } from './sessions';
 import { FileStorage, MemoryStorage, type Storage } from './store';
+import { arcHumanWriter, attestWallet, type HumanWriter } from './chain/attest';
 import { createWorldService, seatGate, type WorldService } from './world/routes';
 import { HumanStore } from './world/humans';
 import { MAX_BATCH, BadFact, Forbidden, authorize, checkShape } from './versus/validate';
@@ -55,6 +56,8 @@ export interface ServerDeps {
   log?: (line: string) => void;
   /** Test stand-in. Production builds the IDKit verifier from config.world. */
   worldVerifier?: IdentityVerifier;
+  /** Test stand-in. Production signs with ARC_RELAYER_KEY from the environment. */
+  humanWriter?: HumanWriter | null;
 }
 
 export interface CourtServer {
@@ -115,6 +118,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     onChange: broadcastGj,
   });
 
+  const humanWriter = deps.humanWriter !== undefined ? deps.humanWriter : arcHumanWriter(process.env, clockMs);
   const world: WorldService | null = config.world
     ? createWorldService({
         config: config.world,
@@ -274,6 +278,17 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       limit(limits.world, sid, 'Too many verification requests. Wait a minute.');
       const result = await world.verify(session, await body(req));
       return json(res, 200, result);
+    }
+
+    if (path === `${API}/chain/attest` && method === 'POST') {
+      limit(limits.world, sid, 'Too many verification requests. Wait a minute.');
+      const b = await body<{ wallet?: unknown; signature?: unknown }>(req);
+      const human = world?.humans.byWallet(session.persona.account);
+      const r = await attestWallet({ writer: humanWriter, human, personaId: session.persona.id, wallet: b.wallet, signature: b.signature });
+      if (r.ok) return json(res, 200, { txHash: r.txHash });
+      if (r.reason === 'disabled') throw new HttpError(503, 'disabled', 'This server has no Arc relayer.');
+      if (r.reason === 'not-verified') throw new HttpError(403, 'forbidden', 'Verify with World ID first.');
+      throw new HttpError(400, 'bad-request', r.reason === 'bad-wallet' ? 'That is not a wallet address.' : 'That signature is not from this wallet.');
     }
 
     if (method === 'GET' && path === `${API}/sessions/me`) {
