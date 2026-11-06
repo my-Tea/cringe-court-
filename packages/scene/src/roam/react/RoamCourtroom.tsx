@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import type { RoamController } from '../controller';
 import { gamepadInput, lookDelta } from '../input';
 import type { RoamData } from '../load';
+import { cameraMode, type PerspectiveChoice } from '../perspective';
 import { AutoQuality, QUALITY, type QualityLevel } from '../quality';
 import { RoamRenderer } from '../three/renderer';
 import { BeatChip, Callout, ControlLegend, Dialogue, Dock, ExhibitPanel, Onboarding, PauseMenu, Prompt, TopBar } from './Hud';
@@ -18,6 +19,9 @@ export interface RoamCourtroomProps {
   data: RoamData;
   /** Initial quality (the pause menu can change it). Default medium. */
   quality?: QualityLevel;
+  /** `auto` is third-person isometric. Default auto. */
+  perspective?: PerspectiveChoice;
+  onPerspectiveChange?: (p: PerspectiveChoice) => void;
   onQualityChange?: (q: QualityLevel) => void;
   /** Step quality down when frames run long. Default true. */
   autoQuality?: boolean;
@@ -87,6 +91,8 @@ export function RoamCourtroom({
   data,
   quality: initialQuality = 'medium',
   onQualityChange,
+  perspective: initialPerspective = 'auto',
+  onPerspectiveChange,
   autoQuality = true,
   pixelated: initialPixelated = true,
   touch = 'auto',
@@ -104,6 +110,7 @@ export function RoamCourtroom({
   const root = useRef<HTMLDivElement>(null);
   const snap = useRoamSnapshot(controller);
   const [quality, setQuality] = useState<QualityLevel>(initialQuality);
+  const [perspective, setPerspective] = useState<PerspectiveChoice>(initialPerspective);
   const [pixelated, setPixelated] = useState(initialPixelated);
   const [engaged, setEngagedState] = useState(false);
   const [onboarded, setOnboarded] = useState(readOnboarded);
@@ -127,6 +134,11 @@ export function RoamCourtroom({
   const auto = useMemo(() => (autoQuality ? new AutoQuality(initialQuality) : null), [autoQuality, initialQuality]);
 
   useEffect(() => setQuality(initialQuality), [initialQuality]);
+  useEffect(() => setPerspective(initialPerspective), [initialPerspective]);
+  useEffect(() => {
+    controller.setPerspective(perspective);
+    renderer.setPerspective(perspective);
+  }, [controller, renderer, perspective]);
   useEffect(() => {
     renderer.setQuality(quality);
     if (auto) auto.level = quality;
@@ -200,10 +212,18 @@ export function RoamCourtroom({
     if ((snap.paused || snap.exhibit) && document.pointerLockElement === root.current) document.exitPointerLock?.();
   }, [snap.paused, snap.exhibit]);
 
+  const changePerspective = useCallback(
+    (p: PerspectiveChoice) => {
+      setPerspective(p);
+      onPerspectiveChange?.(p);
+    },
+    [onPerspectiveChange],
+  );
+
   const capture = useCallback(() => {
     setEngaged(true);
     focusRoot();
-    if (isTouch) return;
+    if (isTouch || cameraMode(perspective) === 'iso') return;
     const el = root.current as (HTMLDivElement & { requestPointerLock?: () => Promise<void> | void }) | null;
     try {
       const r = el?.requestPointerLock?.();
@@ -211,7 +231,7 @@ export function RoamCourtroom({
     } catch {
       /* pointer lock unavailable (iframe, headless): keyboard turning still works */
     }
-  }, [focusRoot, isTouch, setEngaged]);
+  }, [focusRoot, isTouch, perspective, setEngaged]);
 
   const cinematic = snap.control === 'cinematic';
   // Non-blocking onboarding (B4): a corner card, never during a cinematic beat, gone once dismissed or used.
@@ -260,7 +280,7 @@ export function RoamCourtroom({
 
       <RoamStringsProvider strings={S}>
         <div className="ccr-hud">
-          {!snap.paused && snap.control !== 'cinematic' && !snap.exhibit ? <div className={`ccr-cross${snap.focus ? ' ccr-cross--on' : ''}`} aria-hidden="true" /> : null}
+          {cameraMode(perspective) === 'first' && !snap.paused && snap.control !== 'cinematic' && !snap.exhibit ? <div className={`ccr-cross${snap.focus ? ' ccr-cross--on' : ''}`} aria-hidden="true" /> : null}
           <TopBar snap={snap} touch={isTouch} onExit={onExit} onPause={() => controller.setPaused(true)} legendOpen={legend} onToggleLegend={() => setLegend((v) => !v)} />
           <BeatChip snap={snap} onSkip={() => controller.skipBeat()} />
           {legend && !snap.paused ? <ControlLegend touch={isTouch} onClose={() => setLegend(false)} /> : null}
@@ -291,6 +311,8 @@ export function RoamCourtroom({
             touch={isTouch}
             quality={quality}
             onQuality={(q) => changeQuality(q)}
+            perspective={perspective}
+            onPerspective={changePerspective}
             pixelated={pixelated}
             onPixelated={setPixelated}
             onExit={onExit}

@@ -17,6 +17,7 @@ vi.mock('../three/renderer', () => ({
   RoamRenderer: class {
     preset = { level: 'medium' };
     setQuality() {}
+    setPerspective() {}
     dispose() {}
   },
 }));
