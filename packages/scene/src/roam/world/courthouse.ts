@@ -10,7 +10,7 @@
  * y = 0, level with the lobby; the facade's face is at z = FRONT.
  */
 import { COURT } from './courtroom';
-import { b, banner, c, GOLD, CREAM, IRON, LANTERN, MAROON, RED, ROOF, SKYGLASS, STONE, STONE_SH, scales, type Out } from './kit';
+import { b, banner, c, GOLD, CREAM, IRON, LANTERN, MAROON, RED, ROOF, SKYGLASS, STONE, STONE_SH, scales, WOOD, WOOD_LT, type Out } from './kit';
 import { LOBBY } from './lobby';
 
 /** Outer face of the street wall. */
@@ -73,6 +73,50 @@ function hipRoof(out: Out, x0: number, z0: number, x1: number, z1: number, y: nu
   return top;
 }
 
+/**
+ * The street doors seen from the porch: two tall oak leaves with raised
+ * panels, iron studs and gold ring knockers, in a gold frame on a stone sill.
+ * They sit on the outer face of the lobby's own door at depth `z`, so from
+ * outside the doorway is a door, not a dark hole.
+ */
+function streetDoors(out: Out, z: number): void {
+  const x = DOOR.x;
+  const top = DOOR.top;
+  const d = z + 1.2;
+  // Sill and frame.
+  b(out, [-x - 1, 0, z], [x + 1, 0.8, d + 2.4], STONE_SH);
+  b(out, [-x, top - 1.6, z], [x, top, d + 0.4], GOLD);
+  for (const s of [-1, 1]) b(out, [s * (x - 1.2), 0.8, z], [s * x, top, d + 0.4], GOLD);
+  for (const s of [-1, 1]) {
+    // One leaf, hinged at the frame, meeting the other at the centre seam.
+    const x0 = s * 0.6;
+    const x1 = s * (x - 1.2);
+    b(out, [x0, 0.8, z], [x1, top - 1.6, d], WOOD);
+    // Raised panels: a tall lower pair and a short upper one, planks between.
+    const inner = s * 3;
+    const outer = s * (x - 4.2);
+    for (const [y0, y1] of [[5, 30], [34, 56]] as const) {
+      b(out, [inner, y0, d], [outer, y1, d + 0.5], WOOD_LT);
+      b(out, [inner + s * 1.4, y0 + 1.4, d + 0.5], [outer - s * 1.4, y1 - 1.4, d + 0.8], WOOD);
+    }
+    // Iron straps across the leaf, studded.
+    for (const y of [12, 46]) {
+      b(out, [x0 + s * 0.4, y, d], [x1 - s * 0.4, y + 1.6, d + 0.9], IRON);
+      for (let i = 0; i < 4; i++) {
+        const sx = s * (4 + i * ((x - 8) / 3));
+        b(out, [sx - 0.5, y + 0.3, d + 0.9], [sx + 0.5, y + 1.3, d + 1.3], GOLD);
+      }
+    }
+    // Gold ring knocker on a boss, near the seam.
+    c(out, s * 5, d + 1, 1.4, 0.5, 31, 34, GOLD);
+    b(out, [s * 3.8, 26, d + 1], [s * 6.2, 27, d + 1.6], GOLD);
+    b(out, [s * 3.6, 27, d + 1], [s * 4.2, 31, d + 1.6], GOLD);
+    b(out, [s * 5.8, 27, d + 1], [s * 6.4, 31, d + 1.6], GOLD);
+  }
+  // The dark seam where the leaves meet.
+  b(out, [-0.6, 0.8, z], [0.6, top - 1.6, d - 0.2], IRON);
+}
+
 function tower(out: Out, x: number, z: number): void {
   const h = 128;
   c(out, x, z, 9, 9, 0, h, STONE);
@@ -108,6 +152,7 @@ export function courthouseBoxes(): Out {
     b(out, [s * (DOOR.x + 0.2), 0, zf + 2.4], [s * (DOOR.x + 1.6), DOOR.top + 12, zf + 3.2], GOLD);
   }
   b(out, [-DOOR.x, DOOR.top, zf - 5], [DOOR.x, DOOR.top + 2, zf + 2.4], GOLD);
+  streetDoors(out, LOBBY.z1 + 1);
   // The fanlight sits on the lobby wall's outer face, at the back of the recess.
   b(out, [-DOOR.x + 2, DOOR.top + 2, zf - 0.6], [DOOR.x - 2, DOOR.top + 12, zf + 0.2], LANTERN, 0.6);
   for (let x = -DOOR.x + 8; x < DOOR.x - 4; x += 8) b(out, [x - 0.5, DOOR.top + 2, zf + 0.2], [x + 0.5, DOOR.top + 12, zf + 0.8], GOLD);
