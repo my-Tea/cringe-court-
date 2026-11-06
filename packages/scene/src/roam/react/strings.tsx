@@ -1,6 +1,7 @@
 // i18n-ignore: this table is the package's English default copy; hosts translate via RoamStrings.
 import { createContext, useContext, type ReactNode } from 'react';
 import type { ExhibitCard } from '../dialogue';
+import type { PerspectiveChoice } from '../perspective';
 import type { QualityLevel } from '../quality';
 import type { BeatId, ZoneId } from '../types';
 
@@ -46,6 +47,8 @@ export interface RoamStrings {
   pauseResume: string;
   pauseBackToLobby: string;
   pauseGraphicsQuality: string;
+  pausePerspective: string;
+  perspectiveLabel: (choice: PerspectiveChoice) => string;
   qualityLevel: (level: QualityLevel) => string;
   /** Note shown after auto quality steps down. */
   autoQualityNote: (level: QualityLevel) => string;
@@ -166,6 +169,8 @@ export const DEFAULT_ROAM_STRINGS: RoamStrings = {
   pauseResume: 'Resume',
   pauseBackToLobby: 'Back to the lobby',
   pauseGraphicsQuality: 'Graphics quality',
+  pausePerspective: 'Perspective',
+  perspectiveLabel: (choice) => (choice === 'first' ? 'First person' : 'Auto · third person'),
   qualityLevel: capitalise,
   autoQualityNote: (level) => `Quality lowered to ${level} to keep the frame rate up.`,
   pauseChunkyPixels: 'Chunky pixels (low-res render)',
