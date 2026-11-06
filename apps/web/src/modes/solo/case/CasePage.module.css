@@ -80,6 +80,8 @@
 
 .trial {
   display: grid;
+  /* B15: scrolled into view (focus, links, scripts), the heading clears the sticky header (4rem bar + its top gap). */
+  scroll-margin-top: calc(4rem + var(--cc-space-2) + var(--cc-space-6));
 }
 
 /* B15: whatever scrolls a section into view (focus, a link, the browser) keeps

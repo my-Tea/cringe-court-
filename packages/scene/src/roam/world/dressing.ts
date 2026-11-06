@@ -7,27 +7,28 @@
  */
 import type { Box } from '../../courtroom/geometry';
 import { box } from './boxes';
+import { C } from '../palette';
 
 /** A box that glows (unlit, emissive) in the roam renderer. */
 export interface GlowBox extends Box {
   glow: number;
 }
 
-const WOOD = '#8B5E2A';
-const WOOD_LT = '#B77D3A';
-const WOOD_DK = '#4A3A32';
-const GOLD = '#D9A046';
-const GOLD_LT = '#F6C75B';
-const PARCH = '#FFF2C7';
-const CREAM = '#FFF9ED';
-const MAROON = '#7A1C2E';
-const RED = '#A32D3F';
-const BLUE = '#4D7CC5';
-const TEAL = '#3F8FA8';
-const SKY = '#BFD7F5';
-const LEAF = '#3E7F50';
-const LEAF_LT = '#6EBF73';
-const SEA = '#3F8FA8';
+const WOOD = C.gold900;
+const WOOD_LT = C.gold700;
+const WOOD_DK = C.neutral900;
+const GOLD = C.gold500;
+const GOLD_LT = C.gold300;
+const PARCH = C.gold100;
+const CREAM = C.neutral100;
+const MAROON = C.royal900;
+const RED = C.royal700;
+const BLUE = C.blue700;
+const TEAL = C.teal700;
+const SKY = C.blue300;
+const LEAF = C.green700;
+const LEAF_LT = C.green500;
+const SEA = C.teal700;
 
 /** 3×5 pixel glyphs, rows top to bottom. */
 const GLYPHS: Readonly<Record<string, readonly string[]>> = {
@@ -55,6 +56,9 @@ export const EXHIBITS: readonly ExhibitPlacement[] = [
 
 /** Where the defendant's chair stands (in front of the defence desk, facing the bench). */
 export const DEFENDANT_CHAIR = { x: 56, z: -2, seat: 10 } as const;
+
+/** The filer's chair at the prosecution table (Versus Side A), clear of the ballot box and the plant. */
+export const PROSECUTION_CHAIR = { x: -44, z: -2, seat: 10 } as const;
 
 /** A closed folder lying flat, label facing up (+Y), with its letter in pixel type. */
 function folder(out: Box[], cx: number, y: number, cz: number, color: string, letter: string | null, tilt = 0): void {
@@ -112,9 +116,8 @@ function deskProps(out: Box[], cx: number, cz: number, mirror: 1 | -1): void {
   out.push(box([cx + 1 * mirror - 0.3, y + 2.6, cz - 3.4], [cx + 1 * mirror + 0.3, y + 5, cz - 2.8], WOOD_DK));
 }
 
-/** The defendant's chair: low, wooden, very much the hot seat. */
-function defendantChair(out: Box[]): void {
-  const { x, z, seat } = DEFENDANT_CHAIR;
+/** A party's chair: low, wooden, very much the hot seat. */
+function partyChair(out: Box[], { x, z, seat }: { x: number; z: number; seat: number }): void {
   for (const [dx, dz] of [
     [-4, -3.5],
     [3, -3.5],
@@ -224,7 +227,8 @@ export function dressingBoxes(): Box[] {
   evidenceTable(out);
   deskProps(out, -56, -22, -1);
   deskProps(out, 56, -22, 1);
-  defendantChair(out);
+  partyChair(out, DEFENDANT_CHAIR);
+  partyChair(out, PROSECUTION_CHAIR);
   plant(out, -85, -1);
   plant(out, -62, 7.5);
   globe(out, -66, -56);

@@ -416,7 +416,7 @@ describe('Versus: the trial in the roaming courtroom', () => {
     expect(screen.queryByRole('region', { name: /^Courtroom/ })).not.toBeInTheDocument();
     const props = roamSeen.at(-1)!;
     expect(props.role).toBe('juror');
-    expect(props.spawn).toBe('jury-view');
+    expect(props.spawn).toBe('jury-box');
     expect(props.avatar).toMatchObject({ model: 'creator', name: 'juror' });
     expect(props.beats.length).toBeGreaterThan(2);
     expect(props.beats.some((b) => b.id === 'verdict')).toBe(false);
@@ -424,7 +424,7 @@ describe('Versus: the trial in the roaming courtroom', () => {
     await waitFor(() => expect(screen.queryByTestId('roam-stub')).not.toBeInTheDocument());
   });
 
-  it('seats a party at the defendant table and ends the replay with a verdict beat', async () => {
+  it('seats Side A at the prosecution table (the filer’s side) and ends the replay with a verdict beat', async () => {
     const t = court();
     const { trialId } = await toVerdict(t);
     const user = userEvent.setup();
@@ -435,7 +435,7 @@ describe('Versus: the trial in the roaming courtroom', () => {
     expect(await screen.findByTestId('roam-stub')).toBeInTheDocument();
     const props = roamSeen.at(-1)!;
     expect(props.role).toBe('side-a');
-    expect(props.spawn).toBe('defendant');
+    expect(props.spawn).toBe('prosecution');
     expect(props.beats.at(-1)!.id).toBe('verdict');
   });
 });
