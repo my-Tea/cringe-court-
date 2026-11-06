@@ -48,8 +48,18 @@ export function useArcWallet() {
 
   const connect = useCallback(async (): Promise<Hex | null> => {
     const a = (await appLedger().connect?.()) ?? null;
-    if (a) set({ account: a, balance: null });
+    if (a && a !== state.account) set({ account: a, balance: null });
     return a;
+  }, []);
+
+  // Switching account in MetaMask must never leave the page signing for the old one.
+  useEffect(() => {
+    const provider = (window as unknown as { ethereum?: { on?: (e: string, f: () => void) => void; removeListener?: (e: string, f: () => void) => void } }).ethereum;
+    const changed = () => {
+      void appLedger().connect?.({ silent: true }).then((a) => set({ account: a ?? null, balance: null }));
+    };
+    provider?.on?.('accountsChanged', changed);
+    return () => provider?.removeListener?.('accountsChanged', changed);
   }, []);
 
   return { account, balance, connect, refresh: readBalance, hasWallet: appLedger().hasWallet?.() ?? false };

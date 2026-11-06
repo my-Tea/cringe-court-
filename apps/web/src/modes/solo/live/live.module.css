@@ -258,6 +258,14 @@
 
 .benchFull {
   background: var(--cc-royal-700);
+  animation: seatIn var(--cc-duration-slow) var(--cc-ease-enter) both;
+}
+
+@keyframes seatIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.8);
+  }
 }
 
 @keyframes arrive {
@@ -307,7 +315,8 @@
   .lawyerInFlip,
   .vsMark,
   .summonLine,
-  .benchEmpty {
+  .benchEmpty,
+  .benchFull {
     animation: none;
   }
 }

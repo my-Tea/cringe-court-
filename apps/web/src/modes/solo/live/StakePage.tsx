@@ -105,6 +105,8 @@ export function StakePage() {
   const stake = () =>
     attempt(async () => {
       if (!chosen) return;
+      // A remembered address is not permission: MetaMask must authorize this site and be on Arc right now.
+      if (!(await wallet.connect())) return;
       const { caseNumber, receipt } = await ledger.port.fileSoloJury({ title: draft.title, contentHash: confessionHash(draft), jurors, price: chosen.price });
       writeCase(String(caseNumber), { ...draft, txHash: receipt.hash, explorerUrl: receipt.explorerUrl, jurors });
       navigate(soloPaths.trial(caseNumber));
@@ -127,6 +129,7 @@ export function StakePage() {
         loading={busy}
         onClick={() =>
           void attempt(async () => {
+            if (!(await wallet.connect())) return;
             await attestOnArc(wallet.account!);
             await readLevel();
           })

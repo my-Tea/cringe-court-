@@ -62,7 +62,8 @@ export function ArcDocketPage() {
     setError(null);
     setReceipt(null);
     try {
-      const account: Hex | null = wallet.account ?? (await wallet.connect());
+      // A remembered address is not permission: MetaMask must authorize this site and be on Arc right now.
+      const account: Hex | null = await wallet.connect();
       if (!account) return;
       const paid = await ledger.port.fund(caseNumber, amount);
       setReceipt({ amount, url: paid.explorerUrl });
