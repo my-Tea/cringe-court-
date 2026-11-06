@@ -1,0 +1,120 @@
+{
+  "note": "Anonymous per-case defendant stand-in: hooded/masked voxel bust, no face, never the Creator's look. Plum background, 64px base, @2x = 128px, _32 = 32px. The 32px charges_filed uses a stamped slab, not legible text. stamp_impact_* exist at 64 and @2x only.",
+  "poses": [
+    "neutral",
+    "smug",
+    "shocked",
+    "defeated",
+    "slump",
+    "celebrate"
+  ],
+  "expressionNotes": "No face: bag = eye-hole shape + marker mouth; censor = mosaic bar tilt + glint mouth; hood = glint-eye shapes. Marks: shocked \"!\", smug sparkle, defeated/slump sweat, celebrate confetti + raised arms. defeated = head dips; slump = head hangs, arms down.",
+  "files": {
+    "pose": "<set>/<pose>{,@2x,_32}.png",
+    "composite": "<set>/charges_filed{,@2x,_32}.png",
+    "stampSequence": "<set>/stamp_impact_{0..3}{,@2x}.png (0 pop-in, 1 stamp hovers dithered, 2 impact + burst + portrait jolt, 3 settled == charges_filed)"
+  },
+  "parameters": {
+    "mask": [
+      "bag",
+      "censor",
+      "hood"
+    ],
+    "accent": {
+      "burgundy": "#6E1B2A",
+      "magenta": "#74184F",
+      "nearblack": "#2E2438",
+      "mustard": "#A97C2A",
+      "plum": "#4B2A6B"
+    },
+    "glint": {
+      "gold": "#F6C75B",
+      "cyan": "#A8F0F8",
+      "white": "#FFFFFF"
+    },
+    "tagBits": "6-bit booking-tag barcode on the chest"
+  },
+  "caseIdToVariant": "variantForCase(caseId) in defendant-vox.mjs: seed = FNV-1a 32-bit of String(caseId) (code points); rnd = mulberry32(seed); draws in order: mask = MASKS[floor(rnd()*3)], accent = keys(ACCENTS)[floor(rnd()*5)], glint = keys(GLINTS)[floor(rnd()*3)], tagBits = 6 × (rnd()<0.5?0:1) (forced bit0=1 if all zero). Pure/deterministic; pass the same caseId to get the same stand-in. CLI: node export-defendant.mjs <caseId...> writes dist/characters/defendant/case-<id>/.",
+  "sets": [
+    {
+      "name": "stock-bag",
+      "dir": "stock-bag/",
+      "caseId": null,
+      "mask": "bag",
+      "accent": "burgundy",
+      "glint": "gold",
+      "tagBits": [
+        1,
+        0,
+        1,
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "stock-censor",
+      "dir": "stock-censor/",
+      "caseId": null,
+      "mask": "censor",
+      "accent": "nearblack",
+      "glint": "cyan",
+      "tagBits": [
+        1,
+        1,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "stock-hood",
+      "dir": "stock-hood/",
+      "caseId": null,
+      "mask": "hood",
+      "accent": "magenta",
+      "glint": "gold",
+      "tagBits": [
+        0,
+        1,
+        1,
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "case-sample-0001",
+      "dir": "case-sample-0001/",
+      "caseId": "case-0001",
+      "mask": "bag",
+      "accent": "nearblack",
+      "glint": "gold",
+      "tagBits": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "case-sample-0002",
+      "dir": "case-sample-0002/",
+      "caseId": "case-0002",
+      "mask": "bag",
+      "accent": "burgundy",
+      "glint": "cyan",
+      "tagBits": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0
+      ]
+    }
+  ]
+}
