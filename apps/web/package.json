@@ -16,7 +16,7 @@
     "@cringe-court/audio": "*",
     "@cringe-court/core": "*",
     "@cringe-court/engine": "*",
-    "@cringe-court/modes-solo": "*",
+    "@cringe-court/modes-grand-jury": "*",
     "@cringe-court/scene": "*",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
