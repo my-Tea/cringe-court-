@@ -298,14 +298,10 @@ export const shell = {
 
   // ── identity (World ID)
   'worldId.title': 'Verify with World ID',
-  'worldId.description': 'Open World App and approve the request. The court never learns who you are.',
-  'worldId.open': 'Open in World App',
-  'worldId.copy': 'Copy link',
-  'worldId.copied': 'Link copied',
-  'worldId.copyFailed.title': 'Could not copy',
-  'worldId.copyFailed.body': 'Select the link above and copy it by hand.',
+  'worldId.description': 'Scan with your phone and approve in World App. The court never learns who you are.',
+  'worldId.qr': 'QR code. Scan it with your phone to open World App.',
+  'worldId.open': 'On your phone? Open World App',
   'worldId.waiting': 'Waiting for World App…',
-  'worldId.note': 'Honest note: this build does not render a QR code. On a computer, send the link to your phone and open it in World App.',
   'identity.world.label': 'World ID',
   'identity.world.detail': 'World ID · {appId} · verifier backend {host}',
   'identity.mock.label': 'Mock World ID',

@@ -1,26 +1,23 @@
 .body {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--cc-space-4);
 }
 
-.link {
-  margin: 0;
-  padding: var(--cc-space-3);
-  border: 2px solid var(--cc-color-border-strong);
-  border-radius: var(--cc-radius-xs);
-  background: var(--cc-color-surface-sunken);
-  color: var(--cc-color-text);
-  font-family: var(--cc-font-mono);
-  font-size: var(--cc-text-sm);
-  overflow-wrap: anywhere;
-  user-select: all;
+.qr {
+  display: grid;
+  place-items: center;
+  min-height: 15rem;
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cc-space-2);
+.qr img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 2px solid var(--cc-color-border-strong);
+  border-radius: var(--cc-radius-xs);
+  image-rendering: pixelated;
 }
 
 .status {
@@ -29,11 +26,5 @@
   gap: var(--cc-space-2);
   margin: 0;
   color: var(--cc-color-text-muted);
-  font-size: var(--cc-text-sm);
-}
-
-.note {
-  margin: 0;
-  color: var(--cc-color-text-subtle);
   font-size: var(--cc-text-sm);
 }

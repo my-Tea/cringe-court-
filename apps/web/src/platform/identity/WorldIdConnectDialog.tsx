@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { Alert, Dialog, DialogContent, PaperButton, Spinner } from '@/ds';
+import { toDataURL } from 'qrcode';
+import { useEffect, useState } from 'react';
+import { Dialog, DialogContent, PaperButton, Spinner } from '@/ds';
 import { t } from '@/i18n';
+import { QR_COLORS } from './qr.tokens';
 import styles from './WorldIdConnectDialog.module.css';
 
 export interface WorldIdConnectDialogProps {
@@ -9,20 +11,25 @@ export interface WorldIdConnectDialogProps {
   onCancel: () => void;
 }
 
-/** Shows the World App link while IDKit waits for the user to approve. No QR code is rendered in this build. */
+const QR_PX = 240;
+
+/** Shows the World App link as a QR code while IDKit waits for the user to approve on their phone. */
 export function WorldIdConnectDialog({ uri, onCancel }: WorldIdConnectDialogProps) {
-  const [result, setResult] = useState<{ uri: string; state: 'done' | 'failed' } | null>(null);
-  const copied = result && result.uri === uri ? result.state : 'idle';
-  const setCopied = (state: 'done' | 'failed') => uri && setResult({ uri, state });
-  const copy = async () => {
+  const [drawn, setDrawn] = useState<{ uri: string; image: string } | null>(null);
+  const qr = drawn && drawn.uri === uri ? drawn.image : null;
+
+  useEffect(() => {
     if (!uri) return;
-    try {
-      await navigator.clipboard.writeText(uri);
-      setCopied('done');
-    } catch {
-      setCopied('failed');
-    }
-  };
+    let live = true;
+    // Twice the shown size, so the code stays sharp on a high-density screen.
+    void toDataURL(uri, { width: QR_PX * 2, margin: 2, errorCorrectionLevel: 'M', color: QR_COLORS }).then((image) => {
+      if (live) setDrawn({ uri, image });
+    });
+    return () => {
+      live = false;
+    };
+  }, [uri]);
+
   return (
     <Dialog open={uri !== null} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent
@@ -36,26 +43,17 @@ export function WorldIdConnectDialog({ uri, onCancel }: WorldIdConnectDialogProp
         }
       >
         <div className={styles.body}>
-          <div className={styles.actions}>
-            {uri && (
-              <PaperButton onClick={() => window.open(uri, '_blank', 'noopener,noreferrer')}>{t('shell.worldId.open')}</PaperButton>
-            )}
-            <PaperButton variant="ghost" onClick={copy}>
-              {copied === 'done' ? t('shell.worldId.copied') : t('shell.worldId.copy')}
-            </PaperButton>
+          <div className={styles.qr}>
+            {qr ? <img src={qr} alt={t('shell.worldId.qr')} width={QR_PX} height={QR_PX} /> : <Spinner label={t('shell.worldId.waiting')} />}
           </div>
-          <p className={styles.link} data-testid="world-id-link">
-            {uri}
-          </p>
-          {copied === 'failed' && (
-            <Alert tone="warning" title={t('shell.worldId.copyFailed.title')} live="polite">
-              {t('shell.worldId.copyFailed.body')}
-            </Alert>
-          )}
           <p className={styles.status} role="status">
             <Spinner size="sm" label={null} /> {t('shell.worldId.waiting')}
           </p>
-          <p className={styles.note}>{t('shell.worldId.note')}</p>
+          {uri && (
+            <PaperButton variant="ghost" onClick={() => window.open(uri, '_blank', 'noopener,noreferrer')}>
+              {t('shell.worldId.open')}
+            </PaperButton>
+          )}
         </div>
       </DialogContent>
     </Dialog>
