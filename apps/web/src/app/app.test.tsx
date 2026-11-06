@@ -48,7 +48,9 @@ describe('app shell', () => {
     renderAt(path);
     expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
     expect(screen.getByText(ballot)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Filing opens soon/ })).toHaveAttribute('aria-disabled', 'true');
+    // Solo is playable (demo court); the other modes still show the disabled button until their tracks land.
+    if (path === '/solo') expect(screen.getByRole('link', { name: /File a confession/ })).toHaveAttribute('href', '/solo/file');
+    else expect(screen.getByRole('button', { name: /Filing opens soon/ })).toHaveAttribute('aria-disabled', 'true');
     expect(document.title).toBe(`${title} · CringeCourt`);
   });
 
