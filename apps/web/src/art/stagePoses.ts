@@ -34,6 +34,15 @@ export const STAGE_POSES = [
   ['creator', 'crying'],
   ['creator', 'happy'],
   ['creator', 'defeated'],
+  // Versus courtroom (src/modes/versus): both agents argue, react and take the verdict; the judge rules.
+  ['side-a', 'objection'],
+  ['side-a', 'happy'],
+  ['side-a', 'defeated'],
+  ['side-b', 'talking'],
+  ['side-b', 'happy'],
+  ['side-b', 'defeated'],
+  ['judge', 'objection'],
+  ['juror', 'seated'],
 ] as const satisfies ReadonlyArray<readonly [CharacterId, Pose]>;
 
 export type StagePose = (typeof STAGE_POSES)[number];

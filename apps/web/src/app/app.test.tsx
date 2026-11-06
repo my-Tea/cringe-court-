@@ -1,6 +1,4 @@
 import { render, screen, within } from '@testing-library/react';
-import type { ModeId } from '@cringe-court/core';
-import { webModes } from '@/modes/registry';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { axe } from 'vitest-axe';
@@ -53,17 +51,24 @@ describe('app shell', () => {
 
   it.each([
     ['/solo', 'Solo Court', 'GUILTY / NOT COOKED'],
-    ['/versus', 'Versus Court', 'SIDE A / SIDE B'],
     ['/grand-jury', 'Grand Jury', 'FOR / AGAINST'],
   ])('%s renders its mode page with ballot and a disabled filing button', async (path, title, ballot) => {
     renderAt(path);
     expect(await screen.findByRole('heading', { level: 1, name: title })).toBeInTheDocument();
     expect(screen.getByText(ballot)).toBeInTheDocument();
-    // A mode whose track has landed links to its play flow; the rest show the disabled button.
-    const landing = webModes.get(path.slice(1) as ModeId)?.landing;
-    if (landing) expect(screen.getByRole('link', { name: new RegExp(landing.label) })).toHaveAttribute('href', landing.to);
+    // Solo is playable (demo court); the other modes still show the disabled button until their tracks land.
+    if (path === '/solo') expect(screen.getByRole('link', { name: /File a confession/ })).toHaveAttribute('href', '/solo/file');
     else expect(screen.getByRole('button', { name: /Filing opens soon/ })).toHaveAttribute('aria-disabled', 'true');
     expect(document.title).toBe(`${title} · CringeCourt`);
+  });
+
+  it('/versus renders its mode page with ballot and the live filing calls to action', async () => {
+    renderAt('/versus');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Versus Court' })).toBeInTheDocument();
+    expect(screen.getByText('SIDE A / SIDE B')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Start a Versus case/ })).toHaveAttribute('href', '/versus/new');
+    expect(screen.getByRole('link', { name: /I have an invite code/ })).toHaveAttribute('href', '/versus/join');
+    expect(screen.queryByRole('button', { name: /Filing opens soon/ })).not.toBeInTheDocument();
   });
 
   it('marks the current nav item and navigates client-side, moving focus to main', async () => {
