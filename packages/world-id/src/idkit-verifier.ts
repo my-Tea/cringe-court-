@@ -1,3 +1,4 @@
+import { hashSignal } from '@worldcoin/idkit-core/hashing';
 import { deriveHumanId } from './human-id.js';
 import { levelFromCredential } from './level.js';
 import {
@@ -16,8 +17,10 @@ export interface IdkitVerifierOptions {
   /** Minimum level to accept. Default NONE (any verified credential). Jurors: ORB. */
   minLevel?: IdentityLevel;
   fetch?: typeof fetch;
-  /** Default https://developer.worldcoin.org/api/v4/verify */
+  /** Default https://developer.world.org/api/v4/verify */
   endpoint?: string;
+  /** Sent with the proof. Staging for the simulator, production for World App. */
+  environment?: 'staging' | 'production';
   timeoutMs?: number;
   /** ms clock, default Date.now */
   now?: () => number;
@@ -25,13 +28,14 @@ export interface IdkitVerifierOptions {
 
 export { levelFromCredential };
 
-export const DEFAULT_VERIFY_ENDPOINT = 'https://developer.worldcoin.org/api/v4/verify';
+export const DEFAULT_VERIFY_ENDPOINT = 'https://developer.world.org/api/v4/verify';
 
 const CODE_MAP: Array<[RegExp, FailureReason]> = [
   [/max_verifications|nullifier_replayed|already_verified|already_exists|duplicate_nonce/, 'already_verified'],
   [/user_rejected|cancel|verification_rejected/, 'cancelled'],
   [/expired|timestamp_too_old|timestamp_too_far|invalid_timestamp/, 'expired'],
-  [/credential_unavailable|identity_attributes_not_matched/, 'ineligible_level'],
+  [/credential_unavailable|identity_attributes_not_matched|world_id_4_not_available/, 'ineligible_level'],
+  [/all_verifications_failed|app_not_migrated/, 'invalid_proof'],
   [/action/, 'wrong_action'],
 ];
 
@@ -107,7 +111,7 @@ export class IdkitVerifier implements IdentityVerifier {
       res = await doFetch(`${this.o.endpoint}/${this.o.rpId}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(proof),
+        body: JSON.stringify(this.o.environment ? { ...proof, environment: this.o.environment } : proof),
         signal: ctl.signal,
       });
       bodyText = await res.text();
@@ -128,7 +132,7 @@ export class IdkitVerifier implements IdentityVerifier {
 
     if (!res.ok || !isRecord(body) || body.success !== true) {
       if (res.ok && !isRecord(body)) return fail('malformed', 'Verification service returned an unreadable response.');
-      const code = isRecord(body) ? [body.code, body.error, body.attribute].find((x) => typeof x === 'string') : undefined;
+      const code = isRecord(body) ? failureCode(body) : undefined;
       const reason = typeof code === 'string' ? reasonFromCode(code) : 'invalid_proof';
       const msg = reason === 'already_verified' ? 'This person has already verified for this action.' : 'The proof was rejected.';
       return fail(reason, msg);
@@ -138,6 +142,15 @@ export class IdkitVerifier implements IdentityVerifier {
     if (typeof body.action === 'string' && body.action !== this.o.action) {
       return fail('wrong_action', 'Verified action does not match this app.');
     }
+    if (req.signal && !signalMatches(req.signal, proof, body)) {
+      return fail('invalid_proof', 'This proof was made for a different wallet.');
+    }
+
+    const portalNullifier = nullifierFromPortal(body);
+    if (portalNullifier && portalNullifier !== found.nullifier) {
+      return fail('invalid_proof', 'The verification service reported a different person.');
+    }
+    const nullifier = portalNullifier ?? found.nullifier;
 
     if (found.level < this.o.minLevel) {
       return fail('ineligible_level', 'This credential is not strong enough for this role.');
@@ -145,7 +158,7 @@ export class IdkitVerifier implements IdentityVerifier {
 
     let humanId: `0x${string}`;
     try {
-      humanId = deriveHumanId(found.nullifier, this.o.pepper);
+      humanId = deriveHumanId(nullifier, this.o.pepper);
     } catch {
       return fail('malformed', 'Proof nullifier is not in a recognised format.');
     }
@@ -157,4 +170,40 @@ export class IdkitVerifier implements IdentityVerifier {
       verifiedAt: Math.floor((this.o.now ?? Date.now)() / 1000),
     };
   }
+}
+
+function failureCode(body: Record<string, unknown>): string | undefined {
+  const direct = [body.code, body.error, body.attribute].find((x) => typeof x === 'string');
+  if (typeof direct === 'string') return direct;
+  if (!Array.isArray(body.results)) return undefined;
+  for (const row of body.results) {
+    if (!isRecord(row)) continue;
+    const code = [row.code, row.error, row.attribute].find((x) => typeof x === 'string');
+    if (typeof code === 'string') return code;
+  }
+  return undefined;
+}
+
+function nullifierFromPortal(body: Record<string, unknown>): string | undefined {
+  if (typeof body.nullifier === 'string') return body.nullifier;
+  if (!Array.isArray(body.results)) return undefined;
+  for (const row of body.results) {
+    if (isRecord(row) && typeof row.nullifier === 'string') return row.nullifier;
+  }
+  return undefined;
+}
+
+/** Every signal hash in the proof and the portal reply must be this wallet's. */
+function signalMatches(signal: string, proof: Record<string, unknown>, body: Record<string, unknown>): boolean {
+  const want = hashSignal(signal).toLowerCase();
+  const hashes: string[] = [];
+  const collect = (node: unknown) => {
+    if (!isRecord(node)) return;
+    if (typeof node.signal_hash === 'string') hashes.push(node.signal_hash);
+    if (Array.isArray(node.responses)) node.responses.forEach(collect);
+    if (Array.isArray(node.results)) node.results.forEach(collect);
+  };
+  collect(proof);
+  collect(body);
+  return hashes.length > 0 && hashes.every((h) => h.toLowerCase() === want);
 }

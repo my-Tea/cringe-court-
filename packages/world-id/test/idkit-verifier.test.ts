@@ -1,3 +1,4 @@
+import { hashSignal } from '@worldcoin/idkit-core/hashing';
 import { describe, expect, it } from 'vitest';
 import { IdentityLevel, IdkitVerifier, deriveHumanId } from '../src/index.js';
 
@@ -36,7 +37,7 @@ describe('IdkitVerifier', () => {
       verifiedAt: 5000,
     });
     expect(calls).toHaveLength(1);
-    expect(calls[0]!.url).toBe('https://developer.worldcoin.org/api/v4/verify/rp_test');
+    expect(calls[0]!.url).toBe('https://developer.world.org/api/v4/verify/rp_test');
     expect(calls[0]!.init.method).toBe('POST');
     expect(JSON.parse(calls[0]!.init.body as string)).toEqual(p);
     expect(JSON.stringify(r)).not.toContain('987654321');
@@ -96,5 +97,27 @@ describe('IdkitVerifier', () => {
   it('maps client-forwarded cancellation', async () => {
     const { v } = make(() => json(200, { success: true }));
     expect(await v.verify(req({ error: 'user_rejected' }))).toMatchObject({ reason: 'cancelled' });
+  });
+  it('forwards the environment and keeps a matching wallet signal', async () => {
+    const signal = `wallet:${WALLET}`;
+    const p = { ...proofOf(), responses: [{ ...proofOf().responses[0], signal_hash: hashSignal(signal) }] };
+    const { v, calls } = make(() => json(200, { success: true, nullifier: '987654321' }), { environment: 'staging' });
+    const r = await v.verify({ ...req(p), signal });
+    expect(r).toMatchObject({ ok: true, humanId: deriveHumanId('987654321', PEPPER) });
+    expect(JSON.parse(calls[0]!.init.body as string)).toMatchObject({ environment: 'staging' });
+  });
+  it('rejects a proof bound to a different wallet', async () => {
+    const p = { ...proofOf(), responses: [{ ...proofOf().responses[0], signal_hash: hashSignal('wallet:0xother') }] };
+    const { v } = make(() => json(200, { success: true }));
+    const r = await v.verify({ ...req(p), signal: `wallet:${WALLET}` });
+    expect(r).toMatchObject({ ok: false, reason: 'invalid_proof' });
+  });
+  it('rejects a portal nullifier that disagrees with the client proof', async () => {
+    const { v } = make(() => json(200, { success: true, nullifier: '111' }));
+    expect(await v.verify(req(proofOf()))).toMatchObject({ ok: false, reason: 'invalid_proof' });
+  });
+  it('reads a failure code from results[]', async () => {
+    const { v } = make(() => json(200, { success: false, results: [{ code: 'all_verifications_failed' }] }));
+    expect(await v.verify(req(proofOf()))).toMatchObject({ ok: false, reason: 'invalid_proof' });
   });
 });
