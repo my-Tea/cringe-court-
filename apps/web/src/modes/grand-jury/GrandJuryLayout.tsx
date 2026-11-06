@@ -4,6 +4,8 @@ import { NavLink, Outlet } from 'react-router';
 import { t, type MessageKey } from '@/i18n';
 import { Badge, Button, ErrorState, Icon, LoadingState, Tooltip, cx, useToast } from '@/ds';
 import { BackendGate, useBackendLink, type BackendClient } from '@/platform/backend';
+import { appLedger } from '@/platform/ledger';
+import { ArcWalletChip } from './components/ArcWalletChip';
 import { paths } from './lib';
 import { useCourtContext } from './state/context';
 import { CourtProvider } from './state/CourtProvider';
@@ -45,12 +47,13 @@ function WalletChip() {
 }
 
 function CourtBar() {
+  const arc = appLedger().kind === 'arc-testnet';
   return (
     <div className={styles.courtBar}>
       <div className={styles.courtBarInner}>
         <nav aria-label={t('grandJury.layout.nav.label')} className={styles.subNav}>
           <ul role="list">
-            {NAV.map((n) => (
+            {NAV.filter((n) => !arc || n.to !== paths.duty).map((n) => (
               <li key={n.to}>
                 <NavLink to={n.to} className={({ isActive }) => cx(styles.subNavLink, isActive && styles.subNavActive)}>
                   <Icon name={n.icon} /> {t(n.label)}
@@ -59,7 +62,7 @@ function CourtBar() {
             ))}
           </ul>
         </nav>
-        <WalletChip />
+        {arc ? <ArcWalletChip /> : <WalletChip />}
       </div>
     </div>
   );
@@ -116,7 +119,7 @@ function GrandJuryCourt({ client }: { client: BackendClient | null }) {
         }
       >
         <CourtBar />
-        <CourtRibbon client={client} />
+        {appLedger().kind === 'arc-testnet' ? null : <CourtRibbon client={client} />}
         <Outlet />
       </CourtProvider>
     </div>

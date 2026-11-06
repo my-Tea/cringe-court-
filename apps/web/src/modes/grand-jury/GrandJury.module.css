@@ -2162,3 +2162,58 @@
     transition: none !important;
   }
 }
+
+/* ── Live on Arc ───────────────────────────────────────────── */
+
+.arcDocket {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-4);
+  width: min(52rem, 100%);
+  margin-inline: auto;
+  padding-block: var(--cc-space-6);
+  text-align: center;
+}
+
+.arcCases {
+  display: grid;
+  gap: var(--cc-space-4);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arcCase {
+  display: grid;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-4);
+  text-align: start;
+  background: var(--cc-neutral-100);
+  border: 3px solid var(--cc-gold-700);
+}
+
+.arcCase h2,
+.arcCase p {
+  margin: 0;
+}
+
+.arcCase h2 {
+  font-family: var(--cc-font-display);
+}
+
+.arcCase progress {
+  width: 100%;
+  accent-color: var(--cc-royal-700);
+}
+
+.arcCaseNo {
+  font-family: var(--cc-font-display);
+  color: var(--cc-gold-900);
+}
+
+.arcChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+}

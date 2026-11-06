@@ -3,6 +3,7 @@ import { Navigate } from 'react-router';
 import { t } from '@/i18n';
 import type { WebModeModule } from '../registry';
 import { GrandJuryLayout } from './GrandJuryLayout';
+import { appLedger } from '@/platform/ledger';
 import { paths } from './lib';
 
 /**
@@ -29,7 +30,7 @@ const grandJury: WebModeModule = {
     {
       element: <GrandJuryLayout />,
       children: [
-        { path: 'docket', lazy: async () => ({ Component: (await import('./pages/DocketPage')).DocketPage }) },
+        { path: 'docket', lazy: async () => ({ Component: appLedger().kind === 'arc-testnet' ? (await import('./pages/ArcDocketPage')).ArcDocketPage : (await import('./pages/DocketPage')).DocketPage }) },
         { path: 'case/:caseNumber', lazy: async () => ({ Component: (await import('./pages/CasePage')).CasePage }) },
         { path: 'duty', lazy: async () => ({ Component: (await import('./pages/DutyPage')).DutyPage }) },
         { path: 'pricing', lazy: async () => ({ Component: (await import('./pages/PricingPage')).PricingPage }) },
