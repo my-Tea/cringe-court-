@@ -4,6 +4,8 @@ import { BODY, FIXED_DT, insideAny, overlaps, SolidIndex, stepBody, type BodySta
 import type { RoamWorld, Vec3 } from '../types';
 import { ROOM_SCALE } from '../scale';
 import { JURY_BOX, JURY_SLOTS, PLAYER_JURY_SLOT, zoneAt } from '../world';
+import { ISLANDS } from '../world/approach';
+import { GROUNDS, PLAZA_Y, STAIRS } from '../world/plaza';
 import { roamData } from './fixtures';
 
 let world: RoamWorld;
@@ -125,15 +127,80 @@ describe('roam world', () => {
     }
   });
 
-  it('walks off the plaza, up onto the porch, and around the fountain', () => {
+  it('walks down the grand staircase, around the fountain, and back up to the doors', () => {
     const b = body(world.spawns.outside.pos);
-    expect(b.pos[1]).toBeLessThan(-4);
-    const fountain = world.boxes.find((box) => box.m === '#3F8FA8' && box.f[1] < 0)!;
-    walkTo(b, (fountain.f[0] + fountain.t[0]) / 2, (fountain.f[2] + fountain.t[2]) / 2, 8);
-    expect(Math.abs(b.pos[0])).toBeGreaterThan(14 * ROOM_SCALE);
-    walkTo(b, b.pos[0], 160 * ROOM_SCALE, 20);
+    expect(b.pos[1]).toBeCloseTo(0, 1);
+    // Down the red runner to the sunken plaza.
+    walkTo(b, 0, (STAIRS.z0 + STAIRS.steps * STAIRS.run + 12) * ROOM_SCALE, 20);
+    expect(b.pos[1]).toBeLessThan(PLAZA_Y + 1);
+    // The fountain blocks the walk; the player slides off its rim.
+    walkTo(b, 0, 300 * ROOM_SCALE, 10);
+    expect(Math.abs(b.pos[2] - 300 * ROOM_SCALE)).toBeGreaterThan(14 * ROOM_SCALE);
+    // And back up the steps to the terrace in front of the doors.
+    walkTo(b, 0, (GROUNDS.z0 + 12) * ROOM_SCALE, 30);
     expect(b.pos[1]).toBeGreaterThan(-1);
     expect(zoneAt(world, b.pos[0], b.pos[2])?.id).toBe('outside');
+  });
+
+  describe('the arrival run', () => {
+    const gateSolids = () => (world.gates ?? []).map((g) => g.solid);
+    /** Waypoints from the arrival spawn to the courthouse doors, steering around the plinth, gates and fountain. */
+    const route = (): Array<[number, number]> => {
+      const A = ISLANDS.arrival;
+      const W = ISLANDS.wardrobe;
+      const T = ISLANDS.trials;
+      return [
+        [30, A.z1 - 30],
+        [30, A.z0 + 60],
+        [0, A.z0 + 46],
+        [0, W.z1 - 8],
+        [0, W.z0 + 8],
+        [0, T.z1 - 8],
+        [0, T.z0 + 40],
+        [0, T.z0 + 6],
+        [0, GROUNDS.z1 - 8],
+        [0, 345],
+        [30, 322],
+        [30, 278],
+        [0, 255],
+        [0, 222],
+        [0, GROUNDS.z0 + 14],
+      ].map(([x, z]) => [x! * ROOM_SCALE, z! * ROOM_SCALE] as [number, number]);
+    };
+
+    it('starts on the far island, in the identity shrine zone, below the plaza', () => {
+      const s = world.spawns.arrival;
+      expect(zoneAt(world, s.pos[0], s.pos[2])?.id).toBe('arrival');
+      expect(s.pos[2]).toBeGreaterThan(GROUNDS.z1 * ROOM_SCALE);
+      expect(world.interactables.filter((i) => i.kind === 'station').map((i) => i.station).sort()).toEqual(['mode:grand-jury', 'mode:solo', 'mode:versus', 'verify', 'wardrobe']);
+      expect(world.gates?.map((g) => g.id).sort()).toEqual(['trials', 'verify', 'wardrobe']);
+    });
+
+    it('a closed seal stops the player on the bridge', () => {
+      const sealed = new SolidIndex([...world.solids, ...gateSolids()]);
+      const b = body(world.spawns.arrival.pos);
+      for (const [x, z] of route().slice(0, 4)) {
+        for (let t = 0; t < 20; t += FIXED_DT) {
+          const dx = x - b.pos[0];
+          const dz = z - b.pos[2];
+          if (Math.hypot(dx, dz) < 1.5) break;
+          stepBody(b, { forward: 1, strafe: 0, sprint: false, jump: false }, Math.atan2(-dx, -dz), sealed, bounds);
+        }
+      }
+      expect(zoneAt(world, b.pos[0], b.pos[2])?.id).toBe('arrival');
+    });
+
+    it('with every seal open, walks from the shrine to the courthouse doors', () => {
+      const b = body(world.spawns.arrival.pos);
+      const zones = new Set<string>();
+      for (const [x, z] of route()) {
+        walkTo(b, x, z, 30);
+        zones.add(zoneAt(world, b.pos[0], b.pos[2])?.id ?? 'none');
+      }
+      expect([...zones]).toEqual(expect.arrayContaining(['arrival', 'wardrobe', 'trials', 'outside']));
+      expect(b.pos[2]).toBeLessThan((GROUNDS.z0 + 20) * ROOM_SCALE);
+      expect(b.pos[1]).toBeGreaterThan(-1);
+    });
   });
 
   it('a hop is a hop: no flying, no standing on furniture', () => {

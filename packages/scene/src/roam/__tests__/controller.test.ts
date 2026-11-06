@@ -76,6 +76,55 @@ describe('RoamController', () => {
     expect(c.paused).toBe(false);
   });
 
+  it('arrival run: a station opens its panel and holds the player; seals block the bridge until opened', () => {
+    const verify = world.interactables.find((i) => i.station === 'verify')!;
+    const at = verify.at;
+    const from: [number, number, number] = [at[0], -30, at[2] + 60];
+    const c = new RoamController(world, { spawn: { pos: from, yaw: 0, pitch: Math.atan2(at[1] - (from[1] + 44), 60) }, openGates: [] });
+    const events: RoamEvent[] = [];
+    c.subscribe((e) => events.push(e));
+    expect(c.openGates).toEqual([]);
+    c.update(1 / 60);
+    expect(c.snapshot().focus?.id).toBe('station:verify');
+    c.interact();
+    expect(c.snapshot().panel).toBe('verify');
+    expect(events).toContainEqual({ type: 'station', station: 'verify' });
+    const z = c.playerState().pos[2];
+    c.keyDown('KeyW');
+    run(c, 0.5);
+    expect(c.playerState().pos[2]).toBe(z);
+    c.keyUp('KeyW');
+    // Esc closes the panel (it does not pause).
+    c.keyDown('Escape');
+    expect(c.snapshot().panel).toBeNull();
+    expect(c.paused).toBe(false);
+
+    // The verify seal sits on the bridge north of the shrine: walk at it, stop; open it, walk through.
+    const seal = world.gates!.find((g) => g.id === 'verify')!.solid;
+    const sealZ = (seal.min[2] + seal.max[2]) / 2;
+    c.teleport({ pos: [0, -30, seal.max[2] + 40], yaw: 0, pitch: 0 });
+    c.keyDown('KeyW');
+    run(c, 3);
+    expect(c.playerState().pos[2]).toBeGreaterThan(seal.max[2]);
+    c.openGate('verify');
+    expect(c.isGateOpen('verify')).toBe(true);
+    expect(events).toContainEqual({ type: 'gate', gate: 'verify' });
+    run(c, 3);
+    expect(c.playerState().pos[2]).toBeLessThan(sealZ - 20);
+  });
+
+  it('a new avatar look is announced and becomes the player\'s avatar', () => {
+    const c = new RoamController(world, { spawn: 'arrival' });
+    const seen: RoamEvent[] = [];
+    c.subscribe((e) => seen.push(e));
+    const look = { skin: 2, hair: 'bun', hairColor: 1, outfit: 'robe', outfitColor: 7, accessory: 'crown', effect: 'halo' };
+    c.setAvatar({ ...c.avatar, look });
+    expect(c.playerState().avatar.look).toEqual(look);
+    expect(seen.some((e) => e.type === 'avatar')).toBe(true);
+    // Worlds entered past the run have every seal open by default.
+    expect(c.openGates.slice().sort()).toEqual(['trials', 'verify', 'wardrobe']);
+  });
+
   it('runs a beat: auto-seats at the defendant table, locks the camera on the speaker, then returns control', async () => {
     const audio = { id: 'recording', play: vi.fn() };
     const c = new RoamController(world, { spawn: 'lobby', audio });
