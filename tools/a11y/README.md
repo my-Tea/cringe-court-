@@ -19,3 +19,10 @@ node tools/a11y/tabseq.mjs http://localhost:4800 /grand-jury/case/107 45   # pri
 
 Set `CHROME=/path/to/chrome` if Chrome is elsewhere. Each kbflow run prints a JSON log
 (steps, roam walk/pause/toggle results, axe hits per state, console errors).
+
+**Timing caveat.** The Versus run drives three tabs in one headless window, and the
+demo court's deadlines are real minutes (30 min for jury selection). Under software
+WebGL on a busy machine, Chrome's background-tab throttling (or, with throttling
+off, three tabs rendering the 3D room) has stretched single steps to about 55
+minutes. That made the demo deadline lapse and the case end in NO VERDICT, which is
+the correct app behaviour. On an idle machine the whole run takes about 2 minutes.
