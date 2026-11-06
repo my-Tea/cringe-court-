@@ -10,6 +10,7 @@ Start here. Five guides, in the order a coding agent should read them.
 | 4 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 54 animations |
 | 5 | **`ASSET-COMPLETE.md`** | Final inventory + what remains (optional polish only) |
 | 6 | `GAP-ANALYSIS.md` | Historical: what the gaps were before they were filled |
+| 7 | `VILLAGE-DECISION.md` | Why the village set was cut, what stays, when to reopen |
 
 ## Machine-readable data
 
