@@ -136,26 +136,6 @@ Several variants share one silhouette so a jury reads as a group.
 Generate **6–8 colour variants** (cap and hoodie hue shifts) so three jurors in a
 box don't look cloned. Reactions matter more than detail here.
 
-**Seated pose (implemented, juror only):** `juror/poses/seated.png` (front) and
-`seated_threeq.png`, from `EXTRA_POSES.seated` in `vox-base.mjs`: thighs
-horizontal, shins vertical, body lowered 13 units. It needs the rig-ready
-`legs({ seat: true })` geometry, so it is outside the shared 10 poses and is not
-available on other characters yet. The 6-8 colour variants above are not part of
-this work. Animation: `seated_idle` (juror only) in `animations.json`.
-
-### Gallery / audience NPCs — `gallery/`
-
-8 seated, low-detail background NPCs for the gallery benches, generated from a
-seed by `gallery-npcs.mjs` (`node export-gallery.mjs [seed] [count]`, default
-seed `0xC0FFEE`, so output is reproducible). Parameters: 8 hair styles x 8 hair
-colours, 6 skin tones, 4 top styles x 9 top colours, 8 accessories (glasses,
-headphones, cap, beanie, scarf, backpack, earrings, none); leg and shoe colour
-vary too. Each NPC has `back` (camera behind the bench), `back3q` and `threeq`
-(front 3/4), transparent PNGs @1x/@2x sharing one framing so they align on a
-bench. Previews: `_previews/gallery.png`, `_previews/gallery_benches.png`.
-Back views are the identity carrier (hair back, backpack, band, cap strap, hood).
-Seated NPCs read best on a bench; the bench is only in the preview.
-
 ---
 
 ## 4. Expressions — 8 per character

@@ -29,40 +29,6 @@
     "objection",
     "defeated"
   ],
-  "extraPoses": {
-    "note": "Rig-ready poses outside the shared 10. Only the listed characters build geometry for them.",
-    "seated": {
-      "characters": [
-        "juror"
-      ],
-      "files": [
-        "poses/seated.png",
-        "poses/seated_threeq.png"
-      ],
-      "definedIn": "vox-base.mjs EXTRA_POSES",
-      "params": {
-        "dy": -13,
-        "legR": {
-          "fwd": 90
-        },
-        "legL": {
-          "fwd": 90
-        },
-        "armR": {
-          "fwd": 38,
-          "out": 3
-        },
-        "armL": {
-          "fwd": 38,
-          "out": 3
-        },
-        "head": {
-          "nod": 3
-        }
-      }
-    }
-  },
-  "gallery": "gallery/manifest.json  (seated background NPCs, cc-art/gallery-npcs.mjs)",
   "characters": [
     {
       "id": "judge",

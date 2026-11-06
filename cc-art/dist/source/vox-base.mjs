@@ -104,7 +104,7 @@ function head({ skin = C.skin, hair = null, eyeStyle = 'round', mouth = 'neutral
     out.push(b([-1.8, H.mouthY, fz], [1.8, H.mouthY + 1.2, fz + 1], C.mouth));
   }
   if (faceHair) out.push(...faceHair);
-  return tag('head', out);
+  return out;
 }
 
 /** Torso with garment. `trim` adds gold/contrast detail. */
@@ -166,36 +166,14 @@ function arms({ col, colSh, cuff = null, hand = C.skin, lift = 0, o = C.outline 
     if (cuff) out.push(b([lo, yBot, -aw - 0.4], [hi, yBot + 3, aw + 0.4], cuff));
     // hand
     out.push(b([lo + 0.5, yBot - 5, -aw + 0.5], [hi - 0.5, yBot, aw - 0.5], hand));
-    tag(sx > 0 ? 'armR' : 'armL', out.filter((bx) => !bx.g));
   }
   return out;
 }
 
-/** Legs. `seat` builds the rig-ready version: thigh and shin are separate boxes
- *  (tags legL/legR and shinL/shinR) so the pose can fold the hip and knee.
- *  Standing legs stay single boxes, so every non-seated render is unchanged. */
-function legs({ col, shoe = C.ink, w = H.legW, o = C.outline, seat = false }) {
+function legs({ col, shoe = C.ink, w = H.legW, o = C.outline }) {
   const out = [];
   for (const sx of [-1, 1]) {
     const x = sx * 6.5;
-    if (seat) {
-      const side = sx > 0 ? 'R' : 'L';
-      const ex = (a, c) => (sx > 0 ? [x + w - a, x + w - c] : [x - w + c, x - w + a]);
-      const [s0, s1] = ex(1.5, 0), [o0, o1] = sx > 0 ? [x + w, x + w + 0.5] : [x - w - 0.5, x - w];
-      // thigh: y 15..38, hinged at the hip (y 34 = centre line once horizontal)
-      tag('leg' + side, [
-        b([x - w, 15, -4], [x + w, 38, 4], col),
-        b([Math.min(s0, s1), 15, -4], [Math.max(s0, s1), 38, 4], shadeHex(col, 0.82)),
-        b([o0, 15, -4], [o1, 38, 4], o),
-      ]).forEach((bx) => out.push(bx));
-      // shin: hangs from the knee (orig y 15, z 0); extends 4 above so it hides inside the thigh
-      tag('shin' + side, [
-        b([x - w + 0.5, -4, 0], [x + w - 0.5, 19, 8], col),
-        b([Math.min(s0, s1), -4, 0], [Math.max(s0, s1), 19, 8], shadeHex(col, 0.82)),
-        b([x - w - 1, -6, -5.5], [x + w + 1, -4, 8], shoe),
-      ]).forEach((bx) => out.push(bx));
-      continue;
-    }
     out.push(b([x - w, 2, -4], [x + w, H.hipBot, 4], col));
     out.push(b([sx > 0 ? x + w - 1.5 : x - w, 2, -4], [sx > 0 ? x + w : x - w + 1.5, H.hipBot, 4], shadeHex(col, 0.82)));
     out.push(b([sx > 0 ? x + w : x - w - 0.5, 2, -4], [sx > 0 ? x + w + 0.5 : x - w, H.hipBot, 4], o));
@@ -212,91 +190,4 @@ function shadeHex(hex, f) {
   return `#${((r << 16) | (g << 8) | bl).toString(16).padStart(6, '0')}`;
 }
 
-/* ───────────────────────────────── posing ───────────────────────────────── */
-
-/** Mark boxes as belonging to a rig group: 'head' | 'armL' | 'armR'.
- *  Untagged boxes are 'body'. Held props are tagged with the arm holding them. */
-function tag(g, boxes) {
-  for (const bx of boxes) bx.g = g;
-  return boxes;
-}
-
-/** Pose table, degrees. Arms: `out` swings away from the body, `fwd` swings
- *  toward the camera. Head: `nod` (+ = chin down), `tilt` (sideways).
- *  Body (whole character, pivot at the feet): `lean` (+ = toward camera),
- *  `sway` (sideways), `dy` (units up). armR is the +x arm (the gavel hand). */
-export const POSES = {
-  idle:      {},
-  talking:   { armR: { fwd: 50, out: 15 }, head: { tilt: 5 }, lean: 2, sway: -3 },
-  happy:     { armR: { out: 150 }, armL: { out: 150 }, head: { nod: -8 }, dy: 3 },
-  angry:     { armR: { out: 22, fwd: 12 }, armL: { out: 22, fwd: 12 }, head: { nod: 8 }, lean: 8 },
-  shocked:   { armR: { out: 65 }, armL: { out: 65 }, head: { nod: -10 }, lean: -6, dy: 2 },
-  laughing:  { armR: { fwd: 28, out: -10 }, armL: { fwd: 28, out: -10 }, head: { nod: -16 }, lean: -10 },
-  crying:    { armR: { fwd: 140, out: -25 }, head: { nod: 14 }, lean: 4, sway: 3 },
-  confused:  { armR: { out: 140, fwd: 20 }, head: { tilt: -12 }, sway: 8 },
-  objection: { armR: { fwd: 60, out: 55 }, armL: { out: 10, fwd: -10 }, head: { nod: -4 }, lean: 6, sway: -5 },
-  defeated:  { armR: { out: 3, fwd: -4 }, armL: { out: 3, fwd: -4 }, head: { nod: 18 }, lean: 10, dy: -2 },
-};
-export const POSE_IDS = Object.keys(POSES);
-
-/** Poses that need rig-ready geometry, so they are NOT in POSE_IDS (the 10-pose
- *  export set) and only apply to characters that build for them.
- *  `seated`: legs{seat:true}. Thighs horizontal (hip 90 deg), shins vertical
- *  (knee compensates), whole body dropped 13 units so the feet land on the floor
- *  with the hips at seat height (~21). Legs: `fwd` = hip flexion, `knee` = extra
- *  knee bend on top of keeping the shin vertical. */
-export const EXTRA_POSES = {
-  seated: { dy: -13, legR: { fwd: 90 }, legL: { fwd: 90 }, armR: { fwd: 38, out: 3 }, armL: { fwd: 38, out: 3 }, head: { nod: 3 } },
-};
-
-const D2R = Math.PI / 180;
-const IDENT = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
-const rotX = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0]; };
-const rotZ = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0]; };
-const move = (x, y, z) => [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z];
-
-/** A∘B for 3x4 affine matrices (apply B first). */
-function mul(A, B) {
-  const o = new Array(12);
-  for (let r = 0; r < 3; r++) {
-    for (let c = 0; c < 3; c++) o[r * 4 + c] = A[r * 4] * B[c] + A[r * 4 + 1] * B[4 + c] + A[r * 4 + 2] * B[8 + c];
-    o[r * 4 + 3] = A[r * 4] * B[3] + A[r * 4 + 1] * B[7] + A[r * 4 + 2] * B[11] + A[r * 4 + 3];
-  }
-  return o;
-}
-const about = (p, R) => mul(move(p[0], p[1], p[2]), mul(R, move(-p[0], -p[1], -p[2])));
-const isIdent = (M) => M.every((v, i) => Math.abs(v - IDENT[i]) < 1e-9);
-
-/** Apply a pose to tagged boxes. Zero-angle groups are left untouched, so
- *  `idle` renders exactly like the unposed model. `over` patches the table
- *  per character (e.g. the Judge raises the gavel instead of pointing). */
-export function posed(boxes, pose = 'idle', over = {}) {
-  const P = { ...(POSES[pose] || EXTRA_POSES[pose] || POSES.idle), ...(over[pose] || {}) };
-  // pitch is negated: +X rotation tips the top of a part away from the camera
-  const body = mul(move(0, P.dy || 0, 0), mul(rotZ(-(P.sway || 0)), rotX(-(P.lean || 0))));
-  const neck = [0, H.neck, 0];
-  const hd = P.head || {};
-  const group = {
-    body,
-    head: mul(body, about(neck, mul(rotZ(-(hd.tilt || 0)), rotX(-(hd.nod || 0))))),
-  };
-  for (const [g, sx] of [['armR', 1], ['armL', -1]]) {
-    const a = P[g] || {};
-    const shoulder = [sx * (H.torsoW + H.armW * 1.5), H.armTop - 2, 0];
-    group[g] = mul(body, about(shoulder, mul(rotZ(sx * (a.out || 0)), rotX(a.fwd || 0))));
-  }
-  // legs: thigh hinges at the hip, shin hinges at the knee and (by default)
-  // counter-rotates so it stays vertical
-  for (const [g, sx] of [['R', 1], ['L', -1]]) {
-    const a = P['leg' + g] || {};
-    const hip = [sx * 6.5, 34, 0], knee = [sx * 6.5, 15, 0];
-    group['leg' + g] = mul(body, about(hip, rotX(a.fwd || 0)));
-    group['shin' + g] = mul(group['leg' + g], about(knee, rotX(-(a.fwd || 0) + (a.knee || 0))));
-  }
-  return boxes.map((bx) => {
-    const M = group[bx.g || 'body'];
-    return isIdent(M) ? bx : { ...bx, M };
-  });
-}
-
-export { b, pair, head, torso, arms, legs, shadeHex, tag };
+export { b, pair, head, torso, arms, legs, shadeHex };

@@ -2386,48 +2386,6 @@
             }
           ],
           "character": "juror"
-        },
-        {
-          "id": "seated_idle",
-          "loop": true,
-          "duration": 2.4,
-          "character": "juror",
-          "tracks": [
-            {
-              "t": 0,
-              "pose": "seated",
-              "expression": "neutral",
-              "transform": {
-                "x": 0,
-                "y": 0,
-                "scale": 1,
-                "rot": 0
-              }
-            },
-            {
-              "t": 1.2,
-              "pose": "seated",
-              "expression": "neutral",
-              "transform": {
-                "x": 0,
-                "y": -1,
-                "scale": 1,
-                "rot": 0
-              }
-            },
-            {
-              "t": 2.4,
-              "pose": "seated",
-              "expression": "neutral",
-              "transform": {
-                "x": 0,
-                "y": 0,
-                "scale": 1,
-                "rot": 0
-              }
-            }
-          ],
-          "note": "Jury-box idle. Art: characters/juror/poses/seated.png and seated_threeq.png."
         }
       ]
     },
@@ -3036,8 +2994,7 @@
     ],
     "looping": [
       "idle",
-      "talk",
-      "seated_idle"
+      "talk"
     ],
     "oneShot": [
       "react_happy",
@@ -3047,7 +3004,7 @@
       "defeated"
     ],
     "rules": [
-      "idle and talk loop; everything else is one-shot. (seated_idle also loops; juror only.)",
+      "idle and talk loop; everything else is one-shot.",
       "A one-shot interrupts any loop and blocks new triggers until it ends.",
       "objection may interrupt talk; other one-shots may not.",
       "Never leave a character mid-one-shot across a scene transition — snap to idle.",

@@ -98,10 +98,10 @@ const SYSTEM = {
 
 const STATE_MACHINE = {
   states: ['idle', 'talk', 'action', 'react'],
-  looping: ['idle', 'talk', 'seated_idle'],
+  looping: ['idle', 'talk'],
   oneShot: ['react_happy', 'react_angry', 'react_shocked', 'objection', 'defeated'],
   rules: [
-    'idle and talk loop; everything else is one-shot. (seated_idle also loops; juror only.)',
+    'idle and talk loop; everything else is one-shot.',
     'A one-shot interrupts any loop and blocks new triggers until it ends.',
     'objection may interrupt talk; other one-shots may not.',
     'Never leave a character mid-one-shot across a scene transition — snap to idle.',
@@ -128,14 +128,6 @@ export function buildAnimationLibrary() {
     });
     lib.characters[ch] = { id: ch, fixed: true, animations: anims };
   }
-
-  // Juror-only: the seated pose (rig-ready legs exist only for the juror, see
-  // vox-base.mjs EXTRA_POSES). Same keyframe schema as every other animation.
-  lib.characters.juror.animations.push({
-    id: 'seated_idle', loop: true, duration: 2.4, character: 'juror',
-    tracks: [K(0, 'seated', 'neutral'), K(1.2, 'seated', 'neutral', 0, -1), K(2.4, 'seated', 'neutral')],
-    note: 'Jury-box idle. Art: characters/juror/poses/seated.png and seated_threeq.png.',
-  });
 
   // AI narrator is non-humanoid: state-driven, no poses
   lib.characters['ai-narrator'] = {
