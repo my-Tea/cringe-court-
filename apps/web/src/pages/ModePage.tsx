@@ -2,8 +2,8 @@ import { MODES, type ModeId } from '@cringe-court/core';
 import { stagePose } from '@/art/art';
 import { paths } from '@/app/routes';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { Alert, Button, ButtonLink, Card, CardBody, CardHeader, CardTitle, Icon, PhaseStepper, Tooltip } from '@/ds';
-import { modeStart } from '@/modes/registry';
+import { Alert, Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, PaperButtonLink, PaperPanel, PaperRibbon, PhaseStepper, Tooltip } from '@/ds';
+import { webModes } from '@/modes/registry';
 import { MODE_PRESENTATION } from './modeContent';
 import { ModeFacts } from './ModeFacts';
 import styles from './pages.module.css';
@@ -11,53 +11,53 @@ import styles from './pages.module.css';
 export function ModePage({ id }: { id: ModeId }) {
   const mode = MODES[id];
   const m = MODE_PRESENTATION[id];
-  const start = modeStart(id);
+  const playable = webModes.get(id)?.landing;
   useDocumentTitle(mode.name);
 
   return (
-    <>
-      <section className={styles.modeHero} data-accent={m.accent} aria-labelledby="mode-title">
-        <div className={styles.modeHeroInner}>
+    <div className={styles.page}>
+      <PaperPanel as="section" tone="maroon" edge="cut" elevation={3} backing="gold" padding="lg" unfold aria-labelledby="mode-title">
+        <div className={styles.modeHero} data-accent={m.accent}>
           <div className={styles.modeHeroCopy}>
-            <p className={styles.eyebrow}>{m.eyebrow}</p>
+            <PaperRibbon as="p" tone="gold" size="sm">
+              {m.eyebrow}
+            </PaperRibbon>
             <h1 id="mode-title" className={styles.modeTitle}>
               {mode.name}
             </h1>
             <p className={styles.modeHeadline}>{m.headline}</p>
-            <p className={styles.heroLede}>{m.pitch}</p>
+            <p className={styles.modeLede}>{m.pitch}</p>
             <div className={styles.heroActions}>
-              {start ? (
+              {playable ? (
                 <>
-                  <ButtonLink to={start.to} size="lg" iconStart={<Icon name="gavel" />}>
-                    {start.label}
-                  </ButtonLink>
-                  {start.secondary && (
-                    <ButtonLink to={start.secondary.to} size="lg" variant="secondary">
-                      {start.secondary.label}
-                    </ButtonLink>
+                  <PaperButtonLink to={playable.to} size="lg" iconEnd={<Icon name="arrow-right" />}>
+                    {playable.label}
+                  </PaperButtonLink>
+                  {playable.secondary && (
+                    <PaperButtonLink to={playable.secondary.to} size="lg" variant="maroon">
+                      {playable.secondary.label}
+                    </PaperButtonLink>
                   )}
                 </>
               ) : (
                 <Tooltip content="Filing opens when the contracts and AI counsel phases land.">
-                  <Button size="lg" disabled iconStart={<Icon name="lock" />}>
+                  <PaperButton size="lg" disabled iconStart={<Icon name="lock" />}>
                     Filing opens soon
-                  </Button>
+                  </PaperButton>
                 </Tooltip>
               )}
-              <ButtonLink to={paths.home} size="lg" variant="ghost" iconStart={<Icon name="arrow-left" />}>
+              <PaperButtonLink to={paths.court} size="lg" variant="ghost" iconStart={<Icon name="arrow-left" />}>
                 All courts
-              </ButtonLink>
+              </PaperButtonLink>
             </div>
           </div>
           <div className={styles.modeStage} aria-hidden>
-            <div className={styles.spotlight} />
             {m.cast.map((c, i) => (
               <img key={c.character} src={stagePose(c.character, c.pose)} alt="" className={styles.modeStageChar} data-pos={i} data-pixel />
             ))}
-            <div className={styles.stageFloor} />
           </div>
         </div>
-      </section>
+      </PaperPanel>
 
       <div className={styles.modeBody}>
         <Card tone="raised" as="section" aria-labelledby="facts-title">
@@ -107,7 +107,7 @@ export function ModePage({ id }: { id: ModeId }) {
           </CardBody>
         </Card>
 
-        {start ? (
+        {playable ? (
           <Alert tone="info" title="Playable on the demo court" className={styles.modeAlert}>
             This court runs on this browser with test USDC on a memory twin of the Arc testnet contract, offline AI counsel and a mock
             World ID verifier. Open the invite in a second tab to play the other side. Nothing here touches real money.
@@ -119,6 +119,6 @@ export function ModePage({ id }: { id: ModeId }) {
           </Alert>
         )}
       </div>
-    </>
+    </div>
   );
 }

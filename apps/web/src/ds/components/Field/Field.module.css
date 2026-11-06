@@ -67,8 +67,14 @@
   min-height: var(--cc-control-md);
   padding: var(--cc-space-2) var(--cc-space-3);
   border: 1.5px solid var(--cc-color-border-strong);
-  border-radius: var(--cc-radius-md);
-  background: var(--cc-color-surface-sunken);
+  border-radius: var(--cc-radius-xs);
+  /* A cream paper slip with a darker inner fold line along the top; the box itself stays unclipped for the focus ring. */
+  background-color: var(--cc-color-surface-sunken);
+  background-image: var(--cc-paper-grain);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, var(--cc-neutral-900) 10%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--cc-neutral-100) 40%, transparent),
+    1px 2px 0 color-mix(in srgb, var(--cc-neutral-900) 14%, transparent);
   color: var(--cc-color-text);
   font-size: var(--cc-text-md);
   line-height: var(--cc-leading-normal);
@@ -90,7 +96,7 @@
 .control:focus-visible {
   outline: none;
   border-color: var(--cc-color-focus);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc-color-focus) 35%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc-color-focus) 35%, transparent), inset 0 2px 0 color-mix(in srgb, var(--cc-neutral-900) 10%, transparent);
 }
 
 .control[aria-invalid='true'] {
@@ -98,7 +104,7 @@
 }
 
 .control[aria-invalid='true']:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc-color-danger-text) 35%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc-color-danger-text) 35%, transparent), inset 0 2px 0 color-mix(in srgb, var(--cc-neutral-900) 10%, transparent);
 }
 
 .control:disabled {
@@ -167,8 +173,10 @@
   height: 1.375rem;
   margin: 0;
   border: 2px solid var(--cc-color-border-strong);
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-color-surface-sunken);
+  border-radius: 2px;
+  background-color: var(--cc-color-surface-sunken);
+  background-image: var(--cc-paper-grain);
+  box-shadow: 1px 2px 0 color-mix(in srgb, var(--cc-neutral-900) 16%, transparent);
   cursor: inherit;
   transition:
     background-color var(--cc-duration-fast) var(--cc-ease-standard),
@@ -189,7 +197,8 @@
 
 .checkbox:checked {
   border-color: var(--cc-color-accent);
-  background: var(--cc-color-accent);
+  background-color: var(--cc-color-accent);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-plate);
 }
 
 .checkbox:checked::after {
@@ -217,8 +226,10 @@
   height: 1.5rem;
   padding: 0;
   border: 2px solid var(--cc-color-border-strong);
-  border-radius: var(--cc-radius-pill);
-  background: var(--cc-color-surface-sunken);
+  border-radius: 3px;
+  background-color: var(--cc-color-surface-sunken);
+  background-image: var(--cc-paper-grain);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--cc-neutral-900) 14%, transparent);
   cursor: inherit;
   transition:
     background-color var(--cc-duration-base) var(--cc-ease-standard),
@@ -232,7 +243,8 @@
   left: 2px;
   width: 1rem;
   height: 1rem;
-  border-radius: var(--cc-radius-pill);
+  /* The knob is a small cut tab with a chamfered corner. */
+  clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
   background: var(--cc-color-text-muted);
   transition:
     translate var(--cc-duration-base) var(--cc-ease-emphasized),
@@ -241,7 +253,8 @@
 
 .switch[aria-checked='true'] {
   border-color: var(--cc-color-accent);
-  background: var(--cc-color-accent);
+  background-color: var(--cc-color-accent);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-plate);
 }
 
 .switch[aria-checked='true']::after {
@@ -283,29 +296,50 @@
 
 .radioCard {
   --_tone: var(--cc-color-accent);
+  --_c: var(--cc-paper-cut-md);
+  --_edge: var(--cc-color-border);
+  --_fill: var(--cc-color-surface);
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: flex-start;
   gap: var(--cc-space-3);
   padding: var(--cc-space-4);
-  border: 2px solid var(--cc-color-border);
-  border-radius: var(--cc-radius-lg);
-  background: var(--cc-color-surface);
+  border-radius: var(--cc-radius-xs);
+  filter: var(--cc-paper-drop-1);
   cursor: pointer;
-  transition:
-    border-color var(--cc-duration-fast) var(--cc-ease-standard),
-    background-color var(--cc-duration-fast) var(--cc-ease-standard),
-    box-shadow var(--cc-duration-fast) var(--cc-ease-standard);
+  transition: filter var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+/* Chamfered card: ::before is the edge, ::after the sheet (focus ring stays on the unclipped box). */
+.radioCard::before,
+.radioCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: var(--_edge);
+  clip-path: polygon(var(--_c) 0, calc(100% - var(--_c)) 0, 100% var(--_c), 100% calc(100% - var(--_c)), calc(100% - var(--_c)) 100%, var(--_c) 100%, 0 calc(100% - var(--_c)), 0 var(--_c));
+  transition: background-color var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.radioCard::after {
+  inset: 2px;
+  z-index: -1;
+  background-color: var(--_fill);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
 }
 
 .radioCard:hover {
-  border-color: var(--cc-color-border-strong);
+  --_edge: var(--cc-color-border-strong);
+  filter: var(--cc-paper-drop-2);
 }
 
 .radioCard:has(input:checked) {
-  border-color: var(--_tone);
-  background: color-mix(in srgb, var(--_tone) 12%, var(--cc-color-surface));
-  box-shadow: 0 0 0 1px var(--_tone), 0 0 20px color-mix(in srgb, var(--_tone) 25%, transparent);
+  --_edge: var(--_tone);
+  --_fill: color-mix(in srgb, var(--_tone) 12%, var(--cc-color-surface));
+  filter: var(--cc-paper-drop-2);
 }
 
 .radioCard:has(input:focus-visible) {
@@ -315,7 +349,8 @@
 
 .radioCard:has(input:disabled) {
   cursor: not-allowed;
-  border-style: dashed;
+  --_fill: var(--cc-color-disabled-surface);
+  filter: none;
   color: var(--cc-color-disabled-text);
 }
 
@@ -324,11 +359,12 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  margin: 0.1rem 0 0;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.25rem 0.125rem 0;
   border: 2px solid var(--cc-color-border-strong);
-  border-radius: var(--cc-radius-pill);
+  border-radius: 2px;
+  rotate: 45deg;
   background: var(--cc-color-surface-sunken);
   cursor: inherit;
 }

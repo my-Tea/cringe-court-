@@ -6,6 +6,8 @@
   font-variant-numeric: tabular-nums slashed-zero;
   font-weight: var(--cc-weight-bold);
   white-space: nowrap;
+  /* Set like type on a ledger slip: a faint paper-shadow under the digits. */
+  text-shadow: 1px 1px 0 color-mix(in srgb, var(--cc-neutral-900) 10%, transparent);
 }
 
 .unit {

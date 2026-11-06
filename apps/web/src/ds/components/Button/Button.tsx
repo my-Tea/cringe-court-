@@ -4,8 +4,13 @@ import { cx } from '../../lib/cx';
 import { Spinner } from '../Spinner/Spinner';
 import styles from './Button.module.css';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'swear';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+/**
+ * `primary` follows the surface (maroon plate on parchment, gold plate on the
+ * maroon/wood surface); `gold` and `maroon` are fixed paper stocks (the
+ * papercraft reference's "ENTER THE COURT" and "PLAY AS GUEST").
+ */
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'swear' | 'gold' | 'maroon';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface ButtonStyleProps {
   variant?: ButtonVariant;
@@ -113,4 +118,28 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
   return (
     <Button ref={ref} variant={variant} aria-label={label} className={cx(styles.iconOnly, className)} iconStart={icon} {...rest} />
   );
+});
+
+export type PaperButtonVariant = 'gold' | 'maroon' | 'ghost';
+
+export interface PaperButtonProps extends Omit<ButtonProps, 'variant'> {
+  /** `gold` (default): the primary paper plate. `maroon`: secondary. `ghost`: text only. */
+  variant?: PaperButtonVariant;
+}
+
+/**
+ * The papercraft plate with explicit paper stock, independent of the surface:
+ * gold foil, deep maroon card or ghost. Same press, focus and disabled rules as
+ * `Button` (it is one).
+ */
+export const PaperButton = forwardRef<HTMLButtonElement, PaperButtonProps>(function PaperButton({ variant = 'gold', ...rest }, ref) {
+  return <Button ref={ref} variant={variant} {...rest} />;
+});
+
+export interface PaperButtonLinkProps extends Omit<ButtonLinkProps, 'variant'> {
+  variant?: PaperButtonVariant;
+}
+
+export const PaperButtonLink = forwardRef<HTMLAnchorElement, PaperButtonLinkProps>(function PaperButtonLink({ variant = 'gold', ...rest }, ref) {
+  return <ButtonLink ref={ref} variant={variant} {...rest} />;
 });

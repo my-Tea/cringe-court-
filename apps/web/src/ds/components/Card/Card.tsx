@@ -14,7 +14,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   as?: 'article' | 'section' | 'div' | 'li';
 }
 
-/** `ornate` and `parchment` carry the style-guide frame with gold corner knots. */
+/** `ornate` and `parchment` carry the mounted-sheet frame with gold photo-corners. */
 const pad = { sm: styles.padSm, md: styles.padMd, lg: styles.padLg };
 
 export function Card({ tone = 'default', padding = 'md', interactive, as: Tag = 'article', className, children, ...rest }: CardProps) {
