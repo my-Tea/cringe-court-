@@ -1,0 +1,47 @@
+{
+  "name": "cringe-court",
+  "private": true,
+  "version": "0.0.0",
+  "description": "CringeCourt — a comedy courtroom where AI performs and humans decide. Testnet only.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @cringe-court/web",
+    "build": "npm run build -w @cringe-court/web",
+    "preview": "npm run preview -w @cringe-court/web",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "tokens": "npm run tokens -w @cringe-court/web --",
+    "cutouts": "npm run cutouts -w @cringe-court/web --",
+    "check": "npm run tokens -- --check && npm run cutouts -- --check && npm run lint && npm run typecheck && npm test && npm run build",
+    "art:build": "node cc-art/build-all.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/node": "^26.6.6",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.14.0",
+    "jsdom": "^29.1.1",
+    "pngjs": "^7.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^4.1.12",
+    "vitest-axe": "^0.1.0"
+  }
+}
