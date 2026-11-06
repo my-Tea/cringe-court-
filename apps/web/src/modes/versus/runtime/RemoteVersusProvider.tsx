@@ -9,6 +9,8 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type R
 import { ErrorState, LoadingState } from '@/ds';
 import { t } from '@/i18n';
 import { describeBackendError, useBackendLink, type BackendClient } from '@/platform/backend';
+import { platformConfig } from '@/platform/config';
+import { identityFor } from '@/platform/identity/createIdentity';
 import { VersusProvider } from './VersusProvider';
 
 export function RemoteVersusProvider({ client, children }: { client: BackendClient; children: ReactNode }) {
@@ -52,6 +54,7 @@ export function RemoteVersusProvider({ client, children }: { client: BackendClie
       persona={persona}
       clock={clock}
       clerk={false}
+      identity={(p) => identityFor(platformConfig, p.id, { token: () => client.connection.token, wallet: () => p.account })}
       createDesk={(o) => new RemoteVersusDesk({ ...o, store })}
       personaControl={{
         list: sessions.map((s) => ({ id: s.persona.id, name: name(s.persona.id), account: s.persona.account })),

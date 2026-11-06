@@ -7,6 +7,7 @@ import { cx, Spinner, useToast } from '@/ds';
 import { t } from '@/i18n';
 import { appAudio } from '@/platform/audio';
 import { platformConfig } from '@/platform/config';
+import { backendClient } from '@/platform/backend';
 import { identityFor } from '@/platform/identity';
 import { MODE_KEYS } from '@/play/keys';
 import { QuestTracker, TrialPanel, VerifyPanel, WardrobePanel } from '@/play/panels';
@@ -122,7 +123,10 @@ function RunOverlay({ controller, station }: { controller: RoamController; stati
   const snap = useRoamSnapshot(controller);
   const { toast } = useToast();
   const { profile, save } = useGame();
-  const identity = useMemo(() => identityFor(platformConfig, 'player'), []);
+  const identity = useMemo(() => {
+    const backend = platformConfig.backend ? backendClient(platformConfig.backend) : null;
+    return identityFor(platformConfig, 'player', backend ? { token: () => backend.connection.token, wallet: () => backend.account ?? undefined } : {});
+  }, []);
   const mock = identity.id === 'mock';
 
   const setLook = useCallback((look: PlayerLook) => controller.setAvatar({ ...controller.avatar, look }), [controller]);
@@ -135,7 +139,15 @@ function RunOverlay({ controller, station }: { controller: RoamController; stati
   };
 
   const verify = async () => {
-    const request = { action: 'case-party' as const, signal: 'cringecourt:arrival', minLevel: 'device' as const };
+    if (platformConfig.backend) {
+      try {
+        await backendClient(platformConfig.backend).connect();
+      } catch (err) {
+        toast({ tone: 'danger', title: t('play.verify.failed', { message: err instanceof Error ? err.message : 'The court server is not answering.' }) });
+        return;
+      }
+    }
+    const request = { action: 'accept-jury-seat' as const, signal: 'cringecourt:juror', minLevel: 'orb' as const };
     const proof = await identity.requestProof(request);
     if (!proof.ok) {
       if (proof.reason !== 'cancelled') toast({ tone: 'danger', title: t('play.verify.failed', { message: proof.message }) });

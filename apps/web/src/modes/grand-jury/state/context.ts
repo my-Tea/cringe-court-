@@ -67,7 +67,10 @@ export function remoteHandle(client: BackendClient): CourtHandle {
   const account = client.account ?? 'anonymous';
   const court = new RemoteGrandJuryCourt({
     connection: client.connection,
-    identity: identityFor(platformConfig, `demo-human:${account}`),
+    identity: identityFor(platformConfig, `demo-human:${account}`, {
+      token: () => client.connection.token,
+      wallet: () => client.account ?? undefined,
+    }),
     salts: new StorageSaltVault(window.localStorage),
     describe: describeBackendError,
   });
