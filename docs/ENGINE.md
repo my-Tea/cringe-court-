@@ -80,10 +80,42 @@ cancellation and every attendance pattern for Solo.
 
 `createMockPorts()` builds a full, consistent set on one `ManualClock`.
 
-**ChainPort and the contracts.** `v3/p5-contracts` was not pushed when this was
-written, so ChainPort follows DECISIONS and V4, not a contract ABI. The
-commitment encoding is adapter-owned (`commitmentFor`), so a different encoding
-in the contract only changes the Arc adapter.
+**Alignment with v3/p5-contracts** (read from `origin/v3/p5-contracts`, not merged here):
+
+- **Settlement:** `p5-oracle.test.ts` runs all 28 scenarios of p5's hand-written
+  oracle (`contracts/test/fixtures/settlement-scenarios.json`, copied verbatim)
+  through core `settle()`: verdict, per-juror payout, treasury + AI treasury
+  total and refunds all agree.
+- **Commitment:** `MemoryChain.commitmentFor` uses the same encoding as
+  `CringeCourt.commitmentOf`: `keccak256(abi.encode(chainid, court, caseId,
+  juror, uint8 choice, bytes32 salt))`, chain id 5042002. Not cross-run against
+  viem's bytes (viem is not a dependency here).
+- **Port shape:** p5 ships its own contract-shaped `ChainPort` in
+  `packages/chain-client`. Core's `ChainPort` is the app-level port; the Arc
+  adapter wraps chain-client:
+
+  | core `ChainPort` | p5 chain-client |
+  |---|---|
+  | `createCase({ terms, transcriptHash, payers })` | `fileSolo` / `openVersus` / `publishGrandJury` (by `terms.mode`) |
+  | `fund(n, amount)` | Solo: paid in `fileSolo`; Versus B: `joinVersus`; Grand Jury: `contribute` (after `approveUsdc`) |
+  | `sponsor(n, amount)` | `publishGrandJury({ sponsor, sponsorAmount })` |
+  | `acceptSeat(n, nullifier)` | `acceptSeat(offer)` (signed seat offer; identity via `HumanRegistry`) |
+  | jury filled → court opens | `openCourt(caseId, transcriptHash)` (p5 records the transcript hash here, after recruitment) |
+  | `commitmentFor` / `commit` / `reveal` | `commitmentOf` / `commitVote` / `revealVote` |
+  | `advance` / `finalize` | `cancelExpired` / `finalize` (returns the settlement) |
+  | `claim(n)` | `claimRefund(caseId)` for payers, `withdraw()` for juror balances |
+  | `subscribe` | `onEvent` |
+
+  The one semantic difference: core records the transcript hash when the case is
+  created (frozen before paying, D2), p5 when the court opens. The adapter keeps
+  the hash from `createCase` and sends it with `openCourt`.
+
+## 3b. Audio alignment
+
+`@cringe-court/audio` (v3/audio) uses its own cue ids. `apps/web/src/stage/audioCues.ts`
+maps every core `AudioCueId` to one of them or to `null` (music beds and ambience
+are driven by that package's phase ambience; character babble has no recipe). A
+test pins the map against the audio package's cue list as read from `origin/v3/audio`.
 
 ## 4. Modes plug in
 
@@ -145,7 +177,9 @@ to audio cues.
   inference flow (`getServiceMetadata`, `getRequestHeaders`, `processResponse`)
   through an injected interface; method names and the response-id header are not
   confirmed against the current SDK (see `packages/ai/README.md`).
-- **Arc contracts**: ChainPort is not yet aligned with a real ABI (p5 not pushed).
+- **Arc contracts**: the Arc adapter (core `ChainPort` over p5's chain-client) is
+  not written; the mapping above is the plan. Settlement maths and the commitment
+  encoding are aligned and tested.
 - **World IDKit**: only the mock verifier exists.
 - **Audio**: the demo court is silent until `@cringe-court/audio` merges; cue ids
   are defined in core (`AUDIO_CUES`) and may need mapping to that package's ids.
