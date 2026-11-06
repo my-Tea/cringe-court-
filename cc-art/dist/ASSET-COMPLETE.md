@@ -76,6 +76,29 @@ Head-and-shoulders busts on dialogue-box plum, cropped from the voxel render
 only as good as the face rig; re-run after the face rig (`feat/voxel-expressions`)
 lands for much stronger differences.
 
+## Anonymous Defendant
+
+```
+characters/defendant/<set>/{neutral,smug,shocked,defeated,slump,celebrate}{,_32,@2x}.png
+characters/defendant/<set>/charges_filed{,_32,@2x}.png        # portrait + angled stamp
+characters/defendant/<set>/stamp_impact_{0..3}{,@2x}.png      # pop-in → hover → impact → settled
+characters/defendant/defendant.json                           # parameters + caseId→variant rule
+characters/_previews/defendant.png                            # contact sheet
+```
+
+A per-case stand-in (hooded/masked voxel bust, no face, never the Creator's pink
+look), not a character you can recognise. Sets: `stock-bag`, `stock-censor`,
+`stock-hood`, plus two sample cases. `variantForCase(caseId)` in
+`defendant-vox.mjs` maps any case id to mask / hoodie accent / glint colour /
+booking-tag barcode; `node export-defendant.mjs <caseId...>` exports a set for a
+specific case. With no face, expression comes from eye-hole/glint shape, a
+marker or glint mouth, small marks (!, sparkle, sweat, confetti) and head/arm
+pose. Honest limits: the 32px `charges_filed` is a stamped slab, not readable
+text (the 5x7 font needs ~47px); the case-number tag is a barcode, not digits;
+anonymity is pseudonymous by design, not a guarantee. Needs
+`export-portraits.mjs` conventions (plum bg, 64/128/32 sizes) from
+`feat/portraits`.
+
 ## Poses
 
 ```
@@ -158,6 +181,7 @@ node export-all.mjs   # characters
 node ui-kit.mjs       # UI
 node fx-kit.mjs       # FX
 node export-portraits.mjs   # dialogue portraits
+node export-defendant.mjs   # anonymous defendant set
 ```
 
 ---
