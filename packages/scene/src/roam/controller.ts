@@ -39,6 +39,7 @@ import type {
   Vec3,
   ZoneId,
 } from './types';
+import { ISO_RAKE, cameraMode, type PerspectiveChoice } from './perspective';
 import { PLAYER_JURY_SLOT, zoneAt } from './world';
 
 export interface RoamControllerOptions {
@@ -136,6 +137,8 @@ export class RoamController implements BeatHost {
   #beat: { runner: BeatRunner; resolve: () => void } | null = null;
   /** Street doors open once the hearing has finished. */
   #adjourned = false;
+  /** First person until the view asks for auto, which is isometric. */
+  #perspective: PerspectiveChoice = 'first';
   #remotes: PlayerState[] = [];
   #jumpQueued = false;
   #speed = 0;
@@ -653,8 +656,9 @@ export class RoamController implements BeatHost {
     const intent = mergeIntents(held.intent, ...ext.map((e) => e.intent));
     const turn = held.turn + ext.reduce((s, e) => s + e.turn, 0);
     const tilt = held.tilt + ext.reduce((s, e) => s + e.tilt, 0);
+    const iso = cameraMode(this.#perspective) === 'iso';
     const canLook = this.#control !== 'cinematic' && !this.#exhibit;
-    if (canLook) {
+    if (canLook && !iso) {
       this.#yaw -= turn * frame;
       this.#pitch = clampPitch(this.#pitch + tilt * frame);
     }
@@ -667,14 +671,23 @@ export class RoamController implements BeatHost {
     this.#alpha = this.#stepper.advance(frame, (h) => {
       this.#prev = [...this.#body.pos];
       if (this.#seat) return;
-      stepBody(this.#body, move, this.#yaw, this.#index, this.#bounds, h);
+      stepBody(this.#body, move, iso ? ISO_RAKE.yaw : this.#yaw, this.#index, this.#bounds, h);
       moved = true;
     });
+    if (iso && walking && (move.forward !== 0 || move.strafe !== 0)) {
+      const sin = Math.sin(ISO_RAKE.yaw);
+      const cos = Math.cos(ISO_RAKE.yaw);
+      const fx = -sin * move.forward + cos * move.strafe;
+      const fz = -cos * move.forward - sin * move.strafe;
+      const face = Math.atan2(-fx, -fz);
+      const turnK = 1 - Math.exp(-10 * frame);
+      this.#yaw += Math.atan2(Math.sin(face - this.#yaw), Math.cos(face - this.#yaw)) * turnK;
+    }
     this.#speed = Math.hypot(this.#body.vel[0], this.#body.vel[2]);
     if (moved) this.#updateZone();
 
     // Cinematic look: ease the view toward the speaker.
-    if (this.#look) {
+    if (this.#look && !iso) {
       const eye = this.eye();
       const dx = this.#look.target[0] - eye[0];
       const dz = this.#look.target[2] - eye[2];
@@ -807,6 +820,17 @@ export class RoamController implements BeatHost {
 
   get zone(): ZoneId | null {
     return this.#zone;
+  }
+
+  get perspective(): PerspectiveChoice {
+    return this.#perspective;
+  }
+
+  /** `auto` locks the court to third-person isometric. */
+  setPerspective(choice: PerspectiveChoice): void {
+    if (choice === this.#perspective) return;
+    this.#perspective = choice;
+    this.#changed();
   }
 
   get control(): ControlMode {
