@@ -36,3 +36,6 @@ m3_cost_per_view,0.0001,A24,"CDN/bandwidth per view (frozen transcript, cached)"
 m3_crowd_votes,500,A24,points-only crowd votes per funded case
 m3_cost_per_vote,0.0001,A24,offchain vote storage per vote
 m3_sponsor,0.0000,A25,sponsorship revenue per funded case
+m3_fund_elasticity,0.0000,A26,funding-success elasticity to the crowdfund target; 0 = price-insensitive
+m3_fund_ref_target,7.3000,A26,crowdfund target at which A21 funding success was assumed
+m3_hackathon_cap,40,A27,max published Mode 3 cases during the hackathon marketing budget

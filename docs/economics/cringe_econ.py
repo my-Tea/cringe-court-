@@ -67,6 +67,9 @@ P = {
     "m3_crowd_votes":    (500, "A24", "points-only crowd votes per funded case"),
     "m3_cost_per_vote":  (0.00005, "A24", "offchain vote storage per vote"),
     "m3_sponsor":        (0.0, "A25", "sponsorship revenue per funded case"),
+    "m3_fund_elasticity": (0.0, "A26", "funding-success elasticity to the crowdfund target; 0 = price-insensitive"),
+    "m3_fund_ref_target": (7.30, "A26", "crowdfund target at which A21 funding success was assumed"),
+    "m3_hackathon_cap":  (40, "A27", "max published Mode 3 cases during the hackathon marketing budget"),
 }
 
 # Token budgets per LLM call: (name, input tokens, output tokens). ASSUMPTION A7/A16/A22.
@@ -221,12 +224,23 @@ def mode2(params):
                      cost, p_run * p_verdict, infer, tin, tout, rows, gmv=p_run * (pool + fees))
 
 
+def m3_fund_success(params, target):
+    """A21 funding success, cut by (reference target / target) ** A26 elasticity when the target rises.
+
+    One-sided on purpose: a target above the reference lowers success, a cheaper target never raises it
+    above A21. Rewarding discounts would rest on extrapolating a guessed curve.
+    """
+    s0, e = v(params, "m3_fund_success"), v(params, "m3_fund_elasticity")
+    return s0 * min(1.0, (v(params, "m3_fund_ref_target") / target) ** e)
+
+
 def mode3(params):
     n = v(params, "m3_n")
     j, bond, bonus, pool = jury_terms(n)
     fees = v(params, "m3_protocol_fee") + v(params, "m3_ai_fee")
     rows, rev_fees, rev_extra, p_verdict = prepared_trial(params, n, fees)
-    s, r, f = v(params, "m3_fund_success"), v(params, "r_recruit_fail"), v(params, "f_incident")
+    s = m3_fund_success(params, pool + fees)
+    r, f = v(params, "r_recruit_fail"), v(params, "f_incident")
     p_prep = s * (1 - r)
     p_run = p_prep * (1 - f)
     infer, tin, tout = inference_cost(params, CALLS["m3"])
@@ -249,6 +263,7 @@ def mode3(params):
                     cost, p_run * p_verdict, infer, tin, tout, rows, gmv=p_run * (pool + fees))
     out["contributors_per_funded_case"] = (pool + fees) / v(params, "m3_avg_contrib")
     out["sponsor_revenue"] = p_run * v(params, "m3_sponsor")
+    out["fund_success"] = s
     return out
 
 
@@ -299,10 +314,35 @@ SENS = [
 ]
 
 
-def with_param(key, value):
-    q = dict(P)
-    q[key] = (value,) + P[key][1:]
+# Mode 3 pricing options for decision D10 (docs/DECISIONS.md). Overrides on P.
+# LAUNCH must stay contribution-positive at 100% juror attendance (no forfeit revenue) at every
+# tested elasticity: the public mode may not depend on jurors failing (D10, D13).
+LAUNCH = {"m3_protocol_fee": 1.00, "m3_sponsor": 2.00, "m3_review_cost": 1.50}
+SCENARIOS = [
+    ("hackathon: V4-style defaults, capped marketing budget", {}),
+    ("fee only: protocol fee raised to break-even", {"m3_protocol_fee": 2.97}),
+    ("sponsor only: sponsor at break-even", {"m3_sponsor": 2.05}),
+    ("review only: review cut to break-even", {"m3_review_cost": 0.84}),
+    ("launch: sponsored docket (fee 1.00, sponsor 2.00, review 1.50)", LAUNCH),
+    ("launch, every juror shows up (no forfeit revenue)", {**LAUNCH, "p_complete": 1.0}),
+    ("launch, sponsor at 1.50", {**LAUNCH, "m3_sponsor": 1.50}),
+    ("launch, sponsor falls through (sponsor 0)", {**LAUNCH, "m3_sponsor": 0.0}),
+    ("launch, review stays at 2.00", {**LAUNCH, "m3_review_cost": 2.00}),
+    ("launch, 5-juror grand jury (D7 alternative)", {**LAUNCH, "m3_n": 2}),
+    ("hackathon, 5-juror grand jury (D7 alternative)", {"m3_n": 2}),
+]
+ELASTICITIES = (0.0, 0.5, 1.0, 2.0)
+
+
+def with_params(base, overrides):
+    q = dict(base)
+    for key, value in overrides.items():
+        q[key] = (value,) + base[key][1:]
     return q
+
+
+def with_param(key, value):
+    return with_params(P, {key: value})
 
 
 def solve_m3(params, key):
@@ -357,6 +397,9 @@ def check():
         assert abs(tot - 1) < 1e-12
     # three revealed binary votes always yield a 2-of-3 majority
     assert all(vd for k, vd, _ in outcome_distribution(1, 0.9, 0.65) if k == 3)
+    # A26 elasticity is a no-op at the reference target and at elasticity 0
+    assert abs(m3_fund_success(P, 7.30) - v(P, "m3_fund_success")) < 1e-12
+    assert m3_fund_success(with_params(P, {"m3_fund_elasticity": 1.0}), 7.30 * 2) < v(P, "m3_fund_success")
     return "ok"
 
 
@@ -435,9 +478,43 @@ def main():
     solve = [{"question": "Mode 3 protocol fee for contribution >= 0", "value": solve_m3(P, "m3_protocol_fee")},
              {"question": "Mode 3 sponsor revenue per funded case for contribution >= 0", "value": solve_m3(P, "m3_sponsor")},
              {"question": "Mode 3 max human review cost per published case for contribution >= 0", "value": max_review_m3(P)}]
+    for review in (1.00, 1.50, 2.00):
+        q = with_params(P, {**LAUNCH, "m3_review_cost": review, "m3_fund_elasticity": 1.0, "p_complete": 1.0})
+        solve.append({"question": f"Launch sponsor floor per funded case (protocol fee 1.00, review {review:.2f}, "
+                                  f"elasticity 1.0, 100% attendance)", "value": solve_m3(q, "m3_sponsor")})
     write_csv(os.path.join(OUT, "mode3_breakeven.csv"), solve, ["question", "value"])
     for r in solve:
         print(f"{r['question']}: {r['value']}")
+
+    scen = []
+    for name, overrides in SCENARIOS:
+        for e in ELASTICITIES:
+            res = mode3(with_params(P, {**overrides, "m3_fund_elasticity": e}))
+            scen.append({"scenario": name, "elasticity": e, "crowdfund_target": res["case_charge"],
+                         "fund_success": res["fund_success"], "contributors_per_funded_case": res["contributors_per_funded_case"],
+                         "revenue_fees": res["revenue_fees"], "revenue_forfeits": res["revenue_forfeits"],
+                         "sponsor_revenue": res["sponsor_revenue"], "revenue_total": res["revenue_total"],
+                         "forfeit_share_of_revenue": res["forfeit_share_of_revenue"], "cost_total": res["cost_total"],
+                         "contribution": res["contribution"], "p_verdict_per_attempt": res["p_verdict_per_attempt"],
+                         "hackathon_budget_at_cap": max(0.0, -res["contribution"]) * v(P, "m3_hackathon_cap")})
+    write_csv(os.path.join(OUT, "mode3_scenarios.csv"), scen,
+              ["scenario", "elasticity", "crowdfund_target", "fund_success", "contributors_per_funded_case",
+               "revenue_fees", "revenue_forfeits", "sponsor_revenue", "revenue_total", "forfeit_share_of_revenue",
+               "cost_total", "contribution", "p_verdict_per_attempt", "hackathon_budget_at_cap"])
+    print("Mode 3 scenarios (elasticity 0 / 0.5 / 1 / 2 -> contribution):")
+    for name, _ in SCENARIOS:
+        cs = [r["contribution"] for r in scen if r["scenario"] == name]
+        print(f"  {name:<66} " + " / ".join(f"{c:+.4f}" for c in cs))
+
+    grid = []
+    for review in (2.00, 1.50, 1.00):
+        for fee in (0.50, 1.00, 1.50, 2.00):
+            for sponsor in (0.0, 0.50, 1.00, 1.50, 2.00):
+                res = mode3(with_params(P, {"m3_protocol_fee": fee, "m3_sponsor": sponsor, "m3_review_cost": review}))
+                grid.append({"review_cost": review, "protocol_fee": fee, "sponsor": sponsor,
+                             "crowdfund_target": res["case_charge"], "contribution": res["contribution"]})
+    write_csv(os.path.join(OUT, "mode3_pricing_grid.csv"), grid,
+              ["review_cost", "protocol_fee", "sponsor", "crowdfund_target", "contribution"])
 
 
 if __name__ == "__main__":

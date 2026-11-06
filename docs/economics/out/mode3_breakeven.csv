@@ -2,3 +2,6 @@ question,value
 Mode 3 protocol fee for contribution >= 0,2.9700
 Mode 3 sponsor revenue per funded case for contribution >= 0,2.0500
 Mode 3 max human review cost per published case for contribution >= 0,0.8400
+"Launch sponsor floor per funded case (protocol fee 1.00, review 1.00, elasticity 1.0, 100% attendance)",0.7600
+"Launch sponsor floor per funded case (protocol fee 1.00, review 1.50, elasticity 1.0, 100% attendance)",1.7000
+"Launch sponsor floor per funded case (protocol fee 1.00, review 2.00, elasticity 1.0, 100% attendance)",2.6500

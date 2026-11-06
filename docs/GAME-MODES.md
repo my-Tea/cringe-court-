@@ -173,6 +173,12 @@ then the reveal. Gallery NPC sprites fill empty seats.
 
 ## 5. Open product decisions (with chosen defaults)
 
+> **Resolved in [`DECISIONS.md`](DECISIONS.md).** The table below is the original
+> proposal. Where they differ, DECISIONS.md wins. Notable changes: D9 adds a
+> sponsor slot, D10 fixes the launch price (Sponsored Docket), D11 hides the
+> gallery tally until the jury reveal closes, and D13 adds "no pricing may need
+> no-shows".
+
 | # | Decision | Chosen default | Why / alternative |
 |---|---|---|---|
 | D1 | Is Mode 1's defense the user's advocate? | **Yes, Counsel Chaos represents the user; Miss Ratio is the NPC opponent** | Matches the mode definition. V4 §11 treats both sides as show; this re-frames, it does not change the economics |

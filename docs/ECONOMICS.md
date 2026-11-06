@@ -1,6 +1,7 @@
 # CringeCourt — Economics Model, All Three Modes
 
-**Companion to** `docs/GAME-MODES.md`. **Extends** V4 §9 "Original revenue model:
+**Companion to** `docs/GAME-MODES.md` and `docs/DECISIONS.md` (which resolves
+D1–D14 using these numbers). **Extends** V4 §9 "Original revenue model:
 unchanged" (`idea/CringeCourt_V4_Product_Vision_Fairness_Fixes(1).md`), keeping its
 rules and format.
 
@@ -215,9 +216,39 @@ everything else at default:
 **Reading it:** the AI is not the problem (0.04). **Human review of public-figure
 cases is.** That review is required by V4 §12, so don't cut it to rescue the
 margin. Mode 3 is also the most absence-dependent mode: 55 % of its revenue comes
-from forfeits, which sharpens V4 §9's disclosed conflict (§5). **Default decision
-(GAME-MODES D10):** run Mode 3 at the hackathon as a capped marketing cost
-(≈ 1.15 USDC per published case), and re-price before any launch.
+from forfeits, which sharpens V4 §9's disclosed conflict (§5). **Decision
+(DECISIONS D10):** run Mode 3 at the hackathon as a capped marketing cost
+(≤ 40 cases, about 46.06 test USDC), and launch on the Sponsored Docket pricing in §3a.
+
+### 3a. Launch pricing: the Sponsored Docket (DECISIONS D10)
+
+Protocol fee **1.00**, AI fee 0.50, crowdfund target **7.80**, sponsor **≥ 2.00 per
+funded case** committed before publication, human review **≤ 1.50** per published
+case. Design constraint: contribution stays positive **with zero forfeit revenue**
+(100 % attendance) at every tested funding elasticity (A26). From
+`out/mode3_scenarios.csv`:
+
+| Scenario (contribution per published case) | Target | e = 0 | e = 0.5 | e = 1 | e = 2 |
+|---|---:|---:|---:|---:|---:|
+| Hackathon defaults | 7.30 | −1.1515 | −1.1515 | −1.1515 | −1.1515 |
+| Fee only, protocol 2.97 | 9.77 | +0.0012 | −0.2733 | −0.5106 | −0.8930 |
+| Sponsor only, 2.05 | 7.30 | +0.0053 | +0.0053 | +0.0053 | +0.0053 |
+| Review only, 0.84 | 7.30 | +0.0085 | +0.0085 | +0.0085 | +0.0085 |
+| **Sponsored Docket** | **7.80** | **+0.7105** | **+0.6377** | **+0.5673** | **+0.4333** |
+| Sponsored Docket, 100 % attendance | 7.80 | +0.2749 | +0.2163 | +0.1597 | +0.0518 |
+| … sponsor 1.50 | 7.80 | +0.4283 | +0.3647 | +0.3032 | +0.1861 |
+| … review stays 2.00 | 7.80 | +0.2105 | +0.1377 | +0.0673 | −0.0667 |
+| … no sponsor | 7.80 | −0.4181 | −0.4542 | −0.4890 | −0.5553 |
+| … 5-juror grand jury | 4.50 | +0.3954 | +0.3954 | +0.3954 | +0.3954 |
+
+Sponsored Docket at e = 0, per published case: revenue **2.4098** (fees 0.7000,
+forfeits 0.5812, sponsor 1.1286); cost **1.6993**; forfeit share **24.1 %** (55.5 %
+at hackathon fees).
+
+**Sponsor floor** (`out/mode3_breakeven.csv`; protocol fee 1.00, e = 1, 100 %
+attendance): review 1.00 → **0.76**; 1.50 → **1.70**; 2.00 → **2.65**. Re-solve it
+at the measured review cost before launch. `out/mode3_pricing_grid.csv` holds the
+full fee × sponsor × review grid at default attendance.
 
 ---
 
@@ -235,6 +266,9 @@ from forfeits, which sharpens V4 §9's disclosed conflict (§5). **Default decis
 | Revenue from absences | 29.9 % | 20.4 % | 55.5 % |
 | Breakeven, 500/mo infra | 1,763 / mo | 1,646 / mo | never |
 | Breakeven, 15,000/mo team | 52,866 / mo | 49,356 / mo | never |
+| Contribution at 100 % attendance | 0.2187 | 0.2766 | −1.6358 |
+
+Mode 3 at launch pricing (§3a): contribution **+0.7105** (+0.2749 at 100 % attendance).
 
 ---
 
@@ -333,7 +367,10 @@ plausible, not verified, and meant to be replaced with measured values.
 | A22 | Mode 3 token budget | 66,800 in / 5,200 out | — | Incl. 10 spectator commentary beats |
 | A23 | Human sourcing/legal review per published case | 2.00 | 0.50–6.00 | ~10 min editor time; required by V4 §12 |
 | A24 | Spectators 2,000 × 0.0001; crowd votes 500 × 0.00005 | — | 200–50,000 viewers | Cached frozen transcript, no per-view AI |
-| A25 | Sponsor revenue per funded Mode 3 case | 0 | 0–5.00 | No ads by default |
+| A25 | Sponsor revenue per funded Mode 3 case | 0 (launch: 2.00) | 0–5.00 | No sponsor at hackathon; launch ask is 1.00 per 1,000 views at A24, **not tested with any sponsor** |
+| A26 | Funding-success elasticity to the crowdfund target: success × (7.30 / target)^e, only when the target rises above 7.30 | 0 | 0, 0.5, 1, 2 | Shape is a guess; one-sided so a cheaper target never inflates success |
+| A27 | Hackathon Mode 3 cap | 40 published cases | — | Marketing budget ≈ 40 × 1.1515 = 46.06 test USDC |
+| — | Launch review cost target | 1.50 | 1.00–2.00 | AI-prepared source packs, human sign-off kept; **not measured** |
 
 ---
 
@@ -353,6 +390,14 @@ python3 docs/economics/cringe_econ.py --check  # self-test only
 | `out/mode3_breakeven.csv` | Solved break-even fee / sponsor / review cost |
 | `out/parameters.csv` | Every parameter with REPO/ASSUMPTION source |
 | `out/token_budgets.csv` | Per-call token budgets per mode |
+| `out/mode3_scenarios.csv` | D10 pricing options × elasticity A26, incl. 100 % attendance and hackathon budget |
+| `out/mode3_pricing_grid.csv` | Mode 3 contribution over protocol fee × sponsor × review cost |
+
+Regression tests (pin the quoted numbers, the D10 properties, and that `out/` is current):
+
+```bash
+python3 -B -m unittest discover -s docs/economics -v
+```
 
 To change an assumption, edit the `P` table at the top of the script and re-run.
 Then update the numbers in this doc. They are copied from `out/summary.csv`, not
