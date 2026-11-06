@@ -1,6 +1,6 @@
 /*
- * Buttons follow the style-guide tiles: a solid face in a gold rim, sitting on
- * a hard bottom edge (the "press" shadow). Pressing sinks the face onto the edge.
+ * Buttons follow the UI-kit art: a solid face sitting on a hard bottom edge
+ * (the "press" shadow). Pressing sinks the face onto the edge.
  */
 .button {
   --_bg: var(--cc-color-accent);
@@ -8,8 +8,7 @@
   --_bg-pressed: var(--cc-color-accent-pressed);
   --_fg: var(--cc-color-on-accent);
   --_edge: var(--cc-color-accent-shadow);
-  --_border: var(--cc-color-frame);
-  --_shine: color-mix(in srgb, var(--cc-gold-100) 28%, transparent);
+  --_border: transparent;
   --_lift: 3px;
 
   position: relative;
@@ -23,9 +22,7 @@
   border-radius: var(--cc-radius-md);
   background: var(--_bg);
   color: var(--_fg);
-  box-shadow:
-    inset 0 1px 0 var(--_shine),
-    0 var(--_lift) 0 var(--_edge);
+  box-shadow: 0 var(--_lift) 0 var(--_edge);
   font-family: var(--cc-font-body);
   font-size: var(--cc-text-md);
   font-weight: var(--cc-weight-bold);
@@ -49,9 +46,7 @@
 
 .button:active:not([aria-disabled='true']) {
   background: var(--_bg-pressed);
-  box-shadow:
-    inset 0 2px 0 color-mix(in srgb, var(--cc-neutral-900) 22%, transparent),
-    0 0 0 var(--_edge);
+  box-shadow: 0 0 0 var(--_edge);
   transform: translateY(var(--_lift));
 }
 
@@ -63,19 +58,16 @@
 
 /* Variants */
 .secondary {
-  --_bg: color-mix(in srgb, var(--cc-color-surface) 70%, transparent);
-  --_bg-hover: color-mix(in srgb, var(--cc-color-secondary) 12%, var(--cc-color-surface));
-  --_bg-pressed: color-mix(in srgb, var(--cc-color-secondary) 22%, var(--cc-color-surface));
+  --_bg: transparent;
+  --_bg-hover: color-mix(in srgb, var(--cc-color-secondary) 16%, transparent);
+  --_bg-pressed: color-mix(in srgb, var(--cc-color-secondary) 26%, transparent);
   --_fg: var(--cc-color-secondary-text);
-  --_edge: color-mix(in srgb, var(--cc-color-secondary) 45%, transparent);
+  --_edge: transparent;
   --_border: var(--cc-color-secondary);
-  --_shine: transparent;
-  --_lift: 2px;
+  --_lift: 0px;
 }
 
 .ghost {
-  --_border: transparent;
-  --_shine: transparent;
   --_bg: transparent;
   --_bg-hover: color-mix(in srgb, var(--cc-color-text) 9%, transparent);
   --_bg-pressed: color-mix(in srgb, var(--cc-color-text) 15%, transparent);
@@ -85,7 +77,6 @@
 }
 
 .danger {
-  --_border: var(--cc-color-danger-shadow);
   --_bg: var(--cc-color-danger);
   --_bg-hover: var(--cc-color-danger-hover);
   --_bg-pressed: var(--cc-color-danger-shadow);
@@ -96,13 +87,11 @@
 /* The "I SWEAR TO SHOW UP" button: gold, reserved for committing money or duty. */
 .swear {
   --_bg: var(--cc-color-highlight);
-  --_bg-hover: var(--cc-gold-100);
+  --_bg-hover: var(--cc-gold-200);
   --_bg-pressed: var(--cc-gold-500);
   --_fg: var(--cc-color-on-highlight);
   --_edge: var(--cc-color-highlight-shadow);
-  --_border: var(--cc-gold-700);
-  --_shine: color-mix(in srgb, var(--cc-neutral-100) 70%, transparent);
-  font-family: var(--cc-font-pixel);
+  font-family: var(--cc-font-display);
   letter-spacing: var(--cc-tracking-wide);
   text-transform: uppercase;
 }
@@ -116,6 +105,7 @@
   --_lift: 2px;
 }
 
+.sm.secondary,
 .sm.ghost {
   --_lift: 0px;
 }
@@ -127,6 +117,7 @@
   --_lift: 4px;
 }
 
+.lg.secondary,
 .lg.ghost {
   --_lift: 0px;
 }
