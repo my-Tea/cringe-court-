@@ -190,7 +190,7 @@ export const shell = {
   // ── settings
   'settings.lede': 'Sound, motion, how you see the court, and exactly which court is holding your test USDC and checking your jurors.',
   'settings.perspective': 'Perspective',
-  'settings.perspective.body': 'Auto keeps the roaming court in third-person isometric. First person is the view from your own eyes.',
+  'settings.perspective.body': 'Auto follows you from behind, like a Minecraft third person: the mouse swings the camera around you. First person is the view from your own eyes.',
   'settings.perspective.legend': 'Court perspective',
   'settings.perspective.auto': 'Auto · third person',
   'settings.perspective.first': 'First person',
