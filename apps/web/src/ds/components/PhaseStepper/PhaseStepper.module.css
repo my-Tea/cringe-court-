@@ -16,12 +16,10 @@
   min-width: 0;
 }
 
-/* Each phase is a strip of card with slanted, scissor-cut ends. */
 .bar {
-  height: 0.5rem;
-  clip-path: polygon(0.25rem 0, 100% 0, calc(100% - 0.25rem) 100%, 0 100%);
-  background-color: var(--_tone);
-  background-image: var(--cc-paper-grain), linear-gradient(176deg, color-mix(in srgb, var(--cc-neutral-100) 24%, transparent) 0 50%, transparent calc(50% + 1px));
+  height: 0.375rem;
+  border-radius: 1px;
+  background: var(--_tone);
   transition: background-color var(--cc-duration-slow) var(--cc-ease-standard);
 }
 
@@ -48,8 +46,7 @@
   width: 1.125rem;
   height: 1.125rem;
   border: 1.5px solid var(--_tone);
-  border-radius: 0;
-  clip-path: polygon(3px 0, calc(100% - 3px) 0, 100% 3px, 100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0 calc(100% - 3px), 0 3px);
+  border-radius: 2px;
   font-family: var(--cc-font-mono);
   font-size: 0.625rem;
   line-height: 1;
@@ -76,11 +73,8 @@
   color: var(--cc-color-text);
 }
 
-/* The current phase is the sheet on top: lifted with a paper shadow. */
 .current .bar {
-  height: 0.625rem;
-  margin-top: -0.0625rem;
-  filter: drop-shadow(1px 2px 1px color-mix(in srgb, var(--cc-neutral-900) 35%, transparent));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cc-color-highlight) 60%, transparent);
 }
 
 .current .marker {

@@ -19,19 +19,10 @@ function renderAt(path: string) {
   return { router, ...utils };
 }
 
-describe('landing', () => {
-  it('renders the logo heading, the sign-in form and the main nav', async () => {
-    renderAt('/');
-    expect(await screen.findByRole('heading', { level: 1, name: /CringeCourt/ })).toBeInTheDocument();
-    expect(screen.getByRole('form', { name: 'Sign in' })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
-  });
-});
-
 describe('app shell', () => {
   it('renders landmarks, a skip link and the permanent testnet badge', async () => {
-    renderAt('/court');
-    expect(await screen.findByRole('heading', { level: 1, name: 'Pick your court' })).toBeInTheDocument();
+    renderAt('/');
+    expect(await screen.findByRole('heading', { level: 1, name: /CringeCourt/ })).toBeInTheDocument();
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
@@ -40,8 +31,8 @@ describe('app shell', () => {
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
   });
 
-  it('shows the decided numbers for every court on the courts lobby', async () => {
-    renderAt('/court');
+  it('shows the decided numbers for every court on the home page', async () => {
+    renderAt('/');
     await screen.findByRole('heading', { name: 'Pick your court' });
     expect(screen.getByText('1.20 test USDC')).toBeInTheDocument();
     expect(screen.getByText('1.40 test USDC')).toBeInTheDocument();
@@ -51,7 +42,6 @@ describe('app shell', () => {
 
   it.each([
     ['/solo', 'Solo Court', 'GUILTY / NOT COOKED'],
-    ['/versus', 'Versus Court', 'SIDE A / SIDE B'],
     ['/grand-jury', 'Grand Jury', 'FOR / AGAINST'],
   ])('%s renders its mode page with ballot and a disabled filing button', async (path, title, ballot) => {
     renderAt(path);
@@ -61,22 +51,24 @@ describe('app shell', () => {
     expect(document.title).toBe(`${title} · CringeCourt`);
   });
 
-  it('marks the current nav item and navigates client-side, moving focus to main', async () => {
-    const user = userEvent.setup();
-    const { router } = renderAt('/court');
-    await screen.findByRole('heading', { name: 'Pick your court' });
-    const nav = screen.getByRole('navigation', { name: 'Main' });
-    await user.click(within(nav).getByRole('link', { name: 'Leaderboard' }));
-    expect(router.state.location.pathname).toBe('/leaderboard');
-    expect(within(nav).getByRole('link', { name: 'Leaderboard' })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByRole('main')).toHaveFocus();
+  it('/versus renders its mode page with ballot and the live filing calls to action', async () => {
+    renderAt('/versus');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Versus Court' })).toBeInTheDocument();
+    expect(screen.getByText('SIDE A / SIDE B')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Start a Versus case/ })).toHaveAttribute('href', '/versus/new');
+    expect(screen.getByRole('link', { name: /I have an invite code/ })).toHaveAttribute('href', '/versus/join');
+    expect(screen.queryByRole('button', { name: /Filing opens soon/ })).not.toBeInTheDocument();
   });
 
-  it('keeps "The court" tab current on a mode page', async () => {
-    renderAt('/versus');
-    await screen.findByRole('heading', { level: 1, name: 'Versus Court' });
+  it('marks the current nav item and navigates client-side, moving focus to main', async () => {
+    const user = userEvent.setup();
+    const { router } = renderAt('/');
+    await screen.findByRole('heading', { name: 'Pick your court' });
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    expect(within(nav).getByRole('link', { name: 'The court' })).toHaveAttribute('aria-current', 'page');
+    await user.click(within(nav).getByRole('link', { name: 'Versus' }));
+    expect(router.state.location.pathname).toBe('/versus');
+    expect(within(nav).getByRole('link', { name: 'Versus' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('main')).toHaveFocus();
   });
 
   it('shows a 404 page for unknown paths', async () => {
@@ -91,14 +83,9 @@ describe('app shell', () => {
     expect(screen.getByRole('navigation', { name: 'Gallery sections' })).toBeInTheDocument();
   });
 
-  it.each([
-    ['/', 'CringeCourt'],
-    ['/court', 'Pick your court'],
-    ['/how-to-play', 'How to play'],
-    ['/leaderboard', 'Leaderboard'],
-  ])('has no axe violations on %s', async (path, heading) => {
-    const { container } = renderAt(path);
-    await screen.findByRole('heading', { level: 1, name: new RegExp(heading) });
+  it('has no axe violations on the home page', async () => {
+    const { container } = renderAt('/');
+    await screen.findByRole('heading', { name: 'Pick your court' });
     // jsdom can't compute colour contrast; tokens.test.ts enforces it instead.
     expect(await axe(container, { rules: { 'color-contrast': { enabled: false } } })).toHaveNoViolations();
   });

@@ -15,7 +15,6 @@ import {
   StatesSection,
   TabsSection,
 } from './Components';
-import { PapercraftSection } from './Papercraft';
 import { ColorSection, IconSection, MotionSection, SpaceSection, TypeSection } from './Foundations';
 import styles from './Gallery.module.css';
 
@@ -33,7 +32,6 @@ const TOC: ReadonlyArray<{ group: string; items: ReadonlyArray<[string, string]>
   {
     group: 'Components',
     items: [
-      ['papercraft', 'Papercraft'],
       ['buttons', 'Buttons'],
       ['chrome', 'Ornate chrome'],
       ['badges', 'Badges'],
@@ -110,7 +108,6 @@ export function GalleryPage() {
           <MotionSection />
           <IconSection />
           <h2 className={styles.groupTitle}>Components</h2>
-          <PapercraftSection />
           <ButtonSection />
           <ChromeSection />
           <BadgeSection />

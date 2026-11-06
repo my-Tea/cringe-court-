@@ -1,180 +1,119 @@
 /*
- * Buttons are folded paper plates (STYLE-GUIDE §9.3).
- *
- *   ::before  the face: a long hexagonal plate (both ends cut to a point), folded
- *             once along its length (lit top, shaded bottom), with paper grain
- *   ::after   the paper edge underneath, a darker strip `--_lift` lower
- *
- * Pressing pushes the face (and its label) down onto the edge: the paper
- * depresses. The element itself stays unclipped so the focus ring is never cut.
+ * Buttons follow the style-guide tiles: a solid face in a gold rim, sitting on
+ * a hard bottom edge (the "press" shadow). Pressing sinks the face onto the edge.
  */
 .button {
-  --_face: var(--cc-color-accent);
-  --_face-hover: var(--cc-color-accent-hover);
-  --_face-pressed: var(--cc-color-accent-pressed);
+  --_bg: var(--cc-color-accent);
+  --_bg-hover: var(--cc-color-accent-hover);
+  --_bg-pressed: var(--cc-color-accent-pressed);
   --_fg: var(--cc-color-on-accent);
   --_edge: var(--cc-color-accent-shadow);
-  --_rim: color-mix(in srgb, var(--cc-neutral-100) 28%, transparent);
-  --_lift: 4px;
-  --_notch: 0.75em;
-  --_drop: var(--cc-paper-drop-1);
-  --_plate: polygon(var(--_notch) 0, calc(100% - var(--_notch)) 0, 100% 50%, calc(100% - var(--_notch)) 100%, var(--_notch) 100%, 0 50%);
+  --_border: var(--cc-color-frame);
+  --_shine: color-mix(in srgb, var(--cc-gold-100) 28%, transparent);
+  --_lift: 3px;
 
   position: relative;
-  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--cc-space-2);
   min-height: var(--cc-control-md);
-  margin-bottom: var(--_lift);
-  padding: 0 calc(var(--_notch) + var(--cc-space-4));
-  border: 0;
-  border-radius: var(--cc-radius-sm);
-  background: none;
+  padding: 0 var(--cc-space-5);
+  border: 2px solid var(--_border);
+  border-radius: var(--cc-radius-md);
+  background: var(--_bg);
   color: var(--_fg);
-  filter: var(--_drop);
-  font-family: var(--cc-font-display);
+  box-shadow:
+    inset 0 1px 0 var(--_shine),
+    0 var(--_lift) 0 var(--_edge);
+  font-family: var(--cc-font-body);
   font-size: var(--cc-text-md);
-  font-weight: 400;
+  font-weight: var(--cc-weight-bold);
   line-height: 1;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   text-decoration: none;
   white-space: nowrap;
   user-select: none;
-  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
-    color var(--cc-duration-fast) var(--cc-ease-standard),
-    filter var(--cc-duration-fast) var(--cc-ease-standard);
-}
-
-.button::before,
-.button::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  clip-path: var(--_plate);
-  transition:
     background-color var(--cc-duration-fast) var(--cc-ease-standard),
-    translate var(--cc-duration-fast) var(--cc-ease-press);
-}
-
-.button::before {
-  z-index: -1;
-  background-color: var(--_face);
-  background-image: var(--cc-paper-grain), var(--cc-paper-facets-plate);
-  box-shadow:
-    inset 0 2px 0 var(--_rim),
-    inset 0 -2px 0 color-mix(in srgb, var(--cc-neutral-900) 16%, transparent);
-}
-
-.button::after {
-  z-index: -2;
-  translate: 0 var(--_lift);
-  background-color: var(--_edge);
-  background-image: var(--cc-paper-grain);
-}
-
-.button > * {
-  transition: translate var(--cc-duration-fast) var(--cc-ease-press);
+    box-shadow var(--cc-duration-fast) var(--cc-ease-standard),
+    transform var(--cc-duration-fast) var(--cc-ease-standard),
+    color var(--cc-duration-fast) var(--cc-ease-standard);
 }
 
 .button:hover:not([aria-disabled='true']) {
-  --_face: var(--_face-hover);
-  --_drop: var(--cc-paper-drop-2);
+  background: var(--_bg-hover);
   color: var(--_fg);
 }
 
-/* Paper depress: the face and the label sink onto the edge. */
 .button:active:not([aria-disabled='true']) {
-  --_face: var(--_face-pressed);
-  --_drop: none;
-}
-
-.button:active:not([aria-disabled='true'])::before,
-.button:active:not([aria-disabled='true']) > * {
-  translate: 0 var(--_lift);
+  background: var(--_bg-pressed);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, var(--cc-neutral-900) 22%, transparent),
+    0 0 0 var(--_edge);
+  transform: translateY(var(--_lift));
 }
 
 .button:focus-visible {
-  outline: 3px solid var(--cc-color-focus);
-  outline-offset: 4px;
-  border-radius: var(--cc-radius-sm);
+  outline: 2px solid var(--cc-color-focus);
+  outline-offset: 3px;
+  border-radius: var(--cc-radius-md);
 }
 
-/* ── Variants ─────────────────────────────────────────────────────── */
-
-/* Cream card plate with deep-teal ink. Fixed stock on every surface. */
+/* Variants */
 .secondary {
-  --_face: var(--cc-neutral-100);
-  --_face-hover: var(--cc-teal-100);
-  --_face-pressed: var(--cc-paper-cream-shade);
-  --_fg: var(--cc-teal-900);
-  --_edge: var(--cc-neutral-500);
-  --_rim: color-mix(in srgb, var(--cc-neutral-100) 70%, transparent);
-  --_lift: 3px;
+  --_bg: color-mix(in srgb, var(--cc-color-surface) 70%, transparent);
+  --_bg-hover: color-mix(in srgb, var(--cc-color-secondary) 12%, var(--cc-color-surface));
+  --_bg-pressed: color-mix(in srgb, var(--cc-color-secondary) 22%, var(--cc-color-surface));
+  --_fg: var(--cc-color-secondary-text);
+  --_edge: color-mix(in srgb, var(--cc-color-secondary) 45%, transparent);
+  --_border: var(--cc-color-secondary);
+  --_shine: transparent;
+  --_lift: 2px;
 }
 
 .ghost {
-  --_face: transparent;
-  --_face-hover: color-mix(in srgb, var(--cc-color-text) 9%, transparent);
-  --_face-pressed: color-mix(in srgb, var(--cc-color-text) 15%, transparent);
+  --_border: transparent;
+  --_shine: transparent;
+  --_bg: transparent;
+  --_bg-hover: color-mix(in srgb, var(--cc-color-text) 9%, transparent);
+  --_bg-pressed: color-mix(in srgb, var(--cc-color-text) 15%, transparent);
   --_fg: var(--cc-color-text);
   --_edge: transparent;
-  --_rim: transparent;
   --_lift: 0px;
-  --_drop: none;
-  --_notch: 0.35em;
-}
-
-.ghost::before {
-  background-image: none;
-  box-shadow: none;
-}
-
-.ghost:hover:not([aria-disabled='true']) {
-  --_drop: none;
 }
 
 .danger {
-  --_face: var(--cc-color-danger);
-  --_face-hover: var(--cc-color-danger-hover);
-  --_face-pressed: var(--cc-color-danger-hover);
+  --_border: var(--cc-color-danger-shadow);
+  --_bg: var(--cc-color-danger);
+  --_bg-hover: var(--cc-color-danger-hover);
+  --_bg-pressed: var(--cc-color-danger-shadow);
   --_fg: var(--cc-color-on-danger);
   --_edge: var(--cc-color-danger-shadow);
 }
 
-/* Gold foil card: the swear button, and the papercraft "gold" plate ("ENTER THE COURT"). */
-.swear,
-.gold {
-  --_face: var(--cc-gold-300);
-  --_face-hover: var(--cc-royal-100);
-  --_face-pressed: var(--cc-gold-500);
-  --_fg: var(--cc-royal-900);
-  --_edge: var(--cc-gold-700);
-  --_rim: color-mix(in srgb, var(--cc-neutral-100) 75%, transparent);
+/* The "I SWEAR TO SHOW UP" button: gold, reserved for committing money or duty. */
+.swear {
+  --_bg: var(--cc-color-highlight);
+  --_bg-hover: var(--cc-gold-100);
+  --_bg-pressed: var(--cc-gold-500);
+  --_fg: var(--cc-color-on-highlight);
+  --_edge: var(--cc-color-highlight-shadow);
+  --_border: var(--cc-gold-700);
+  --_shine: color-mix(in srgb, var(--cc-neutral-100) 70%, transparent);
+  font-family: var(--cc-font-pixel);
+  letter-spacing: var(--cc-tracking-wide);
+  text-transform: uppercase;
 }
 
-/* Deep maroon card ("PLAY AS GUEST"): cream ink, a thin gold rim. */
-.maroon {
-  --_face: var(--cc-paper-maroon-deep);
-  --_face-hover: var(--cc-royal-900);
-  --_face-pressed: var(--cc-paper-maroon-deep);
-  --_fg: var(--cc-gold-100);
-  --_edge: var(--cc-neutral-900);
-  --_rim: color-mix(in srgb, var(--cc-gold-500) 70%, transparent);
-}
-
-/* ── Sizes ────────────────────────────────────────────────────────── */
-
+/* Sizes */
 .sm {
   min-height: var(--cc-control-sm);
-  padding: 0 calc(var(--_notch) + var(--cc-space-2));
+  padding: 0 var(--cc-space-3);
   font-size: var(--cc-text-sm);
-  --_lift: 3px;
-  --_notch: 0.6em;
+  border-radius: var(--cc-radius-sm);
+  --_lift: 2px;
 }
 
 .sm.ghost {
@@ -183,23 +122,12 @@
 
 .lg {
   min-height: var(--cc-control-lg);
-  padding: 0 calc(var(--_notch) + var(--cc-space-5));
+  padding: 0 var(--cc-space-6);
   font-size: var(--cc-text-lg);
-  --_lift: 5px;
-  --_notch: 0.9em;
+  --_lift: 4px;
 }
 
-/* The hero plate: "ENTER THE COURT". */
-.xl {
-  min-height: 3.75rem;
-  padding: 0 calc(var(--_notch) + var(--cc-space-6));
-  font-size: var(--cc-text-xl);
-  --_lift: 6px;
-  --_notch: 1em;
-}
-
-.lg.ghost,
-.xl.ghost {
+.lg.ghost {
   --_lift: 0px;
 }
 
@@ -208,7 +136,6 @@
 }
 
 .iconOnly {
-  --_notch: 0.4em;
   padding: 0;
   aspect-ratio: 1;
 }
@@ -216,8 +143,8 @@
 .icon {
   display: inline-flex;
   flex-shrink: 0;
-  width: 1.2em;
-  height: 1.2em;
+  width: 1.15em;
+  height: 1.15em;
 }
 
 .icon > :global(svg),
@@ -226,27 +153,16 @@
   height: 100%;
 }
 
-.xl .icon {
-  width: 1.4em;
-  height: 1.4em;
-}
-
-.label {
-  padding-top: 0.08em; /* Lilita sits high in its box */
-}
-
 /* Disabled: real `disabled` is avoided so the button stays focusable and its
    reason (a tooltip or hint) stays reachable; aria-disabled carries the state. */
 .button[aria-disabled='true'] {
-  --_face: var(--cc-color-disabled-surface);
+  --_bg: var(--cc-color-disabled-surface);
   --_fg: var(--cc-color-disabled-text);
-  --_edge: color-mix(in srgb, var(--cc-color-disabled-text) 40%, transparent);
-  --_drop: none;
+  --_edge: transparent;
+  --_border: transparent;
   cursor: not-allowed;
-}
-
-.button[aria-disabled='true']::before {
-  background-image: var(--cc-paper-grain);
+  box-shadow: none;
+  transform: none;
 }
 
 .loading {
@@ -262,19 +178,4 @@
   inset: 0;
   display: grid;
   place-items: center;
-}
-
-@media (forced-colors: active) {
-  .button {
-    border: 2px solid ButtonText;
-  }
-
-  .button::before,
-  .button::after {
-    display: none;
-  }
-}
-
-.ghost::after {
-  display: none;
 }

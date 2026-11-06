@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { OrnateFrame } from './OrnateFrame';
 
 describe('OrnateFrame', () => {
-  it('re-themes its subtree, shows the ribbon and decorative photo-corners', async () => {
+  it('re-themes its subtree, shows the ribbon and hides the corner knots', async () => {
     const { container } = render(
       <main>
         <OrnateFrame as="section" tone="wood" ribbon="Verdict" aria-label="Verdict">
@@ -15,9 +15,9 @@ describe('OrnateFrame', () => {
     const frame = screen.getByRole('region', { name: 'Verdict' });
     expect(frame).toHaveAttribute('data-surface', 'wood');
     expect(screen.getByText('Verdict', { selector: 'p' })).toBeInTheDocument();
-    const corners = frame.querySelectorAll(':scope > span[aria-hidden="true"]');
-    expect(corners).toHaveLength(4);
-    expect(frame.querySelector('svg')).toBeNull();
+    const knots = frame.querySelectorAll('svg');
+    expect(knots).toHaveLength(4);
+    knots.forEach((k) => expect(k).toHaveAttribute('aria-hidden', 'true'));
     expect(await axe(container, { rules: { 'color-contrast': { enabled: false } } })).toHaveNoViolations();
   });
 
