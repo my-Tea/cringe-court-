@@ -1,6 +1,6 @@
 // All 8 characters at realistic (non-chibi) proportions — voxel boxes.
 // Head ≈ 23% of height, matching the Judge reference.
-import { H, C, b, pair, head, torso, arms, legs } from './vox-base.mjs';
+import { H, C, b, pair, head, torso, arms, legs, tag, posed } from './vox-base.mjs';
 
 export { head };
 
@@ -13,7 +13,6 @@ const FACE_MATS = new Set(['#FFFFFF', '#3B2A28', '#241A22', '#5A4234', '#8E3B42'
 export const JUDGE = {
   id: 'judge', label: 'Judge Gavel.exe',
   parts: (pose = 'idle', expr = 'neutral') => {
-    const lift = pose === 'objection' ? -14 : pose === 'happy' ? -6 : pose === 'defeated' ? 10 : 0;
     const out = [];
     const hw = H.headW;
     const fz = -hw;            // the face plane — nothing may be drawn in front of this
@@ -41,10 +40,11 @@ export const JUDGE = {
     out.push(b([hw - 6, H.headBot - 3, fz - 1.4], [hw - 2, H.headBot + 2, fz + 4], bdSh));      // shade
     // moustache, tight under the nose
     out.push(b([-hw + 3, H.mouthY + 1, fz - 1.8], [hw - 3, H.mouthY + 3, fz + 0.5], bd));
+    tag('head', out);
 
     // ── body ────────────────────────────────────────────────────────
     out.push(...torso({ col: C.burg, colSh: C.burgSh, style: 'robe' }));
-    out.push(...arms({ col: C.burg, colSh: C.burgSh, cuff: C.cream, lift }));
+    out.push(...arms({ col: C.burg, colSh: C.burgSh, cuff: C.cream }));
     out.push(...legs({ col: C.burgSh, shoe: C.ink }));
 
     // ── fur mantle: sits ON the shoulders, in front of the robe ─────
@@ -68,13 +68,21 @@ export const JUDGE = {
     out.push(b([-2, H.torsoTop - 16, -td - 2.4], [2, H.torsoTop - 12, -td - 1.4], C.goldLt));
 
     // ── gavel, held right — oversized ───────────────────────────────
-    const gx = H.torsoW + H.armW * 2 + 4, gy = H.armBot + lift + 4;
-    out.push(b([gx - 1.4, gy, -1.4], [gx + 1.4, gy + 26, 1.4], C.hairBr));
-    out.push(b([gx - 6, gy + 24, -3], [gx + 6, gy + 32, 3], C.hairBrLt));
-    out.push(b([gx - 6.6, gy + 26, -3.4], [gx + 6.6, gy + 29, 3.4], C.gold));
-    out.push(...pair([gx - 7, gy + 24, -3], [gx - 5.6, gy + 32, 3], C.goldLt));
+    const gx = H.torsoW + H.armW * 2 + 4, gy = H.armBot + 4;
+    out.push(...tag('armR', [
+      b([gx - 1.4, gy, -1.4], [gx + 1.4, gy + 26, 1.4], C.hairBr),
+      b([gx - 6, gy + 24, -3], [gx + 6, gy + 32, 3], C.hairBrLt),
+      b([gx - 6.6, gy + 26, -3.4], [gx + 6.6, gy + 29, 3.4], C.gold),
+      // end caps on both faces of the head (pair() would mirror one onto the left hand)
+      b([gx - 7, gy + 24, -3], [gx - 5.6, gy + 32, 3], C.goldLt),
+      b([gx + 5.6, gy + 24, -3], [gx + 7, gy + 32, 3], C.goldLt),
+    ]));
 
-    return out;
+    // the Judge never points — he raises the gavel
+    return posed(out, pose, {
+      objection: { armR: { out: 165, fwd: 10 }, armL: { out: 10 } },
+      angry: { armR: { out: 120, fwd: 15 }, armL: { out: 22, fwd: 12 } },
+    });
   },
 };
 
@@ -82,7 +90,6 @@ export const JUDGE = {
 export const PROSECUTOR = {
   id: 'prosecutor', label: 'Miss Ratio',
   parts: (pose = 'idle', expr = 'neutral') => {
-    const lift = pose === 'objection' ? -16 : 0;
     const out = [];
     const hw = H.headW;
     const P = C.hairPk, Psh = C.hairPkSh, Plt = C.hairPkLt;
@@ -112,11 +119,12 @@ export const PROSECUTOR = {
     out.push(b([-hw + 1, H.headTop - 6, -hw - 1.6], [hw - 1, H.headTop - 3, -hw + 1], C.ink));
     // gold scales earrings
     out.push(...pair([-hw - 2, H.eyeY - 8, -2], [-hw + 0.2, H.eyeY - 1, 2], C.gold));
+    tag('head', out);
 
     out.push(...torso({ col: C.burgSh, colSh: C.burg, style: 'suit' }));
-    out.push(...arms({ col: C.burgSh, colSh: C.burg, cuff: C.cream, lift }));
+    out.push(...arms({ col: C.burgSh, colSh: C.burg, cuff: C.cream }));
     out.push(...legs({ col: C.navySh, shoe: C.ink }));
-    return out;
+    return posed(out, pose);
   },
 };
 
@@ -142,15 +150,18 @@ export const DEFENSE = {
     out.push(...head({ eyeStyle: 'round', mouth: expr === 'shocked' ? 'shout' : expr === 'laughing' || expr === 'happy' ? 'grin' : expr === 'crying' || expr === 'confused' ? 'frown' : expr === 'smug' ? 'smirk' : 'neutral', hair: Br }));
     // bandage on cheek
     out.push(b([4, H.mouthY + 6, -hw - 1.4], [9, H.mouthY + 9, -hw - 0.4], C.cream));
+    tag('head', out);
 
     out.push(...torso({ col: C.navy, colSh: C.navySh, style: 'suit' }));
     out.push(...arms({ col: C.navy, colSh: C.navySh, cuff: C.cream }));
     out.push(...legs({ col: C.navySh, shoe: C.ink }));
 
     // EXHIBIT A paper
-    out.push(b([-H.torsoW - H.armW * 2 - 3, H.armBot + 4, -6], [-H.torsoW - H.armW * 2 + 8, H.armBot + 16, -4.6], C.cream));
-    out.push(b([-H.torsoW - H.armW * 2 - 1, H.armBot + 13, -6.2], [-H.torsoW - H.armW * 2 + 6, H.armBot + 14, -5], '#A32D3F'));
-    return out;
+    out.push(...tag('armL', [
+      b([-H.torsoW - H.armW * 2 - 3, H.armBot + 4, -6], [-H.torsoW - H.armW * 2 + 8, H.armBot + 16, -4.6], C.cream),
+      b([-H.torsoW - H.armW * 2 - 1, H.armBot + 13, -6.2], [-H.torsoW - H.armW * 2 + 6, H.armBot + 14, -5], '#A32D3F'),
+    ]));
+    return posed(out, pose);
   },
 };
 
@@ -173,13 +184,14 @@ export const BAILIFF = {
     out.push(b([-hw - 2, H.headTop - 1, -hw - 4], [hw + 2, H.headTop + 1.4, -hw + 1], C.ink)); // brim
     out.push(b([-hw - 2, H.headTop + 1, -hw - 1.2], [hw + 2, H.headTop + 2, -hw + 1], C.gold)); // band
     out.push(b([-2.4, H.headTop + 2, -hw - 2], [2.4, H.headTop + 4.6, -hw], C.goldLt));        // badge
+    tag('head', out);
 
     out.push(...torso({ col: C.navy, colSh: C.navySh, style: 'uniform' }));
     // epaulettes
     out.push(...pair([-H.torsoW, H.torsoTop - 2, -5], [-H.torsoW + 6, H.torsoTop + 0.6, 5], C.gold));
     out.push(...arms({ col: C.navy, colSh: C.navySh, cuff: C.ink }));
     out.push(...legs({ col: C.navySh, shoe: C.ink }));
-    return out;
+    return posed(out, pose);
   },
 };
 
@@ -206,6 +218,7 @@ export const CLERK = {
       out.push(b([ex - 2.6, H.eyeY - 2, -hw - 2], [ex + 2.6, H.eyeY + 2.8, -hw - 1.4], '#EAF4FF'));
     }
     out.push(b([-2.6, H.eyeY - 0.4, -hw - 1.9], [2.6, H.eyeY + 0.6, -hw - 1.3], C.goldDk));
+    tag('head', out);
 
     out.push(...torso({ col: C.cream, colSh: C.creamSh, style: 'blouse' }));
     out.push(...arms({ col: C.cream, colSh: C.creamSh, cuff: C.burg }));
@@ -213,9 +226,9 @@ export const CLERK = {
 
     // armful of papers
     for (let i = 0; i < 4; i++) {
-      out.push(b([-H.torsoW - 9 + i * 0.6, H.armBot + 2 + i * 1.6, -6], [-H.torsoW + 4 + i * 0.6, H.armBot + 4 + i * 1.6, -3], i % 2 ? C.cream : C.creamSh));
+      out.push(...tag('armL', [b([-H.torsoW - 9 + i * 0.6, H.armBot + 2 + i * 1.6, -6], [-H.torsoW + 4 + i * 0.6, H.armBot + 4 + i * 1.6, -3], i % 2 ? C.cream : C.creamSh)]));
     }
-    return out;
+    return posed(out, pose);
   },
 };
 
@@ -250,7 +263,8 @@ export const NARRATOR = {
       out.push(b([x, y, z], [x + 5, y + 6.4, z + 0.8], C.cream));
       out.push(b([x + 0.8, y + 4.4, z + 0.8], [x + 4.2, y + 5.4, z + 1.2], C.skinSh));
     }
-    return out;
+    // no limbs: the body lean/sway/bob carries the pose
+    return posed(out, pose);
   },
 };
 
@@ -285,6 +299,7 @@ export const JUROR = {
     // headphones
     out.push(...pair([-hw - 4.4, H.headBot + 2, -5], [-hw - 1.6, H.headBot + 14, 5], C.ink));
     out.push(...pair([-hw - 4.6, H.headBot + 4, -4], [-hw - 2.6, H.headBot + 12, 4], C.cyan));
+    tag('head', out);
 
     out.push(...torso({ col: C.blue, colSh: C.blueSh, style: 'hoodie' }));
     out.push(...arms({ col: C.blue, colSh: C.blueSh, cuff: C.blueSh }));
@@ -294,7 +309,8 @@ export const JUROR = {
     out.push(b([-H.torsoW - 12, H.armBot + 2, -5], [-H.torsoW - 2, H.armBot + 13, -1], C.cream));
     out.push(b([-H.torsoW - 12, H.armBot + 10, -5.4], [-H.torsoW - 2, H.armBot + 13, -0.6], C.burg));
     for (let i = 0; i < 4; i++) out.push(b([-H.torsoW - 11 + i * 2.6, H.armBot + 13, -4], [-H.torsoW - 9.4 + i * 2.6, H.armBot + 16, -1.6], i % 2 ? C.goldLt : C.cream));
-    return out;
+    tag('armL', out.slice(-6));
+    return posed(out, pose);
   },
 };
 
@@ -313,6 +329,7 @@ export const CREATOR = {
     }
 
     out.push(...head({ eyeStyle: 'shades', mouth: expr === 'shocked' ? 'shout' : expr === 'laughing' || expr === 'happy' ? 'grin' : 'neutral', hair: Br }));
+    tag('head', out);
 
     out.push(...torso({ col: C.pink, colSh: C.pinkSh, style: 'hoodie' }));
     out.push(...arms({ col: C.pink, colSh: C.pinkSh, cuff: C.pinkSh }));
@@ -324,7 +341,7 @@ export const CREATOR = {
     for (const [dx, dy2, w2, h2] of [[0, 3, 3, 3], [6, 3, 3, 3], [0, 0, 3, 4], [6, 0, 3, 4], [3, 1, 3, 4], [3, 5, 3, 2]]) {
       out.push(b([hx + dx, hy + dy2, hz], [hx + dx + w2, hy + dy2 + h2, hz + 1], C.white));
     }
-    return out;
+    return posed(out, pose);
   },
 };
 

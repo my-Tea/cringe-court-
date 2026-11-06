@@ -69,8 +69,20 @@ brows above the shades. Say the word and I'll do (b) — it's a 10-line change.
 characters/<id>/poses/{idle,talking,happy,angry,shocked,laughing,crying,confused,objection,defeated}.png
 ```
 
-Parametric: body offset, lean, per-arm angle, head tilt. The gavel, papers, popcorn
-and pointing hands all follow the pose. Verified that all 10 differ per character.
+Data-driven: `POSES` in `vox-base.mjs` gives each pose per-arm swing (`out`/`fwd`),
+head `nod`/`tilt`, and body `lean`/`sway`/`dy`. Boxes are tagged into rig groups
+(`head`, `armL`, `armR`, `body`) and `posed()` applies one rotation per group, so the
+gavel, papers and popcorn follow the hand holding them. The AI Narrator has no limbs,
+so its poses come from the body lean/sway/bob alone. The Judge overrides `objection`
+and `angry` to raise the gavel instead of pointing.
+
+Each pose wears its matching expression where one exists (`angry` pose → `angry` face),
+and a character's 10 poses share one framing, so frames keep the same scale when
+swapped mid-animation. Verified by hash: all 10 pose PNGs differ for every character.
+
+> Earlier revisions of this report claimed the 10 poses already differed. They did
+> not: the voxel builders ignored `pose`, so 6 of 8 characters shipped 10 identical
+> pose PNGs. Fixed on `feat/voxel-poses`.
 
 ---
 
@@ -170,17 +182,22 @@ match the cast. That is the highest-value remaining polish item.
 | `ui-kit.mjs` | UI assets + the 5×7 bitmap font |
 | `fx-kit.mjs` | FX sprites |
 | `sprite-player.mjs` | Player compositor |
-| `export-all.mjs` | Bulk export → 144 sprites + sheets |
+| `vox-base.mjs` / `vox-chars.mjs` | Voxel anatomy, pose rig, all 8 characters |
+| `char-render.mjs` | Orthographic voxel renderer (supports per-box transforms) |
+| `export-vox.mjs` | Bulk export → 144 character sprites + sheets |
+| `export-player-vox.mjs` | Player parts → 58 sprites |
 | `animations.mjs` | 54 animations, 10 system |
 
 Regenerate everything:
 
 ```bash
 cd cc-art
-node export-all.mjs   # characters
-node ui-kit.mjs       # UI
-node fx-kit.mjs       # FX
-node brand-kit.mjs    # wordmark, share card, case card
+npm install --no-save pngjs   # the only dependency; not vendored
+node export-vox.mjs          # characters (export-all.mjs is the retired 2D pipeline)
+node export-player-vox.mjs   # player parts
+node ui-kit.mjs              # UI
+node fx-kit.mjs              # FX
+node brand-kit.mjs           # wordmark, share card, case card
 ```
 
 ---
