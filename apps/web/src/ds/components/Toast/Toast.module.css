@@ -65,7 +65,7 @@
 /* Verdict toasts get the gold rim: "the jury has spoken". */
 .verdict {
   --_tone: var(--cc-color-highlight);
-  box-shadow: var(--cc-shadow-ring-highlight), var(--cc-shadow-3);
+  box-shadow: var(--cc-shadow-glow-highlight), var(--cc-shadow-3);
 }
 
 .icon {

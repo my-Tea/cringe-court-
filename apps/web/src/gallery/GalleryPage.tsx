@@ -53,7 +53,7 @@ const TOC: ReadonlyArray<{ group: string; items: ReadonlyArray<[string, string]>
 /** Storybook-style catalogue of every token, component and state. */
 export function GalleryPage() {
   useDocumentTitle('Design gallery');
-  const [surface, setSurface] = useState<Surface>('parchment');
+  const [surface, setSurface] = useState<Surface>('night');
   const [replayKey, setReplayKey] = useState(0);
   const { reduced, setPreference } = useMotion();
 
@@ -86,9 +86,9 @@ export function GalleryPage() {
 
         <div className={styles.toolbar} role="toolbar" aria-label="Gallery preview settings">
           <div role="group" aria-label="Preview surface" style={{ display: 'flex', gap: 'var(--cc-space-2)' }}>
-            {(['parchment', 'wood'] as const).map((s) => (
+            {(['night', 'parchment'] as const).map((s) => (
               <Button key={s} size="sm" variant={surface === s ? 'primary' : 'ghost'} aria-pressed={surface === s} onClick={() => setSurface(s)}>
-                {s === 'parchment' ? 'Parchment' : 'Wood'}
+                {s === 'night' ? 'Night' : 'Parchment'}
               </Button>
             ))}
           </div>

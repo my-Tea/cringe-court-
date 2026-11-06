@@ -1,9 +1,9 @@
 /* Global base: page canvas, type defaults, focus, selection, utilities. */
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
   background: var(--cc-color-canvas);
-  scrollbar-color: var(--cc-neutral-700) var(--cc-neutral-900);
+  scrollbar-color: var(--cc-night-500) var(--cc-night-950);
 }
 
 body {
@@ -12,8 +12,8 @@ body {
   line-height: var(--cc-leading-normal);
   color: var(--cc-color-text);
   background:
-    radial-gradient(60rem 40rem at 50% -12rem, color-mix(in srgb, var(--cc-royal-700) 9%, transparent), transparent 70%),
-    radial-gradient(40rem 30rem at 100% 0, color-mix(in srgb, var(--cc-teal-900) 12%, transparent), transparent 70%),
+    radial-gradient(60rem 40rem at 50% -12rem, rgb(255 79 184 / 0.09), transparent 70%),
+    radial-gradient(40rem 30rem at 100% 0, rgb(107 76 168 / 0.12), transparent 70%),
     var(--cc-color-canvas);
   background-attachment: fixed;
   font-feature-settings: 'ss01' on;
@@ -74,8 +74,8 @@ samp {
 }
 
 ::selection {
-  background: var(--cc-gold-300);
-  color: var(--cc-neutral-900);
+  background: var(--cc-neon-500);
+  color: var(--cc-night-900);
 }
 
 /* Screen-reader-only text. */

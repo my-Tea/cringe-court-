@@ -39,7 +39,7 @@ export function AnonymousPortrait({ size = 'md', ring = 'neutral', label = 'Anon
     <span role="img" aria-label={label} className={cx(styles.portrait, styles.anonymous, size !== 'md' && styles[size], ringClass[ring], className)}>
       <svg viewBox="0 0 12 12" fill="currentColor" shapeRendering="crispEdges" aria-hidden focusable="false">
         <path d="M4 1h4v1H4zM3 2h6v4H3zM4 6h4v1H4zM5 7h2v1H5zM2 8h8v1H2zM1 9h10v3H1z" />
-        <path d="M5 3h2v1H5zM6 4h1v1H6z" fill="var(--cc-neutral-900)" />
+        <path d="M5 3h2v1H5zM6 4h1v1H6z" fill="var(--cc-night-900)" />
       </svg>
     </span>
   );

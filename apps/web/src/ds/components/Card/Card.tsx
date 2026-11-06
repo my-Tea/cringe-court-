@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { cx } from '../../lib/cx';
 import styles from './Card.module.css';
 
-export type CardTone = 'default' | 'raised' | 'ornate' | 'parchment' | 'sunken';
+export type CardTone = 'default' | 'raised' | 'neon' | 'parchment' | 'sunken';
 
 export interface CardProps extends HTMLAttributes<HTMLElement> {
   tone?: CardTone;

@@ -133,7 +133,7 @@ export function CardSection() {
   return (
     <GallerySection id="cards" title="Cards" description="Default, raised, neon (the brand frame with gold corner brackets), parchment (in-world documents) and sunken wells. Interactive cards lift and glow; the title link covers the card.">
       <Specimen label="Tones" layout="grid3">
-        {(['default', 'raised', 'ornate', 'parchment', 'sunken'] as const).map((tone) => (
+        {(['default', 'raised', 'neon', 'parchment', 'sunken'] as const).map((tone) => (
           <Card key={tone} tone={tone}>
             <CardHeader eyebrow={tone}>
               <CardTitle>Case #0069</CardTitle>

@@ -5,8 +5,8 @@
  */
 .impact {
   --_plate: var(--cc-color-accent);
-  --_ink: var(--cc-neutral-100);
-  --_outline: var(--cc-neutral-900);
+  --_ink: var(--cc-cream-150);
+  --_outline: var(--cc-night-900);
   position: relative;
   display: inline-grid;
   place-items: center;
@@ -60,11 +60,11 @@
 
 .cook {
   --_plate: var(--cc-color-highlight);
-  --_ink: var(--cc-neutral-100);
+  --_ink: var(--cc-cream-50);
 }
 
 .order {
-  --_plate: var(--cc-teal-900);
+  --_plate: var(--cc-purple-500);
 }
 
 .counter {
