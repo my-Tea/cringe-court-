@@ -11,9 +11,11 @@
  *   VITE_ARC_COURT         CringeCourt contract address        (required for arc-testnet)
  *   VITE_ARC_USDC          USDC (ERC-20 interface) address      (required for arc-testnet)
  *   VITE_ARC_REGISTRY      HumanRegistry address                (required for arc-testnet)
- *   VITE_IDENTITY          mock | world-idkit
+ *   VITE_IDENTITY          mock | world-idkit   (mock stays the default)
  *   VITE_WORLD_APP_ID      World Developer Portal app id        (required for world-idkit)
  *   VITE_WORLD_BACKEND_URL Verifier backend: /rp-context and /verify (required for world-idkit)
+ *   VITE_WORLD_ACTION      World action (default cringecourt-juror)
+ *   VITE_WORLD_ENVIRONMENT staging | production (default staging)
  *   VITE_BACKEND_URL       Shared court server (apps/server) so Versus and Grand Jury work across
  *                          devices. Unset: every court lives in this browser only (the default).
  */
@@ -41,6 +43,8 @@ export interface BackendConfig {
 export interface WorldConfig {
   appId: `app_${string}`;
   backendUrl: string;
+  action: string;
+  environment: 'staging' | 'production';
 }
 
 /** A deploy-config problem as catalog key + params, so the UI can translate it. */
@@ -109,8 +113,18 @@ export function readPlatformConfig(env: Env): PlatformConfig {
     const backendUrl = str(env.VITE_WORLD_BACKEND_URL).replace(/\/+$/, '');
     const missing = [!/^app_[A-Za-z0-9_]+$/.test(appId) && 'VITE_WORLD_APP_ID', !/^https?:\/\//.test(backendUrl) && 'VITE_WORLD_BACKEND_URL'].filter(Boolean);
     if (missing.length === 0) {
-      identity = 'world-idkit';
-      world = { appId: appId as `app_${string}`, backendUrl };
+      const environmentName = str(env.VITE_WORLD_ENVIRONMENT) || 'staging';
+      if (environmentName !== 'staging' && environmentName !== 'production') {
+        warnings.push({ key: 'shell.config.worldMissing', params: { vars: 'VITE_WORLD_ENVIRONMENT', count: 1 } });
+      } else {
+        identity = 'world-idkit';
+        world = {
+          appId: appId as `app_${string}`,
+          backendUrl,
+          action: str(env.VITE_WORLD_ACTION) || 'cringecourt-juror',
+          environment: environmentName,
+        };
+      }
     } else {
       warnings.push({ key: 'shell.config.worldMissing', params: { vars: missing.join(', '), count: missing.length } });
     }
@@ -123,7 +137,6 @@ export function readPlatformConfig(env: Env): PlatformConfig {
   if (wantBackend) {
     if (/^https?:\/\/[^\s/?#]+(\/[^\s?#]*)?$/.test(wantBackend)) backend = { url: wantBackend };
     else warnings.push({ key: 'backend.config.invalid', params: { value: wantBackend } });
-    if (backend && identity === 'world-idkit') warnings.push({ key: 'backend.config.idkit', params: {} });
   }
 
   return { ledger, arc, identity, world, backend, warnings };

@@ -9,6 +9,7 @@ export interface IdentityOptions {
   /** Where the World App link goes. Default: the app-wide connect dialog (`WorldIdConnectHost`). */
   onConnect?: ConnectHandler;
   wallet?: () => string | undefined;
+  token?: () => string | null | undefined;
   fetch?: typeof fetch;
 }
 
@@ -18,8 +19,11 @@ export function identityFor(config: Pick<PlatformConfig, 'identity' | 'world'>, 
     return new IdkitIdentityPort({
       appId: config.world.appId,
       backendUrl: config.world.backendUrl,
+      action: config.world.action,
+      environment: config.world.environment,
       onConnect: options.onConnect ?? presentWorldIdConnect,
       ...(options.wallet ? { wallet: options.wallet } : {}),
+      ...(options.token ? { token: options.token } : {}),
       ...(options.fetch ? { fetch: options.fetch } : {}),
     });
   }

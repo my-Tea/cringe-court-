@@ -107,7 +107,7 @@ describe('readPlatformConfig', () => {
     });
     expect(c.ledger).toBe('arc-testnet');
     expect(c.arc?.chainId).toBe(5042002);
-    expect(c.world).toEqual({ appId: 'app_staging_123', backendUrl: 'https://verify.example' });
+    expect(c.world).toEqual({ appId: 'app_staging_123', backendUrl: 'https://verify.example', action: 'cringecourt-juror', environment: 'staging' });
     expect(c.warnings).toEqual([]);
   });
 
