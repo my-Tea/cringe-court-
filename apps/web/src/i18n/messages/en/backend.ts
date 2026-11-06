@@ -3,7 +3,7 @@ export const backend = {
   // ── deploy configuration (Settings → Connections)
   'config.invalid': 'VITE_BACKEND_URL is “{value}”, which is not an http(s) address. Versus and Grand Jury stay on this device.',
   'config.idkit':
-    'The court server checks World ID proofs for shape, level and one seat per human, but does not verify IDKit proofs cryptographically yet. Pair it with the mock identity until it does.',
+    'World ID proofs are checked by the court server. The signing key stays there. This browser only receives the result.',
 
   // ── connecting, and when it fails
   'gate.connecting.title': 'Connecting to the court server…',
