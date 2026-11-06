@@ -1,0 +1,54 @@
+import type { AudioCueId } from '@cringe-court/core';
+
+/**
+ * Core cue ids → @cringe-court/audio cue ids (v3/audio `packages/audio/src/cues.ts`,
+ * read at the time of writing; that package is not merged into this branch).
+ * `null` = no one-shot equivalent: music beds and ambience are driven by the
+ * audio package's phase ambience, and character babble has no recipe yet.
+ * When v3/audio merges, its adapter plays `AUDIO_CUE_MAP[cue]` and skips nulls.
+ */
+export const AUDIO_CUE_MAP: Readonly<Record<AudioCueId, string | null>> = {
+  'sfx.gavel': 'gavel_strike',
+  'sfx.stamp': 'stamp',
+  'sfx.coin': 'coin',
+  'sfx.paper': 'paper',
+  'sfx.unlock': 'ballot_unlock',
+  'sfx.door-creak': 'door_creak',
+  'sfx.desk-slam': 'gavel_triple',
+  'sfx.whoosh': null,
+  'sfx.impact': 'gavel_strike',
+  'sfx.crowd-gasp': 'crowd_gasp',
+  'sfx.crowd-laugh': 'crowd_laugh',
+  'sfx.crowd-murmur': 'crowd_murmur',
+  'sfx.ballot-drop': 'ballot_seal',
+  'sfx.box-shut': 'ballot_seal',
+  'sfx.seal-break': 'ballot_unlock',
+  'sfx.spotlight': null,
+  'sfx.typewriter': 'vote_tick',
+  'stinger.objection': 'objection',
+  'stinger.case-open': 'stamp',
+  'stinger.jury-out': 'timer_warning',
+  'stinger.verdict-guilty': 'verdict_guilty',
+  'stinger.verdict-not-cooked': 'verdict_not_cooked',
+  'stinger.verdict-side': 'verdict_decided',
+  'stinger.mistrial': 'verdict_none',
+  'stinger.reveal': 'ballot_unlock',
+  'music.lobby': null,
+  'music.trial': null,
+  'music.tension': null,
+  'music.deliberation': null,
+  'music.verdict': 'crowd_applause',
+  'amb.courtroom': null,
+  'ui.click': 'ui_click',
+  'ui.hover': 'ui_hover',
+  'ui.toggle': 'ui_toggle',
+  'ui.success': 'ui_confirm',
+  'ui.error': 'ui_error',
+  'ui.notify': 'ui_toast',
+  'voice.judge': null,
+  'voice.prosecutor': null,
+  'voice.defense': null,
+  'voice.side-a': null,
+  'voice.side-b': null,
+  'voice.narrator': null,
+};
