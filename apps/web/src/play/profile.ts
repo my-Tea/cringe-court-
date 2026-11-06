@@ -63,20 +63,21 @@ export function savedLook(storage: Storage | undefined = safeStorage()): PlayerL
   }
 }
 
-/** Seals already lifted for this profile (a returning player walks straight through). */
+/**
+ * Seals already lifted. The shrine is optional, so the verify bridge starts open.
+ * Wardrobe, then the trial gate, then the courthouse.
+ */
 export function openGatesFor(p: PlayerProfile): GateId[] {
-  const out: GateId[] = [];
-  if (p.verified) out.push('verify');
-  if (p.verified && p.dressed) out.push('wardrobe');
-  if (p.verified && p.dressed && p.mode) out.push('trials');
+  const out: GateId[] = ['verify'];
+  if (p.dressed) out.push('wardrobe');
+  if (p.dressed && p.mode) out.push('trials');
   return out;
 }
 
 export type QuestStep = 'verify' | 'wardrobe' | 'trial' | 'enter';
 
-/** The step the player is on. */
+/** The step the player is on. Verification is optional and does not block the walk. */
 export function currentStep(p: PlayerProfile): QuestStep {
-  if (!p.verified) return 'verify';
   if (!p.dressed) return 'wardrobe';
   if (!p.mode) return 'trial';
   return 'enter';

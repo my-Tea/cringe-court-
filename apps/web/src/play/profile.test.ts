@@ -20,8 +20,8 @@ const base: PlayerProfile = { look: DEFAULT_LOOK, dressed: false, verified: null
 
 describe('arrival run profile', () => {
   it('walks the steps in order and lifts one seal per finished stop', () => {
-    expect(currentStep(base)).toBe('verify');
-    expect(openGatesFor(base)).toEqual([]);
+    expect(currentStep(base)).toBe('wardrobe');
+    expect(openGatesFor(base)).toEqual(['verify']);
     const verified = { ...base, verified: { nullifier: '0xabc', at: 1 } };
     expect(currentStep(verified)).toBe('wardrobe');
     expect(openGatesFor(verified)).toEqual(['verify']);
@@ -29,8 +29,8 @@ describe('arrival run profile', () => {
     expect(currentStep(dressed)).toBe('trial');
     expect(openGatesFor({ ...dressed, mode: 'versus' })).toEqual(['verify', 'wardrobe', 'trials']);
     expect(currentStep({ ...dressed, mode: 'versus' })).toBe('enter');
-    // A mode chosen without the earlier stops opens nothing past them.
-    expect(openGatesFor({ ...base, mode: 'solo' })).toEqual([]);
+    // A mode chosen without dressing opens the shrine only.
+    expect(openGatesFor({ ...base, mode: 'solo' })).toEqual(['verify']);
   });
 
   it('a first visit rolls and saves a look; a saved profile round-trips', () => {

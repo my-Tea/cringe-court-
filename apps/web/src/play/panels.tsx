@@ -241,7 +241,6 @@ export function TrialPanel({ mode, chosen, onChoose, onClose }: { mode: ModeId; 
 /* ── Quest tracker ────────────────────────────────────────────────── */
 
 const STEPS: ReadonlyArray<{ id: QuestStep; label: MessageKey; hint: MessageKey }> = [
-  { id: 'verify', label: 'play.quest.verify', hint: 'play.quest.hint.verify' },
   { id: 'wardrobe', label: 'play.quest.wardrobe', hint: 'play.quest.hint.wardrobe' },
   { id: 'trial', label: 'play.quest.trial', hint: 'play.quest.hint.trial' },
   { id: 'enter', label: 'play.quest.enter', hint: 'play.quest.hint.enter' },
