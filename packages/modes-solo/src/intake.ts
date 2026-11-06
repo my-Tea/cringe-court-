@@ -45,7 +45,7 @@ export function validateDraft(d: SoloDraft): DraftErrors {
 export function validateAngle(angle: string): string | null {
   const a = angle.trim();
   if (!a) return 'Pick an angle or write one line for Counsel Chaos.';
-  if (a.length > ANGLE_MAX) return `One line, ${ANGLE_MAX} characters at most (D2).`;
+  if (a.length > ANGLE_MAX) return `One line, ${ANGLE_MAX} characters at most.`;
   return null;
 }
 

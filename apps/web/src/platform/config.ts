@@ -14,6 +14,8 @@
  *   VITE_IDENTITY          mock | world-idkit
  *   VITE_WORLD_APP_ID      World Developer Portal app id        (required for world-idkit)
  *   VITE_WORLD_BACKEND_URL Verifier backend: /rp-context and /verify (required for world-idkit)
+ *   VITE_BACKEND_URL       Shared court server (apps/server) so Versus and Grand Jury work across
+ *                          devices. Unset: every court lives in this browser only (the default).
  */
 import type { MessageKey, MessageParams } from '@/i18n';
 
@@ -28,6 +30,12 @@ export interface ArcConfig {
   court: Address;
   usdc: Address;
   registry: Address;
+}
+
+/** The shared court server (docs/BACKEND.md). */
+export interface BackendConfig {
+  /** Origin of apps/server, no trailing slash. */
+  url: string;
 }
 
 export interface WorldConfig {
@@ -46,6 +54,8 @@ export interface PlatformConfig {
   arc: ArcConfig | null;
   identity: IdentityKind;
   world: WorldConfig | null;
+  /** Shared court server for Versus and Grand Jury, or null for this-browser-only courts. */
+  backend: BackendConfig | null;
   /** Why a requested adapter fell back to its demo stand-in. Translated where shown (config is read once, at load). */
   warnings: readonly ConfigWarning[];
 }
@@ -108,7 +118,15 @@ export function readPlatformConfig(env: Env): PlatformConfig {
     warnings.push({ key: 'shell.config.unknownIdentity', params: { value: wantIdentity } });
   }
 
-  return { ledger, arc, identity, world, warnings };
+  let backend: BackendConfig | null = null;
+  const wantBackend = str(env.VITE_BACKEND_URL).replace(/\/+$/, '');
+  if (wantBackend) {
+    if (/^https?:\/\/[^\s/?#]+(\/[^\s?#]*)?$/.test(wantBackend)) backend = { url: wantBackend };
+    else warnings.push({ key: 'backend.config.invalid', params: { value: wantBackend } });
+    if (backend && identity === 'world-idkit') warnings.push({ key: 'backend.config.idkit', params: {} });
+  }
+
+  return { ledger, arc, identity, world, backend, warnings };
 }
 
 /** The config this build was made with. */

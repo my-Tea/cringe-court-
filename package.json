@@ -27,7 +27,10 @@
     "build:libs": "npm run build -w @cringe-court/chain-client -w @cringe-court/world-id",
     "test:packages": "npm test -w @cringe-court/chain-client -w @cringe-court/world-id",
     "test:contracts": "npm --prefix contracts test",
-    "check:full": "npm run check && npm run test:packages && npm run test:contracts"
+    "check:full": "npm run check && npm run test:packages && npm run test:contracts",
+    "server": "npm start -w @cringe-court/server",
+    "dev:full": "node tools/dev-full.mjs",
+    "e2e:backend": "node apps/web/e2e/backend/run.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

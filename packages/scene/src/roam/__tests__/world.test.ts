@@ -36,17 +36,19 @@ describe('roam world', () => {
   });
 
   it('has the reference set dressing: exhibits, witness stand, jury, judge, police, two counsel', () => {
-    for (const id of ['exhibit-a', 'exhibit-b', 'exhibit-c', 'witness-stand', 'defendant-table', 'bench', 'street-doors', 'globe', 'bust']) {
+    for (const id of ['exhibit-a', 'exhibit-b', 'exhibit-c', 'witness-stand', 'defendant-table', 'prosecution-chair', 'bench', 'street-doors', 'globe', 'bust']) {
       expect(world.interactables.some((i) => i.id === id)).toBe(true);
     }
     const roles = world.npcs.map((n) => n.role);
     for (const r of ['judge', 'prosecutor', 'defense', 'bailiff', 'juror'] as const) expect(roles).toContain(r);
-    expect(roles.filter((r) => r === 'juror')).toHaveLength(3);
+    // Seven jury-box seats: Grand Jury appoints 7 (Solo and Versus fill the front three).
+    expect(roles.filter((r) => r === 'juror')).toHaveLength(7);
   });
 
   it('spawns and seat exits are standing room (inside the rooms, not inside furniture)', () => {
     for (const [id, s] of Object.entries(world.spawns)) {
-      if (id === 'defendant' || id === 'witness') continue;
+      // Seated spawns put you in a chair, not on the floor.
+      if (id === 'defendant' || id === 'witness' || id === 'prosecution' || id === 'jury-box') continue;
       expect(insideAny(s.pos, bounds), id).toBe(true);
       expect(overlaps(index, s.pos[0], s.pos[2], s.pos[1]), id).toBe(false);
     }
@@ -152,5 +154,67 @@ describe('roam world', () => {
     }
     expect(p.pos[0]).toBeGreaterThan(-36.4 * ROOM_SCALE + BODY.radius - 0.01);
     expect(top).toBeLessThan(BODY.step + 3);
+  });
+
+  describe('the jury box (seven seats)', () => {
+    const jurors = () => world.npcs.filter((n) => n.role === 'juror');
+    /** Eye-level centre of a seated juror's head (the seated cast spans ~28–50 above the origin, ~12 wide). */
+    const head = (p: Vec3): Vec3 => [p[0] - 1, p[1] + 39, p[2]];
+
+    it('seats seven jurors: three on the floor, four on the raised back row, none sharing a seat', () => {
+      expect(JURY_SLOTS).toHaveLength(7);
+      expect(JURY_SLOTS.filter((s) => s.row === 'front')).toHaveLength(3);
+      const front = JURY_SLOTS.filter((s) => s.row === 'front');
+      const back = JURY_SLOTS.filter((s) => s.row === 'back');
+      for (const b of back) expect(b.pos[1] - front[0]!.pos[1]).toBeGreaterThan(10);
+      for (const row of [front, back]) {
+        const zs = row.map((s) => s.pos[2]).sort((a, b) => a - b);
+        // A seated juror is ~21 wide: neighbours need about that much room.
+        for (let i = 1; i < zs.length; i++) expect(zs[i]! - zs[i - 1]!).toBeGreaterThanOrEqual(19.9);
+      }
+      expect(jurors().map((j) => j.jurySlot)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+      for (const j of jurors()) {
+        expect(j.pos).toEqual(JURY_SLOTS[j.jurySlot!]!.pos);
+        expect(zoneAt(world, j.pos[0], j.pos[2])?.id).toBe('jury-box');
+        // Inside the box, behind the front panel, in front of the wall.
+        expect(j.pos[0]).toBeGreaterThan(JURY_BOX.rail + 5);
+        expect(j.pos[0]).toBeLessThan(JURY_BOX.x1);
+      }
+    });
+
+    it('every back-row face shows between the front-row heads from the well, the counsel tables and the jury viewpoint', () => {
+      const front = JURY_SLOTS.filter((s) => s.row === 'front').map((s) => head(s.pos));
+      const viewers: Vec3[] = [
+        [0, 44, 0],
+        [world.seats.defendant.pos[0], 40, world.seats.defendant.pos[2]],
+        [world.seats.prosecution.pos[0], 40, world.seats.prosecution.pos[2]],
+        [world.spawns['jury-view'].pos[0], 44, world.spawns['jury-view'].pos[2]],
+        [world.spawns['bench-front'].pos[0], 52, world.spawns['bench-front'].pos[2]],
+      ];
+      for (const v of viewers) {
+        for (const b of JURY_SLOTS.filter((s) => s.row === 'back')) {
+          const face = head(b.pos);
+          for (const f of front) {
+            // Where the sightline crosses the front row's plane (x of the front heads).
+            const t = (f[0] - v[0]) / (face[0] - v[0]);
+            const y = v[1] + (face[1] - v[1]) * t;
+            const z = v[2] + (face[2] - v[2]) * t;
+            // The back juror's eyes clear the front head (half-width 6, top 11 above its centre): beside it or over it.
+            const clear = Math.abs(z - f[2]) > 8 || y > f[1] + 11;
+            expect(clear, `back z ${b.pos[2]} from ${v.join(',')} behind front z ${f[2]}`).toBe(true);
+          }
+        }
+      }
+    });
+
+    it('is staff-only: the box is closed to walking, and the player juror seat is in it', () => {
+      const seat = world.seats['jury-box'];
+      expect(seat.pos).toEqual(JURY_SLOTS[PLAYER_JURY_SLOT]!.pos);
+      expect(overlaps(index, seat.pos[0], seat.pos[2], seat.pos[1])).toBe(true);
+      expect(overlaps(index, seat.exit[0], seat.exit[2], seat.exit[1])).toBe(false);
+      expect(zoneAt(world, seat.pos[0], seat.pos[2])?.id).toBe('jury-box');
+      // B17: the zone exists, and the viewpoint reports where it really stands (the well, facing the box).
+      expect(zoneAt(world, world.spawns['jury-view'].pos[0], world.spawns['jury-view'].pos[2])?.id).toBe('well');
+    });
   });
 });

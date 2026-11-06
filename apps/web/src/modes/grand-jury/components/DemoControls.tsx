@@ -1,6 +1,6 @@
 import type { CaseDetail } from '@cringe-court/modes-grand-jury';
 import { useState } from 'react';
-import { Button, Icon, Tooltip } from '@/ds';
+import { Button, Icon, Tooltip, useToast } from '@/ds';
 import { t } from '@/i18n';
 import { useCourtContext } from '../state/context';
 import { useCourtNow } from '../state/hooks';
@@ -13,6 +13,7 @@ import styles from '../GrandJury.module.css';
  */
 export function DemoControls({ detail }: { detail: CaseDetail }) {
   const { demo } = useCourtContext();
+  const { toast } = useToast();
   const now = useCourtNow();
   const [busy, setBusy] = useState(false);
   if (!detail.demoTiming || detail.phaseEndsAt === null) return null;
@@ -22,9 +23,9 @@ export function DemoControls({ detail }: { detail: CaseDetail }) {
   const skip = async () => {
     setBusy(true);
     try {
-      await demo.sim.catchUp(detail.caseNumber);
-      demo.clock.skip(left + 1);
-      await demo.sim.tick();
+      await demo.skip(detail.caseNumber);
+    } catch (err) {
+      toast({ tone: 'danger', title: t('grandJury.demo.clock'), description: err instanceof Error ? err.message : String(err) });
     } finally {
       setBusy(false);
     }

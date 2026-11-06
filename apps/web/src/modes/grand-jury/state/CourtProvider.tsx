@@ -1,15 +1,30 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { BackendClient } from '@/platform/backend';
 import { CourtContext, forgetSharedDemo, sharedDemo, type CourtStatus } from './context';
 
-/** Provides the shared demo court, its change signal and the once-a-second simulated world. */
-export function CourtProvider({ children, fallback, tick = true }: { children: ReactNode; fallback: (status: Exclude<CourtStatus, { state: 'ready' }>, retry: () => void) => ReactNode; tick?: boolean }) {
+/**
+ * Provides the court (this browser's demo, or the shared court server when
+ * `client` is given), its change signal and, for the demo, the once-a-second
+ * simulated world. On the server the world ticks there and changes arrive live.
+ */
+export function CourtProvider({
+  children,
+  fallback,
+  tick = true,
+  client = null,
+}: {
+  children: ReactNode;
+  fallback: (status: Exclude<CourtStatus, { state: 'ready' }>, retry: () => void) => ReactNode;
+  tick?: boolean;
+  client?: BackendClient | null;
+}) {
   const [status, setStatus] = useState<CourtStatus>({ state: 'loading' });
   const [version, setVersion] = useState(0);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let live = true;
-    sharedDemo().then(
+    sharedDemo(client).then(
       (demo) => live && setStatus({ state: 'ready', demo }),
       (error: unknown) => {
         forgetSharedDemo();
@@ -19,7 +34,7 @@ export function CourtProvider({ children, fallback, tick = true }: { children: R
     return () => {
       live = false;
     };
-  }, [attempt]);
+  }, [attempt, client]);
 
   const demo = status.state === 'ready' ? status.demo : null;
 
@@ -31,14 +46,17 @@ export function CourtProvider({ children, fallback, tick = true }: { children: R
   // The world's heartbeat: other summoners, jurors and the bailiff act once a second.
   const ticking = useRef(false);
   useEffect(() => {
-    if (!demo || !tick) return;
+    const step = demo?.tick;
+    if (!demo || !tick || !step) return;
     const id = window.setInterval(() => {
       if (document.hidden || ticking.current) return;
       ticking.current = true;
-      void demo.sim.tick().finally(() => {
-        ticking.current = false;
-        setVersion((v) => v + 1);
-      });
+      void step()
+        .catch((e: unknown) => console.warn('[grand-jury] simulation tick failed', e))
+        .finally(() => {
+          ticking.current = false;
+          setVersion((v) => v + 1);
+        });
     }, 1000);
     return () => window.clearInterval(id);
   }, [demo, tick]);

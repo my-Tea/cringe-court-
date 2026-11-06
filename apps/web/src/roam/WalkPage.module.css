@@ -154,3 +154,10 @@
     height: min(78vh, 46rem);
   }
 }
+
+.details {
+  display: block;
+  margin-top: var(--cc-space-2);
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+}

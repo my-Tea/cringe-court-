@@ -77,7 +77,14 @@ describe('Language setting', () => {
 
 describe('readPlatformConfig', () => {
   it('defaults to the demo adapters', () => {
-    expect(readPlatformConfig({})).toEqual({ ledger: 'demo', arc: null, identity: 'mock', world: null, warnings: [] });
+    expect(readPlatformConfig({})).toEqual({ ledger: 'demo', arc: null, identity: 'mock', world: null, backend: null, warnings: [] });
+  });
+
+  it('takes a court server URL, and says so when it is not one', () => {
+    expect(readPlatformConfig({ VITE_BACKEND_URL: 'http://localhost:8787/' }).backend).toEqual({ url: 'http://localhost:8787' });
+    const bad = readPlatformConfig({ VITE_BACKEND_URL: 'localhost:8787' });
+    expect(bad.backend).toBeNull();
+    expect(bad.warnings[0]).toEqual({ key: 'backend.config.invalid', params: { value: 'localhost:8787' } });
   });
 
   it('accepts a complete Arc testnet and World ID config', () => {

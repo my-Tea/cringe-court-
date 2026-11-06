@@ -12,7 +12,7 @@
  * approves the exact text before it can reach the other side or the jury.
  */
 import type { FilingPatch, TrialRules } from '@cringe-court/core';
-import { redact, type RedactionHit } from './redact';
+import { placeholderHits, redact, type RedactionHit } from './redact';
 import { screenTopic, type TopicScreen } from './safeguards';
 
 export type BriefingStep = 'happened' | 'why' | 'private' | 'angle';
@@ -97,7 +97,7 @@ export function briefingIssues(d: BriefingDraft, rules: Pick<TrialRules, 'storyM
   if (composeStory(d).length > rules.storyMaxChars) issues.push({ field: 'why', message: `Your story is over ${rules.storyMaxChars} characters in total.` });
   if (d.privateNotes.length > q.private.maxChars) issues.push({ field: 'privateNotes', message: `Keep private notes under ${q.private.maxChars} characters.` });
   if (!d.angle.trim()) issues.push({ field: 'angle', message: 'Pick an angle or write your own.' });
-  if (d.angle.trim().length > rules.angleMaxChars) issues.push({ field: 'angle', message: `One line: ${rules.angleMaxChars} characters at most (D2).` });
+  if (d.angle.trim().length > rules.angleMaxChars) issues.push({ field: 'angle', message: `One line: ${rules.angleMaxChars} characters at most.` });
   if (d.nickname.trim().length > rules.nicknameMaxChars) issues.push({ field: 'nickname', message: `Nicknames are ${rules.nicknameMaxChars} characters at most.` });
   return issues;
 }
@@ -113,10 +113,14 @@ export interface PreparedBriefing {
 
 /** Run the redaction pass and the topic screen over a briefing. Pure. */
 export function prepareBriefing(d: BriefingDraft): PreparedBriefing {
-  const story = redact(composeStory(d));
+  const rawStory = composeStory(d);
+  const story = redact(rawStory);
   const privateNotes = redact(d.privateNotes.trim());
   const angle = redact(d.angle.trim());
-  const nickname = redact(d.nickname.trim());
+  // The nickname is a pseudonym the player chose; it may legitimately look like a first name.
+  const nickname = redact(d.nickname.trim(), { names: false });
+  // A stored brief is already redacted: count its placeholders so every screen reports the same removals.
+  const withStored = (r: { text: string; hits: readonly RedactionHit[] }, raw: string): readonly RedactionHit[] => [...r.hits, ...placeholderHits(raw)];
   return {
     patch: {
       story: story.text,
@@ -124,7 +128,12 @@ export function prepareBriefing(d: BriefingDraft): PreparedBriefing {
       angle: angle.text || null,
       nickname: nickname.text || null,
     },
-    redactions: { story: story.hits, privateNotes: privateNotes.hits, angle: angle.hits, nickname: nickname.hits },
+    redactions: {
+      story: withStored(story, rawStory),
+      privateNotes: withStored(privateNotes, d.privateNotes),
+      angle: withStored(angle, d.angle),
+      nickname: withStored(nickname, d.nickname),
+    },
     screen: screenTopic(d.happened, d.why, d.privateNotes, d.angle, d.nickname),
   };
 }

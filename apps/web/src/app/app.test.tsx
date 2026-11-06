@@ -65,6 +65,19 @@ describe('app shell', () => {
     expect(document.title).toBe(`${title} · CringeCourt`);
   });
 
+  it('/grand-jury explains that you are the verified juror and the others are simulated; Solo keeps the NPC-jurors notice', async () => {
+    const gj = renderAt('/grand-jury');
+    await screen.findByRole('heading', { level: 1, name: 'Grand Jury' });
+    expect(screen.getByText('Playable on the demo court: you are a verified juror')).toBeInTheDocument();
+    expect(screen.getByText(/mock World ID verifies you/)).toBeInTheDocument();
+    expect(screen.queryByText(/NPC jurors stand in for World ID/)).not.toBeInTheDocument();
+    gj.unmount();
+    renderAt('/solo');
+    await screen.findByRole('heading', { level: 1, name: 'Solo Court' });
+    expect(screen.getByText('Testnet demo court')).toBeInTheDocument();
+    expect(screen.getByText(/NPC jurors stand in for World ID/)).toBeInTheDocument();
+  });
+
   it('/versus renders its mode page with ballot and the live filing calls to action', async () => {
     renderAt('/versus');
     expect(await screen.findByRole('heading', { level: 1, name: 'Versus Court' })).toBeInTheDocument();
