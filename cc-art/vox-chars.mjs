@@ -2,6 +2,62 @@
 // Head ≈ 23% of height, matching the Judge reference.
 import { H, C, b, pair, head, torso, arms, legs, tag, posed } from './vox-base.mjs';
 
+/** Idle variants per character, as rig deltas (same units as POSES in
+ *  vox-base.mjs). Each stays an "idle": feet planted, no expression change,
+ *  one small readable action. Played once after a few base-idle loops. */
+export const IDLE = {
+  judge: {
+    idle_a: { armL: { fwd: 135, across: 38 }, head: { nod: 3 } },                  // adjusts shades
+    idle_b: { armR: { out: 24, fwd: 8 }, head: { nod: 5 } },                    // taps the gavel
+    idle_c: { armL: { fwd: 105, across: 30 }, head: { nod: 6, tilt: 3 } },        // strokes beard
+  },
+  prosecutor: {
+    idle_a: { armR: { fwd: 85, across: 50 }, armL: { fwd: 85, across: 50 }, head: { tilt: -4 }, lean: -2 }, // arms crossed
+    idle_b: { sway: 5, lean: 3, head: { tilt: 5 }, armR: { out: 8 }, armL: { out: 8 } },               // foot-tap lean
+    idle_c: { armR: { fwd: 145, across: 22 }, head: { tilt: 7 } },                                       // flips hair
+  },
+  defense: {
+    idle_a: { armR: { out: 30, fwd: 10 }, armL: { out: 30, fwd: 10 }, head: { tilt: -6 }, dy: 1.5, sway: 3 }, // shrug-lean
+    idle_b: { armR: { fwd: 85, across: 38 }, head: { nod: 5 } },                                               // adjusts tie
+    idle_c: { armL: { fwd: 75, out: -18 }, head: { nod: 14, tilt: 4 } },                                      // reads paper
+  },
+  bailiff: {
+    idle_a: { armR: { fwd: 150, across: 26 }, head: { nod: -2 } },                // adjusts cap
+    idle_b: { sway: 4, head: { tilt: -5 }, armR: { out: 6, fwd: -6 }, armL: { out: 6, fwd: -6 } }, // shifts weight
+    idle_c: { armL: { fwd: 95, across: 45 }, head: { nod: 8 } },                 // checks watch
+  },
+  clerk: {
+    idle_a: { armL: { fwd: 55, out: -8 }, head: { nod: 9 } },                   // flips papers
+    idle_b: { armR: { fwd: 135, across: 36 }, head: { nod: 2 } },                  // pushes glasses up
+    idle_c: { head: { nod: -8, tilt: 6 }, sway: 2, armR: { out: 5 } },          // glances up
+  },
+  'ai-narrator': {
+    idle_a: { dy: 4, sway: 5 },                                                 // bob + tilt right
+    idle_b: { dy: 2, lean: 7, sway: -4 },                                       // leans in
+    idle_c: { dy: 5, sway: -6, lean: -4 },                                      // bob + tilt left
+  },
+  juror: {
+    idle_a: { armL: { fwd: 120, across: 34 }, head: { nod: 4 } },                 // munches popcorn
+    idle_b: { lean: -9, head: { nod: -6 }, armL: { out: 6 } },                  // leans back
+    idle_c: { lean: 7, head: { nod: 7 }, armL: { fwd: 28, out: -4 } },          // leans in, engrossed
+  },
+  creator: {
+    idle_a: { armR: { out: 6, fwd: 22 }, armL: { out: 6, fwd: 22 }, head: { tilt: 5 }, sway: 3 }, // hands in hoodie
+    idle_b: { armR: { fwd: 150, across: 22 }, head: { tilt: 5, nod: 3 } },                          // scratches head
+    idle_c: { sway: -6, head: { nod: 10 }, armR: { fwd: 12 }, armL: { fwd: 12 } },                // nervous sway
+  },
+  'side-a': {
+    idle_a: { armR: { fwd: 85, across: 50 }, armL: { fwd: 85, across: 50 }, head: { tilt: 4 }, lean: -3 }, // arms crossed, unbothered
+    idle_b: { armR: { fwd: 70, across: 24 }, head: { nod: 12 } },                                         // checks the receipts on their phone
+    idle_c: { lean: -5, sway: 3, head: { nod: -4 }, armR: { out: 5 }, armL: { out: 5 } },                 // rocks back on the heels
+  },
+  'side-b': {
+    idle_a: { armR: { out: 14, fwd: -12 }, armL: { out: 14, fwd: -12 }, sway: -3, head: { tilt: -5 } },   // hands on hips
+    idle_b: { armR: { fwd: 150, across: 18 }, head: { tilt: -6, nod: 2 } },                                // tightens the ponytail
+    idle_c: { sway: 5, lean: 3, head: { tilt: 6 }, armR: { out: 9 }, armL: { out: 9 } },                   // impatient lean
+  },
+};
+
 export { head };
 
 /** Replace the face boxes for a given expression.
@@ -89,6 +145,7 @@ export const JUDGE = {
 
     // the Judge never points — he raises the gavel
     return posed(out, pose, {
+      ...IDLE.judge,
       objection: { armR: { out: 165, fwd: 10 }, armL: { out: 10 } },
       angry: { armR: { out: 120, fwd: 15 }, armL: { out: 22, fwd: 12 } },
     });
@@ -133,7 +190,7 @@ export const PROSECUTOR = {
     out.push(...torso({ col: C.burgSh, colSh: C.burg, style: 'suit' }));
     out.push(...arms({ col: C.burgSh, colSh: C.burg, cuff: C.cream }));
     out.push(...legs({ col: C.navySh, shoe: C.ink }));
-    return posed(out, pose);
+    return posed(out, pose, IDLE.prosecutor);
   },
 };
 
@@ -170,7 +227,7 @@ export const DEFENSE = {
       b([-H.torsoW - H.armW * 2 - 3, H.armBot + 4, -6], [-H.torsoW - H.armW * 2 + 8, H.armBot + 16, -4.6], C.cream),
       b([-H.torsoW - H.armW * 2 - 1, H.armBot + 13, -6.2], [-H.torsoW - H.armW * 2 + 6, H.armBot + 14, -5], '#A32D3F'),
     ]));
-    return posed(out, pose);
+    return posed(out, pose, IDLE.defense);
   },
 };
 
@@ -200,7 +257,7 @@ export const BAILIFF = {
     out.push(...pair([-H.torsoW, H.torsoTop - 2, -5], [-H.torsoW + 6, H.torsoTop + 0.6, 5], C.gold));
     out.push(...arms({ col: C.navy, colSh: C.navySh, cuff: C.ink }));
     out.push(...legs({ col: C.navySh, shoe: C.ink }));
-    return posed(out, pose);
+    return posed(out, pose, IDLE.bailiff);
   },
 };
 
@@ -236,7 +293,7 @@ export const CLERK = {
     for (let i = 0; i < 4; i++) {
       out.push(...tag('armL', [b([-H.torsoW - 9 + i * 0.6, H.armBot + 2 + i * 1.6, -6], [-H.torsoW + 4 + i * 0.6, H.armBot + 4 + i * 1.6, -3], i % 2 ? C.cream : C.creamSh)]));
     }
-    return posed(out, pose);
+    return posed(out, pose, IDLE.clerk);
   },
 };
 
@@ -270,7 +327,7 @@ export const NARRATOR = {
       out.push(b([x + 0.8, y + 4.4, z + 0.8], [x + 4.2, y + 5.4, z + 1.2], C.skinSh));
     }
     // no limbs: the body lean/sway/bob carries the pose
-    return posed(out, pose);
+    return posed(out, pose, IDLE['ai-narrator']);
   },
 };
 
@@ -384,7 +441,7 @@ function juror(v = {}) {
       for (let i = 0; i < 4; i++) out.push(b([-H.torsoW - 11 + i * 2.6, H.armBot + 13, -4], [-H.torsoW - 9.4 + i * 2.6, H.armBot + 16, -1.6], i % 2 ? C.goldLt : C.cream));
       tag('armL', out.slice(-6));   // the bucket follows the left hand
     }
-    return posed(out, pose);
+    return posed(out, pose, IDLE.juror);
   };
 }
 
@@ -429,7 +486,7 @@ export const CREATOR = {
     for (const [dx, dy2, w2, h2] of [[0, 3, 3, 3], [6, 3, 3, 3], [0, 0, 3, 4], [6, 0, 3, 4], [3, 1, 3, 4], [3, 5, 3, 2]]) {
       out.push(b([hx + dx, hy + dy2, hz], [hx + dx + w2, hy + dy2 + h2, hz + 1], C.white));
     }
-    return posed(out, pose);
+    return posed(out, pose, IDLE.creator);
   },
 };
 
@@ -486,7 +543,7 @@ function side({ id, label, letter, team, teamSh, teamLt, hair, hairSh, hairStyle
       g.forEach((row, gy) => [...row].forEach((on, gx) => {
         if (on === '1') out.push(b([x0 + gx * px, y0 - (gy + 1) * px, -td - 2.2], [x0 + (gx + 1) * px, y0 - gy * px, -td - 1.4], teamSh));
       }));
-      return posed(out, pose);
+      return posed(out, pose, IDLE[id]);
     },
   };
 }

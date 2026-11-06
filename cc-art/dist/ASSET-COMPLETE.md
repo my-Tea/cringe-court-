@@ -24,7 +24,7 @@ Verified against the filesystem.
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
 | **3D models** | `.bbmodel` (995 elements) | ✅ |
-| **Animation data** | 55 char + 10 system | ✅ |
+| **Animation data** | 106 char (incl. 3 idle variants x 10 characters, juror `seated_idle`) + 10 system | ✅ |
 | **Gallery NPCs** | 8 seated x 3 views (@1x/@2x) + juror `seated` pose | ✅ new, low detail |
 
 ### What closed the previous gaps
@@ -84,7 +84,12 @@ and juror, and the defense's bandage moved off his eye.
 
 ```
 characters/<id>/poses/{idle,talking,happy,angry,shocked,laughing,crying,confused,objection,defeated}.png
+characters/<id>/poses/{idle_a,idle_b,idle_c}.png    (idle variants, + @2x of each)
 ```
+
+Idle variants are per-character rig deltas (`IDLE` in `vox-chars.mjs`; `across` in the
+rig swings a raised hand to the midline). Preview: `characters/_previews/idle-variants.png`
+(rows: character; columns: idle, a, b, c). Picking rules are in ANIMATION-GUIDE.md.
 
 Data-driven: `POSES` in `vox-base.mjs` gives each pose per-arm swing (`out`/`fwd`),
 head `nod`/`tilt`, and body `lean`/`sway`/`dy`. Boxes are tagged into rig groups
@@ -267,7 +272,7 @@ node brand-kit.mjs           # wordmark, share card, case card
 |---|---|
 | Rebuild player on `pen3` | Biggest quality win, but the existing parts function |
 | Judge expression separation | Faithful as-is; a taste call |
-| 2–3 idle variants per char | Repetition only shows in long sessions |
+| Animated (multi-frame) idle gestures | Idle variants exist as held poses; continuous motion is polish |
 | GLB export of the `.bbmodel` | Needs a GUI click in Blockbench |
 
 **Nothing blocking remains.** Every asset the animation system references now

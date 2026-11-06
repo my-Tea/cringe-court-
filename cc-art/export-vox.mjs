@@ -2,7 +2,7 @@
 // Renders via char-render.mjs (orthographic, supersampled, two-light rig).
 import { CHARS, CHAR_IDS, JUROR_VARIANTS } from './vox-chars.mjs';
 import { renderCharacter, boundsOf } from './char-render.mjs';
-import { POSE_IDS, EXTRA_POSES } from './vox-base.mjs';
+import { POSE_IDS, EXTRA_POSES, IDLE_IDS } from './vox-base.mjs';
 import { Canvas } from './core.mjs';
 import fs from 'node:fs';
 
@@ -66,6 +66,7 @@ function sheet(imgs, cols, cw, ch, outFile) {
 }
 
 let count = 0;
+const idleRows = [];   // per character: idle, idle_a, idle_b, idle_c
 const report = [];
 
 for (const id of CHAR_IDS) {
@@ -117,7 +118,18 @@ for (const id of CHAR_IDS) {
     }
   }
 
-  report.push({ id, label: CHARS[id].label, expressions: 8, poses: 10 });
+  // idle variants — same framing as the poses so they swap in without a size pop
+  const idleRow = [poseImgs[0]];
+  for (const v of IDLE_IDS) {
+    const img = trim(renderCharacter(CHARS[id].parts(v, 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6, bounds }));
+    img.save(`${dir}/poses/${v}.png`);
+    img.scale(2).save(`${dir}/poses/${v}@2x.png`);
+    idleRow.push(img);
+    count++;
+  }
+  idleRows.push(...idleRow);
+
+  report.push({ id, label: CHARS[id].label, expressions: 8, poses: 10, idleVariants: IDLE_IDS.length });
   console.log(`${id}: done`);
 }
 
@@ -140,6 +152,9 @@ console.log(`juror variants: ${variants.length}`);
 const lineup = CHAR_IDS.map((id) => trim(renderCharacter(CHARS[id].parts('idle', 'neutral'), { w: 300, h: 420, yaw: 14, pitch: 6 })));
 sheet(lineup, 4, 300, 420, `${OUT}/_previews/lineup.png`);
 
+// idle-variant preview: one row per character, columns = idle + variants
+sheet(idleRows, IDLE_IDS.length + 1, 170, 300, `${OUT}/_previews/idle-variants.png`);
+
 fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
   canvas: { master: [300, 420] },
   proportions: '4.5-5.0 heads tall (realistic, NOT chibi)',
@@ -151,6 +166,7 @@ fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
     seated: { characters: ['juror'], files: ['poses/seated.png', 'poses/seated_threeq.png'], definedIn: 'vox-base.mjs EXTRA_POSES', params: EXTRA_POSES.seated },
   },
   gallery: 'gallery/manifest.json  (seated background NPCs, cc-art/gallery-npcs.mjs)',
+  idleVariants: IDLE_IDS,
   characters: report,
   jurorVariants: variants.map((v) => ({ ...v, file: `juror/variants/${v.id}.png` })),
 }, null, 2));

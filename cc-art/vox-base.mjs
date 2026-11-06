@@ -345,9 +345,15 @@ export const EXTRA_POSES = {
   seated: { dy: -13, legR: { fwd: 90 }, legL: { fwd: 90 }, armR: { fwd: 38, out: 3 }, armL: { fwd: 38, out: 3 }, head: { nod: 3 } },
 };
 
+/** Idle variants: small, readable deltas from the base idle, one table per
+ *  character (see IDLE in vox-chars.mjs). They live outside POSES on purpose:
+ *  POSE_IDS stays the 10 core poses, and IDLE_IDS lists the extras. */
+export const IDLE_IDS = ['idle_a', 'idle_b', 'idle_c'];
+
 const D2R = Math.PI / 180;
 const IDENT = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
 const rotX = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0]; };
+const rotY = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0]; };
 const rotZ = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0]; };
 const move = (x, y, z) => [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z];
 
@@ -367,6 +373,7 @@ const isIdent = (M) => M.every((v, i) => Math.abs(v - IDENT[i]) < 1e-9);
  *  `idle` renders exactly like the unposed model. `over` patches the table
  *  per character (e.g. the Judge raises the gavel instead of pointing). */
 export function posed(boxes, pose = 'idle', over = {}) {
+  // EXTRA_POSES (seated) need rig-ready geometry; idle_a/b/c come in via `over`
   const P = { ...(POSES[pose] || EXTRA_POSES[pose] || POSES.idle), ...(over[pose] || {}) };
   // pitch is negated: +X rotation tips the top of a part away from the camera
   const body = mul(move(0, P.dy || 0, 0), mul(rotZ(-(P.sway || 0)), rotX(-(P.lean || 0))));
@@ -379,7 +386,7 @@ export function posed(boxes, pose = 'idle', over = {}) {
   for (const [g, sx] of [['armR', 1], ['armL', -1]]) {
     const a = P[g] || {};
     const shoulder = [sx * (H.torsoW + H.armW * 1.5), H.armTop - 2, 0];
-    group[g] = mul(body, about(shoulder, mul(rotZ(sx * (a.out || 0)), rotX(a.fwd || 0))));
+    group[g] = mul(body, about(shoulder, mul(rotZ(sx * (a.out || 0)), mul(rotY(sx * (a.across || 0)), rotX(a.fwd || 0)))));
   }
   // legs: thigh hinges at the hip, shin hinges at the knee and (by default)
   // counter-rotates so it stays vertical

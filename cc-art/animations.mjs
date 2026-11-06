@@ -1,6 +1,7 @@
 // Animation definitions — keyframe timelines over pose + expression + transform.
 // Sprite-swap only: pose/expression snap, transform interpolates linearly.
 import fs from 'node:fs';
+import { POSE_IDS, IDLE_IDS, EXTRA_POSES } from './vox-base.mjs';
 
 const K = (t, pose, expression, x = 0, y = 0, scale = 1, rot = 0, fx = null) =>
   ({ t, pose, expression, transform: { x, y, scale, rot }, ...(fx ? { fx } : {}) });
@@ -56,9 +57,35 @@ const SIGNATURES = {
   clerk:      { pose: 'objection', expression: 'confused', fx: 'sweat', callout: '' },
   bailiff:    { pose: 'objection', expression: 'angry', fx: 'shake',   callout: 'ORDER!' },
   creator:    { pose: 'defeated', expression: 'crying', fx: 'tears',   callout: 'IT WAS A JOKE BRO!' },
+  // Versus parties (idea md 4B): each side's own objection beat
+  'side-a':   { pose: 'objection', expression: 'angry', fx: 'impact',  callout: 'SIDE A OBJECTS!' },
+  'side-b':   { pose: 'objection', expression: 'smug', fx: 'flash',    callout: 'SIDE B OBJECTS!' },
 };
 
-const CHARACTERS = ['judge', 'prosecutor', 'defense', 'bailiff', 'clerk', 'juror'];
+/** Idle variants. Each plays ONCE (idle -> variant pose -> idle) and is picked by
+ *  the runtime between base-idle loops (see STATE_MACHINE.idleVariants). Poses are
+ *  the idle_a/b/c rig deltas in vox-chars.mjs IDLE. Weights sum to 1 per character. */
+const IDLE_VARIANT_META = {
+  judge:         [['idle_a', 'adjusts shades', 0.4], ['idle_b', 'taps gavel', 0.35], ['idle_c', 'strokes beard', 0.25]],
+  prosecutor:    [['idle_a', 'arms crossed', 0.4], ['idle_b', 'foot-tap lean', 0.35], ['idle_c', 'flips hair', 0.25]],
+  defense:       [['idle_a', 'shrug-lean', 0.4], ['idle_b', 'adjusts tie', 0.35], ['idle_c', 'reads paper', 0.25]],
+  bailiff:       [['idle_a', 'adjusts cap', 0.35], ['idle_b', 'shifts weight', 0.4], ['idle_c', 'checks watch', 0.25]],
+  clerk:         [['idle_a', 'flips papers', 0.4], ['idle_b', 'pushes glasses up', 0.35], ['idle_c', 'glances up', 0.25]],
+  'ai-narrator': [['idle_a', 'hover bob, tilt right', 0.35], ['idle_b', 'leans in', 0.3], ['idle_c', 'hover bob, tilt left', 0.35]],
+  juror:         [['idle_a', 'munches popcorn', 0.4], ['idle_b', 'leans back', 0.35], ['idle_c', 'leans in, engrossed', 0.25]],
+  creator:       [['idle_a', 'hands in hoodie', 0.4], ['idle_b', 'scratches head', 0.3], ['idle_c', 'nervous sway', 0.3]],
+  'side-a':      [['idle_a', 'arms crossed, unbothered', 0.4], ['idle_b', 'checks phone receipts', 0.35], ['idle_c', 'rocks on heels', 0.25]],
+  'side-b':      [['idle_a', 'hands on hips', 0.4], ['idle_b', 'tightens ponytail', 0.3], ['idle_c', 'impatient lean', 0.3]],
+};
+
+function idleVariant(ch, [id, note, weight]) {
+  return {
+    id, character: ch, variantOf: 'idle', loop: false, interruptible: true, weight, duration: 2.4, note,
+    tracks: [K(0, 'idle', 'neutral'), K(0.4, id, 'neutral'), K(1.8, id, 'neutral', 0, -1), K(2.4, 'idle', 'neutral')],
+  };
+}
+
+const CHARACTERS = ['judge', 'prosecutor', 'defense', 'bailiff', 'clerk', 'juror', 'creator', 'side-a', 'side-b'];
 const ANIM_ORDER = ['idle', 'talk', 'react_happy', 'react_angry', 'react_shocked', 'objection', 'defeated'];
 
 /** Global scene animations — driven by the game loop, not a character. */
@@ -99,12 +126,23 @@ const SYSTEM = {
 const STATE_MACHINE = {
   states: ['idle', 'talk', 'action', 'react'],
   looping: ['idle', 'talk', 'seated_idle'],
+  idleVariants: {
+    base: 'idle',
+    variants: IDLE_IDS,
+    selection: 'weighted-random',
+    baseLoopsBeforeVariant: [2, 4],   // play base idle 2-4 full loops, then one variant
+    noImmediateRepeat: true,          // never the same variant twice in a row
+    afterVariant: 'idle',             // each variant is one-shot, returns to base idle
+    perCharacter: 'animations[].weight (variantOf: "idle") gives each character its own weights',
+  },
   oneShot: ['react_happy', 'react_angry', 'react_shocked', 'objection', 'defeated'],
   rules: [
     'idle and talk loop; everything else is one-shot. (seated_idle also loops; juror only.)',
     'A one-shot interrupts any loop and blocks new triggers until it ends.',
     'objection may interrupt talk; other one-shots may not.',
     'Never leave a character mid-one-shot across a scene transition — snap to idle.',
+    'Idle variants (idle_a/b/c) are NOT one-shots for blocking purposes: any trigger, talk, or reaction interrupts them immediately and snaps to the new state.',
+    'Idle variants only start from base idle, never from talk or after a reaction without at least one fresh base-idle loop.',
     'While dialogue streams, alternate talk <-> idle on a 1.2-2.4s random interval.',
   ],
 };
@@ -126,6 +164,7 @@ export function buildAnimationLibrary() {
       }
       return a;
     });
+    anims.push(...IDLE_VARIANT_META[ch].map((m) => idleVariant(ch, m)));
     lib.characters[ch] = { id: ch, fixed: true, animations: anims };
   }
 
@@ -146,6 +185,8 @@ export function buildAnimationLibrary() {
     })),
   };
 
+  lib.characters['ai-narrator'].animations.push(...IDLE_VARIANT_META['ai-narrator'].map((m) => idleVariant('ai-narrator', m)));
+
   // player uses the same reaction set, gender-neutral
   lib.characters['player'] = {
     id: 'player', fixed: false, layered: true,
@@ -155,8 +196,34 @@ export function buildAnimationLibrary() {
   return lib;
 }
 
+/** Throws if any keyframe references a pose that has no source, any idle
+ *  variant set is incomplete, or weights are not a probability distribution.
+ *  With `dir` (the dist/characters folder) it also checks the PNGs exist. */
+export function validateAnimationLibrary(lib, dir = null) {
+  // extra poses (seated) still need their PNG, which the file check below enforces
+  const poses = new Set([...POSE_IDS, ...IDLE_IDS, ...Object.keys(EXTRA_POSES)]);
+  const errs = [];
+  for (const [cid, c] of Object.entries(lib.characters)) {
+    if (c.humanoid === false && !c.animations.some((a) => a.tracks)) continue;
+    for (const a of c.animations) {
+      for (const k of a.tracks || []) {
+        if (!poses.has(k.pose)) errs.push(`${cid}/${a.id}: unknown pose ${k.pose}`);
+        else if (dir && cid !== 'player' && !fs.existsSync(`${dir}/${cid}/poses/${k.pose}.png`)) errs.push(`${cid}/${a.id}: missing ${cid}/poses/${k.pose}.png`);
+      }
+    }
+    if (cid !== 'player') {
+      const v = c.animations.filter((a) => a.variantOf === 'idle');
+      if (v.map((a) => a.id).join() !== IDLE_IDS.join()) errs.push(`${cid}: idle variants are ${v.map((a) => a.id)}`);
+      const w = v.reduce((t, a) => t + a.weight, 0);
+      if (Math.abs(w - 1) > 1e-6) errs.push(`${cid}: idle weights sum to ${w}`);
+    }
+  }
+  if (errs.length) throw new Error('animation validation failed:\n  ' + errs.join('\n  '));
+}
+
 export function writeAnimationLibrary(outFile) {
   const lib = buildAnimationLibrary();
+  validateAnimationLibrary(lib, outFile.replace(/animation\/[^/]*$/, 'characters'));
   fs.writeFileSync(outFile, JSON.stringify(lib, null, 2));
   const n = Object.values(lib.characters).reduce((a, c) => a + c.animations.length, 0);
   return { file: outFile, characters: Object.keys(lib.characters).length, animations: n, system: Object.keys(lib.system).length };

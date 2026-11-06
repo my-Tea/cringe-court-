@@ -48,7 +48,7 @@ disk on 2026-11-01.
 | 10 | Share card frame | 0 / 1 |
 | 11 | Case-card template | 0 / 1 |
 | 12 | Character-specific props as separate sprites | gavel, EXHIBIT A paper, popcorn, papers stack |
-| 13 | Idle animation variants | 1 per char instead of 2–3 (avoids visible repetition) |
+| 13 | Idle animation variants | ✅ 3 per char (`idle_a/b/c`) as held poses; multi-frame idle gestures still open |
 
 ---
 
