@@ -13,7 +13,7 @@ disk on 2026-11-01.
 | Scene renders | 11 (6 POV + iso + cutaway) | `scene/*.png` | ✅ Complete |
 | Props | **53** (1138 boxes) | `sprites/props/` | ✅ Complete |
 | Block textures | **13** tileable 16×16 | `textures/blocks/` | ✅ Complete |
-| Prop model | `.bbmodel`, 995 elements, 41 groups | `models/` | ✅ Complete |
+| Prop model | `.bbmodel`, 1138 elements, 53 groups | `models/` | ✅ Complete |
 | Animation data | **54 char anims + 10 system** | `animation/animations.json` | ✅ Data complete, **no art** |
 | Voxel characters | **8** (643 boxes total) | `characters/<id>/` | ⚠️ Only front/¾/side renders |
 | Player parts | **58 PNGs** across 9 categories | `characters/player/` | ⚠️ Works, but art is rough |

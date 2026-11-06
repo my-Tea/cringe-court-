@@ -23,7 +23,7 @@ Verified against the filesystem.
 | **Props** | 106 (53 props @1x + @4x) | ✅ |
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
-| **3D models** | `.bbmodel` (995 elements) | ✅ |
+| **3D models** | `.bbmodel` (1138 elements, 53 props) | ✅ |
 | **Animation data** | 106 char (incl. 3 idle variants x 10 characters, juror `seated_idle`) + 10 system | ✅ |
 | **Gallery NPCs** | 8 seated x 3 views (@1x/@2x) + juror `seated` pose | ✅ new, low detail |
 
@@ -170,8 +170,7 @@ runtime. The defendant is always an anonymous silhouette (art bible part 2, #4).
 `ballot_paper`, `ballot_envelope`, `case_stamp`, `settlement_receipt`,
 `podium_mic`, `potted_plant` — the art bible part 3 props that were missing.
 Defined in `props.mjs`, exported by `node export.mjs` (writes `out/props/`; copy to
-`dist/sprites/props/`). **Not yet in `models/CringeCourt_Props.bbmodel`**: that file
-was built through Blockbench and nothing in `cc-art/` regenerates it.
+`dist/sprites/props/`). Included in `models/CringeCourt_Props.bbmodel`.
 
 ---
 
