@@ -376,7 +376,7 @@ function juror(v = {}) {
 
     out.push(...torso({ col: top, colSh: topSh, style }));
     out.push(...arms({ col: top, colSh: topSh, cuff: topSh, hand: skin }));
-    out.push(...legs({ col: legCol, shoe: C.ink }));
+    out.push(...legs({ col: legCol, shoe: C.ink, seat: pose === 'seated' }));
 
     if (popcorn) {
       out.push(b([-H.torsoW - 12, H.armBot + 2, -5], [-H.torsoW - 2, H.armBot + 13, -1], C.cream));

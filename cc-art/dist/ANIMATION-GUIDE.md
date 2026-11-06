@@ -4,7 +4,7 @@ How to wire character animation. Companion to `CHARACTER-SPEC.md` (what the
 assets are) — this file is **how they move**.
 
 Machine-readable source: `animation/animations.json` — 8 characters,
-**54 character animations**, **10 system animations**.
+**55 character animations** (54 shared-set + juror `seated_idle`), **10 system animations**.
 
 ---
 

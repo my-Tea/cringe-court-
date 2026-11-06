@@ -24,7 +24,8 @@ Verified against the filesystem.
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
 | **3D models** | `.bbmodel` (995 elements) | ✅ |
-| **Animation data** | 54 char + 10 system | ✅ |
+| **Animation data** | 55 char + 10 system | ✅ |
+| **Gallery NPCs** | 8 seated x 3 views (@1x/@2x) + juror `seated` pose | ✅ new, low detail |
 
 ### What closed the previous gaps
 
@@ -240,9 +241,10 @@ than detailed anatomy. Not yet tried in-engine.
 | `sprite-player.mjs` | Player compositor |
 | `vox-base.mjs` / `vox-chars.mjs` | Voxel anatomy, pose rig, all 8 characters |
 | `char-render.mjs` | Orthographic voxel renderer (supports per-box transforms) |
-| `export-vox.mjs` | Bulk export → 144 character sprites + sheets |
+| `export-vox.mjs` | Bulk export → 144 character sprites + sheets (+ juror seated) |
+| `gallery-npcs.mjs` / `export-gallery.mjs` | Seeded seated audience NPCs + export |
 | `export-player-vox.mjs` | Player parts → 58 sprites |
-| `animations.mjs` | 54 animations, 10 system |
+| `animations.mjs` | 55 animations (incl. juror `seated_idle`), 10 system |
 
 Regenerate everything:
 
@@ -250,6 +252,7 @@ Regenerate everything:
 cd cc-art
 npm install --no-save pngjs   # the only dependency; not vendored
 node export-vox.mjs          # characters (export-all.mjs is the retired 2D pipeline)
+node export-gallery.mjs      # gallery NPCs
 node export-player-vox.mjs   # player parts
 node ui-kit.mjs              # UI
 node fx-kit.mjs              # FX

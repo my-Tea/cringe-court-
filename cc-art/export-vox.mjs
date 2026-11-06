@@ -2,7 +2,7 @@
 // Renders via char-render.mjs (orthographic, supersampled, two-light rig).
 import { CHARS, CHAR_IDS, JUROR_VARIANTS } from './vox-chars.mjs';
 import { renderCharacter, boundsOf } from './char-render.mjs';
-import { POSE_IDS } from './vox-base.mjs';
+import { POSE_IDS, EXTRA_POSES } from './vox-base.mjs';
 import { Canvas } from './core.mjs';
 import fs from 'node:fs';
 
@@ -104,6 +104,19 @@ for (const id of CHAR_IDS) {
   }
   sheet(poseImgs, 5, 170, 300, `${dir}/_poses.png`);
 
+  // seated: rig-ready legs only exist on characters that build for it (juror).
+  // Same framing as the 10-pose set so the scale matches; pitched higher (24 deg)
+  // so the horizontal thighs read from the front.
+  if (id === 'juror') {
+    const seat = CHARS[id].parts('seated', 'neutral');
+    for (const [suffix, yaw] of [['', 14], ['_threeq', 40]]) {
+      const img = trim(renderCharacter(seat, { w: 300, h: 420, yaw, pitch: 24, bounds }));
+      img.save(`${dir}/poses/seated${suffix}.png`);
+      img.scale(2).save(`${dir}/poses/seated${suffix}@2x.png`);
+      count++;
+    }
+  }
+
   report.push({ id, label: CHARS[id].label, expressions: 8, poses: 10 });
   console.log(`${id}: done`);
 }
@@ -133,6 +146,11 @@ fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify({
   note: 'Voxel characters. Source of truth: cc-art/vox-chars.mjs. Head is ~23% of total height.',
   expressions: Object.keys(EXPR),
   poses: POSE,
+  extraPoses: {
+    note: 'Rig-ready poses outside the shared 10. Only the listed characters build geometry for them.',
+    seated: { characters: ['juror'], files: ['poses/seated.png', 'poses/seated_threeq.png'], definedIn: 'vox-base.mjs EXTRA_POSES', params: EXTRA_POSES.seated },
+  },
+  gallery: 'gallery/manifest.json  (seated background NPCs, cc-art/gallery-npcs.mjs)',
   characters: report,
   jurorVariants: variants.map((v) => ({ ...v, file: `juror/variants/${v.id}.png` })),
 }, null, 2));

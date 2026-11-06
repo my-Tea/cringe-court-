@@ -267,10 +267,31 @@ function arms({ col, colSh, cuff = null, hand = C.skin, lift = 0, o = C.outline 
   return out;
 }
 
-function legs({ col, shoe = C.ink, w = H.legW, o = C.outline }) {
+/** Legs. `seat` builds the rig-ready version: thigh and shin are separate boxes
+ *  (tags legL/legR and shinL/shinR) so the pose can fold the hip and knee.
+ *  Standing legs stay single boxes, so every non-seated render is unchanged. */
+function legs({ col, shoe = C.ink, w = H.legW, o = C.outline, seat = false }) {
   const out = [];
   for (const sx of [-1, 1]) {
     const x = sx * 6.5;
+    if (seat) {
+      const side = sx > 0 ? 'R' : 'L';
+      const ex = (a, c) => (sx > 0 ? [x + w - a, x + w - c] : [x - w + c, x - w + a]);
+      const [s0, s1] = ex(1.5, 0), [o0, o1] = sx > 0 ? [x + w, x + w + 0.5] : [x - w - 0.5, x - w];
+      // thigh: y 15..38, hinged at the hip (y 34 = centre line once horizontal)
+      tag('leg' + side, [
+        b([x - w, 15, -4], [x + w, 38, 4], col),
+        b([Math.min(s0, s1), 15, -4], [Math.max(s0, s1), 38, 4], shadeHex(col, 0.82)),
+        b([o0, 15, -4], [o1, 38, 4], o),
+      ]).forEach((bx) => out.push(bx));
+      // shin: hangs from the knee (orig y 15, z 0); extends 4 above so it hides inside the thigh
+      tag('shin' + side, [
+        b([x - w + 0.5, -4, 0], [x + w - 0.5, 19, 8], col),
+        b([Math.min(s0, s1), -4, 0], [Math.max(s0, s1), 19, 8], shadeHex(col, 0.82)),
+        b([x - w - 1, -6, -5.5], [x + w + 1, -4, 8], shoe),
+      ]).forEach((bx) => out.push(bx));
+      continue;
+    }
     out.push(b([x - w, 2, -4], [x + w, H.hipBot, 4], col));
     out.push(b([sx > 0 ? x + w - 1.5 : x - w, 2, -4], [sx > 0 ? x + w : x - w + 1.5, H.hipBot, 4], shadeHex(col, 0.82)));
     out.push(b([sx > 0 ? x + w : x - w - 0.5, 2, -4], [sx > 0 ? x + w + 0.5 : x - w, H.hipBot, 4], o));
@@ -314,6 +335,16 @@ export const POSES = {
 };
 export const POSE_IDS = Object.keys(POSES);
 
+/** Poses that need rig-ready geometry, so they are NOT in POSE_IDS (the 10-pose
+ *  export set) and only apply to characters that build for them.
+ *  `seated`: legs{seat:true}. Thighs horizontal (hip 90 deg), shins vertical
+ *  (knee compensates), whole body dropped 13 units so the feet land on the floor
+ *  with the hips at seat height (~21). Legs: `fwd` = hip flexion, `knee` = extra
+ *  knee bend on top of keeping the shin vertical. */
+export const EXTRA_POSES = {
+  seated: { dy: -13, legR: { fwd: 90 }, legL: { fwd: 90 }, armR: { fwd: 38, out: 3 }, armL: { fwd: 38, out: 3 }, head: { nod: 3 } },
+};
+
 const D2R = Math.PI / 180;
 const IDENT = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
 const rotX = (a) => { const c = Math.cos(a * D2R), s = Math.sin(a * D2R); return [1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0]; };
@@ -336,7 +367,7 @@ const isIdent = (M) => M.every((v, i) => Math.abs(v - IDENT[i]) < 1e-9);
  *  `idle` renders exactly like the unposed model. `over` patches the table
  *  per character (e.g. the Judge raises the gavel instead of pointing). */
 export function posed(boxes, pose = 'idle', over = {}) {
-  const P = { ...(POSES[pose] || POSES.idle), ...(over[pose] || {}) };
+  const P = { ...(POSES[pose] || EXTRA_POSES[pose] || POSES.idle), ...(over[pose] || {}) };
   // pitch is negated: +X rotation tips the top of a part away from the camera
   const body = mul(move(0, P.dy || 0, 0), mul(rotZ(-(P.sway || 0)), rotX(-(P.lean || 0))));
   const neck = [0, H.neck, 0];
@@ -349,6 +380,14 @@ export function posed(boxes, pose = 'idle', over = {}) {
     const a = P[g] || {};
     const shoulder = [sx * (H.torsoW + H.armW * 1.5), H.armTop - 2, 0];
     group[g] = mul(body, about(shoulder, mul(rotZ(sx * (a.out || 0)), rotX(a.fwd || 0))));
+  }
+  // legs: thigh hinges at the hip, shin hinges at the knee and (by default)
+  // counter-rotates so it stays vertical
+  for (const [g, sx] of [['R', 1], ['L', -1]]) {
+    const a = P['leg' + g] || {};
+    const hip = [sx * 6.5, 34, 0], knee = [sx * 6.5, 15, 0];
+    group['leg' + g] = mul(body, about(hip, rotX(a.fwd || 0)));
+    group['shin' + g] = mul(group['leg' + g], about(knee, rotX(-(a.fwd || 0) + (a.knee || 0))));
   }
   return boxes.map((bx) => {
     const M = group[bx.g || 'body'];
