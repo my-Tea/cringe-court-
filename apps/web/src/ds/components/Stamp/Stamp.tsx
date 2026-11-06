@@ -25,11 +25,18 @@ export interface StampProps {
   className?: string;
 }
 
+/**
+ * A verdict slip: a pinked cream card slip with the verdict rubber-stamped on it
+ * in ink (STYLE-GUIDE §9.11). Text is live HTML, so labels stay accessible.
+ */
 export function Stamp({ children, sub, tone = 'guilty', size = 'md', animate, className }: StampProps) {
   return (
-    <span className={cx(styles.stamp, toneClass[tone], size !== 'md' && styles[size], animate && styles.animate, className)}>
-      <span>{children}</span>
-      {sub && <span className={styles.sub}>{sub}</span>}
+    // The ink is always read against the cream slip, so the tones resolve on the parchment surface.
+    <span className={cx(styles.stamp, toneClass[tone], size !== 'md' && styles[size], animate && styles.animate, className)} data-surface="parchment">
+      <span className={styles.ink}>
+        <span>{children}</span>
+        {sub && <span className={styles.sub}>{sub}</span>}
+      </span>
     </span>
   );
 }

@@ -249,12 +249,22 @@ export const contrastPairs: ReadonlyArray<{ fg: ColorRole; bg: ColorRole; min: 3
 /* ── Typography ─────────────────────────────────────────────────────────── */
 
 export const fontFamily = {
-  /** Display serif: the soft, heavy old-style of the style-guide title ("CringeCourt", "Your Honor, Bro Is Cooked."). Headings. */
-  display: "'Fraunces Variable', 'Iowan Old Style', Georgia, serif",
-  /** Pixel face: echoes the pixel art. Eyebrows, badges, stamps, impact text, counters. */
-  pixel: "'Pixelify Sans', 'Space Grotesk Variable', system-ui, sans-serif",
-  /** Body face: geometric, quirky, very readable. */
-  body: "'Space Grotesk Variable', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  /**
+   * Paper display face: the chunky, rounded caps cut from card stock on the
+   * papercraft reference ("THE COURT IS NOW IN SESSION", "ENTER THE COURT").
+   * Headings, ribbons, buttons, tabs, stamps.
+   */
+  display: "'Lilita One', 'Nunito Variable', system-ui, sans-serif",
+  /** Serif accent: the italic motto ("Your Honor, Bro Is Cooked.") and receipts' signature lines. */
+  serif: "'Fraunces Variable', 'Iowan Old Style', Georgia, serif",
+  /**
+   * Label face (eyebrows, badges, counters). Historically the pixel face; the
+   * papercraft direction replaces it with the paper display face. The token
+   * name stays so existing components and the mode tracks keep working.
+   */
+  pixel: "'Lilita One', 'Nunito Variable', system-ui, sans-serif",
+  /** Body face: rounded, friendly and very readable, like the form labels on the reference. */
+  body: "'Nunito Variable', system-ui, -apple-system, 'Segoe UI', sans-serif",
   /** Numbers that carry money or time: tabular, unambiguous. */
   mono: "'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace",
 } as const;
@@ -340,6 +350,132 @@ const woodShadow: Partial<Record<keyof typeof shadow, string>> = {
   bevel: `inset 1px 1px 0 ${alpha(p.gold[300], 0.22)}, inset -1px -1px 0 ${alpha(ink, 0.6)}`,
 };
 
+/* ── Papercraft ─────────────────────────────────────────────────────────── */
+
+/**
+ * The papercraft art direction (docs/STYLE-GUIDE.md §9): every surface is a
+ * sheet of card stock. Light comes from the top-left, so each sheet casts a
+ * tight contact shadow plus a soft ambient shadow down and to the right onto
+ * the sheet below it. `paper-N` are box-shadows for rectangular sheets;
+ * `paper-drop-N` are the same stack as `filter: drop-shadow()` for sheets
+ * whose outline is cut by a mask or clip-path (torn edges, ribbons, tiles).
+ */
+const paperShadowStops = {
+  1: [[1, 1, 0, 0.2], [2, 3, 5, 0.16]],
+  2: [[1, 2, 0, 0.22], [4, 7, 12, 0.2]],
+  3: [[2, 3, 0, 0.24], [8, 14, 24, 0.24]],
+  4: [[3, 5, 0, 0.26], [14, 26, 44, 0.3]],
+} as const;
+
+export const paperElevation = Object.fromEntries(
+  Object.entries(paperShadowStops).map(([k, stops]) => [k, stops.map(([x, y, b, a]) => `${x}px ${y}px ${b}px ${alpha(ink, a)}`).join(', ')]),
+) as Record<keyof typeof paperShadowStops, string>;
+
+export const paperDrop = Object.fromEntries(
+  Object.entries(paperShadowStops).map(([k, stops]) => [k, stops.map(([x, y, b, a]) => `drop-shadow(${x}px ${y}px ${b / 2}px ${alpha(ink, a)})`).join(' ')]),
+) as Record<keyof typeof paperShadowStops, string>;
+
+/** Mix two palette colours in sRGB (w = share of `a`). Only for the derived paper shades below. */
+export function mix(a: string, b: string, w: number): string {
+  const ca = parseInt(a.slice(1), 16);
+  const cb = parseInt(b.slice(1), 16);
+  const ch = (shift: number) => Math.round(((ca >> shift) & 255) * w + ((cb >> shift) & 255) * (1 - w));
+  return `#${[16, 8, 0].map((s) => ch(s).toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+}
+
+/**
+ * Derived paper shades. The 30 swatches stay authoritative; these are the only
+ * extra colours, each an sRGB mix of two swatches (documented in the style
+ * guide). They are emitted as `color-mix()` of the palette variables, so
+ * tokens.css still names only palette colours, and `paperShadeHex` carries
+ * their computed values for the contrast tests.
+ */
+export const paperShades = {
+  /** The deep maroon of the "PLAY AS GUEST" plate and the nav bar's lower fold. */
+  'maroon-deep': { a: 'royal-900', b: 'neutral-900', w: 0.62 },
+  /** The lit fold of a maroon sheet (between royal-900 and royal-700). */
+  'maroon-fold': { a: 'royal-900', b: 'royal-700', w: 0.5 },
+  /** The lit fold of a cream sheet. */
+  'cream-fold': { a: 'neutral-100', b: 'gold-100', w: 0.5 },
+  /** Cream paper in shadow (input fields, the back of ribbons). */
+  'cream-shade': { a: 'neutral-300', b: 'gold-100', w: 0.45 },
+} as const;
+
+export type PaperShade = keyof typeof paperShades;
+
+const swatch = (name: string): string => {
+  const [family, step] = name.split('-') as [keyof typeof palette, string];
+  return (palette[family] as Record<string, string>)[step]!;
+};
+
+export const paperShadeHex = Object.fromEntries(
+  Object.entries(paperShades).map(([k, { a, b, w }]) => [k, mix(swatch(a), swatch(b), w)]),
+) as Record<PaperShade, string>;
+
+/** Deterministic jagged edge: a torn-paper silhouette, 120×12 tile, fill below the tear. */
+function tornEdgePath(flip: boolean): string {
+  // Hand-tuned tooth heights (0-12) so the tear reads irregular but tiles seamlessly.
+  const teeth = [3, 8, 2, 6, 4, 9, 3, 5, 1, 7, 4, 8, 2, 6, 3, 9, 5, 2, 7, 3];
+  const step = 120 / teeth.length;
+  const pts = teeth.map((t, i) => `${(i * step).toFixed(1)} ${flip ? 12 - t : t}`);
+  pts.push(`120 ${flip ? 12 - teeth[0]! : teeth[0]!}`);
+  return flip ? `M0 0 L${pts.join(' L')} L120 0 Z` : `M0 12 L${pts.join(' L')} L120 12 Z`;
+}
+
+const svgUrl = (svg: string) => `url("data:image/svg+xml,${svg.replace(/"/g, "'").replace(/#/g, '%23').replace(/</g, '%3C').replace(/>/g, '%3E')}")`;
+
+/** Masks and textures used by the paper primitives (alpha only: no colour of their own, except the grain's ink). */
+export const paperTexture = {
+  /** Mask tile for a torn top edge (120×12, repeat-x). */
+  'edge-torn-top': svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 12" preserveAspectRatio="none"><path d="${tornEdgePath(false)}"/></svg>`),
+  /** Mask tile for a torn bottom edge. */
+  'edge-torn-bottom': svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 12" preserveAspectRatio="none"><path d="${tornEdgePath(true)}"/></svg>`),
+  /** Mask tile for a pinking-shear zig-zag bottom edge (16×8). */
+  'edge-zigzag-bottom': svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8" preserveAspectRatio="none"><path d="M0 0H16V2L8 8L0 2Z"/></svg>`),
+  'edge-zigzag-top': svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8" preserveAspectRatio="none"><path d="M0 8H16V6L8 0L0 6Z"/></svg>`),
+  /**
+   * Paper grain: fine fibre noise tinted with ink (neutral-900 = 74 58 50 → the
+   * colour-matrix row offsets), mostly transparent. Layer it over any paper fill.
+   */
+  grain: svgUrl(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="7" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.29 0 0 0 0 0.227 0 0 0 0 0.196 0 0 0 0.75 -0.38"/></filter><rect width="180" height="180" filter="url(#g)"/></svg>`,
+  ),
+  /** Large, soft mottling (pulp clouds) for big sheets such as the page backdrop and the login panel. */
+  mottle: svgUrl(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="420"><filter id="m"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="2" seed="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.29 0 0 0 0 0.227 0 0 0 0 0.196 0 0 0 0.34 -0.13"/></filter><rect width="420" height="420" filter="url(#m)"/></svg>`,
+  ),
+} as const;
+
+/**
+ * Low-poly fold facets: hard-edged light and shade planes laid over a sheet's
+ * fill, so a flat panel reads as folded card. Light planes are cream with
+ * alpha, shade planes ink with alpha; they work on any paper colour.
+ */
+const lit = (a: number) => `color-mix(in srgb, var(--cc-neutral-100) ${a}%, transparent)`;
+const shade = (a: number) => `color-mix(in srgb, var(--cc-neutral-900) ${a}%, transparent)`;
+export const paperFacets = {
+  /** Panels and cards: a broad lit plane top-left, a shade plane bottom-right, one diagonal fold between. */
+  panel: [
+    `linear-gradient(118deg, ${lit(14)} 0 24%, transparent calc(24% + 1px))`,
+    `linear-gradient(242deg, transparent 0 62%, ${shade(7)} calc(62% + 1px) 100%)`,
+    `linear-gradient(152deg, transparent 0 46%, ${lit(6)} calc(46% + 1px) 71%, transparent calc(71% + 1px))`,
+    `linear-gradient(28deg, transparent 0 80%, ${shade(5)} calc(80% + 1px))`,
+  ].join(', '),
+  /** Buttons and plates: the sheet is folded once along its length (lit top, shaded bottom), with a cut-in at each end. */
+  plate: [
+    `linear-gradient(176deg, ${lit(22)} 0 46%, transparent calc(46% + 1px) 100%)`,
+    `linear-gradient(184deg, transparent 0 54%, ${shade(9)} calc(54% + 1px) 100%)`,
+    `linear-gradient(100deg, ${lit(10)} 0 12%, transparent calc(12% + 1px) 88%, ${shade(10)} calc(88% + 1px))`,
+  ].join(', '),
+  /** Tiles and small badges: four facets meeting near the centre, like a folded paper gem. */
+  gem: [
+    `conic-gradient(from 210deg at 46% 42%, ${lit(24)} 0 90deg, transparent 90deg 180deg, ${shade(12)} 180deg 270deg, ${lit(6)} 270deg 360deg)`,
+  ].join(', '),
+} as const;
+
+/** Corner cuts (chamfers) for clip-paths: paper is trimmed with scissors, not rounded. */
+export const paperCut = { sm: '4px', md: '7px', lg: '12px' } as const;
+
 /* ── Motion ─────────────────────────────────────────────────────────────── */
 
 /**
@@ -365,6 +501,10 @@ export const easing = {
   stamp: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
   /** Pixel-art stepping, for typewriter and sprite flicks. */
   pixel: 'steps(4, end)',
+  /** Paper unfolding: a quick open with a soft settle. */
+  unfold: 'cubic-bezier(0.22, 1.25, 0.36, 1)',
+  /** Paper being pressed down onto the sheet beneath. */
+  press: 'cubic-bezier(0.3, 0, 0.5, 1)',
 } as const;
 
 /* ── Layers and breakpoints ─────────────────────────────────────────────── */
@@ -406,6 +546,7 @@ export function toCss(): string {
     ...paletteVars,
     ...surfaceVars('parchment'),
     'font-display': fontFamily.display,
+    'font-serif': fontFamily.serif,
     'font-pixel': fontFamily.pixel,
     'font-body': fontFamily.body,
     'font-mono': fontFamily.mono,
@@ -420,6 +561,14 @@ export function toCss(): string {
     'prose-max': layout.proseMax,
     gutter: layout.gutter,
     ...scaleVars('shadow', shadow),
+    ...scaleVars('paper', paperElevation),
+    ...scaleVars('paper-drop', paperDrop),
+    ...scaleVars('paper-cut', paperCut),
+    ...scaleVars('paper-facets', paperFacets),
+    ...scaleVars('paper', paperTexture),
+    ...Object.fromEntries(
+      Object.entries(paperShades).map(([k, { a, b, w }]) => [`paper-${k}`, `color-mix(in srgb, var(--cc-${a}) ${Math.round(w * 100)}%, var(--cc-${b}))`]),
+    ),
     ...scaleVars('duration', duration),
     ...scaleVars('ease', easing),
     ...scaleVars('z', zIndex),

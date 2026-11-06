@@ -1,0 +1,90 @@
+/*
+ * Each layer is a parallax plane: the hero sets --px/--py (pointer, -1..1) and
+ * --sy (scroll, 0..1); a layer moves by its depth --d. The entrance is the
+ * shared paper slide-in, staggered back to front. Reduced motion: no
+ * parallax, no entrance, no sway, no gavel (see the bottom of this file).
+ */
+.layer {
+  --cc-slide-y: 28px;
+  --cc-slide-r: 0deg;
+  transform: translate3d(
+    calc(var(--px, 0) * var(--d) * -18px),
+    calc(var(--py, 0) * var(--d) * -10px + var(--sy, 0) * var(--d) * -36px),
+    0
+  );
+  transition: transform var(--cc-duration-slower) var(--cc-ease-standard);
+  animation: cc-paper-slide-in var(--cc-duration-slower) var(--cc-ease-unfold) backwards;
+  animation-delay: calc(var(--cc-stagger, 0) * 70ms);
+}
+
+.drop2 {
+  filter: var(--cc-paper-drop-2);
+}
+
+.drop3 {
+  filter: var(--cc-paper-drop-3);
+}
+
+.drop4 {
+  filter: var(--cc-paper-drop-4);
+}
+
+.sway {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: cc-paper-sway 7s ease-in-out infinite;
+}
+
+/* The judge winds up and bangs, every few seconds. Pivot: the elbow. */
+.gavel {
+  transform-box: view-box;
+  transform-origin: 704px 298px;
+  animation: cc-hero-gavel 4.8s var(--cc-ease-standard) infinite;
+}
+
+@keyframes cc-hero-gavel {
+  0%,
+  70%,
+  100% {
+    transform: rotate(0deg);
+  }
+  80% {
+    transform: rotate(-14deg);
+  }
+  86% {
+    transform: rotate(9deg);
+  }
+  90% {
+    transform: rotate(5deg);
+  }
+}
+
+.exhibitWord,
+.exhibitLetter {
+  fill: var(--cc-royal-900);
+  font-family: var(--cc-font-display);
+  text-anchor: middle;
+}
+
+.exhibitWord {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.exhibitLetter {
+  font-size: 22px;
+}
+
+:root[data-reduced-motion='true'] :is(.layer, .sway, .gavel) {
+  animation: none;
+  transform: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-reduced-motion]) :is(.layer, .sway, .gavel) {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+}

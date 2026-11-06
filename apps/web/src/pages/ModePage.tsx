@@ -2,8 +2,7 @@ import { MODES, type ModeId } from '@cringe-court/core';
 import { stagePose } from '@/art/art';
 import { paths } from '@/app/routes';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { webModes } from '@/modes/registry';
-import { Alert, Button, ButtonLink, Card, CardBody, CardHeader, CardTitle, Icon, PhaseStepper, Tooltip } from '@/ds';
+import { Alert, Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, PaperButtonLink, PaperPanel, PaperRibbon, PhaseStepper, Tooltip } from '@/ds';
 import { MODE_PRESENTATION } from './modeContent';
 import { ModeFacts } from './ModeFacts';
 import styles from './pages.module.css';
@@ -11,46 +10,39 @@ import styles from './pages.module.css';
 export function ModePage({ id }: { id: ModeId }) {
   const mode = MODES[id];
   const m = MODE_PRESENTATION[id];
-  const cta = webModes.get(id)?.cta;
   useDocumentTitle(mode.name);
 
   return (
-    <>
-      <section className={styles.modeHero} data-accent={m.accent} aria-labelledby="mode-title">
-        <div className={styles.modeHeroInner}>
+    <div className={styles.page}>
+      <PaperPanel as="section" tone="maroon" edge="cut" elevation={3} backing="gold" padding="lg" unfold aria-labelledby="mode-title">
+        <div className={styles.modeHero} data-accent={m.accent}>
           <div className={styles.modeHeroCopy}>
-            <p className={styles.eyebrow}>{m.eyebrow}</p>
+            <PaperRibbon as="p" tone="gold" size="sm">
+              {m.eyebrow}
+            </PaperRibbon>
             <h1 id="mode-title" className={styles.modeTitle}>
               {mode.name}
             </h1>
             <p className={styles.modeHeadline}>{m.headline}</p>
-            <p className={styles.heroLede}>{m.pitch}</p>
+            <p className={styles.modeLede}>{m.pitch}</p>
             <div className={styles.heroActions}>
-              {cta ? (
-                <ButtonLink to={cta.to} size="lg" iconEnd={<Icon name="arrow-right" />}>
-                  {cta.label}
-                </ButtonLink>
-              ) : (
-                <Tooltip content="Filing opens when the contracts and AI counsel phases land.">
-                  <Button size="lg" disabled iconStart={<Icon name="lock" />}>
-                    Filing opens soon
-                  </Button>
-                </Tooltip>
-              )}
-              <ButtonLink to={paths.home} size="lg" variant="ghost" iconStart={<Icon name="arrow-left" />}>
+              <Tooltip content="Filing opens when the contracts and AI counsel phases land.">
+                <PaperButton size="lg" disabled iconStart={<Icon name="lock" />}>
+                  Filing opens soon
+                </PaperButton>
+              </Tooltip>
+              <PaperButtonLink to={paths.court} size="lg" variant="ghost" iconStart={<Icon name="arrow-left" />}>
                 All courts
-              </ButtonLink>
+              </PaperButtonLink>
             </div>
           </div>
           <div className={styles.modeStage} aria-hidden>
-            <div className={styles.spotlight} />
             {m.cast.map((c, i) => (
               <img key={c.character} src={stagePose(c.character, c.pose)} alt="" className={styles.modeStageChar} data-pos={i} data-pixel />
             ))}
-            <div className={styles.stageFloor} />
           </div>
         </div>
-      </section>
+      </PaperPanel>
 
       <div className={styles.modeBody}>
         <Card tone="raised" as="section" aria-labelledby="facts-title">
@@ -100,13 +92,11 @@ export function ModePage({ id }: { id: ModeId }) {
           </CardBody>
         </Card>
 
-        {!cta && (
         <Alert tone="warning" title="You are looking at the app shell" className={styles.modeAlert}>
           This build has the courts, design system and rules, but no filing yet. Contracts on Arc testnet, AI counsel on 0G and
           World ID juror screening arrive in the next phases. Nothing here touches money.
         </Alert>
-        )}
       </div>
-    </>
+    </div>
   );
 }

@@ -1,26 +1,40 @@
+/*
+ * Portrait mount (STYLE-GUIDE §9.11): the bust sits in a maroon octagon cut
+ * from card, mounted on a gold octagon that peeks out 3px. The ring colour is
+ * the lower (shaded) facet of the mount; the upper facet is always lit gold.
+ */
 .portrait {
   --_size: 4rem;
   --_ring: var(--cc-color-frame);
+  --_cut: 22%;
   position: relative;
   display: inline-block;
   flex-shrink: 0;
   width: var(--_size);
   height: var(--_size);
-  border-radius: var(--cc-radius-md);
-  background: var(--cc-royal-900);
-  box-shadow: 0 0 0 2px var(--_ring), 0 0 0 3px var(--cc-color-frame-dark);
-  overflow: hidden;
+  padding: 3px;
+  background: linear-gradient(150deg, var(--cc-gold-300) 0 42%, var(--_ring) 42%);
+  clip-path: polygon(var(--_cut) 0, calc(100% - var(--_cut)) 0, 100% var(--_cut), 100% calc(100% - var(--_cut)), calc(100% - var(--_cut)) 100%, var(--_cut) 100%, 0 calc(100% - var(--_cut)), 0 var(--_cut));
+  filter: var(--cc-paper-drop-1);
+}
+
+.portrait img,
+.portrait svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .portrait img {
-  width: 100%;
-  height: 100%;
+  background-color: var(--cc-royal-900);
+  background-image: linear-gradient(160deg, var(--cc-royal-700) 0 45%, transparent 45%);
+  clip-path: inherit;
   image-rendering: pixelated;
 }
 
 .xs {
   --_size: 2rem;
-  border-radius: var(--cc-radius-sm);
+  padding: 2px;
 }
 
 .sm {
@@ -29,11 +43,12 @@
 
 .lg {
   --_size: 6rem;
+  padding: 4px;
 }
 
 .xl {
   --_size: 8rem;
-  border-radius: var(--cc-radius-lg);
+  padding: 5px;
 }
 
 .accent {
@@ -56,10 +71,31 @@
 .anonymous {
   display: inline-grid;
   place-items: center;
-  color: var(--cc-teal-700);
+  color: var(--cc-teal-300);
+}
+
+.anonymous::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  background: linear-gradient(160deg, var(--cc-teal-700) 0 45%, var(--cc-teal-900) 45%);
+  clip-path: inherit;
+}
+
+.anonymous {
+  isolation: isolate;
 }
 
 .anonymous svg {
   width: 70%;
   height: 70%;
+}
+
+@media (forced-colors: active) {
+  .portrait {
+    border: 2px solid CanvasText;
+    clip-path: none;
+    filter: none;
+  }
 }

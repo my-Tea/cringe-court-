@@ -1,36 +1,56 @@
 /*
- * Parchment frame (style guide, right column): a rounded gold band with a
- * dark-gold outer line, a hairline inner rule and pixel knots on the corners.
+ * Mounted sheet (STYLE-GUIDE §9.3): the content sheet sits on a gold card
+ * mount that peeks out 4px all round, both with scissor-cut corners, a paper
+ * shadow under the stack and gold photo-corners folded over each corner.
+ * The sheets are pseudo-elements, so nothing focusable inside is ever clipped.
  */
 .frame {
   --_pad: var(--cc-space-6);
+  --_cut: var(--cc-paper-cut-lg);
   position: relative;
+  isolation: isolate;
   min-width: 0;
   padding: var(--_pad);
-  border: 3px solid var(--cc-color-frame);
-  border-radius: var(--cc-radius-xl);
-  background:
-    radial-gradient(120% 90% at 50% 0%, var(--cc-color-surface) 55%, color-mix(in srgb, var(--cc-color-frame-light) 18%, var(--cc-color-surface))),
-    var(--cc-color-surface);
-  box-shadow:
-    0 0 0 1px var(--cc-color-frame-dark),
-    var(--cc-shadow-bevel),
-    var(--cc-shadow-2);
   color: var(--cc-color-text);
+  filter: var(--cc-paper-drop-2);
 }
 
-/* Hairline inner rule. */
-.frame::before {
+.frame::before,
+.frame::after {
   content: '';
   position: absolute;
-  inset: 5px;
-  border: 1px solid color-mix(in srgb, var(--cc-color-frame) 70%, transparent);
-  border-radius: calc(var(--cc-radius-xl) - 6px);
   pointer-events: none;
+  clip-path: polygon(
+    var(--_cut) 0,
+    calc(100% - var(--_cut)) 0,
+    100% var(--_cut),
+    100% calc(100% - var(--_cut)),
+    calc(100% - var(--_cut)) 100%,
+    var(--_cut) 100%,
+    0 calc(100% - var(--_cut)),
+    0 var(--_cut)
+  );
+}
+
+/* gold mount: lit upper-left facet, shaded lower-right */
+.frame::before {
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(150deg, var(--cc-color-frame-light) 0 38%, var(--cc-color-frame) 38% 78%, var(--cc-color-frame-dark) 78%);
+}
+
+/* the sheet itself: surface stock, grain, one soft fold */
+.frame::after {
+  inset: 4px;
+  z-index: -1;
+  background-color: var(--cc-color-surface);
+  background-image: var(--cc-paper-grain), var(--cc-paper-facets-panel);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc-color-frame) 60%, transparent);
 }
 
 .sm {
   --_pad: var(--cc-space-4);
+  --_cut: var(--cc-paper-cut-md);
 }
 
 .md {
@@ -42,75 +62,83 @@
 }
 
 .withRibbon {
-  margin-top: var(--cc-space-4);
-  padding-top: calc(var(--_pad) + var(--cc-space-3));
+  margin-top: var(--cc-space-5);
+  padding-top: calc(var(--_pad) + var(--cc-space-4));
 }
 
+/* Maroon ribbon across the top edge: band in front, folded ends behind. */
 .ribbon {
   position: absolute;
   top: 0;
   left: 50%;
-  translate: -50% -60%;
-  z-index: 1;
-  max-width: calc(100% - 3rem);
-  padding: var(--cc-space-1) var(--cc-space-5);
-  border: 2px solid var(--cc-gold-500);
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-royal-900);
-  box-shadow: 0 0 0 1px var(--cc-gold-900), 0 3px 0 var(--cc-neutral-900);
+  translate: -50% -55%;
+  z-index: 2;
+  isolation: isolate;
+  max-width: calc(100% - 4rem);
+  margin: 0;
+  padding: var(--cc-space-1_5) var(--cc-space-5);
+  background-color: var(--cc-royal-900);
+  background-image: var(--cc-paper-grain), linear-gradient(180deg, color-mix(in srgb, var(--cc-royal-700) 70%, transparent) 0 50%, transparent 50%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.7em) 50%, 100% 100%, 0 100%, 0.7em 50%);
   color: var(--cc-gold-100);
   font-family: var(--cc-font-display);
   font-size: var(--cc-text-md);
-  font-weight: var(--cc-weight-bold);
-  font-variation-settings: 'SOFT' 100;
+  letter-spacing: var(--cc-tracking-wide);
+  text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Corner knots: centred on the outer corner of the band. */
-.knot {
+/* Gold photo-corners: a folded triangle over each corner (lit face + crease). */
+.corner {
   position: absolute;
   z-index: 1;
-  width: 14px;
-  height: 14px;
+  width: 1.5rem;
+  aspect-ratio: 1;
   pointer-events: none;
+  background: linear-gradient(135deg, var(--cc-gold-300) 0 50%, transparent 50%);
+}
+
+.corner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0 calc(50% - 3px), var(--cc-gold-700) calc(50% - 3px) 50%, transparent 50%);
 }
 
 .tl {
-  top: -8px;
-  left: -8px;
+  top: 0;
+  left: 0;
 }
 
 .tr {
-  top: -8px;
-  right: -8px;
-}
-
-.bl {
-  bottom: -8px;
-  left: -8px;
+  top: 0;
+  right: 0;
+  rotate: 90deg;
 }
 
 .br {
-  right: -8px;
-  bottom: -8px;
+  right: 0;
+  bottom: 0;
+  rotate: 180deg;
 }
 
-.knotOutline {
-  fill: var(--cc-gold-900);
-}
-
-.knotFill {
-  fill: var(--cc-gold-500);
-}
-
-.knotShine {
-  fill: var(--cc-gold-100);
+.bl {
+  bottom: 0;
+  left: 0;
+  rotate: 270deg;
 }
 
 @media (forced-colors: active) {
   .frame {
-    border-color: CanvasText;
+    border: 2px solid CanvasText;
+    filter: none;
+  }
+
+  .frame::before,
+  .frame::after,
+  .corner {
+    display: none;
   }
 }

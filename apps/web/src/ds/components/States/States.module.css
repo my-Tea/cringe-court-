@@ -27,8 +27,11 @@
   width: 140%;
   height: 1rem;
   translate: -50% 0;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--cc-royal-700) 28%, transparent), transparent);
+  /* A flat paper shadow under the character, not a glow. */
+  height: 0.75rem;
+  clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
+  background: color-mix(in srgb, var(--cc-neutral-900) 22%, transparent);
+  filter: blur(2px);
   z-index: -1;
 }
 
@@ -69,8 +72,11 @@
 .details pre {
   margin-top: var(--cc-space-2);
   padding: var(--cc-space-3);
-  border-radius: var(--cc-radius-sm);
-  background: var(--cc-color-surface-sunken);
+  border-radius: var(--cc-radius-xs);
+  border-left: 3px solid var(--cc-color-frame);
+  background-color: var(--cc-color-surface-sunken);
+  background-image: var(--cc-paper-grain);
+  box-shadow: var(--cc-paper-1);
   white-space: pre-wrap;
   word-break: break-word;
 }
