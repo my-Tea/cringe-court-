@@ -236,6 +236,27 @@ export class ArcLedger implements ChainPort {
     });
   }
 
+  /** What each jury size costs, read from the contract so the screen cannot drift from it. */
+  async soloPrice(jurors: number): Promise<{ price: Usdc; bond: Usdc; successBonus: Usdc }> {
+    return this.#run(async () => {
+      if (!this.#port.soloPrice) throw new ChainError('not-allowed', t('shell.ledger.error.noRelayer'));
+      const p = await this.#port.soloPrice(jurors);
+      return { price: usdcOf(p.price), bond: usdcOf(p.bond), successBonus: usdcOf(p.successBonus) };
+    });
+  }
+
+  /** Stakes a Solo case before any script exists: the hash commits to the confession, not to a transcript. */
+  async fileSoloJury(p: { title: string; contentHash: Hex; jurors: number; price: Usdc }): Promise<{ caseNumber: CaseNumber; receipt: TxReceipt }> {
+    return this.#run(async () => {
+      const me = this.#me();
+      if (!this.#port.fileSoloJury) throw new ChainError('not-allowed', t('shell.ledger.error.noRelayer'));
+      await this.#allowance(me, p.price);
+      const { caseId, txHash } = await this.#port.fileSoloJury({ contentHash: p.contentHash, jurors: p.jurors });
+      this.#remember(caseId, 'solo', p.title, p.contentHash);
+      return { caseNumber: caseNumberOf(caseId), receipt: this.#receipt(txHash) };
+    });
+  }
+
   async getCase(caseNumber: CaseNumber): Promise<ChainCase | null> {
     return this.#run(() => this.#load(caseIdOf(caseNumber)));
   }
