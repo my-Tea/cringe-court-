@@ -28,7 +28,8 @@ import { FAUCET_MAX, GrandJuryHall, type GjCommand } from './gj/hall';
 import { RateLimiter } from './ratelimit';
 import { InviteSigner, SessionFull, Sessions, type Session } from './sessions';
 import { FileStorage, MemoryStorage, type Storage } from './store';
-import { ARC_COURT, arcHumanWriter, attestWallet, type HumanWriter } from './chain/attest';
+import { ARC_COURT, ARC_RPC, arcHumanWriter, attestWallet, type HumanWriter } from './chain/attest';
+import { createRpcProxy, type RpcRequest } from './chain/rpcProxy';
 import { arcStakeReader, courtWriter, createSoloTrials, screenConfession } from './solo/trial';
 import { createWorldService, seatGate, type WorldService } from './world/routes';
 import { HumanStore } from './world/humans';
@@ -122,6 +123,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
   });
 
   const soloTrials = deps.soloTrials ?? createSoloTrials({ writer: courtWriter(process.env, log), stakes: arcStakeReader(process.env, (process.env.ARC_COURT?.trim() || ARC_COURT) as `0x${string}`) });
+  const rpcProxy = createRpcProxy({ url: process.env.ARC_RPC_URL?.trim() || ARC_RPC });
   const humanWriter = deps.humanWriter !== undefined ? deps.humanWriter : arcHumanWriter(process.env, clockMs);
   const world: WorldService | null = config.world
     ? createWorldService({
@@ -142,6 +144,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     world: new RateLimiter({ capacity: 8, refill: 1 / 30 }, clockMs),
     // The trial page asks every couple of seconds until a paid trial is written.
     soloTrial: new RateLimiter({ capacity: 90, refill: 1 }, clockMs),
+    chainRpc: new RateLimiter({ capacity: 120, refill: 10 }, clockMs),
     inviteIp: new RateLimiter({ capacity: 40, refill: 0.2 }, clockMs),
     faucet: new RateLimiter({ capacity: 6, refill: 1 / 20 }, clockMs),
   };
@@ -251,6 +254,13 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     if (method === 'GET' && (path === `${API}/health` || path === '/healthz')) {
       const r: HealthResponse = { ok: true, name: 'cringe-court-server', version: SERVER_VERSION, serverTime: clockMs(), features };
       return json(res, 200, r);
+    }
+
+    // Before auth: reading a public chain needs no session, and prices load before anyone connects.
+    if (method === 'POST' && path === `${API}/chain/rpc`) {
+      limit(limits.chainRpc, ip, 'Too many chain reads. Wait a moment.');
+      const out = await rpcProxy.forward(await body<RpcRequest>(req));
+      return json(res, out.status, out.body);
     }
 
     if (method === 'POST' && path === `${API}/sessions`) {

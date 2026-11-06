@@ -21,6 +21,7 @@ interface Price {
 
 const CIRCLE_FAUCET = 'https://faucet.circle.com';
 const METAMASK = 'https://metamask.io/download/';
+const RETRY_MS = 4000;
 
 /** Page two: how big a jury, and one button. The wallet only asks for what is actually missing. */
 export function StakePage() {
@@ -41,21 +42,28 @@ export function StakePage() {
   // One at a time: the public RPC refuses bursts. Prices never change on a page, so one good read is enough.
   useEffect(() => {
     let live = true;
+    let retry: ReturnType<typeof setTimeout> | undefined;
     setPriceFailed(false);
     void (async () => {
       try {
         for (const j of JURIES) {
+          if (prices[j]) continue;
           const p = await ledger.port.soloPrice(j);
           if (!live) return;
           setPrices((all) => ({ ...all, [j]: p }));
         }
       } catch {
-        if (live) setPriceFailed(true);
+        if (!live) return;
+        setPriceFailed(true);
+        // Arc recovers on its own, so nobody should have to keep pressing a button.
+        retry = setTimeout(() => setPriceTry((n) => n + 1), RETRY_MS);
       }
     })();
     return () => {
       live = false;
+      clearTimeout(retry);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `prices` only skips what already loaded
   }, [ledger, priceTry]);
 
   const readLevel = useCallback(async () => {
@@ -63,7 +71,18 @@ export function StakePage() {
   }, [ledger, wallet.account]);
 
   useEffect(() => {
-    void readLevel().catch(() => undefined);
+    let live = true;
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    const attemptRead = () => {
+      readLevel().catch(() => {
+        if (live) retry = setTimeout(attemptRead, RETRY_MS);
+      });
+    };
+    attemptRead();
+    return () => {
+      live = false;
+      clearTimeout(retry);
+    };
   }, [readLevel]);
 
   if (!draft) return <Navigate to={soloPaths.file} replace />;

@@ -72,7 +72,7 @@ function injectedProvider(): EIP1193Provider | null {
 export function createLedger(config: PlatformConfig, options: CreateLedgerOptions = {}): Ledger {
   if (config.ledger === 'arc-testnet') {
     if (!config.arc) throw new ChainError('rejected', t('shell.ledger.error.arcConfig'));
-    return createArc(config.arc);
+    return createArc(config.arc, config.backend?.url ?? null);
   }
   return createDemo(options);
 }
@@ -129,10 +129,12 @@ async function ensureArc(provider: EIP1193Provider, arc: NonNullable<PlatformCon
   }
 }
 
-function createArc(arc: NonNullable<PlatformConfig['arc']>): Ledger {
+function createArc(arc: NonNullable<PlatformConfig['arc']>, server: string | null): Ledger {
   const chain = { ...arcTestnet, rpcUrls: { default: { http: [arc.rpcUrl] } } };
-  // The public RPC rate-limits hard: group reads into one call, and wait out a 429 instead of failing.
-  const publicClient = createPublicClient({ chain, batch: { multicall: { wait: 40 } }, transport: http(arc.rpcUrl, { retryCount: 4, retryDelay: 500 }) });
+  // The public RPC answers 429 to browsers at very low volume, so reads go through the court server,
+  // which queues and caches them. Writes still go from the player's own wallet.
+  const readUrl = server ? `${server.replace(/\/+$/, '')}/api/v1/chain/rpc` : arc.rpcUrl;
+  const publicClient = createPublicClient({ chain, batch: { multicall: { wait: 40 } }, transport: http(readUrl, { retryCount: 4, retryDelay: 500 }) });
   const addresses = { court: arc.court, usdc: arc.usdc, registry: arc.registry };
   const readOnly = createViemChainPort({ publicClient, addresses, chainId: BigInt(arc.chainId) });
   const explorerTx = (hash: Hex) => `${ARC_EXPLORER}${hash}`;
