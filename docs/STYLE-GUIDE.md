@@ -183,7 +183,14 @@ badges moved to `secondary` / `danger` backgrounds; Countdown and PhaseStepper
 
 ## 5. Art direction
 
-- **Pixel art, isometric.** Scenes are isometric pixel art with crisp edges
+> **Partly superseded by §9 (papercraft, 2026-11-03).** The palette, the red
+> carpet, the scale banners and the tone below still hold. The **chrome**
+> guidance does not: "pixel art, isometric" for UI, "rounded ornate frames",
+> pixel corner knots, round icon tiles and the Fraunces/Pixelify type pairing
+> are replaced by cut-and-folded paper (§9). Each superseded bullet is marked
+> ~~struck~~ → §9.x.
+
+- ~~**Pixel art, isometric.**~~ → §9.9 (UI and hero art are papercraft; the voxel cast and the 3D courtroom stay until their art pass, §9.12). Scenes are isometric pixel art with crisp edges
   (`image-rendering: pixelated` for sprites; never smooth-scale pixel art).
   Voxel characters from `cc-art` stay the cast.
 - **The courthouse.** A cream-stone isometric courthouse with maroon roofs,
@@ -195,17 +202,17 @@ badges moved to `secondary` / `danger` backgrounds; Countdown and PhaseStepper
 - **Gold scale banners.** Maroon banners with a gold border and a gold scales
   emblem hang from gold rods. The scales glyph (`<Icon name="scales">`) is the
   brand mark (header, favicon, crest over the hero title).
-- **Rounded ornate frames.** Panels are rounded rectangles with a gold band,
+- ~~**Rounded ornate frames.**~~ → §9.2/§9.3 (chamfered paper sheets on a gold mount with photo-corners). Panels are rounded rectangles with a gold band,
   a dark-gold outer line, a hairline inner rule and small ornaments at the
   corners (`OrnateFrame`, `Card tone="ornate" | "parchment"`).
-- **Four round icon buttons.** Maroon rounded tiles in a gold rim with a gold
+- ~~**Four round icon buttons.**~~ → §9.7 (folded paper gems). Maroon rounded tiles in a gold rim with a gold
   pixel glyph: **scales, document, gear, star** (`RoundIconButton`,
   `RoundIconLink`, `RoundIconTile`). Hover lightens the glyph; press sinks the
   tile onto its edge.
-- **Parchment frame.** The empty cream panel with a gold rule and corner
+- ~~**Parchment frame.**~~ → §9.3 (mounted sheet). The empty cream panel with a gold rule and corner
   flourishes (right column of the guide) is the default container for
   documents, receipts, dialogue and verdicts.
-- **Typography.** A heavy, soft old-style serif for the title and headings
+- ~~**Typography.**~~ → §9.1 (Lilita One paper display face; Fraunces only for the italic motto; no pixel face). A heavy, soft old-style serif for the title and headings
   (Fraunces, `SOFT 100`), maroon with a gold-and-ink extrusion for the hero
   title; the italic serif motto "*Your Honor, Bro Is Cooked.*" between gold
   rules with diamonds; small-caps serif signature lines ("PIXEL ART STYLE
@@ -216,6 +223,10 @@ badges moved to `secondary` / `danger` backgrounds; Countdown and PhaseStepper
 - **Tone.** Bold, polished, timeless; warm daylight rather than neon night.
 
 ## 6. Interim scene art
+
+> `courthouse.webp` no longer appears in the app (the landing hero is the SVG
+> courtroom, §9.9); `colonnade.webp` is unused by the papercraft pages. The
+> script and files are kept for the cc-art pipeline's `--check`.
 
 Until dedicated renders exist, `apps/web/scripts/gen-guide-art.py`
 (`npm run guide-art -w @cringe-court/web [-- --check]`, needs Pillow) crops two
@@ -276,3 +287,190 @@ pose cutouts are shown in front of the parchment and colonnade backdrops.
   `RoundIconButton` / `OrnateFrame`.
 - §4 *Accessibility*: the focus-ring colours ("gold on night, plum on
   parchment"): now teal on parchment, gold on wood.
+
+## 9. Papercraft art direction (2026-11-03)
+
+![Papercraft reference (style reference only, never shipped in the UI)](assets/theme-papercraft.jpg)
+
+Source: `docs/assets/theme-papercraft.jpg`, Chayan's login/landing reference
+("I want this type of theme for the game"). It is **direction only**: nothing
+in the app embeds, crops or traces it; every shipped piece is original
+CSS/SVG. The 30-swatch palette (§1) stays authoritative: the reference uses
+the same maroon / gold / cream family. Four derived paper shades are the only
+extra colours, each an sRGB mix of two swatches, emitted as `color-mix()` of
+palette variables (`tokens.ts → paperShades`):
+
+| Token | Mix | Used for |
+|---|---|---|
+| `--cc-paper-maroon-deep` | 62 % `royal-900` + `neutral-900` | PLAY AS GUEST plate, nav lower fold, HUD tags |
+| `--cc-paper-maroon-fold` | 50 % `royal-900` + `royal-700` | lit fold of a maroon sheet |
+| `--cc-paper-cream-fold` | 50 % `neutral-100` + `gold-100` | lit fold of a cream sheet |
+| `--cc-paper-cream-shade` | 45 % `neutral-300` + `gold-100` | kraft board, ribbon tails, fields in shadow |
+
+**The idea.** Everything is cut and folded from card and laid in layers:
+faceted low-poly folds, scissor-cut corners, torn and pinked edges, a soft
+shadow under each layer, fine grain. Playful meme-court humour, warm and rich.
+
+### 9.1 Type
+
+- **Display:** Lilita One (`--cc-font-display`), uppercase, wide tracking, for
+  ribbons, buttons, tabs, stamps, card titles. `--cc-font-pixel` now resolves
+  to the same face (token kept so existing code keeps working).
+- **Body:** Nunito. **Numbers:** JetBrains Mono (money, time).
+- **Serif:** Fraunces italic only for the motto "*Your Honor, Bro Is Cooked.*".
+
+### 9.2 Layers, elevation and grain
+
+- **A sheet = fill + facets + grain + cut outline + shadow.** Fill is a palette
+  colour; facets are `--cc-paper-facets-panel | plate | gem` (hard-edged light
+  and shade planes, one light from the top-left); grain is `--cc-paper-grain`
+  (big sheets also get `--cc-paper-mottle`).
+- **Elevation** counts the paper layers below a sheet. Box shadows
+  `--cc-paper-1…4` for rectangles; `--cc-paper-drop-1…4` (`filter:
+  drop-shadow`) for anything with a cut, torn or zig-zag outline, so the
+  shadow follows the cut. Each step is a crisp 1–3 px "card thickness" offset
+  plus a soft blur. Use: 1 chips/fields, 2 cards/ribbons/nav, 3 dialogs,
+  dialogue box, characters, 4 the login panel and the stage.
+- **Layering rule:** never more than four visible layers in one stack; a
+  backing sheet (gold or maroon) peeks out 4–6 px down-right, never up-left.
+- **Never clip a focusable element.** Outlines (chamfer, torn edge) live on
+  pseudo-elements or wrapper layers, so focus rings stay whole.
+
+### 9.3 Cuts, folds and edges
+
+- **Chamfer, not radius.** Corners are trimmed with scissors:
+  `--cc-paper-cut-sm | md | lg` (4 / 7 / 12 px), `.cc-cut` helper.
+  `border-radius` is reserved for things that are round in life.
+- **Torn edge** (`--cc-paper-edge-torn-*` masks): kraft boards, the season
+  board, the dialogue box's top. **Pinking-shear zig-zag**
+  (`--cc-paper-edge-zigzag-*`): receipts, verdict slips, CTA boards.
+- **Folds:** a crease is a 1 px darker line or a hard gradient stop; a fold
+  never uses a soft gradient.
+- **Mounted sheet** (`OrnateFrame`, `Card tone="ornate|parchment"`): content
+  sheet on a gold mount, gold photo-corners (folded triangles) on each corner.
+
+### 9.4 Ribbons (`PaperRibbon`)
+
+Cream band in front with a hand-trimmed outline; swallowtail ends folded
+behind it (`--cc-paper-cream-shade`, darker because they face away). Ink text
+(`neutral-900`, 4.5:1+). `sparks` adds the gold chevrons of "THE COURT IS NOW IN
+SESSION". `tails={false}` for tagline slips. Tones: cream (default), maroon
+(gold-100 text), gold (royal-900 text). Ribbons are usually the section heading
+(`as="h1|h2"`).
+
+### 9.5 Buttons and fields
+
+- **`PaperButton` / `PaperButtonLink`:** `gold` (primary, royal-900 label on
+  gold-300, chunky folded plate with a darker card edge), `maroon` (secondary,
+  gold-100 on `maroon-deep`), `ghost`. Icon slot (`iconStart`), sizes sm–xl.
+  **Press = paper depress:** the plate drops 2–3 px onto its edge and the shadow
+  shrinks (`--cc-ease-press`).
+- **`PaperField`:** label row with a leading icon (as on the reference), then a
+  hand-trimmed cream strip; password fields get the eye toggle (`revealable`).
+  Focus is a double ring (ink inside, surface focus colour outside), ≥3:1 on
+  both the cream strip and the maroon panel. Errors: icon + text, `aria-invalid`.
+
+### 9.6 Nav (`PaperNavBar`, `PaperTab`)
+
+A maroon strip folded once along its length, with gold-outlined paper tabs
+(HOME / THE COURT / LEADERBOARD / HOW TO PLAY) and the gold ENTER COURT
+button at the end. Active tab = filled gold plate, `aria-current="page"`
+(`activeFor` keeps "The court" current on mode pages). Under 40 rem tabs fold
+down to their icons; the label stays the accessible name.
+
+### 9.7 Tiles (`PaperTile`)
+
+Small folded gems (hexagon or rounded square) with a gold rim and a four-facet
+face: the Discord / Google / Apple sign-in tiles and quick links. Icon-only, so
+`label` is required. Press sinks the tile.
+
+### 9.8 Logo (`Logo`)
+
+SVG, three layouts: `stacked` (scales crest with crown above the wordmark
+plate, gavel under it: login panel), `inline` (nav), `mark` (crest only:
+footer, favicon-size). The letters are live text in the display face on a
+maroon plate with a gold rim, folded across the middle (lit top / gold
+bottom) with a dark card extrusion. All fills are palette variables.
+
+### 9.9 Characters and scenes
+
+- **Hero courtroom** (`apps/web/src/landing/hero/`): hand-built layered SVG,
+  nine planes back to front (wall, window/columns/curtains/valance, banners and
+  throne, bench + judge + bailiff, jury box, stairs, lawyers + desks, exhibits
+  + Shiba, foreground plant/globe/carpet). Every colour is a palette token
+  (`Swatch` type), so the scene cannot drift from §1.
+- **Characters** (`chibi.tsx`): chibi proportions (head ≈ ½ the figure),
+  faceted heads with one shaded cheek fold, spiky card hair with a separate
+  fringe, laughing open mouths, eyes squeezed shut or in sunglasses / stars /
+  swirls; costume hoods (chicken, frog, cat) and hats (pizza, police cap). The
+  judge: white spiky hair and folded beard, sunglasses, maroon robe with a fur
+  collar, gold gavel. Gold "ha!" sparks fly off whoever is laughing hardest.
+- **Scene rules:** one light from the top-left; every object = lit polygon +
+  shade facet; shadows only between layers (`--cc-paper-drop-*`); grain is one
+  multiplied overlay for the whole scene, not per object.
+- **Never** ship the reference JPG or crops of it.
+
+### 9.10 The landing (`/`)
+
+Kraft board with gold folded corners. Left: the maroon sign-in panel
+(`PaperPanel tone="maroon" edge="cut" elevation=4 backing="gold"`): stacked
+Logo, ribbon, tagline slip, email, password (eye), ENTER THE COURT (gold),
+PLAY AS GUEST (maroon), "or continue with" + Discord/Google/Apple tiles, and a
+demo-sign-in note. Right: the nav bar over the courtroom in a gold card mount.
+Under 64 rem: one column, nav → courtroom → panel. Auth is a **UI stub**:
+demo entry and guest play route to `/court`, social tiles toast "coming soon",
+the password is wiped on submit, nothing is sent or stored.
+
+### 9.11 Motion
+
+| Name | Where | How | Reduced motion |
+|---|---|---|---|
+| paper-unfold | dialogs, panels (`unfold`), `.cc-unfold` | rotateX from the top edge, `--cc-ease-unfold` | none |
+| paper-slide-in | toasts, hero layers, lists (`.cc-slide-in`, `--cc-stagger`) | translate + slight rotate, settle | none |
+| paper-pop | badges, tags (`.cc-pop`) | scale with overshoot | none |
+| paper depress | every paper button/tile/chip | 2–3 px drop + shadow shrink | instant |
+| gavel-bang | verdict stamp slam, `.cc-gavel-bang`, the hero judge | jolt + shiver | none |
+| sway | hanging banners (`.cc-sway`) | ±1.2° | none |
+| parallax | hero layers | pointer (mouse only) and scroll, by depth | off; layers reset |
+
+All durations read `--cc-duration-*` (0 ms under reduced motion), and each
+helper also has explicit `animation: none` blocks for both the in-app toggle
+(`:root[data-reduced-motion='true']`) and the system setting. Enforced by
+`ds/papercraft.test.ts`.
+
+### 9.12 What the mode tracks adopt
+
+Merge `v3/p3c-papercraft` first; then use, from `@/ds` only:
+
+| Need | Use | Notes |
+|---|---|---|
+| Page / section heading | `PaperRibbon as="h1|h2"` | `sparks` for the big moment |
+| Hero band, verdict panel | `PaperPanel tone="maroon" edge="cut" backing="gold"` | re-themes children to wood |
+| Content card | `Card` (now paper) or `PaperPanel tone="cream"` | `edge="torn"` for documents |
+| Primary / secondary action | `PaperButton variant="gold" | "maroon"` | `ButtonLink` → `PaperButtonLink` |
+| Inputs | `PaperField` (or `Field`, now paper-styled) | |
+| Trial stage | `TrialStage` (paper mount, tag HUD, paper chips) | CSS only, API unchanged |
+| Dialogue | `DialogueBox` | torn cream sheet, maroon name tag |
+| Verdict | `Stamp` (pinked cream slip, ink stamp, slam) | always parchment inks |
+| Jury / cast faces | `Portrait` (gold octagon mount), `AnonymousPortrait` | |
+| Case card / receipts | `OrnateFrame` / `Card tone="parchment"`, `Receipt` | photo-corners, zig-zag |
+| Quick links / social | `PaperTile` | |
+| Motion | `.cc-unfold`, `.cc-slide-in`, `.cc-pop`, `.cc-gavel-bang` | from `ds/styles/paper.css` |
+
+Do not hand-roll rounded pills, glows or pixel borders; do not add hex/rgb
+literals (the source scan fails the build).
+
+**3D / voxel courtroom (`packages/scene`, not changed here).** To sit inside
+the paper UI it should read as a paper diorama: flat shading
+(`MeshLambertMaterial` with `flatShading: true`, or `MeshToonMaterial` with a
+2–3 step gradient map); palette-only albedos (walls `neutral-900`/`gold-900`
+planks, maroon `royal-700/900` banners and carpet, cream `neutral-100`
+columns, gold `gold-300/500` trim); a faint paper-grain texture (the same
+`feTurbulence` grain baked to a 256 px tile, multiplied at ~15 %) on large
+planes; one warm key light from the camera's top-left (`gold-100`,
+intensity ~1.2) plus hemisphere fill (`gold-100` sky / `neutral-900` ground),
+no specular; soft contact shadows (PCFSoft, small radius) and **no fog
+colours outside the palette** (`lighting.ts` still uses a few off-palette fog
+and mood hexes such as `#1a1320`, `#BDF5FF`, `#FF6B5E`: remap them to
+`neutral-900`, `blue-100`, `royal-500` in the scene's own art pass). The mode
+tracks' 2D chrome around the canvas is already paper (`TrialStage`).
