@@ -46,7 +46,8 @@ describe('createLedger', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
     // Writes need a wallet; the relayer-backed seat offers are not deployed.
     await expect(l.port.advance(1 as never).catch((e: unknown) => e)).resolves.toBeInstanceOf(ChainError);
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // One read, retried four times: the public RPC rate-limits, so a failure is not trusted at once.
+    expect(fetchSpy).toHaveBeenCalledTimes(5);
   });
 
   it('attaches an injected wallet on connect, still without network calls', async () => {
