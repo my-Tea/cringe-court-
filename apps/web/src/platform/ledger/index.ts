@@ -3,6 +3,7 @@ export type { ArcLedgerOptions, CourtBackend, SeatOfferRequest, SeatOfferSource 
 export { DemoBackend } from './demoBackend';
 export { appLedger } from './appLedger';
 export { createLedger } from './createLedger';
+export { useArcWallet } from './useArcWallet';
 export type { CreateLedgerOptions, DemoHandles, Ledger, LedgerInfo } from './createLedger';
 export { probeLedger } from './probe';
 export type { LedgerTermsSource, ModeProbe } from './probe';
