@@ -14,6 +14,7 @@ import { ROOM_SCALE } from '../scale';
 import type { PlayerState } from '../types';
 import type { RoamBox } from '../world';
 import { VoxelAvatar } from './avatar';
+import { buildPlazaSky } from './sky';
 import { buildWorldMeshes, type WorldMeshes } from './worldMesh';
 import { C } from '../palette';
 
@@ -69,6 +70,8 @@ export class RoamRenderer {
   #flashOn = false;
   #lastFocus: string | null = null;
   #frame = 0;
+  #openSky = false;
+  readonly #sky = buildPlazaSky();
   readonly #unsub: () => void;
   preset: QualityPreset;
 
@@ -79,6 +82,7 @@ export class RoamRenderer {
     this.scene.name = 'roam';
     this.scene.background = new THREE.Color(C.neutral900);
     this.scene.fog = this.#fog;
+    this.scene.add(this.#sky);
     this.#world = buildWorldMeshes(options.boxes);
     this.scene.add(this.#world.group);
 
@@ -205,6 +209,9 @@ export class RoamRenderer {
       }
     }
     if (this.#focus.visible) (this.#focus.material as THREE.LineBasicMaterial).opacity = reducedMotion ? 0.9 : 0.65 + Math.sin(performance.now() / 260) * 0.25;
+
+    this.#applyOutside(c.zone);
+    if (this.#sky.visible) this.#sky.position.copy(this.camera.position);
   }
 
   /** The gavel's white pop. */
@@ -223,7 +230,33 @@ export class RoamRenderer {
     this.#key.intensity = m.key;
     for (const p of this.#points) p.intensity = (p.userData.base as number) * m.point;
     this.#fog.color.set(m.fog);
-    (this.scene.background as THREE.Color).set(m.fog);
+    if (!this.#openSky) (this.scene.background as THREE.Color).set(m.fog);
+  }
+
+  /**
+   * Outdoors the indoor fog colour is a flat brown. The plaza keeps a blue
+   * skydome and daylight, and drops distance fog so the facade stays readable.
+   */
+  #applyOutside(zone: string | null): void {
+    const open = zone === 'outside';
+    this.#sky.visible = open;
+    if (open) {
+      this.scene.fog = null;
+      this.#ambient.color.set(C.blue100);
+      this.#ambient.intensity = 0.75 + this.#flash * 1.6;
+      this.#hemi.color.set(C.blue300);
+      this.#hemi.groundColor.set(C.neutral300);
+      this.#hemi.intensity = 1.1;
+      this.#key.color.set(C.gold100);
+      this.#key.intensity = 1.5;
+      (this.scene.background as THREE.Color).set(C.blue700);
+    } else if (this.#openSky) {
+      this.#openSky = false;
+      this.scene.fog = this.#fog;
+      this.#applyMood();
+      return;
+    }
+    this.#openSky = open;
   }
 
   #syncRemotes(list: readonly PlayerState[], dt: number, reduced: boolean): void {
@@ -264,6 +297,10 @@ export class RoamRenderer {
     this.#world.dispose();
     this.#focus.geometry.dispose();
     (this.#focus.material as THREE.Material).dispose();
+    this.#sky.geometry.dispose();
+    const skyMat = this.#sky.material as THREE.MeshBasicMaterial;
+    skyMat.map?.dispose();
+    skyMat.dispose();
   }
 }
 

@@ -63,6 +63,28 @@ describe('roam renderer (no GL needed)', () => {
     r.dispose();
   });
 
+  it('opens a blue cloud sky on the plaza and keeps the indoor fog inside', () => {
+    const controller = new RoamController(data.world, { spawn: 'aisle' });
+    const r = new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller, quality: 'high' });
+    controller.update(1 / 60);
+    r.update(1 / 60);
+    const sky = r.scene.getObjectByName('plaza-sky')!;
+    expect(sky.visible).toBe(false);
+    expect(r.scene.fog).toBeTruthy();
+    controller.teleport('outside');
+    controller.update(1 / 60);
+    r.update(1 / 60);
+    expect(controller.zone).toBe('outside');
+    expect(sky.visible).toBe(true);
+    expect(r.scene.fog).toBeNull();
+    expect((r.scene.background as THREE.Color).getHexString()).toBe(C.blue700.slice(1).toLowerCase());
+    controller.teleport('lobby');
+    r.update(1 / 60);
+    expect(sky.visible).toBe(false);
+    expect(r.scene.fog).toBeTruthy();
+    r.dispose();
+  });
+
   it('the focus outline follows the focused interactable', () => {
     const b = data.world.interactables.find((i) => i.id === 'exhibit-b')!.at;
     const controller = new RoamController(data.world, { spawn: { pos: [0, 0, 20 * ROOM_SCALE], yaw: 0, pitch: Math.atan2(b[1] - 44, 20 * ROOM_SCALE - b[2]) } });
