@@ -32,6 +32,7 @@ export function GameWorld({ view }: { view: GameView }) {
     // A returning player who has finished the run starts on the courthouse terrace.
     spawn: currentStep(start) === 'enter' ? 'outside' : 'arrival',
     openGates: openGatesFor(start),
+    stations: true,
     avatar: { model: 'creator', name: t('trial.roam.you'), look: start.look },
   });
   const [perspective, setPerspective] = useState<PerspectiveChoice>(() => readPerspective());
@@ -96,6 +97,7 @@ export function GameWorld({ view }: { view: GameView }) {
           strings={strings}
           className={styles.room}
           presentation={presentation}
+          fullscreen
           pauseLobby={false}
           pauseExtra={<GameMenuItems compact onNavigate={() => roam.controller.setPaused(false)} />}
         >
@@ -153,15 +155,15 @@ function RunOverlay({ controller, station }: { controller: RoamController; stati
     toast({ tone: 'success', title: t('play.wardrobe.ok.title'), description: t('play.wardrobe.ok.body') });
   };
 
-  const cancelLook = () => {
-    setLook(profile.look);
-    controller.closePanel();
-  };
-
   const chooseMode = (mode: ModeId) => {
     commit({ ...profile, mode });
     toast({ tone: 'success', title: t('play.trial.ok.title', { mode: t(MODE_KEYS[mode]) }), description: t('play.trial.ok.body') });
   };
+
+  // However a wardrobe closes (Back, Esc), a look that was not confirmed comes off.
+  useEffect(() => {
+    if (!snap.panel && controller.avatar.look !== profile.look) setLook(profile.look);
+  }, [snap.panel, controller, profile.look, setLook]);
 
   const step = currentStep(profile);
   const mode = station?.startsWith('mode:') ? (station.slice(5) as ModeId) : null;
@@ -173,7 +175,7 @@ function RunOverlay({ controller, station }: { controller: RoamController; stati
     <>
       {showQuest ? <QuestTracker step={step} onSkip={step === 'enter' && snap.zone !== 'outside' ? () => controller.teleport('outside') : null} /> : null}
       {snap.panel === 'verify' ? <VerifyPanel mock={mock} done={!!profile.verified} onVerify={verify} onClose={() => controller.closePanel()} /> : null}
-      {snap.panel === 'wardrobe' ? <WardrobePanel look={controller.avatar.look ?? profile.look} onChange={setLook} onConfirm={confirmLook} onCancel={cancelLook} /> : null}
+      {snap.panel === 'wardrobe' ? <WardrobePanel look={controller.avatar.look ?? profile.look} onChange={setLook} onConfirm={confirmLook} onCancel={() => controller.closePanel()} /> : null}
       {snap.panel === 'trials' && mode ? <TrialPanel mode={mode} chosen={profile.mode} onChoose={() => chooseMode(mode)} onClose={() => controller.closePanel()} /> : null}
     </>
   );
