@@ -188,7 +188,12 @@ export const shell = {
   'notFound.body': 'The court searched every docket. Check the address, or head back and pick a court.',
 
   // ── settings
-  'settings.lede': 'Sound, motion, and exactly which court is holding your test USDC and checking your jurors.',
+  'settings.lede': 'Sound, motion, how you see the court, and exactly which court is holding your test USDC and checking your jurors.',
+  'settings.perspective': 'Perspective',
+  'settings.perspective.body': 'Auto keeps the roaming court in third-person isometric. First person is the view from your own eyes.',
+  'settings.perspective.legend': 'Court perspective',
+  'settings.perspective.auto': 'Auto · third person',
+  'settings.perspective.first': 'First person',
   'settings.sound': 'Sound',
   'settings.motion': 'Motion',
   'settings.motion.body':
