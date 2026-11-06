@@ -57,9 +57,9 @@
   gap: var(--cc-space-3);
   border-radius: var(--cc-radius-xl);
   background:
-    radial-gradient(ellipse at 50% 30%, rgb(246 199 91 / 0.12), transparent 60%),
-    #120c16;
-  color: #fff2c7;
+    radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--cc-gold-300) 12%, transparent), transparent 60%),
+    var(--cc-neutral-900);
+  color: var(--cc-gold-100);
   box-shadow: 0 0 0 1px var(--cc-color-border);
 }
 
