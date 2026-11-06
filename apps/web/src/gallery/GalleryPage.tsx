@@ -8,6 +8,7 @@ import {
   ButtonSection,
   CardSection,
   CastSection,
+  ChromeSection,
   FeedbackSection,
   FormSection,
   OverlaySection,
@@ -32,6 +33,7 @@ const TOC: ReadonlyArray<{ group: string; items: ReadonlyArray<[string, string]>
     group: 'Components',
     items: [
       ['buttons', 'Buttons'],
+      ['chrome', 'Ornate chrome'],
       ['badges', 'Badges'],
       ['cards', 'Cards'],
       ['forms', 'Form fields'],
@@ -79,7 +81,7 @@ export function GalleryPage() {
           <p className={styles.toolbarLabel}>CringeCourt design system</p>
           <h1 className={styles.title}>Design gallery</h1>
           <p className={styles.lede}>
-            Every token, component and state, live. Switch the surface to see components re-map to parchment, and toggle reduced motion
+            Every token, component and state, live. Switch the surface to see components re-map from parchment to wood, and toggle reduced motion
             to check every animation degrades to an instant state change.
           </p>
         </div>
@@ -107,6 +109,7 @@ export function GalleryPage() {
           <IconSection />
           <h2 className={styles.groupTitle}>Components</h2>
           <ButtonSection />
+          <ChromeSection />
           <BadgeSection />
           <CardSection />
           <FormSection />

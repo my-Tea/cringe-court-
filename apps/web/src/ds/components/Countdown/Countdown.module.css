@@ -1,9 +1,9 @@
 /*
  * Deadline widget (V4 §5: time remaining "must be instantly readable"). The
- * bar drains from sunrise gold to dusk red as the deadline approaches.
+ * bar drains from burnished gold to dusk red as the deadline approaches.
  */
 .countdown {
-  --_tone: var(--cc-color-highlight);
+  --_tone: var(--cc-color-highlight-shadow);
   display: flex;
   flex-direction: column;
   gap: var(--cc-space-2);

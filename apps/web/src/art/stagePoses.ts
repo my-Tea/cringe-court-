@@ -15,25 +15,6 @@ export const STAGE_POSES = [
   ['side-a', 'talking'],
   ['side-b', 'angry'],
   ['juror', 'idle'],
-  // Solo courtroom (apps/web/src/modes/solo, STAGE_POSE_SET in @cringe-court/modes-solo).
-  ['judge', 'talking'],
-  ['judge', 'angry'],
-  ['judge', 'shocked'],
-  ['prosecutor', 'idle'],
-  ['prosecutor', 'angry'],
-  ['prosecutor', 'laughing'],
-  ['prosecutor', 'shocked'],
-  ['prosecutor', 'confused'],
-  ['defense', 'talking'],
-  ['defense', 'objection'],
-  ['defense', 'shocked'],
-  ['defense', 'confused'],
-  ['defense', 'happy'],
-  ['creator', 'idle'],
-  ['creator', 'shocked'],
-  ['creator', 'crying'],
-  ['creator', 'happy'],
-  ['creator', 'defeated'],
 ] as const satisfies ReadonlyArray<readonly [CharacterId, Pose]>;
 
 export type StagePose = (typeof STAGE_POSES)[number];

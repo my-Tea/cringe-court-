@@ -85,7 +85,7 @@ export class FixtureCounsel implements AiCounselPort {
         beat: 'smug',
         text: unbalanced
           ? 'No comment.'
-          : `${CHARACTER_NAMES[d.counsel]} for ${label1}: ${d.angle ? `${d.angle} ` : ''}${firstSentence(d.publicText)} Context is everything, and the context is chaos.`,
+          : `${CHARACTER_NAMES[d.counsel]} for ${label1}: ${d.angle ? `${d.angle} ` : ''}Context is everything, and the context is chaos.`,
       },
     ];
     if (request.scope === 'teaser') {
