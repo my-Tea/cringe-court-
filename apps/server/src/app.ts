@@ -6,6 +6,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { caseNumber as toCaseNumber, usdc, type AiCounselPort, type BallotChoice, type CaseNumber, type Hex, type WorldIdProof } from '@cringe-court/core';
+import type { IdentityVerifier } from '@cringe-court/world-id';
 import { VersusCounsel, parseInviteCode, type FactBody } from '@cringe-court/modes-versus';
 import {
   API,
@@ -27,6 +28,8 @@ import { FAUCET_MAX, GrandJuryHall, type GjCommand } from './gj/hall';
 import { RateLimiter } from './ratelimit';
 import { InviteSigner, SessionFull, Sessions, type Session } from './sessions';
 import { FileStorage, MemoryStorage, type Storage } from './store';
+import { createWorldService, seatGate, type WorldService } from './world/routes';
+import { HumanStore } from './world/humans';
 import { MAX_BATCH, BadFact, Forbidden, authorize, checkShape } from './versus/validate';
 import { Conflict, Rejected, RoomFull, VersusRoom } from './versus/room';
 import type { Fact } from '@cringe-court/modes-versus';
@@ -50,6 +53,8 @@ export interface ServerDeps {
   clockMs?: () => number;
   counsel?: AiCounselPort;
   log?: (line: string) => void;
+  /** Test stand-in. Production builds the IDKit verifier from config.world. */
+  worldVerifier?: IdentityVerifier;
 }
 
 export interface CourtServer {
@@ -110,6 +115,14 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     onChange: broadcastGj,
   });
 
+  const world: WorldService | null = config.world
+    ? createWorldService({
+        config: config.world,
+        humans: new HumanStore(storage.log('humans'), clockMs),
+        ...(deps.worldVerifier ? { verifier: deps.worldVerifier } : {}),
+      })
+    : null;
+
   /* ── limits ─────────────────────────────────────────────────────────── */
 
   const limits = {
@@ -118,6 +131,7 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     reads: new RateLimiter({ capacity: 120, refill: 20 }, clockMs),
     writes: new RateLimiter({ capacity: 30, refill: 3 }, clockMs),
     inviteSession: new RateLimiter({ capacity: 8, refill: 1 / 60 }, clockMs),
+    world: new RateLimiter({ capacity: 8, refill: 1 / 30 }, clockMs),
     inviteIp: new RateLimiter({ capacity: 40, refill: 0.2 }, clockMs),
     faucet: new RateLimiter({ capacity: 6, refill: 1 / 20 }, clockMs),
   };
@@ -250,6 +264,18 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     if (method === 'GET') limit(limits.reads, sid);
     else limit(limits.writes, sid);
 
+    if (path === `${API}/world/rp-context` && method === 'GET') {
+      if (!world) throw new HttpError(503, 'disabled', 'World ID is not configured on this server.');
+      limit(limits.world, sid, 'Too many verification requests. Wait a minute.');
+      return json(res, 200, world.rpContext(session));
+    }
+    if (path === `${API}/world/verify` && method === 'POST') {
+      if (!world) throw new HttpError(503, 'disabled', 'World ID is not configured on this server.');
+      limit(limits.world, sid, 'Too many verification requests. Wait a minute.');
+      const result = await world.verify(session, await body(req));
+      return json(res, 200, result);
+    }
+
     if (method === 'GET' && path === `${API}/sessions/me`) {
       const r: MeResponse = { persona: session.persona, features };
       return json(res, 200, r);
@@ -268,6 +294,17 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       let authors: string[];
       try {
         bodies = b.facts.map(checkShape);
+        if (world && config.world) {
+          for (const fact of bodies) {
+            if (fact.type !== 'seat' || fact.demo) continue;
+            const c = room.case(fact.trialId);
+            const gate = seatGate(world.humans, fact.account, config.world.action, {
+              partyHumanIds: Object.values(c?.parties ?? {}).flatMap((p) => (p ? [p.nullifier] : [])),
+              seatedHumanIds: [...(c?.seatNullifiers ?? [])],
+            });
+            if (!gate.ok) throw new HttpError(403, 'forbidden', gate.message);
+          }
+        }
         authors = authorize(bodies, viewerOf(session), (t) => room.case(t), { demoClock: config.demoClock });
       } catch (err) {
         if (err instanceof BadFact) throw new HttpError(400, 'bad-request', err.message);
@@ -348,7 +385,16 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
             break;
           case 'seat-request':
           case 'seat-decline':
-          case 'seat-accept':
+            cmd = { type: action, account, n };
+            break;
+          case 'seat-accept': {
+            if (world && config.world) {
+              const gate = seatGate(world.humans, account, config.world.action, { partyHumanIds: [], seatedHumanIds: [] });
+              if (!gate.ok) throw new HttpError(403, 'forbidden', gate.message);
+            }
+            cmd = { type: action, account, n };
+            break;
+          }
           case 'settle':
           case 'claim':
             cmd = { type: action, account, n };

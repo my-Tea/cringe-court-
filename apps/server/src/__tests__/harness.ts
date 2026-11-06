@@ -7,7 +7,7 @@ import type { AiCounselPort } from '@cringe-court/core';
 import { MemorySaltVault, MockIdentity } from '@cringe-court/core/testing';
 import { VersusCounsel } from '@cringe-court/modes-versus';
 import { CourtConnection, RemoteFactStore, RemoteGrandJuryCourt, RemoteVersusDesk, type PersonaInfo, type SessionResponse } from '@cringe-court/net';
-import { createCourtServer, type CourtServer } from '../app';
+import { createCourtServer, type CourtServer, type ServerDeps } from '../app';
 import { readConfig, type ServerConfig } from '../config';
 import type { Storage } from '../store';
 
@@ -17,13 +17,14 @@ export interface Running {
   close(): Promise<void>;
 }
 
-export async function startServer(o: { config?: Partial<ServerConfig>; storage?: Storage; clockMs?: () => number; counsel?: AiCounselPort } = {}): Promise<Running> {
+export async function startServer(o: { config?: Partial<ServerConfig>; storage?: Storage; clockMs?: () => number; counsel?: AiCounselPort; worldVerifier?: ServerDeps['worldVerifier'] } = {}): Promise<Running> {
   const config: ServerConfig = { ...readConfig({}), store: 'memory', port: 0, host: '127.0.0.1', tickMs: 0, counselLatencyMs: 0, corsOrigins: ['http://app.test'], ...o.config };
   const court = await createCourtServer(config, {
     ...(o.storage ? { storage: o.storage } : {}),
     ...(o.clockMs ? { clockMs: o.clockMs } : {}),
     counsel: o.counsel ?? new VersusCounsel(),
     log: () => undefined,
+    ...(o.worldVerifier ? { worldVerifier: o.worldVerifier } : {}),
   });
   const url = await court.listen();
   return { court, url, close: () => court.close() };
