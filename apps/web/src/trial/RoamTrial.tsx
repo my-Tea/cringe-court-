@@ -32,6 +32,18 @@ export function RoamTrial({ beats, label, role = 'defendant', spawn = 'defendant
   const [run, setRun] = useState(0);
   const [current, setCurrent] = useState<number | null>(null);
   const [done, setDone] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    const sync = () => setFull(document.fullscreenElement === box.current && box.current !== null);
+    document.addEventListener('fullscreenchange', sync);
+    return () => document.removeEventListener('fullscreenchange', sync);
+  }, []);
+  const canFull = typeof document !== 'undefined' && typeof document.documentElement.requestFullscreen === 'function';
+  const toggleFull = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void box.current?.requestFullscreen();
+  };
   const cb = useRef({ onBeat, onDone });
   useEffect(() => {
     cb.current = { onBeat, onDone };
@@ -73,7 +85,7 @@ export function RoamTrial({ beats, label, role = 'defendant', spawn = 'defendant
 
   const beat = current !== null ? beats[current] : undefined;
   return (
-    <div className={styles.roam}>
+    <div className={styles.roam} ref={box}>
       <RoamCourtroom controller={roam.controller} data={roam.data} onExit={onExit} label={label} className={styles.canvas} />
       <div className={styles.roamBar}>
         <p className={styles.roamStatus} aria-live="polite">
@@ -99,6 +111,11 @@ export function RoamTrial({ beats, label, role = 'defendant', spawn = 'defendant
           <Button size="sm" variant="ghost" iconStart={<Icon name="refresh" />} onClick={() => setRun((n) => n + 1)}>
             Replay hearing
           </Button>
+          {canFull && (
+            <Button size="sm" variant="ghost" aria-pressed={full} onClick={toggleFull}>
+              {full ? 'Exit full screen' : 'Full screen'}
+            </Button>
+          )}
         </div>
       </div>
     </div>

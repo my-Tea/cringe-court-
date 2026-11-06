@@ -43,7 +43,7 @@
 .canvas {
   aspect-ratio: 16 / 9;
   width: 100%;
-  min-height: 18rem;
+  min-height: 22rem;
 }
 
 @media (max-width: 40rem) {
@@ -82,4 +82,15 @@
 
 .roamActions button {
   color: var(--cc-gold-100);
+}
+
+.roam:fullscreen {
+  border: 0;
+  border-radius: 0;
+}
+
+.roam:fullscreen .canvas {
+  flex: 1;
+  aspect-ratio: auto;
+  min-height: 0;
 }
