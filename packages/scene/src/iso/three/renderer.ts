@@ -20,7 +20,7 @@ import { ISO } from '../camera';
 import type { IsoController } from '../controller';
 import { CELL, depthKey, type TownBox } from '../world';
 import { FACE_SHADE } from '../../roam/cast';
-import { surfaceFor, surfaceTexture } from '../../roam/three/textures';
+import { surfaceFor, surfaceGain, surfaceTexture } from '../../roam/three/textures';
 import { VoxelAvatar } from '../../roam/three/avatar';
 import type { CastFile } from '../../roam/cast';
 
@@ -293,8 +293,9 @@ export class IsoRenderer {
       geometry.setAttribute('uv', new THREE.BufferAttribute(batch.uvs, 2));
       geometry.setIndex(new THREE.BufferAttribute(batch.indices, 1));
       geometry.computeBoundingSphere();
-      const color = new THREE.Color(batch.color);
-      const map = surfaceTexture(surfaceFor(batch.color, batch.glow));
+      const kind = surfaceFor(batch.color, batch.glow);
+      const map = surfaceTexture(kind);
+      const color = new THREE.Color(batch.color).multiplyScalar(batch.glow > 0 ? 1 : surfaceGain(kind));
       const material =
         batch.glow > 0
           ? new THREE.MeshBasicMaterial({ color, map, vertexColors: true, fog: true })
