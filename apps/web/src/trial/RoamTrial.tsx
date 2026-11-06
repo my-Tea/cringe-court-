@@ -19,6 +19,7 @@ import { playBeats, type PlannedBeat } from './beats';
 import { setHearingPace, useHearingPace } from './hearingPace';
 import { roamStrings } from './roamStrings';
 import styles from './Trial.module.css';
+import { savedLook } from '@/play/profile';
 
 export interface RoamTrialProps {
   beats: readonly PlannedBeat[];
@@ -59,7 +60,7 @@ function RoamTrialRoom({
   role = 'defendant',
   spawn,
   jurors = 3,
-  avatar = { model: 'creator', name: t('trial.roam.you') },
+  avatar = { model: 'creator', name: t('trial.roam.you'), look: savedLook() },
   remotes,
   onExit,
   onBeat,
