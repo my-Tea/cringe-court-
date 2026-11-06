@@ -21,6 +21,9 @@ function setup(opts: { completion?: unknown; verifyBody?: unknown; verifyStatus?
       request: (config) => {
         configs.push(config);
         return {
+          constraints: async () => {
+            throw new Error('A uniqueness request here uses a preset.');
+          },
           preset: async (p, options) => {
             presets.push(p);
             return {
@@ -35,6 +38,7 @@ function setup(opts: { completion?: unknown; verifyBody?: unknown; verifyStatus?
       },
     },
     proofOfHuman: (o) => ({ kind: 'human', ...o }),
+    CredentialRequest: () => ({}),
     orbLegacy: (o) => ({ kind: 'orb', ...o }),
     deviceLegacy: (o) => ({ kind: 'device', ...o }),
   };
@@ -58,14 +62,23 @@ describe('a person World already knows', () => {
 
   function runtime(firstError: string | null) {
     const log: string[] = [];
-    const flow = (done: unknown) => ({ preset: async () => ({ connectorURI: 'https://world.org/verify?t=x', pollUntilCompletion: async () => done }) });
+    const started = async (done: unknown) => ({ connectorURI: 'https://world.org/verify?t=x', pollUntilCompletion: async () => done });
+    // Like the real SDK: a session flow refuses a preset.
+    const flow = (done: unknown, session = false) => ({
+      preset: async () => {
+        if (session) throw new Error('Presets are not supported for session flows. Use .constraints() instead.');
+        return started(done);
+      },
+      constraints: async () => started(done),
+    });
     const idkit = {
       IDKit: {
         request: () => { log.push('uniqueness'); return flow(firstError ? { success: false, error: firstError } : { success: true, result: RESULT }); },
-        createSession: () => { log.push('createSession'); return flow({ success: true, result: SESSION }); },
-        proveSession: (id: string) => { log.push(`proveSession:${id}`); return flow({ success: true, result: SESSION }); },
+        createSession: () => { log.push('createSession'); return flow({ success: true, result: SESSION }, true); },
+        proveSession: (id: string) => { log.push(`proveSession:${id}`); return flow({ success: true, result: SESSION }, true); },
       },
       proofOfHuman: () => ({}),
+      CredentialRequest: () => ({}),
       orbLegacy: () => ({}),
       deviceLegacy: () => ({}),
     } as unknown as IdkitRuntime;

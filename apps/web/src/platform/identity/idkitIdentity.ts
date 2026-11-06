@@ -10,6 +10,8 @@ export interface IdkitRequestLike {
 }
 interface IdkitBuilderLike {
   preset(preset: unknown, options?: { signal?: AbortSignal }): Promise<IdkitRequestLike>;
+  /** The only selector session flows accept. */
+  constraints(node: unknown, options?: { signal?: AbortSignal }): Promise<IdkitRequestLike>;
 }
 interface IdkitSessionConfig {
   app_id: `app_${string}`;
@@ -30,6 +32,7 @@ export interface IdkitRuntime {
     proveSession?(sessionId: `session_${string}`, config: IdkitSessionConfig): IdkitBuilderLike;
   };
   proofOfHuman(opts?: { signal?: string }): unknown;
+  CredentialRequest(type: 'proof_of_human', opts?: { signal?: string }): unknown;
   orbLegacy(opts?: { signal?: string }): unknown;
   deviceLegacy(opts?: { signal?: string }): unknown;
 }
@@ -227,7 +230,6 @@ export class IdkitIdentityPort implements IdentityPort {
       const signal = typeof serverSignal === 'string' ? serverSignal : request.signal;
 
       const runtime = await this.#loadRuntime();
-      const preset = runtime.proofOfHuman({ signal });
       const environment = this.#o.environment ?? 'staging';
       const session = { app_id: this.#o.appId, rp_context: rpContext, environment };
       const saved = storedSession();
@@ -239,7 +241,10 @@ export class IdkitIdentityPort implements IdentityPort {
           : saved && proveSession
             ? proveSession.call(runtime.IDKit, saved, session)
             : createSession!.call(runtime.IDKit, session);
-      const req = await builder.preset(preset, { signal: own.signal });
+      const req =
+        kind === 'uniqueness'
+          ? await builder.preset(runtime.proofOfHuman({ signal }), { signal: own.signal })
+          : await builder.constraints(runtime.CredentialRequest('proof_of_human', { signal }), { signal: own.signal });
       cleanup = this.#o.onConnect?.(req.connectorURI, abort);
       const done = await req.pollUntilCompletion({ signal: own.signal });
       if (!done.success && REPLAY_CODES.has(done.error) && kind === 'uniqueness') return 'replayed';
