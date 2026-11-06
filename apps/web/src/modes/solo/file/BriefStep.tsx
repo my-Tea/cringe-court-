@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import type { EvidenceState, PublicExhibit } from '@cringe-court/core';
 import { ANGLE_MAX, REDACTION_LABELS, soloMode, type SoloSession, type SoloSnapshot } from '@cringe-court/modes-solo';
 import { Alert, Badge, Button, Icon, PaperButton, PaperField, PaperPanel, PaperRibbon, Portrait, Select, Skeleton, TextArea, cx } from '@/ds';
+import { t } from '@/i18n';
 import { Courtroom } from '../court/Courtroom';
 import styles from './FilePage.module.css';
 
@@ -16,8 +17,8 @@ const OWN = 'own';
 
 /** Step 2: approve what the public sees, add evidence, brief Counsel Chaos (D2), and optionally watch the free teaser (D3). */
 export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: BriefStepProps) {
-  const t = snap.trial;
-  const side = t.filing.sides.a!;
+  const tState = snap.trial;
+  const side = tState.filing.sides.a!;
   const [choice, setChoice] = useState<string | null>(() => {
     if (!side.angle) return null;
     return snap.angles?.find((a) => a.text === side.angle)?.id ?? OWN;
@@ -36,42 +37,42 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
     if (session.addExhibit(exhibit, hiddenNames)) setExhibit({ kind: 'text', title: '', body: '' });
   };
 
-  const exhibitsLeft = t.rules.maxExhibits - t.exhibits.length;
+  const exhibitsLeft = tState.rules.maxExhibits - tState.exhibits.length;
 
   return (
     <div className={styles.brief}>
       <header className={styles.stepHead}>
-        <p className={styles.eyebrow}>Step 2 of 5</p>
+        <p className={styles.eyebrow}>{t('solo.file.stepOf', { n: 2, total: 5 })}</p>
         <PaperRibbon as="h2" className={styles.stepTitle}>
-          Brief your lawyer
+          {t('solo.brief.title')}
         </PaperRibbon>
-        <p className={styles.lede}>Check what the court will see, add evidence if you have any, then give Counsel Chaos one angle to run with.</p>
+        <p className={styles.lede}>{t('solo.brief.lede')}</p>
       </header>
 
       <div className={styles.briefGrid}>
         <PaperPanel as="section" edge="cut" elevation={2} aria-labelledby="public-title">
           <div className={styles.panelStack}>
             <header>
-              <p className={styles.eyebrow}>Public record</p>
+              <p className={styles.eyebrow}>{t('solo.brief.public.eyebrow')}</p>
               <h3 id="public-title" className={styles.panelTitle}>
-                What Miss Ratio and the jury will read
+                {t('solo.brief.public.heading')}
               </h3>
             </header>
-            <p className={styles.publicTitle}>“{t.filing.title}”</p>
+            <p className={styles.publicTitle}>“{tState.filing.title}”</p>
             <p className={styles.publicStory}>{side.story}</p>
             {snap.redactions.length > 0 ? (
-              <ul className={styles.redactions} role="list" aria-label="Hidden by the redaction pass">
+              <ul className={styles.redactions} role="list" aria-label={t('solo.brief.public.redactions')}>
                 {snap.redactions.map((r, i) => (
                   <li key={i}>
-                    <Badge tone="info">{REDACTION_LABELS[r.kind]}</Badge> hidden
+                    <Badge tone="info">{REDACTION_LABELS[r.kind]}</Badge> {t('solo.brief.public.hidden')}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className={styles.small}>Nothing needed hiding. Your private notes stay with Counsel Chaos.</p>
+              <p className={styles.small}>{t('solo.brief.public.nothing')}</p>
             )}
             <Button size="sm" variant="ghost" onClick={() => session.withdraw()}>
-              Start over
+              {t('solo.brief.startOver')}
             </Button>
           </div>
         </PaperPanel>
@@ -79,44 +80,44 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
         <PaperPanel as="section" edge="cut" elevation={2} aria-labelledby="evidence-title">
           <div className={styles.panelStack}>
             <header>
-              <p className={styles.eyebrow}>{`Optional · ${exhibitsLeft} of ${t.rules.maxExhibits} left`}</p>
+              <p className={styles.eyebrow}>{t('solo.brief.exhibits.eyebrow', { left: exhibitsLeft, max: tState.rules.maxExhibits })}</p>
               <h3 id="evidence-title" className={styles.panelTitle}>
-                Evidence locker
+                {t('solo.brief.exhibits.heading')}
               </h3>
             </header>
-            {t.exhibits.length > 0 && (
+            {tState.exhibits.length > 0 && (
               <ol className={styles.exhibits} role="list">
-                {t.exhibits.map((x, i) => (
+                {tState.exhibits.map((x, i) => (
                   <li key={x.id}>
                     <span className={styles.exhibitLetter}>{String.fromCharCode(65 + i)}</span>
                     <div>
                       <strong>{x.title}</strong>
                       <p>{x.body}</p>
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => session.removeExhibit(x.id)} aria-label={`Remove exhibit ${String.fromCharCode(65 + i)}, ${x.title}`}>
-                      Remove
+                    <Button size="sm" variant="ghost" onClick={() => session.removeExhibit(x.id)} aria-label={t('solo.brief.exhibit.removeAria', { letter: String.fromCharCode(65 + i), title: x.title })}>
+                      {t('solo.brief.exhibit.remove')}
                     </Button>
                   </li>
                 ))}
               </ol>
             )}
             {exhibitsLeft > 0 && (
-              <form className={styles.exhibitForm} onSubmit={addExhibit} aria-label="Add an exhibit">
+              <form className={styles.exhibitForm} onSubmit={addExhibit} aria-label={t('solo.brief.exhibit.formLabel')}>
                 <Select
-                  label="Kind"
+                  label={t('solo.brief.exhibit.kind')}
                   value={exhibit.kind}
                   onChange={(e) => setExhibit({ ...exhibit, kind: e.target.value as PublicExhibit['kind'] })}
                   options={[
-                    { value: 'text', label: 'Text' },
-                    { value: 'quote', label: 'Quote (a message, a post)' },
-                    { value: 'screenshot', label: 'Screenshot caption' },
-                    { value: 'link', label: 'Link (redacted)' },
+                    { value: 'text', label: t('solo.brief.exhibit.kind.text') },
+                    { value: 'quote', label: t('solo.brief.exhibit.kind.quote') },
+                    { value: 'screenshot', label: t('solo.brief.exhibit.kind.screenshot') },
+                    { value: 'link', label: t('solo.brief.exhibit.kind.link') },
                   ]}
                 />
-                <PaperField label="Exhibit title" value={exhibit.title} maxLength={80} onChange={(e) => setExhibit({ ...exhibit, title: e.target.value })} />
-                <TextArea label="What it shows" value={exhibit.body} maxLength={400} rows={2} onChange={(e) => setExhibit({ ...exhibit, body: e.target.value })} />
+                <PaperField label={t('solo.brief.exhibit.titleField')} value={exhibit.title} maxLength={80} onChange={(e) => setExhibit({ ...exhibit, title: e.target.value })} />
+                <TextArea label={t('solo.brief.exhibit.bodyField')} value={exhibit.body} maxLength={400} rows={2} onChange={(e) => setExhibit({ ...exhibit, body: e.target.value })} />
                 <Button type="submit" size="sm" variant="secondary" iconStart={<Icon name="plus" />}>
-                  Add exhibit
+                  {t('solo.brief.exhibit.add')}
                 </Button>
               </form>
             )}
@@ -129,26 +130,26 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
           <Portrait character="defense" expression="smug" size="lg" ring="accent" alt="" />
           <div>
             <h3 id="angle-title" className={styles.sectionTitle}>
-              One angle for Counsel Chaos
+              {t('solo.brief.angle.heading')}
             </h3>
-            <p className={styles.small}>Pick one of three or write your own line ({ANGLE_MAX} characters). It is the only steer your lawyer gets (D2).</p>
+            <p className={styles.small}>{t('solo.brief.angle.hint', { max: ANGLE_MAX })}</p>
           </div>
         </div>
         {!snap.angles ? (
           busy === 'angles' ? (
-            <div className={styles.angleGrid} aria-busy="true" aria-label="Counsel Chaos is thinking of angles">
+            <div className={styles.angleGrid} aria-busy="true" aria-label={t('solo.brief.angle.thinking')}>
               <Skeleton height="6rem" />
               <Skeleton height="6rem" />
               <Skeleton height="6rem" />
             </div>
           ) : (
             <PaperButton variant="maroon" onClick={() => void session.suggestAngles()} iconStart={<Icon name="sparkle" />}>
-              Ask Counsel Chaos for angles
+              {t('solo.brief.angle.ask')}
             </PaperButton>
           )
         ) : (
           <fieldset className={styles.angleFieldset}>
-            <legend className="cc-visually-hidden">Defense angle</legend>
+            <legend className="cc-visually-hidden">{t('solo.brief.angle.legend')}</legend>
             <div className={styles.angleGrid}>
               {snap.angles.map((a) => (
                 <label key={a.id} className={cx(styles.angle, choice === a.id && styles.angleOn)}>
@@ -158,18 +159,18 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
               ))}
               <label className={cx(styles.angle, choice === OWN && styles.angleOn)}>
                 <input type="radio" name="angle" value={OWN} checked={choice === OWN} onChange={() => setChoice(OWN)} />
-                <span>Write my own line</span>
+                <span>{t('solo.brief.angle.own')}</span>
               </label>
             </div>
           </fieldset>
         )}
         {choice === OWN && (
-          <TextArea label="Your angle" value={own} maxLength={ANGLE_MAX} rows={2} onChange={(e) => setOwn(e.target.value)} placeholder="Market conditions made it inevitable." />
+          <TextArea label={t('solo.brief.angle.ownLabel')} value={own} maxLength={ANGLE_MAX} rows={2} onChange={(e) => setOwn(e.target.value)} placeholder={t('solo.brief.angle.ownPlaceholder')} />
         )}
       </section>
 
       {snap.error && (
-        <Alert tone={snap.error.code === 'quota' ? 'warning' : 'danger'} title={snap.error.code === 'quota' ? 'Teaser limit reached' : 'Not yet'} live="assertive">
+        <Alert tone={snap.error.code === 'quota' ? 'warning' : 'danger'} title={snap.error.code === 'quota' ? t('solo.brief.error.quota') : t('solo.brief.error.generic')} live="assertive">
           {snap.error.message}
         </Alert>
       )}
@@ -177,11 +178,11 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
       {snap.teaser && watching && (
         <section aria-labelledby="teaser-title" className={styles.teaser}>
           <h3 id="teaser-title" className={styles.sectionTitle}>
-            Free teaser: opening statements
+            {t('solo.brief.teaser.heading')}
           </h3>
-          <Courtroom lines={snap.teaser} cast={soloMode.staging(t.terms)} title={t.filing.title} exhibits={t.exhibits} />
-          <Alert tone="info" title="The jury is out, and the AI never decides">
-            The teaser stops here on purpose (D3). Real people decide the verdict. These openings carry over into your case.
+          <Courtroom lines={snap.teaser} cast={soloMode.staging(tState.terms)} title={tState.filing.title} exhibits={tState.exhibits} />
+          <Alert tone="info" title={t('solo.brief.teaser.alertTitle')}>
+            {t('solo.brief.teaser.alertBody')}
           </Alert>
         </section>
       )}
@@ -196,12 +197,12 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
           }}
           iconEnd={<Icon name="arrow-right" />}
         >
-          Approve and send to counsel
+          {t('solo.brief.approve')}
         </PaperButton>
         {snap.teaser ? (
           !watching && (
             <PaperButton variant="maroon" size="lg" onClick={() => setWatching(true)}>
-              Watch the teaser again
+              {t('solo.brief.teaser.again')}
             </PaperButton>
           )
         ) : (
@@ -216,11 +217,11 @@ export function BriefStep({ session, snap, hiddenNames, teaserAllowance }: Brief
               setWatching(true);
             }}
           >
-            {teaserAllowance.remaining > 0 ? 'Watch the free teaser' : 'Free teaser used today'}
+            {teaserAllowance.remaining > 0 ? t('solo.brief.teaser.watch') : t('solo.brief.teaser.used')}
           </PaperButton>
         )}
         <p className={styles.small}>
-          Free teasers today: {teaserAllowance.remaining} of {teaserAllowance.limit}. Approving freezes the public text above.
+          {t('solo.brief.teaser.count', { remaining: teaserAllowance.remaining, limit: teaserAllowance.limit })}
         </p>
       </div>
     </div>

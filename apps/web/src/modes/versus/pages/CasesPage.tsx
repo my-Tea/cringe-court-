@@ -1,6 +1,7 @@
 import { CATEGORIES, formatCaseNumber, formatUsdc } from '@cringe-court/core';
 import { VERSUS_STEPS, casesFor, jurorStake, nextStep, stepIndex, viewerOf, type VersusCase } from '@cringe-court/modes-versus';
 import { Link } from 'react-router';
+import { t } from '@/i18n';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Badge, EmptyState, Icon, LoadingState, PaperButtonLink, Portrait, Skeleton } from '@/ds';
 import { PageHead } from '../components/PageHead';
@@ -20,7 +21,7 @@ function CaseCard({ c }: { c: VersusCase }) {
       <Portrait character={viewer === 'b' ? 'side-b' : viewer === 'a' ? 'side-a' : 'juror'} size="sm" ring={viewer === 'b' ? 'side-b' : viewer === 'a' ? 'side-a' : 'highlight'} alt="" />
       <div className={styles.caseCardBody}>
         <p className={styles.caseCardMeta}>
-          {c.caseNumber !== null ? formatCaseNumber(c.caseNumber) : 'Private'} · {CATEGORIES[s.filing.category]} · {viewer === 'a' ? 'Side A' : viewer === 'b' ? 'Side B' : viewer === 'juror' ? 'Juror' : 'Watching'}
+          {c.caseNumber !== null ? formatCaseNumber(c.caseNumber) : t('versus.cases.private')} · {CATEGORIES[s.filing.category]} · {viewer === 'a' ? t('common.role.sideA') : viewer === 'b' ? t('common.role.sideB') : viewer === 'juror' ? t('common.role.juror') : t('versus.header.viewer.spectator')}
         </p>
         <h3 className={styles.caseCardTitle}>
           <Link to={versusPaths.case(c.trialId)} className={styles.stretched}>
@@ -28,11 +29,11 @@ function CaseCard({ c }: { c: VersusCase }) {
           </Link>
         </h3>
         <p className={styles.caseCardStep}>
-          {step.yourMove && <span className={styles.yourMove}>Your move</span>}
+          {step.yourMove && <span className={styles.yourMove}>{t('versus.header.yourMove')}</span>}
           {step.label}
         </p>
       </div>
-      <div className={styles.caseCardProgress} aria-label={closed ? 'Closed' : `Step ${index + 1} of ${VERSUS_STEPS.length}: ${VERSUS_STEPS[index]}`} role="img">
+      <div className={styles.caseCardProgress} aria-label={closed ? t('versus.cases.closedAria') : t('versus.cases.stepAria', { n: index + 1, total: VERSUS_STEPS.length, label: VERSUS_STEPS[index]! })} role="img">
         {VERSUS_STEPS.map((label, i) => (
           <span key={label} data-done={i < index || (i === index && (s.stage === 'verdict' || s.stage === 'share')) || undefined} data-current={(i === index && !closed) || undefined} />
         ))}
@@ -44,14 +45,14 @@ function CaseCard({ c }: { c: VersusCase }) {
 
 /** Your cases on this device, and juries that need a verified human. */
 export function CasesPage() {
-  useDocumentTitle('My Versus cases');
+  useDocumentTitle(t('versus.cases.docTitle'));
   const { snapshot, persona } = useVersus();
   if (!snapshot) {
     return (
       <>
-        <PageHead eyebrow="Versus Court" title="My cases" />
+        <PageHead eyebrow={t('common.mode.versus')} title={t('versus.persona.myCases')} />
         <div className={styles.page}>
-          <LoadingState title="Fetching the docket…">
+          <LoadingState title={t('versus.cases.loading')}>
             <Skeleton height="4rem" />
           </LoadingState>
         </div>
@@ -65,39 +66,39 @@ export function CasesPage() {
   return (
     <>
       <PageHead
-        eyebrow="Versus Court"
-        title="My cases"
-        lede="Every case this persona is part of, in this browser’s demo court."
+        eyebrow={t('common.mode.versus')}
+        title={t('versus.persona.myCases')}
+        lede={t('versus.cases.lede')}
         aside={
           <PaperButtonLink to={versusPaths.newCase} size="lg" iconStart={<Icon name="gavel" />}>
-            Start a case
+            {t('versus.cases.start')}
           </PaperButtonLink>
         }
       />
       <div className={styles.page}>
         {mine.length === 0 ? (
           <EmptyState
-            title="No cases yet"
+            title={t('versus.cases.empty.title')}
             character="side-a"
             expression="smug"
             headingLevel={2}
             actions={
               <>
-                <PaperButtonLink to={versusPaths.newCase}>Start a Versus case</PaperButtonLink>
+                <PaperButtonLink to={versusPaths.newCase}>{t('versus.mode.landing.start')}</PaperButtonLink>
                 <PaperButtonLink to={versusPaths.join} variant="maroon">
-                  I have an invite code
+                  {t('versus.mode.landing.join')}
                 </PaperButtonLink>
               </>
             }
           >
-            Got a petty argument that needs settling? File it, send the invite, and let a jury of strangers decide. Switched tabs? Use “Switch persona” above to pick yourself up.
+            {t('versus.cases.empty.body')}
           </EmptyState>
         ) : (
           <>
             {open.length > 0 && (
               <section aria-labelledby="open-title" className={styles.listSection}>
                 <h2 id="open-title" className={styles.listTitle}>
-                  In progress <Badge tone="accent">{open.length}</Badge>
+                  {t('versus.cases.inProgress')} <Badge tone="accent">{open.length}</Badge>
                 </h2>
                 <ul className={styles.caseList} role="list">
                   {open.map((c) => (
@@ -109,7 +110,7 @@ export function CasesPage() {
             {done.length > 0 && (
               <section aria-labelledby="done-title" className={styles.listSection}>
                 <h2 id="done-title" className={styles.listTitle}>
-                  Closed
+                  {t('versus.cases.closed')}
                 </h2>
                 <ul className={styles.caseList} role="list">
                   {done.map((c) => (
@@ -123,10 +124,10 @@ export function CasesPage() {
 
         <section aria-labelledby="duty-title" className={styles.listSection}>
           <h2 id="duty-title" className={styles.listTitle}>
-            Jury duty open now
+            {t('versus.cases.duty.title')}
           </h2>
           {duty.length === 0 ? (
-            <p className={styles.muted}>No Versus case on this device is looking for jurors right now.</p>
+            <p className={styles.muted}>{t('versus.cases.duty.empty')}</p>
           ) : (
             <ul className={styles.caseList} role="list">
               {duty.map((c) => (
@@ -134,7 +135,7 @@ export function CasesPage() {
                   <Portrait character="juror" size="sm" ring="highlight" alt="" />
                   <div className={styles.caseCardBody}>
                     <p className={styles.caseCardMeta}>
-                      {c.caseNumber !== null && formatCaseNumber(c.caseNumber)} · {c.state.stage === 'jury' ? `${c.state.seats.length} of ${c.state.terms.jurySize} seats taken` : ''}
+                      {c.caseNumber !== null && formatCaseNumber(c.caseNumber)} · {c.state.stage === 'jury' ? t('versus.cases.duty.seats', { taken: c.state.seats.length, size: c.state.terms.jurySize }) : ''}
                     </p>
                     <h3 className={styles.caseCardTitle}>
                       <Link to={versusPaths.case(c.trialId)} className={styles.stretched}>
@@ -142,7 +143,7 @@ export function CasesPage() {
                       </Link>
                     </h3>
                     <p className={styles.caseCardStep}>
-                      Bond {formatUsdc(jurorStake(c.state.terms).bond)}, earn {formatUsdc(jurorStake(c.state.terms).reward)} for finishing
+                      {t('versus.cases.duty.stake', { bond: formatUsdc(jurorStake(c.state.terms).bond), reward: formatUsdc(jurorStake(c.state.terms).reward) })}
                     </p>
                   </div>
                   <Icon name="chevron-right" aria-hidden className={styles.caseCardChevron} />

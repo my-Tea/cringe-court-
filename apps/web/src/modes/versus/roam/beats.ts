@@ -8,6 +8,7 @@
  * (`prosecutor`) and Agent B from the defence bench (`defense`), whatever the
  * sides call themselves. Jurors never speak in a Versus transcript.
  */
+import { t } from '@/i18n';
 import type { CourtLine, Segment } from '@cringe-court/core';
 import type { BeatId, BeatOptions, DialogueLine, VerdictKind } from '@cringe-court/scene/roam';
 
@@ -56,7 +57,7 @@ export function versusBeats(lines: readonly CourtLine[], verdict?: 'a' | 'b' | '
   }
   if (verdict !== undefined) {
     const kind: VerdictKind = verdict === 'a' ? 'side-a' : verdict === 'b' ? 'side-b' : 'mistrial';
-    out.push({ id: 'verdict', options: { verdict: kind, verdictText: verdict === 'none' ? 'NO VERDICT' : `SIDE ${verdict.toUpperCase()} WINS` } });
+    out.push({ id: 'verdict', options: { verdict: kind, verdictText: verdict === 'none' ? t('versus.roam.noVerdict') : t('versus.roam.wins', { side: verdict.toUpperCase() }) } });
   }
   return out;
 }

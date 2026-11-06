@@ -1,5 +1,6 @@
 import { shareCardModel, shareCardSvg, shareText, type ShareTheme, type VersusCase } from '@cringe-court/modes-versus';
 import { useMemo } from 'react';
+import { t } from '@/i18n';
 import { Card, CardBody, CardHeader, CardTitle, Icon, PaperButton, Stamp, useToast } from '@/ds';
 import { palette } from '@/ds/tokens';
 import { useVersus } from '../runtime/context';
@@ -63,24 +64,24 @@ export function ShareCard({ c }: { c: VersusCase }) {
 
   return (
     <Card as="section" aria-labelledby="share-title" padding="lg">
-      <CardHeader eyebrow="Share card">
+      <CardHeader eyebrow={t('versus.share.eyebrow')}>
         <CardTitle id="share-title" as="h2">
-          Tell the group chat
+          {t('versus.share.title')}
         </CardTitle>
       </CardHeader>
       <CardBody className={styles.stack}>
         <figure className={styles.shareCard} data-outcome={model.outcome}>
           <div className={styles.shareInner}>
             <p className={styles.shareEyebrow}>
-              Versus Court · {model.caseLabel} · {model.category}
+              {t('versus.share.eyebrowLine', { caseLabel: model.caseLabel, category: model.category })}
             </p>
             <p className={styles.shareTitle}>“{model.title}”</p>
             <Stamp tone={model.outcome === 'a' ? 'side-a' : model.outcome === 'b' ? 'side-b' : 'no-verdict'} size="lg" className={styles.shareStamp}>
               {model.headline}
             </Stamp>
-            <p className={styles.shareSub}>{model.outcome === 'mistrial' ? 'No verdict · both sides refunded' : `${model.winner} beat ${model.loser}`}</p>
+            <p className={styles.shareSub}>{model.outcome === 'mistrial' ? t('versus.share.mistrial') : t('versus.share.beat', { winner: model.winner ?? '', loser: model.loser ?? '' })}</p>
             <p className={styles.shareMeta}>
-              Jury {model.tally[0]}–{model.tally[1]} · {model.completed} of {model.appointed} jurors finished duty
+              {t('versus.share.meta', { a: model.tally[0], b: model.tally[1], completed: model.completed, appointed: model.appointed })}
             </p>
             {model.quote && (
               <blockquote className={styles.shareQuote}>
@@ -88,11 +89,11 @@ export function ShareCard({ c }: { c: VersusCase }) {
               </blockquote>
             )}
             <p className={styles.shareFoot}>
-              <span>Bragging rights only · testnet · transcript {model.fingerprint}…</span>
-              <span className={styles.shareBrand}>CringeCourt</span>
+              <span>{t('versus.share.foot', { fingerprint: model.fingerprint })}</span>
+              <span className={styles.shareBrand}>{t('common.app.name')}</span>
             </p>
           </div>
-          <figcaption className="cc-visually-hidden">Share card preview</figcaption>
+          <figcaption className="cc-visually-hidden">{t('versus.share.preview')}</figcaption>
         </figure>
         <div className={styles.inlineActions}>
           <PaperButton
@@ -100,14 +101,14 @@ export function ShareCard({ c }: { c: VersusCase }) {
             onClick={() =>
               void navigator.clipboard.writeText(text).then(
                 () => {
-                  toast({ title: 'Copied the post and link', tone: 'success' });
+                  toast({ title: t('versus.share.copied'), tone: 'success' });
                   record('link');
                 },
-                () => toast({ title: 'Copy did not work here', tone: 'warning' }),
+                () => toast({ title: t('versus.invite.copyFailed'), tone: 'warning' }),
               )
             }
           >
-            Copy post
+            {t('versus.share.copyPost')}
           </PaperButton>
           <PaperButton
       variant="maroon"
@@ -124,14 +125,14 @@ export function ShareCard({ c }: { c: VersusCase }) {
         })
       }
      >
-            Download image
+            {t('versus.share.download')}
           </PaperButton>
           <a className={styles.xLink} href={`https://x.com/intent/post?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer" onClick={() => record('x')}>
-            <Icon name="external" aria-hidden /> Post on X<span className="cc-visually-hidden"> (opens in a new tab)</span>
+            <Icon name="external" aria-hidden /> {t('versus.share.postOnX')}<span className="cc-visually-hidden"> {t('versus.share.newTab')}</span>
           </a>
           {typeof navigator.share === 'function' && (
             <PaperButton variant="ghost" iconStart={<Icon name="external" />} onClick={() => void navigator.share({ title: model.caseLabel, text, url }).then(() => record('native'), () => undefined)}>
-              Share…
+              {t('versus.invite.share')}
             </PaperButton>
           )}
         </div>

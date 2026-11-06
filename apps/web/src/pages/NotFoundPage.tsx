@@ -1,27 +1,28 @@
 import { paths } from '@/app/routes';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { ButtonLink, EmptyState, Icon, Stamp } from '@/ds';
+import { t } from '@/i18n';
 import styles from './pages.module.css';
 
 export function NotFoundPage() {
-  useDocumentTitle('Case not found');
+  useDocumentTitle(t('shell.notFound.docTitle'));
   return (
     <div className={styles.notFound}>
-      <Stamp tone="no-verdict" size="lg" animate sub="Error 404">
-        Case dismissed
+      <Stamp tone="no-verdict" size="lg" animate sub={t('shell.notFound.sub')}>
+        {t('shell.notFound.stamp')}
       </Stamp>
       <EmptyState
-        title="This page was never filed"
+        title={t('shell.notFound.title')}
         character="judge"
         expression="shocked"
         headingLevel={1}
         actions={
           <ButtonLink to={paths.home} iconStart={<Icon name="arrow-left" />}>
-            Back to the courthouse
+            {t('common.action.backToCourthouse')}
           </ButtonLink>
         }
       >
-        The court searched every docket. Check the address, or head back and pick a court.
+        {t('shell.notFound.body')}
       </EmptyState>
     </div>
   );

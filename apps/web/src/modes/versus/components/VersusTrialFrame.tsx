@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { Viewer } from '@cringe-court/modes-versus';
 import type { PlayerRole, SpawnId } from '@cringe-court/scene/roam';
+import { t } from '@/i18n';
 import { TrialViewFrame } from '@/trial/TrialViewFrame';
 import { versusBeats } from '../roam/beats';
 import { useVersus } from '../runtime/context';
@@ -23,7 +24,7 @@ export function VersusTrialFrame({ viewer, ...classic }: TrialViewProps & { view
   return (
     <TrialViewFrame
       classic={<TrialView {...classic} />}
-      roam={{ beats, label: `Courtroom: ${filing.title}`, role, spawn, avatar: { model: 'creator', name: persona.name } }}
+      roam={{ beats, label: t('versus.court.label', { title: filing.title }), role, spawn, avatar: { model: 'creator', name: persona.name } }}
     />
   );
 }

@@ -1,9 +1,11 @@
 import type { CourtLine, Exhibit, Filing } from '@cringe-court/core';
 import { sideLabel } from '@cringe-court/modes-versus';
+import { t } from '@/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { stagePose } from '@/art/art';
 import { guideArt } from '@/art/art';
 import { cx, DialogueBox, Icon, type ImpactKind, ImpactText, PaperButton, Stamp, useReducedMotion } from '@/ds';
+import { agentName } from '../copy';
 import { useVersus } from '../runtime/context';
 import styles from './Courtroom.module.css';
 
@@ -28,11 +30,18 @@ export interface CourtroomProps {
   className?: string;
 }
 
+const JUROR_TAG = {
+  empty: 'versus.court.jury.empty',
+  opened: 'versus.court.jury.opened',
+  sealed: 'versus.court.jury.sealed',
+  seated: 'versus.court.jury.seated',
+} as const;
+
 function calloutFor(line: CourtLine, index: number): ImpactKind | null {
   if (index === 0) return 'order';
-  const t = line.text.trimStart().toUpperCase();
-  if (t.startsWith('OBJECTION')) return 'objection';
-  if (t.startsWith('COUNTER')) return 'counter';
+  const head = line.text.trimStart().toUpperCase();
+  if (head.startsWith('OBJECTION')) return 'objection';
+  if (head.startsWith('COUNTER')) return 'counter';
   if (line.beat === 'laugh') return 'cook';
   return null;
 }
@@ -97,7 +106,7 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
   const exhibit = line.exhibitId ? exhibits.find((x) => x.id === line.exhibitId) : undefined;
   const nameA = sideLabel('a', filing.sides.a, { quotes: true });
   const nameB = sideLabel('b', filing.sides.b, { quotes: true });
-  const speakerName = who === 'side-a' ? `Agent A · for ${nameA}` : who === 'side-b' ? `Agent B · for ${nameB}` : 'Judge Gavel.exe';
+  const speakerName = who === 'side-a' ? t('versus.court.speaker', { agent: agentName('a'), name: nameA }) : who === 'side-b' ? t('versus.court.speaker', { agent: agentName('b'), name: nameB }) : t('versus.court.judge');
   const juryOut = line.segment === 'jury-out';
 
   const poseA = verdict === 'a' ? 'happy' : verdict === 'b' ? 'defeated' : who === 'side-a' && callout === 'objection' ? 'objection' : 'talking';
@@ -105,7 +114,7 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
   const poseJudge = who === 'judge' ? (line.beat === 'gavel' ? 'objection' : 'talking') : 'idle';
 
   return (
-    <section className={cx(styles.court, className)} aria-label="Courtroom">
+    <section className={cx(styles.court, className)} aria-label={t('versus.court.aria')}>
       <div className={styles.stage} data-speaker={who}>
         <img className={styles.backdrop} src={guideArt('colonnade')} alt="" />
         <div className={styles.light} aria-hidden />
@@ -114,32 +123,32 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
         <figure className={styles.bench} data-at="a" data-active={who === 'side-a' || undefined}>
           <img src={stagePose('side-a', poseA)} alt="" data-pixel className={styles.sprite} />
           <figcaption className={styles.plate} data-side="a">
-            Agent A <span>{nameA}</span>
+            {agentName('a')} <span>{nameA}</span>
           </figcaption>
         </figure>
 
         <figure className={styles.bench} data-at="judge" data-active={who === 'judge' || undefined}>
           <img src={stagePose('judge', poseJudge)} alt="" data-pixel className={styles.sprite} />
           <figcaption className={styles.plate} data-side="judge">
-            Judge Gavel.exe
+            {t('versus.court.judge')}
           </figcaption>
         </figure>
 
         <figure className={styles.bench} data-at="b" data-active={who === 'side-b' || undefined}>
           <img src={stagePose('side-b', poseB)} alt="" data-pixel className={styles.sprite} />
           <figcaption className={styles.plate} data-side="b">
-            Agent B <span>{nameB}</span>
+            {agentName('b')} <span>{nameB}</span>
           </figcaption>
         </figure>
 
-        <div className={styles.juryBox} aria-label={`Jury box: ${seats.length} of ${jurySize} seated`} role="img">
+        <div className={styles.juryBox} aria-label={t('versus.court.jury.aria', { seated: seats.length, size: jurySize })} role="img">
           {Array.from({ length: jurySize }, (_, i) => {
             const seat = seats[i];
             const state = !seat ? 'empty' : seat.revealed ? 'opened' : seat.committed ? 'sealed' : 'seated';
             return (
               <div key={i} className={styles.juror} data-state={state}>
                 {seat && <img src={stagePose('juror', 'seated')} alt="" data-pixel />}
-                <span className={styles.jurorTag}>{state === 'empty' ? 'Empty seat' : state === 'opened' ? 'Scroll opened' : state === 'sealed' ? 'Scroll sealed' : 'Seated'}</span>
+                <span className={styles.jurorTag}>{t(JUROR_TAG[state])}</span>
               </div>
             );
           })}
@@ -153,14 +162,14 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
         {juryOut && (
           <div className={styles.juryOut} key={`j-${index}`}>
             <Stamp tone="case-number" size="lg" animate>
-              The jury is out
+              {t('versus.court.juryOut')}
             </Stamp>
           </div>
         )}
         {exhibit && (
-          <aside className={styles.exhibit} key={`x-${index}`} aria-label={`Exhibit: ${exhibit.title}`}>
+          <aside className={styles.exhibit} key={`x-${index}`} aria-label={t('versus.court.exhibit.aria', { title: exhibit.title })}>
             <p className={styles.exhibitLabel}>
-              Exhibit · Side {exhibit.submittedBy === 'court' ? 'court' : exhibit.submittedBy.toUpperCase()}
+              {t('versus.court.exhibit.label', { side: exhibit.submittedBy === 'court' ? t('versus.court.exhibit.court') : exhibit.submittedBy.toUpperCase() })}
             </p>
             <p className={styles.exhibitTitle}>{exhibit.title}</p>
             <p className={styles.exhibitBody}>{exhibit.body}</p>
@@ -174,7 +183,7 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
 
       <div className={styles.controls}>
         <PaperButton size="sm" variant="ghost" iconStart={<Icon name="arrow-left" />} onClick={() => go(index - 1)} disabled={index === 0}>
-          Back
+          {t('common.action.back')}
         </PaperButton>
         <PaperButton
           size="sm"
@@ -185,25 +194,25 @@ export function Courtroom({ lines, exhibits, filing, seats = [], jurySize = 3, v
           }}
           aria-pressed={isPlaying}
         >
-          {isPlaying ? 'Pause' : last ? 'Replay trial' : index === 0 ? 'Play the trial' : 'Resume'}
+          {isPlaying ? t('versus.court.pause') : last ? t('versus.court.replay') : index === 0 ? t('versus.court.play') : t('versus.court.resume')}
         </PaperButton>
         <PaperButton size="sm" variant="ghost" iconEnd={<Icon name="arrow-right" />} onClick={() => go(index + 1)} disabled={last}>
-          Next line
+          {t('versus.court.next')}
         </PaperButton>
         <span className={styles.progress} aria-live="off">
-          Line {index + 1} of {lines.length}
+          {t('versus.court.progress', { n: index + 1, total: lines.length })}
         </span>
       </div>
 
       <details className={styles.transcript}>
-        <summary>Full transcript ({lines.length} lines)</summary>
+        <summary>{t('versus.court.transcript', { count: lines.length })}</summary>
         <ol className={styles.transcriptList}>
           {lines.map((l, i) => {
             const s = speakerOf(l);
             return (
               <li key={l.id} data-speaker={s} aria-current={i === index ? 'step' : undefined}>
                 <button type="button" onClick={() => go(i)} className={styles.transcriptLine}>
-                  <span className={styles.transcriptWho}>{s === 'side-a' ? 'Agent A' : s === 'side-b' ? 'Agent B' : 'Judge'}</span>
+                  <span className={styles.transcriptWho}>{s === 'side-a' ? agentName('a') : s === 'side-b' ? agentName('b') : t('versus.court.judgeShort')}</span>
                   <span>{l.text}</span>
                 </button>
               </li>

@@ -1,7 +1,8 @@
 import { CATEGORIES, CANCEL_LABELS, formatUsdc } from '@cringe-court/core';
 import { parseInviteCode, sideCharges, viewerOf } from '@cringe-court/modes-versus';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { t, tRich } from '@/i18n';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { Alert, Button, Countdown, Dialog, DialogClose, DialogContent, DialogTrigger, EmptyState, Icon, LoadingState, PaperButton, PaperButtonLink, Portrait, Stamp, TextField } from '@/ds';
 import { PageHead } from '../components/PageHead';
@@ -10,6 +11,8 @@ import { versusPaths } from '../mode';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
 import { PaperSection } from '../components/PaperSection';
+
+const STRONG = (chunk: ReactNode) => <strong>{chunk}</strong>;
 
 function CodeForm({ initial = '', error }: { initial?: string; error?: string }) {
   const navigate = useNavigate();
@@ -27,8 +30,8 @@ function CodeForm({ initial = '', error }: { initial?: string; error?: string })
       noValidate
     >
       <TextField
-        label="Invite code"
-        hint="8 characters, like K7QM-2XPA. Case and dashes don’t matter."
+        label={t('versus.invite.codeLabel')}
+        hint={t('versus.join.codeHint')}
         value={value}
         onChange={(e) => {
           setValue(e.target.value.toUpperCase());
@@ -40,7 +43,7 @@ function CodeForm({ initial = '', error }: { initial?: string; error?: string })
         className={styles.codeField}
       />
       <PaperButton type="submit" size="lg" iconEnd={<Icon name="arrow-right" />}>
-        Open invite
+        {t('versus.join.open')}
       </PaperButton>
     </form>
   );
@@ -49,14 +52,14 @@ function CodeForm({ initial = '', error }: { initial?: string; error?: string })
 /** Side B's door: enter a code (or follow a link), read the invite, accept with World ID or decline. */
 export function JoinPage() {
   const { code: raw } = useParams();
-  useDocumentTitle('Join a Versus case');
+  useDocumentTitle(t('versus.join.docTitle'));
   const { snapshot, persona, desk, run, now } = useVersus();
   const navigate = useNavigate();
 
   if (!raw) {
     return (
       <>
-        <PageHead eyebrow="Versus Court · invite" title="Someone took you to court" lede="Enter the code from your invite. You will see what you are agreeing to before anything is shared or charged." />
+        <PageHead eyebrow={t('versus.join.eyebrow')} title={t('versus.join.title.enter')} lede={t('versus.join.lede')} />
         <div className={styles.page}>
           <PaperSection as="div" padding="lg" className={styles.narrow}>
             <CodeForm />
@@ -67,7 +70,7 @@ export function JoinPage() {
   }
 
   const parsed = parseInviteCode(raw);
-  const head = <PageHead eyebrow="Versus Court · invite" title="You have been summoned" />;
+  const head = <PageHead eyebrow={t('versus.join.eyebrow')} title={t('versus.join.title.summoned')} />;
   if (!parsed.ok) {
     return (
       <>
@@ -85,7 +88,7 @@ export function JoinPage() {
       <>
         {head}
         <div className={styles.page}>
-          <LoadingState title="Finding your invite…" />
+          <LoadingState title={t('versus.join.loading')} />
         </div>
       </>
     );
@@ -98,16 +101,16 @@ export function JoinPage() {
         {head}
         <div className={styles.page}>
           <EmptyState
-            title="No case with that code here"
+            title={t('versus.join.missing.title')}
             character="clerk"
             expression="shocked"
             actions={
               <PaperButtonLink to={versusPaths.join} variant="maroon">
-                Try another code
+                {t('versus.join.missing.action')}
               </PaperButtonLink>
             }
           >
-            The demo court lives in this browser, so the invite only works in a tab of the same browser that filed it. Check the code, or ask Side A to open the invite here.
+            {t('versus.join.missing.body')}
           </EmptyState>
         </div>
       </>
@@ -124,13 +127,13 @@ export function JoinPage() {
         {head}
         <div className={styles.page}>
           <EmptyState
-            title={viewer === 'a' ? 'This is your own invite' : 'You already joined this case'}
+            title={viewer === 'a' ? t('versus.join.own.title') : t('versus.join.joined.title')}
             character={viewer === 'a' ? 'side-a' : 'side-b'}
-            actions={<PaperButtonLink to={versusPaths.case(c.trialId)}>Open the case</PaperButtonLink>}
+            actions={<PaperButtonLink to={versusPaths.case(c.trialId)}>{t('versus.join.openCase')}</PaperButtonLink>}
           >
             {viewer === 'a'
-              ? 'Send the link or code to the other side. To try it yourself, open the link in a new tab: each tab is a separate demo persona.'
-              : `“${title}” is waiting for you in the case room.`}
+              ? t('versus.join.own.body')
+              : t('versus.join.joined.body', { title })}
           </EmptyState>
         </div>
       </>
@@ -144,16 +147,16 @@ export function JoinPage() {
         {head}
         <div className={styles.page}>
           <EmptyState
-            title={closed ? 'This invite is closed' : 'Someone already accepted this invite'}
+            title={closed ? t('versus.join.closed.title') : t('versus.join.taken.title')}
             character="judge"
             expression="neutral"
             actions={
               <PaperButtonLink to={versusPaths.cases} variant="maroon">
-                My cases
+                {t('versus.persona.myCases')}
               </PaperButtonLink>
             }
           >
-            {closed ? `${CANCEL_LABELS[s.reason]}. Nobody was charged.` : 'Each case has exactly two sides. If you are one of them, switch to that persona in the bar above.'}
+            {closed ? t('versus.join.closed.body', { reason: CANCEL_LABELS[s.reason] }) : t('versus.join.taken.body')}
           </EmptyState>
         </div>
       </>
@@ -166,71 +169,71 @@ export function JoinPage() {
     <>
       {head}
       <div className={styles.page}>
-        <PaperSection as="article" padding="lg" ribbon="Summons" className={styles.summonsFrame} bodyClassName={styles.summons} aria-labelledby="summons-title">
+        <PaperSection as="article" padding="lg" ribbon={t('versus.join.summons')} className={styles.summonsFrame} bodyClassName={styles.summons} aria-labelledby="summons-title">
           <div className={styles.summonsTop}>
-            <Portrait character="side-a" expression="smug" size="lg" ring="side-a" alt="Side A" />
+            <Portrait character="side-a" expression="smug" size="lg" ring="side-a" alt={t('common.role.sideA')} />
             <div>
               <p className={styles.eyebrow}>{CATEGORIES[s.filing.category]}</p>
               <h2 id="summons-title" className={styles.summonsTitle}>
                 “{title}”
               </h2>
-              <p className={styles.muted}>Side A wants to settle this in Versus Court, and invited you to be Side B.</p>
+              <p className={styles.muted}>{t('versus.join.wants')}</p>
             </div>
             <Stamp tone="filed" size="sm" className={styles.summonsStamp}>
-              Charges filed
+              {t('versus.join.charges')}
             </Stamp>
           </div>
 
-          {consentEnds !== null && <Countdown label="Answer by" startsAt={(consentEnds - (s.terms.deadlines.preTrial ?? 0)) * 1000} endsAt={consentEnds * 1000} now={now * 1000} />}
+          {consentEnds !== null && <Countdown label={t('versus.join.answerBy')} startsAt={(consentEnds - (s.terms.deadlines.preTrial ?? 0)) * 1000} endsAt={consentEnds * 1000} now={now * 1000} />}
 
           <ul className={styles.ruleList} role="list">
             <li>
               <Icon name="lock" aria-hidden />
               <span>
-                <strong>You get your own AI agent.</strong> You brief Agent B in private; Side A never sees your notes, and you never see theirs.
+                {tRich('versus.join.rule.agent', { b: STRONG })}
               </span>
             </li>
             <li>
               <Icon name="eye" aria-hidden />
               <span>
-                <strong>You read Side A’s story after you accept</strong>, and approve your own public version before the trial is frozen. No real names, ever.
+                {tRich('versus.join.rule.story', { b: STRONG })}
               </span>
             </li>
             <li>
               <Icon name="scales" aria-hidden />
               <span>
-                <strong>You pay {formatUsdc(share.total)} test USDC</strong> only after both of you approve the trial. Withdraw any time before then and nothing is charged.
+                {tRich('versus.join.rule.pay', { b: STRONG }, { amount: formatUsdc(share.total) })}
               </span>
             </li>
             <li>
               <Icon name="star" aria-hidden />
               <span>
-                <strong>Bragging rights only.</strong> No wager: nobody wins the other side’s money. On NO VERDICT or any failure, you get your own half back.
+                {tRich('versus.join.rule.bragging', { b: STRONG })}
               </span>
             </li>
           </ul>
 
-          <Alert tone="info" title="Petty fights only">
-            If this is about safety, money owed, custody or anything serious, decline. Those are routed out of CringeCourt, not into it.
+          <Alert tone="info" title={t('versus.join.petty.title')}>
+            {t('versus.join.petty.body', { app: t('common.app.name') })}
           </Alert>
 
           <div className={styles.summonsActions}>
             <Dialog>
               <DialogTrigger asChild>
-                <PaperButton variant="ghost">Decline</PaperButton>
+                <PaperButton variant="ghost">{t('versus.join.decline')}</PaperButton>
               </DialogTrigger>
               <DialogContent
-                title="Decline the invite?"
-                description="The case closes privately. Side A is told you declined, and nobody is charged."
+                title={t('versus.join.decline.title')}
+                description={t('versus.join.decline.body')}
                 size="sm"
                 footer={
                   <>
                     <DialogClose asChild>
-                      <PaperButton variant="ghost">Keep it open</PaperButton>
+                      <PaperButton variant="ghost">{t('versus.join.keepOpen')}</PaperButton>
                     </DialogClose>
                     <DialogClose asChild>
-                      <Button variant="danger" onClick={() => void run(() => desk.declineInvite(c.trialId), { success: 'Invite declined. Nobody was charged.' })}>
-                        Decline
+                      <Button variant="danger" onClick={() => void run(() => desk.declineInvite(c.trialId), { success: t('versus.join.declined') })}>
+                        {t('versus.join.decline')}
                       </Button>
                     </DialogClose>
                   </>
@@ -238,22 +241,22 @@ export function JoinPage() {
               />
             </Dialog>
             <WorldIdDialog
-              title="Prove you are a unique human"
-              purpose="One human, one side: Side A cannot also be Side B, and neither side can sit on this jury."
-              confirmLabel="Verify & accept"
+              title={t('versus.world.title')}
+              purpose={t('versus.join.world.purpose')}
+              confirmLabel={t('versus.join.world.confirm')}
               onVerified={async () => {
-                const ok = await run(() => desk.acceptInvite(c.trialId), { success: 'You are Side B. Time to brief your agent.' });
+                const ok = await run(() => desk.acceptInvite(c.trialId), { success: t('versus.join.accepted') });
                 if (ok) navigate(versusPaths.case(c.trialId));
               }}
               trigger={
                 <PaperButton size="lg" iconStart={<Icon name="gavel" />}>
-                  Accept & become Side B
+                  {t('versus.join.accept')}
                 </PaperButton>
               }
             />
           </div>
           <p className={styles.fine}>
-            Not you? <Link to={versusPaths.landing}>Read how Versus works</Link>.
+            {tRich('versus.join.notYou', { how: (chunk) => <Link to={versusPaths.landing}>{chunk}</Link> })}
           </p>
         </PaperSection>
       </div>

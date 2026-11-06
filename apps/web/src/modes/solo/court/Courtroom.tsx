@@ -3,6 +3,7 @@ import type { AudioPort, CastMember, CourtLine, PublicExhibit } from '@cringe-co
 import { SEGMENT_TITLES, directAll, type Shot, type StageActor } from '@cringe-court/modes-solo';
 import { stagePose } from '@/art/art';
 import { Button, DialogueBox, IconButton, ImpactText, PaperPanel, PaperRibbon, Stamp, cx, useReducedMotion, type ImpactKind } from '@/ds';
+import { t, type MessageKey } from '@/i18n';
 import { sceneArt, setFor } from '../lib/art';
 import { SoloIcon } from '../lib/SoloIcon';
 import { SoundToggle } from '../lib/SoundToggle';
@@ -37,12 +38,13 @@ export interface CourtroomProps {
   className?: string;
 }
 
-const SPEAKER_NAME: Readonly<Record<StageActor, string>> = {
-  judge: 'Judge Gavel.exe',
-  prosecutor: 'Miss Ratio',
-  defense: 'Counsel Chaos',
-  defendant: 'The defendant',
+const SPEAKER_NAME_KEY: Readonly<Record<StageActor, MessageKey>> = {
+  judge: 'solo.courtroom.speaker.judge',
+  prosecutor: 'solo.courtroom.speaker.prosecutor',
+  defense: 'solo.courtroom.speaker.defense',
+  defendant: 'solo.courtroom.speaker.defendant',
 };
+const speakerName = (actor: StageActor): string => t(SPEAKER_NAME_KEY[actor]);
 
 const IMPACT: Partial<Record<NonNullable<Shot['callout']>['style'], ImpactKind>> = {
   objection: 'objection',
@@ -91,7 +93,7 @@ export function Courtroom({
   const onVoxelError = useCallback(() => {
     setVoxelFailed(true);
     setView('2d');
-  }, []);
+  }, [setView]);
   const rootRef = useRef<HTMLElement>(null);
   const shot = shots[index];
   const last = index === shots.length - 1;
@@ -161,7 +163,7 @@ export function Courtroom({
   const speakerCharacter = shot.speaker === 'defendant' ? 'creator' : shot.speaker;
 
   return (
-    <section ref={rootRef} className={cx(styles.courtroom, className)} aria-label={`Courtroom: ${title}`} data-surface="wood">
+    <section ref={rootRef} className={cx(styles.courtroom, className)} aria-label={t('solo.courtroom.region', { title })} data-surface="wood">
       <div className={styles.viewport} data-view={view} data-voxel-ready={(view === '3d' && voxelReady) || undefined}>
         {view === '3d' && cast && (
           <div className={styles.voxelLayer} aria-hidden>
@@ -204,8 +206,8 @@ export function Courtroom({
             data-pixel
             data-speaking={shot.speaker === 'defense' || undefined}
           />
-          <span className={cx(styles.nameplate, styles.plateP)}>Miss Ratio · prosecution</span>
-          <span className={cx(styles.nameplate, styles.plateD)}>Counsel Chaos · your lawyer</span>
+          <span className={cx(styles.nameplate, styles.plateP)}>{t('solo.courtroom.plate.prosecution')}</span>
+          <span className={cx(styles.nameplate, styles.plateD)}>{t('solo.courtroom.plate.defense')}</span>
         </div>
         <div className={styles.light} data-mood={shot.lighting} aria-hidden />
         {shot.fx === 'flash' && <div key={`flash-${index}`} className={styles.flash} aria-hidden />}
@@ -218,8 +220,8 @@ export function Courtroom({
         )}
         {shot.callout?.style === 'jury-out' && (
           <div key={`out-${index}`} className={styles.juryOut} aria-hidden>
-            <Stamp tone="filed" size="xl" animate sub="Ballots are sealed in secret">
-              The jury is out
+            <Stamp tone="filed" size="xl" animate sub={t('solo.courtroom.juryOutSub')}>
+              {t('solo.courtroom.juryOut')}
             </Stamp>
           </div>
         )}
@@ -227,7 +229,7 @@ export function Courtroom({
           <figure key={`ex-${index}`} className={styles.exhibit} aria-hidden>
             <PaperPanel tone="cream" edge="torn" elevation={3} backing="gold" padding="sm">
               <figcaption>
-                Exhibit {exhibitLetter} · {exhibit.title}
+                {t('solo.courtroom.exhibit', { letter: exhibitLetter, title: exhibit.title })}
               </figcaption>
               <p>{exhibit.body}</p>
             </PaperPanel>
@@ -244,14 +246,14 @@ export function Courtroom({
           className={styles.dialogue}
           speaker={speakerCharacter}
           expression={shot.mood}
-          speakerName={SPEAKER_NAME[shot.speaker]}
+          speakerName={speakerName(shot.speaker)}
           text={shot.line.text}
           speed={52}
           onDone={onDone}
         />
       </PaperPanel>
       <p className="cc-visually-hidden" aria-live="polite" aria-atomic>
-        {`${SPEAKER_NAME[shot.speaker]}: ${shot.line.text}`}
+        {t('solo.courtroom.speech', { speaker: speakerName(shot.speaker), text: shot.line.text })}
       </p>
 
       <PaperPanel tone="maroon" edge="cut" elevation={2} padding="sm" className={styles.controlsSheet}>
@@ -260,7 +262,7 @@ export function Courtroom({
             <IconButton
               size="sm"
               variant="secondary"
-              label="Previous line"
+              label={t('solo.courtroom.prev')}
               icon={<SoloIcon name="prev" />}
               onClick={() => go(index - 1)}
               disabled={index === 0}
@@ -268,7 +270,7 @@ export function Courtroom({
             <IconButton
               size="md"
               variant="gold"
-              label={playing ? 'Pause' : last && typed ? 'Replay from the start' : 'Play'}
+              label={playing ? t('solo.courtroom.pause') : last && typed ? t('solo.courtroom.replay') : t('solo.courtroom.play')}
               icon={<SoloIcon name={playing ? 'pause' : 'play'} />}
               onClick={() => {
                 if (!playing && last && typed) {
@@ -281,7 +283,7 @@ export function Courtroom({
             <IconButton
               size="sm"
               variant="secondary"
-              label="Next line"
+              label={t('solo.courtroom.next')}
               icon={<SoloIcon name="next" />}
               onClick={() => go(index + 1)}
               disabled={last}
@@ -289,9 +291,9 @@ export function Courtroom({
           </div>
           <div className={styles.progress}>
             <span className={styles.counter}>
-              Line {index + 1} of {shots.length}
+              {t('solo.courtroom.counter', { n: index + 1, total: shots.length })}
             </span>
-            <div className={styles.chapters} role="group" aria-label="Jump to a part of the trial">
+            <div className={styles.chapters} role="group" aria-label={t('solo.courtroom.chapters')}>
               {segments.map((seg) => {
                 const first = lines.findIndex((l) => l.segment === seg);
                 const active = shot.line.segment === seg;
@@ -318,23 +320,22 @@ export function Courtroom({
               </Button>
             )}
             <Button size="sm" variant="ghost" aria-expanded={showTranscript} onClick={() => setShowTranscript((s) => !s)}>
-              {showTranscript ? 'Hide transcript' : 'Transcript'}
+              {showTranscript ? t('solo.courtroom.transcript.hide') : t('solo.courtroom.transcript.show')}
             </Button>
             {actions}
           </div>
         </div>
       </PaperPanel>
       <p className={styles.hint}>
-        Space to play or pause · ← → to move between lines
-        {voxelFailed && ` · “${trialView.label}” could not load here, so this is the illustrated stage.`}
+        {voxelFailed ? t('solo.courtroom.hintFailed', { label: trialView.label }) : t('solo.courtroom.hint')}
       </p>
 
       {showTranscript && (
-        <ol className={styles.transcript} aria-label="Full transcript" role="list">
+        <ol className={styles.transcript} aria-label={t('solo.courtroom.transcript.label')} role="list">
           {shots.map((s, i) => (
             <li key={s.line.id} aria-current={i === index ? 'true' : undefined}>
               <button type="button" onClick={() => go(i)}>
-                <strong>{SPEAKER_NAME[s.speaker]}</strong> {s.line.text}
+                <strong>{speakerName(s.speaker)}</strong> {s.line.text}
               </button>
             </li>
           ))}

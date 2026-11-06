@@ -1,5 +1,6 @@
 import type { Hex, IdentityAction, IdentityPort, ProofRequest, ProofResult, ScreeningResult, VerificationLevel, VerifyContext, WorldIdProof } from '@cringe-court/core';
 import { IdentityLevel, JUROR_SCREENING_COPY, levelFromCredential, type FailureReason, type VerificationResult } from '@cringe-court/world-id/client';
+import { t } from '@/i18n';
 
 /** The slice of `@worldcoin/idkit-core` this adapter uses (injectable for tests). */
 export interface IdkitRequestLike {
@@ -41,7 +42,7 @@ export function mapIdkitError(code: string): Extract<ProofResult, { ok: false }>
   if (NOT_VERIFIED_CODES.has(code)) return { ok: false, reason: 'not-verified', message: JUROR_SCREENING_COPY.ineligible_level };
   if (code === 'timeout' || /expired|timestamp/.test(code)) return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.expired };
   if (code === 'connection_failed') return { ok: false, reason: 'error', message: JUROR_SCREENING_COPY.network };
-  return { ok: false, reason: 'error', message: `World ID could not finish (${code}). Please try again.` };
+  return { ok: false, reason: 'error', message: t('shell.identity.error.generic', { code }) };
 }
 
 const rec = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);

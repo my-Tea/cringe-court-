@@ -3,15 +3,18 @@
  * browser only. These helpers list and clear them, leaving player preferences
  * (sound, motion) alone.
  */
+import type { MessageKey } from '@/i18n';
+
 export interface DemoDataGroup {
   prefix: string;
-  label: string;
+  /** Catalog key for the group's description. */
+  label: MessageKey;
 }
 
 export const DEMO_DATA_GROUPS: readonly DemoDataGroup[] = [
-  { prefix: 'cc:solo:', label: 'Solo docket, draft confession and teaser quota' },
-  { prefix: 'cc:versus:', label: 'Versus cases, personas and sealed ballots' },
-  { prefix: 'cc:gj:', label: 'Grand Jury sealed ballots' },
+  { prefix: 'cc:solo:', label: 'shell.demoData.group.solo' },
+  { prefix: 'cc:versus:', label: 'shell.demoData.group.versus' },
+  { prefix: 'cc:gj:', label: 'shell.demoData.group.grandJury' },
 ];
 
 function keysOf(storage: Storage): string[] {
