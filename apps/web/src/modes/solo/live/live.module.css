@@ -1,0 +1,315 @@
+/* The live Solo path: one idea on each page, in the warm palette. */
+
+.page {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-4);
+  width: min(46rem, 100%);
+  margin-inline: auto;
+  padding-block: var(--cc-space-6);
+  text-align: center;
+  animation: arrive var(--cc-duration-slower) var(--cc-ease-enter) both;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--cc-font-display);
+  font-size: clamp(2.25rem, 7vw, 3.75rem);
+  line-height: 1.05;
+  color: var(--cc-royal-900);
+}
+
+.lede,
+.hint {
+  margin: 0;
+}
+
+.lede {
+  font-size: var(--cc-text-lg);
+  max-width: 34rem;
+}
+
+.hint {
+  color: var(--cc-color-text-muted);
+}
+
+.bigGavel {
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  font-size: 2.5rem;
+  color: var(--cc-gold-100);
+  background: var(--cc-royal-900);
+  border: 4px solid var(--cc-gold-500);
+  transform-origin: 70% 70%;
+  animation: knock calc(var(--cc-duration-dramatic) * 3) var(--cc-ease-standard) infinite;
+}
+
+.confession {
+  width: 100%;
+  padding: var(--cc-space-4);
+  font: inherit;
+  font-size: var(--cc-text-xl);
+  line-height: 1.35;
+  color: var(--cc-royal-900);
+  background: var(--cc-neutral-100);
+  border: 4px solid var(--cc-royal-900);
+  box-shadow: 0 8px 0 var(--cc-gold-500);
+  resize: vertical;
+  transition: box-shadow var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.confession:focus {
+  outline: none;
+  box-shadow: 0 8px 0 var(--cc-royal-500);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--cc-space-2);
+  width: 100%;
+}
+
+.textButton {
+  padding: 0;
+  font-family: var(--cc-font-display);
+  color: var(--cc-royal-700);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  font-size: var(--cc-text-sm);
+  color: var(--cc-color-text-muted);
+}
+
+.primary {
+  animation: arrive var(--cc-duration-slower) var(--cc-ease-enter) both;
+}
+
+.primaryLink {
+  padding: var(--cc-space-3) var(--cc-space-6);
+  font-family: var(--cc-font-display);
+  color: var(--cc-royal-900);
+  background: var(--cc-gold-300);
+  border: 3px solid var(--cc-royal-900);
+}
+
+.actions {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-2);
+}
+
+.quote {
+  width: 100%;
+  margin: 0;
+  padding: var(--cc-space-3) var(--cc-space-4);
+  font-style: italic;
+  background: var(--cc-gold-100);
+  border-inline-start: 6px solid var(--cc-royal-700);
+  text-align: start;
+}
+
+.juries {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
+  gap: var(--cc-space-3);
+  width: 100%;
+}
+
+.jury {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-1);
+  padding: var(--cc-space-4) var(--cc-space-3);
+  font: inherit;
+  color: var(--cc-royal-900);
+  background: var(--cc-neutral-100);
+  border: 4px solid var(--cc-gold-700);
+  cursor: pointer;
+  animation: arrive var(--cc-duration-slower) var(--cc-ease-enter) both;
+  transition:
+    transform var(--cc-duration-fast) var(--cc-ease-standard),
+    background var(--cc-duration-fast) var(--cc-ease-standard);
+}
+
+.jury:hover {
+  transform: translateY(-4px);
+}
+
+.juryOn {
+  color: var(--cc-gold-100);
+  background: var(--cc-royal-900);
+  border-color: var(--cc-gold-300);
+  transform: translateY(-4px);
+}
+
+.jurySeats {
+  display: flex;
+  gap: var(--cc-space-1);
+  min-height: 1rem;
+}
+
+.seat {
+  width: 0.75rem;
+  height: 1rem;
+  background: var(--cc-gold-500);
+}
+
+.juryName {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-lg);
+}
+
+.juryPrice {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-2xl);
+}
+
+.juryNote {
+  font-size: var(--cc-text-sm);
+  opacity: 0.85;
+}
+
+.summon {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-4);
+  padding-block: var(--cc-space-6);
+  text-align: center;
+}
+
+.vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cc-space-4);
+  width: 100%;
+}
+
+.vs img {
+  height: clamp(12rem, 40vh, 22rem);
+  min-width: 0;
+  object-fit: contain;
+}
+
+.lawyerIn {
+  animation: slideLeft var(--cc-duration-dramatic) var(--cc-ease-enter) both;
+}
+
+.lawyerInFlip {
+  scale: -1 1;
+  animation: slideRight var(--cc-duration-dramatic) var(--cc-ease-enter) both;
+}
+
+.vsMark {
+  font-family: var(--cc-font-display);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  color: var(--cc-royal-700);
+  animation: pulse var(--cc-duration-slower) var(--cc-ease-standard) infinite alternate;
+}
+
+.summonLine {
+  margin: 0;
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xl);
+  color: var(--cc-royal-900);
+  animation: arrive var(--cc-duration-slow) var(--cc-ease-enter) both;
+}
+
+.court {
+  display: grid;
+  gap: var(--cc-space-3);
+}
+
+.courtTitle {
+  margin: 0;
+  text-align: center;
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-2xl);
+  color: var(--cc-royal-900);
+}
+
+.bench {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--cc-space-2);
+}
+
+.benchEmpty,
+.benchFull {
+  width: 2.5rem;
+  height: 3.25rem;
+  border: 3px solid var(--cc-gold-700);
+}
+
+.benchEmpty {
+  animation: pulse var(--cc-duration-dramatic) var(--cc-ease-standard) infinite alternate;
+}
+
+.benchFull {
+  background: var(--cc-royal-700);
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes knock {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0);
+  }
+  88% {
+    transform: rotate(-14deg);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-120px);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(120px);
+  }
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .bigGavel,
+  .jury,
+  .primary,
+  .lawyerIn,
+  .lawyerInFlip,
+  .vsMark,
+  .summonLine,
+  .benchEmpty {
+    animation: none;
+  }
+}

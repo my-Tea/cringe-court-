@@ -21,6 +21,8 @@ const mode: WebModeModule = {
   },
   routes: [
     { path: 'file', lazy: async () => ({ Component: (await import('./file/FilePage')).FilePage }) },
+    { path: 'stake', lazy: async () => ({ Component: (await import('./live/StakePage')).StakePage }) },
+    { path: 'trial/:caseNumber', lazy: async () => ({ Component: (await import('./live/TrialPage')).TrialPage }) },
     { path: 'case/:trialId', lazy: async () => ({ Component: (await import('./case/CasePage')).CasePage }) },
     { path: 'docket', lazy: async () => ({ Component: (await import('./case/DocketPage')).DocketPage }) },
   ],

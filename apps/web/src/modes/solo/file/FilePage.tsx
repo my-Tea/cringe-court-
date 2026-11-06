@@ -6,10 +6,10 @@ import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { t } from '@/i18n';
 import { Icon, PaperButtonLink, PaperRibbon, PhaseStepper } from '@/ds';
 import { appLedger } from '@/platform/ledger';
-import { clearDraftText, demoCourt, loadDraftText, openArcCourt, saveDraftText } from '../lib/demoCourt';
+import { clearDraftText, demoCourt, loadDraftText, saveDraftText } from '../lib/demoCourt';
 import { soloPaths } from '../lib/paths';
 import { useSessionSnapshot } from '../lib/useSession';
-import { ArcWalletGate } from './ArcWalletGate';
+import { ConfessPage } from '../live/ConfessPage';
 import { BriefStep } from './BriefStep';
 import { ConfessStep } from './ConfessStep';
 import { DismissedStep, DraftingStep, PayStep, ReviewStep } from './CounselSteps';
@@ -17,21 +17,10 @@ import styles from './FilePage.module.css';
 
 const steps = () => [t('solo.file.steps.confess'), t('solo.file.steps.brief'), t('solo.file.steps.drafts'), t('solo.file.steps.review'), t('solo.file.steps.pay')];
 
-/** /solo/file — on Arc, the wallet comes first: a case is paid from the player's own wallet. */
+/** /solo/file. On Arc the game is three pages: confess, stake, then a trial nobody has seen yet. */
 export function FilePage() {
   useDocumentTitle(t('solo.file.doc'));
-  const [ready, setReady] = useState(() => appLedger().kind !== 'arc-testnet');
-  if (!ready) {
-    return (
-      <ArcWalletGate
-        onReady={(account) => {
-          openArcCourt(account);
-          setReady(true);
-        }}
-      />
-    );
-  }
-  return <FileFlow />;
+  return appLedger().kind === 'arc-testnet' ? <ConfessPage /> : <FileFlow />;
 }
 
 /** From confession to a paid, frozen case (GAME-MODES §2 steps 1–4). */
