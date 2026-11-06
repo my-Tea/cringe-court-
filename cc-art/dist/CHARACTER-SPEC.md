@@ -119,19 +119,6 @@ sprite set with 6 states.
 
 ---
 
-### 2.7 The Defendant (anonymous) — `defendant/`
-
-Not a fixed character: a per-case stand-in for the accused. Hooded or masked
-voxel bust, no face, no skin, deliberately different from the Creator's pink
-hoodie so it never reveals who the creator is (pseudonymous, never a promise of
-perfect anonymity). Swappable parameters: mask (`bag` / `censor` / `hood`),
-hoodie accent (burgundy, magenta, near-black, mustard, plum), eye-glint colour,
-and a 6-bit booking-tag barcode. `variantForCase(caseId)` derives them
-deterministically (FNV-1a → mulberry32). Poses: neutral, smug, shocked, defeated,
-slump, celebrate, plus the "CHARGES FILED" composite and a 4-frame stamp-impact
-sequence for `case_accepted`. Implementation: `defendant-vox.mjs`,
-`export-defendant.mjs`; details in ASSET-COMPLETE.md.
-
 ## 3. Juror / Voter — `juror/`
 
 A **recognizable generic NPC**, and explicitly **not** the player's appearance.

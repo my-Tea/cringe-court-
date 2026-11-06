@@ -20,7 +20,7 @@ Verified against the filesystem.
 | **Player parts** | **58** + default, voxel | ✅ Matches cast proportions (4.5 heads) |
 | **UI kit** | **34** assets (47 with @2x icons) | ✅ |
 | **FX sprites** | **10** | ✅ |
-| **Props** | 82 (41 props @1x + @4x) | ✅ |
+| **Props** | 94 (47 props @1x + @4x) | ✅ |
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
 | **3D models** | `.bbmodel` (995 elements) | ✅ |
@@ -63,42 +63,6 @@ brows above the shades. Say the word and I'll do (b) — it's a 10-line change.
 
 ---
 
-## Portraits
-
-```
-characters/<id>/portraits/{neutral,smug,shocked,defeated}{,_32,@2x}.png   # 64 / 32 / 128 px
-characters/_previews/portraits.png                                       # contact sheet
-characters/portraits.json                                                # index
-```
-
-Head-and-shoulders busts on dialogue-box plum, cropped from the voxel render
-(`export-portraits.mjs`). `defeated` uses the crying face. Expression contrast is
-only as good as the face rig; re-run after the face rig (`feat/voxel-expressions`)
-lands for much stronger differences.
-
-## Anonymous Defendant
-
-```
-characters/defendant/<set>/{neutral,smug,shocked,defeated,slump,celebrate}{,_32,@2x}.png
-characters/defendant/<set>/charges_filed{,_32,@2x}.png        # portrait + angled stamp
-characters/defendant/<set>/stamp_impact_{0..3}{,@2x}.png      # pop-in → hover → impact → settled
-characters/defendant/defendant.json                           # parameters + caseId→variant rule
-characters/_previews/defendant.png                            # contact sheet
-```
-
-A per-case stand-in (hooded/masked voxel bust, no face, never the Creator's pink
-look), not a character you can recognise. Sets: `stock-bag`, `stock-censor`,
-`stock-hood`, plus two sample cases. `variantForCase(caseId)` in
-`defendant-vox.mjs` maps any case id to mask / hoodie accent / glint colour /
-booking-tag barcode; `node export-defendant.mjs <caseId...>` exports a set for a
-specific case. With no face, expression comes from eye-hole/glint shape, a
-marker or glint mouth, small marks (!, sparkle, sweat, confetti) and head/arm
-pose. Honest limits: the 32px `charges_filed` is a stamped slab, not readable
-text (the 5x7 font needs ~47px); the case-number tag is a barcode, not digits;
-anonymity is pseudonymous by design, not a guarantee. Needs
-`export-portraits.mjs` conventions (plum bg, 64/128/32 sizes) from
-`feat/portraits`.
-
 ## Poses
 
 ```
@@ -126,6 +90,16 @@ and pointing hands all follow the pose. Verified that all 10 differ per characte
 | `receipt_card.png` | 300×260 | Settlement layout |
 
 The pixel font is a **built-in 5×7 bitmap** in `ui-kit.mjs` — no font file to ship.
+
+---
+
+## Trial-moment props (`sprites/props/`)
+
+`ballot_paper`, `ballot_envelope`, `case_stamp`, `settlement_receipt`,
+`podium_mic`, `potted_plant` — the art bible part 3 props that were missing.
+Defined in `props.mjs`, exported by `node export.mjs` (writes `out/props/`; copy to
+`dist/sprites/props/`). **Not yet in `models/CringeCourt_Props.bbmodel`**: that file
+was built through Blockbench and nothing in `cc-art/` regenerates it.
 
 ---
 
@@ -180,8 +154,6 @@ cd cc-art
 node export-all.mjs   # characters
 node ui-kit.mjs       # UI
 node fx-kit.mjs       # FX
-node export-portraits.mjs   # dialogue portraits
-node export-defendant.mjs   # anonymous defendant set
 ```
 
 ---

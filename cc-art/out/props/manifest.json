@@ -900,5 +900,137 @@
     "height": 14,
     "image": "cart.png",
     "image4x": "cart@4x.png"
+  },
+  {
+    "name": "ballot_paper",
+    "label": "Ballot paper (\"Secret Verdict Scroll\"), half-folded",
+    "boxes": 6,
+    "size": [
+      10,
+      4.4,
+      7.7
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 10,
+      "d": 7.7
+    },
+    "height": 4.4,
+    "image": "ballot_paper.png",
+    "image4x": "ballot_paper@4x.png"
+  },
+  {
+    "name": "ballot_envelope",
+    "label": "Sealed ballot envelope (commit phase)",
+    "boxes": 5,
+    "size": [
+      14,
+      2.6,
+      9
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 14,
+      "d": 9
+    },
+    "height": 2.6,
+    "image": "ballot_envelope.png",
+    "image4x": "ballot_envelope@4x.png"
+  },
+  {
+    "name": "case_stamp",
+    "label": "Case-number rubber stamp",
+    "boxes": 6,
+    "size": [
+      10.8,
+      14.6,
+      6.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 10.8,
+      "d": 6.8
+    },
+    "height": 14.6,
+    "image": "case_stamp.png",
+    "image4x": "case_stamp@4x.png"
+  },
+  {
+    "name": "settlement_receipt",
+    "label": "Settlement receipt slip (curled)",
+    "boxes": 10,
+    "size": [
+      8,
+      2.6,
+      16
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 8,
+      "d": 16
+    },
+    "height": 2.6,
+    "image": "settlement_receipt.png",
+    "image4x": "settlement_receipt@4x.png"
+  },
+  {
+    "name": "podium_mic",
+    "label": "Podium microphone (press / witness)",
+    "boxes": 6,
+    "size": [
+      8,
+      15.6,
+      12.8
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 8,
+      "d": 12.8
+    },
+    "height": 15.6,
+    "image": "podium_mic.png",
+    "image4x": "podium_mic@4x.png"
+  },
+  {
+    "name": "potted_plant",
+    "label": "Potted plant (corner dressing)",
+    "boxes": 8,
+    "size": [
+      10,
+      20,
+      9.2
+    ],
+    "pivot": [
+      0,
+      0,
+      0
+    ],
+    "footprint": {
+      "w": 10,
+      "d": 9.2
+    },
+    "height": 20,
+    "image": "potted_plant.png",
+    "image4x": "potted_plant@4x.png"
   }
 ]
