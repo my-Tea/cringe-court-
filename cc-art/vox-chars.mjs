@@ -12,6 +12,19 @@ const MOUTH = { neutral: 'neutral', happy: 'grin', angry: 'grit', shocked: 'shou
 
 const FACE_MATS = new Set(['#FFFFFF', '#3B2A28', '#241A22', '#5A4234', '#8E3B42', '#7A3340', '#D2686E', '#E8C4A8', '#D2A98C', '#B48A6C']);
 
+/** Brand gavel: handle + head + gold band + an end cap on each face of the
+ *  head. Shared with fp-hands.mjs. */
+export function gavelBoxes(gx, gy, gz = 0) {
+  return [
+    b([gx - 1.4, gy, gz - 1.4], [gx + 1.4, gy + 26, gz + 1.4], C.hairBr),
+    b([gx - 6, gy + 24, gz - 3], [gx + 6, gy + 32, gz + 3], C.hairBrLt),
+    b([gx - 6.6, gy + 26, gz - 3.4], [gx + 6.6, gy + 29, gz + 3.4], C.gold),
+    // end caps (pair() would mirror one about the origin, onto the left hand)
+    b([gx - 7, gy + 24, gz - 3], [gx - 5.6, gy + 32, gz + 3], C.goldLt),
+    b([gx + 5.6, gy + 24, gz - 3], [gx + 7, gy + 32, gz + 3], C.goldLt),
+  ];
+}
+
 /* ══════════════════════════════════ JUDGE ══════════════════════════════════ */
 export const JUDGE = {
   id: 'judge', label: 'Judge Gavel.exe',
@@ -72,14 +85,7 @@ export const JUDGE = {
 
     // ── gavel, held right — oversized ───────────────────────────────
     const gx = H.torsoW + H.armW * 2 + 4, gy = H.armBot + 4;
-    out.push(...tag('armR', [
-      b([gx - 1.4, gy, -1.4], [gx + 1.4, gy + 26, 1.4], C.hairBr),
-      b([gx - 6, gy + 24, -3], [gx + 6, gy + 32, 3], C.hairBrLt),
-      b([gx - 6.6, gy + 26, -3.4], [gx + 6.6, gy + 29, 3.4], C.gold),
-      // end caps on both faces of the head (pair() would mirror one onto the left hand)
-      b([gx - 7, gy + 24, -3], [gx - 5.6, gy + 32, 3], C.goldLt),
-      b([gx + 5.6, gy + 24, -3], [gx + 7, gy + 32, 3], C.goldLt),
-    ]));
+    out.push(...tag('armR', gavelBoxes(gx, gy)));
 
     // the Judge never points — he raises the gavel
     return posed(out, pose, {

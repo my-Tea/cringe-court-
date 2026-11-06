@@ -59,6 +59,7 @@ const anim = (await fetch('animation/animations.json').then(r => r.json()))
 | UI kit | ✅ **34** assets |
 | FX | ✅ **10** |
 | Player parts | ✅ **60** |
+| First-person hands | ✅ 7 poses x 6 skin tones (+ left mirrors), `characters/player/hands/` |
 
 ## Three things to know before you start
 
