@@ -10,5 +10,5 @@
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom/vitest", "node"]
   },
   "include": ["src"],
-  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/modes-versus" }, { "path": "../../packages/audio" }]
+  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/modes-grand-jury" }]
 }
