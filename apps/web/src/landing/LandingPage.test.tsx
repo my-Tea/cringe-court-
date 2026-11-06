@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { axe } from 'vitest-axe';
@@ -84,14 +84,15 @@ describe('landing', () => {
     expect(router.state.location.pathname).toBe('/');
   });
 
-  it('a well-formed demo entry goes to the courts lobby without keeping the password', async () => {
+  it('a well-formed demo entry walks into the arrival run without keeping the password', async () => {
     const user = userEvent.setup();
     const { router } = renderLanding();
     await user.type(await screen.findByLabelText('Email'), 'juror@example.com');
     const password = screen.getByLabelText('Password');
     await user.type(password, 'secret');
     await user.keyboard('{Enter}');
-    expect(router.state.location.pathname).toBe('/court');
+    // The run is a lazy route: the location moves once its chunk has loaded.
+    await waitFor(() => expect(router.state.location.pathname).toBe('/play'), { timeout: 5000 });
     expect(await screen.findByText(/nothing was sent or saved/)).toBeInTheDocument();
     expect(document.querySelector('input[type="password"]')).toBeNull();
   });
@@ -101,7 +102,7 @@ describe('landing', () => {
     const { router } = renderLanding();
     (await screen.findByRole('button', { name: 'Play as guest' })).focus();
     await user.keyboard('{Enter}');
-    expect(router.state.location.pathname).toBe('/court');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/play'), { timeout: 5000 });
   });
 
   it('social tiles say "coming soon" and stay on the page', async () => {

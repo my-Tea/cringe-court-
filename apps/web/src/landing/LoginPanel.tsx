@@ -44,12 +44,12 @@ export function LoginPanel() {
       return;
     }
     toast({ tone: 'success', title: t('shell.login.ribbon'), description: t('shell.login.toast.session') });
-    navigate(paths.court);
+    navigate(paths.play);
   }
 
   function guest() {
     toast({ tone: 'info', title: t('shell.login.guest.title'), description: t('shell.login.guest.body') });
-    navigate(paths.court);
+    navigate(paths.play);
   }
 
   return (
