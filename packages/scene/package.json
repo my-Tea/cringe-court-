@@ -11,7 +11,9 @@
     "./assets/*": "./assets/*",
     "./roam": "./src/roam/index.ts",
     "./roam/react": "./src/roam/react/index.ts",
-    "./iso": "./src/iso/index.ts"
+    "./iso": "./src/iso/index.ts",
+    "./iso/react": "./src/iso/react/index.ts",
+    "./iso/three": "./src/iso/three/index.ts"
   },
   "scripts": {
     "atlas": "tsx scripts/gen-atlas.ts",

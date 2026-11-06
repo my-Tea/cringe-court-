@@ -33,6 +33,10 @@ export function surfaceFor(hex: string, glow = 0): SurfaceKind {
     case '#D9A046':
     case '#F6C75B':
       return 'metal';
+    case '#7FA9E6':
+    case '#BDF5FF':
+    case '#4D7CC5':
+      return 'glass';
     default:
       return 'plain';
   }
