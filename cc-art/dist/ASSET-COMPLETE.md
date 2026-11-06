@@ -23,7 +23,7 @@ Verified against the filesystem.
 | **Props** | 106 (53 props @1x + @4x) | ✅ |
 | **Block textures** | 13 | ✅ |
 | **Scene renders** | 11 | ✅ |
-| **3D models** | `.bbmodel` (995 elements) | ✅ |
+| **3D models** | `.bbmodel` (1138 elements, 53 props) | ✅ |
 | **Animation data** | 54 char + 10 system | ✅ |
 
 ### What closed the previous gaps
@@ -98,8 +98,7 @@ The pixel font is a **built-in 5×7 bitmap** in `ui-kit.mjs` — no font file to
 `ballot_paper`, `ballot_envelope`, `case_stamp`, `settlement_receipt`,
 `podium_mic`, `potted_plant` — the art bible part 3 props that were missing.
 Defined in `props.mjs`, exported by `node export.mjs` (writes `out/props/`; copy to
-`dist/sprites/props/`). **Not yet in `models/CringeCourt_Props.bbmodel`**: that file
-was built through Blockbench and nothing in `cc-art/` regenerates it.
+`dist/sprites/props/`). Included in `models/CringeCourt_Props.bbmodel`.
 
 ---
 
