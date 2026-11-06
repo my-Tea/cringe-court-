@@ -100,7 +100,12 @@ export function ModePage({ id }: { id: ModeId }) {
           </CardBody>
         </Card>
 
-        {!playable && (
+        {playable ? (
+          <Alert tone="info" title="Testnet demo court" className={styles.modeAlert}>
+            This court runs end to end in your browser: scripted counsel stands in for 0G Compute, an in-browser twin of the Arc testnet
+            contract holds free test USDC, and NPC jurors stand in for World ID–verified humans. Nothing here touches real money.
+          </Alert>
+        ) : (
           <Alert tone="warning" title="You are looking at the app shell" className={styles.modeAlert}>
             This build has the courts, design system and rules, but no filing yet. Contracts on Arc testnet, AI counsel on 0G and
             World ID juror screening arrive in the next phases. Nothing here touches money.

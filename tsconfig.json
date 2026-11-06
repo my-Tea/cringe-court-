@@ -20,6 +20,9 @@
       "path": "./packages/modes-grand-jury"
     },
     {
+      "path": "./packages/modes-solo"
+    },
+    {
       "path": "./apps/web"
     },
     {

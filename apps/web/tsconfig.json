@@ -36,6 +36,12 @@
     },
     {
       "path": "../../packages/modes-grand-jury"
+    },
+    {
+      "path": "../../packages/modes-solo"
+    },
+    {
+      "path": "../../packages/audio"
     }
   ]
 }
