@@ -11,6 +11,7 @@ each service runs on in this build. Testnet only (D14).
 | Identity (core `IdentityPort`) | mock personas under world-id's real eligibility rules (Orb for jurors, Device for parties, parties excluded, one seat per human) | World IDKit in the browser plus a verifier backend (`/rp-context`, `/verify`) running `IdkitVerifier` | `platform/identity/` |
 | Audio | one shared `@cringe-court/audio` engine for every mode (`appAudio()`), settings saved as `cc:audio` | same | `platform/audio.ts` |
 | AI counsel | scripted fixture counsel | 0G Compute adapter in `packages/ai` (not wired in this build) | per mode |
+| Court server (Versus, Grand Jury) | none: every court lives in this browser | `apps/server` shared by every device: `RemoteFactStore` / `RemoteGrandJuryCourt` from `packages/net` (docs/BACKEND.md) | `platform/backend/` |
 
 Configuration is read once from Vite env (`platform/config.ts`):
 
@@ -19,7 +20,14 @@ VITE_LEDGER=demo | arc-testnet
 VITE_ARC_RPC_URL, VITE_ARC_COURT, VITE_ARC_USDC, VITE_ARC_REGISTRY
 VITE_IDENTITY=mock | world-idkit
 VITE_WORLD_APP_ID, VITE_WORLD_BACKEND_URL
+VITE_BACKEND_URL            shared court server for Versus and Grand Jury (unset = this browser only)
 ```
+
+`apps/web/.env.example` lists them all. With `VITE_BACKEND_URL` set, the Versus
+and Grand Jury layouts go through `BackendGate`. It shows an honest error if the
+server cannot be reached and offers the local demo as an explicit,
+remembered, reversible choice. It never falls back silently. `npm run dev:full`
+starts the server and the app wired together.
 
 A half-configured service falls back to its demo adapter, and Settings shows a
 warning that names the missing variables. `/settings` → *Court connections*
@@ -42,9 +50,10 @@ Covered by tests in `platform/ledger/*.test.ts`:
 - Reveal opens as soon as every juror has committed. Time-driven phase changes have no contract event, so subscribers poll `getCase`.
 - Titles, categories and Grand Jury contributor lists are not stored on-chain. An indexer is needed after a reload.
 
-The mode flows still run on their own in-browser twins: Solo (`SoloSession` and
-the NPC jury), Versus (an event-sourced case room) and Grand Jury (the demo
-court). `soloSession.test.ts` shows Solo running end to end on `ArcLedger(memory)`.
+The mode flows still run on their own twins: Solo (`SoloSession` and the NPC
+jury) in the browser; Versus (an event-sourced case room) and Grand Jury (the
+demo court) in the browser by default, or on the shared court server with
+`VITE_BACKEND_URL` (docs/BACKEND.md). `soloSession.test.ts` shows Solo running end to end on `ArcLedger(memory)`.
 Moving the live Solo page onto it is the next step.
 
 ## Trials in the first-person courtroom (`apps/web/src/trial/`)
