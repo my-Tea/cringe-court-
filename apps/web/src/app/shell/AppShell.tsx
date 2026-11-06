@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router';
-import { Dialog, DialogContent, DialogTrigger, Icon, IconButton, Logo, PaperNavBar, PaperPanel, PaperTab, RoundIconLink, TestnetBadge, Tooltip } from '@/ds';
+import { Dialog, DialogContent, DialogTrigger, Icon, IconButton, Logo, PaperNavBar, PaperPanel, PaperTab, RoundIconLink, TestnetBadge, Tooltip, usePageEnter } from '@/ds';
 import { t } from '@/i18n';
 import { COURT_LINKS, NAV_ITEMS, paths } from '../routes';
 import styles from './AppShell.module.css';
@@ -25,6 +25,9 @@ function useFocusMainOnNavigate() {
 export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const mainRef = useFocusMainOnNavigate();
+  const { pathname: enterKey } = useLocation();
+  // Each new page settles in (tokens: --cc-duration-slow, --cc-ease-enter; instant under reduced motion).
+  usePageEnter(mainRef, enterKey);
   const { pathname } = useLocation();
   const close = () => setMenuOpen(false);
 

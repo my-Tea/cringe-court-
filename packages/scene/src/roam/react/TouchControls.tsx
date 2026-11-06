@@ -77,15 +77,15 @@ export function TouchControls({ controller, prompt }: { controller: RoamControll
       </div>
       <div className="ccr-touch-buttons">
         <button type="button" className="ccr-btn ccr-btn--ghost" aria-label={S.touchPause} onClick={() => controller.setPaused(true)}>
-          {/* i18n-ignore: pause glyph */}
-          II
+          {/* i18n-ignore: glyphs are decoration; the aria-label is the name (WCAG 2.5.3). */}
+          <span aria-hidden="true">II</span>
         </button>
         <span />
         <button type="button" className="ccr-btn ccr-btn--ghost" aria-label={S.touchHop} onClick={() => controller.jump()}>
-          ⤒
+          <span aria-hidden="true">⤒</span>
         </button>
         <button type="button" className={`ccr-btn ccr-act ${prompt ? 'ccr-btn--gold' : ''}`} aria-label={prompt ? S.touchInteractWith(prompt) : S.touchInteract} onClick={() => controller.interact()}>
-          ✋
+          <span aria-hidden="true">✋</span>
         </button>
       </div>
     </div>
