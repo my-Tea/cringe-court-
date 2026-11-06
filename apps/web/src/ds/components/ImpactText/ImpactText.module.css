@@ -11,7 +11,7 @@
   display: inline-grid;
   place-items: center;
   padding: 1.1em 1.6em;
-  font-family: var(--cc-font-display);
+  font-family: var(--cc-font-pixel);
   font-size: var(--_size, var(--cc-text-3xl));
   font-weight: var(--cc-weight-bold);
   line-height: 1;

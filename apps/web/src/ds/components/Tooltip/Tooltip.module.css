@@ -2,7 +2,7 @@
   z-index: var(--cc-z-tooltip);
   max-width: 18rem;
   padding: var(--cc-space-2) var(--cc-space-3);
-  border: 1px solid var(--cc-color-border-strong);
+  border: 1px solid var(--cc-gold-700);
   border-radius: var(--cc-radius-sm);
   background: var(--cc-neutral-900);
   box-shadow: var(--cc-shadow-3);
