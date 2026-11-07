@@ -38,6 +38,18 @@ export interface RoamTrialProps {
   onBeat?: (index: number) => void;
   /** Called once every beat has played. */
   onDone?: () => void;
+  /** Keep the room open but do not start the hearing yet (the jury is still arriving). */
+  hold?: boolean;
+  /** How many jurors are in the box so far. Default: all of them. */
+  seated?: number;
+  /** Stay in session after the hearing; `finale` then plays the vote and the verdict in the room. */
+  stayInSession?: boolean;
+  finale?: readonly PlannedBeat[] | null;
+  onFinale?: () => void;
+  /** No control bar, for a recording of the hearing. */
+  chromeless?: boolean;
+  /** Fill the screen; the page draws its HUD over the room. */
+  bleed?: boolean;
 }
 
 /** Before the first beat seats you: at your table, in the jury box, or walking in from the aisle. */
@@ -65,6 +77,13 @@ function RoamTrialRoom({
   onExit,
   onBeat,
   onDone,
+  hold = false,
+  seated,
+  stayInSession = false,
+  finale,
+  onFinale,
+  chromeless = false,
+  bleed = false,
 }: RoamTrialProps) {
   const pace = useHearingPace();
   const [perspective, setPerspective] = useState<PerspectiveChoice>(() => readPerspective());
@@ -86,9 +105,9 @@ function RoamTrialRoom({
     if (document.fullscreenElement) void document.exitFullscreen();
     else void box.current?.requestFullscreen();
   };
-  const cb = useRef({ onBeat, onDone });
+  const cb = useRef({ onBeat, onDone, onFinale, stayInSession });
   useEffect(() => {
-    cb.current = { onBeat, onDone };
+    cb.current = { onBeat, onDone, onFinale, stayInSession };
   });
   const controller = roam.status === 'ready' ? roam.controller : null;
   useEffect(() => controller?.setPace(pace), [controller, pace]);
@@ -97,7 +116,16 @@ function RoamTrialRoom({
   const plan = JSON.stringify(beats);
 
   useEffect(() => {
-    if (!controller) return;
+    if (seated !== undefined) controller?.setJurors(seated);
+  }, [controller, seated]);
+
+  useEffect(() => {
+    if (!controller || !chromeless) return;
+    (window as unknown as { __hearing?: unknown }).__hearing = controller;
+  }, [controller, chromeless]);
+
+  useEffect(() => {
+    if (!controller || hold) return;
     const abort = new AbortController();
     const planned = JSON.parse(plan) as PlannedBeat[];
     // eslint-disable-next-line react-hooks/set-state-in-effect -- resets the finished flag when a new run starts
@@ -108,13 +136,23 @@ function RoamTrialRoom({
       cb.current.onBeat?.(i);
     }).then((all) => {
       if (!all) return;
-      controller.adjourn();
+      if (!cb.current.stayInSession) controller.adjourn();
       setCurrent(null);
       setDone(true);
       cb.current.onDone?.();
     });
     return () => abort.abort();
-  }, [controller, plan, run]);
+  }, [controller, plan, run, hold]);
+
+  const finalePlan = finale ? JSON.stringify(finale) : null;
+  useEffect(() => {
+    if (!controller || !finalePlan) return;
+    const abort = new AbortController();
+    void playBeats(controller, JSON.parse(finalePlan) as PlannedBeat[], abort.signal).then((all) => {
+      if (all) cb.current.onFinale?.();
+    });
+    return () => abort.abort();
+  }, [controller, finalePlan]);
 
   if (roam.status === 'error')
     return (
@@ -138,7 +176,7 @@ function RoamTrialRoom({
     roam.controller.skipBeat();
   };
   return (
-    <div className={styles.roam} ref={box}>
+    <div className={styles.roam} ref={box} data-bleed={bleed || undefined}>
       <RoamCourtroom
         controller={roam.controller}
         data={roam.data}
@@ -152,7 +190,7 @@ function RoamTrialRoom({
           setPerspective(p);
         }}
       />
-      <div className={styles.roamBar} data-surface="wood">
+      <div className={styles.roamBar} data-surface="wood" style={chromeless ? { display: 'none' } : undefined}>
         <p className={styles.roamStatus} aria-live="polite">
           {beat ? (
             <>

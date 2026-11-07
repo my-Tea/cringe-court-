@@ -15,7 +15,7 @@ const REGISTRY_ABI = parseAbi([
 
 export const ARC_RPC = 'https://rpc.testnet.arc.network';
 const ARC_CHAIN_ID = 5042002;
-const ARC_REGISTRY: Address = '0x7DecbE8467F1A4319d33B0e41ED0ab14123f9657';
+export const ARC_REGISTRY: Address = '0x7DecbE8467F1A4319d33B0e41ED0ab14123f9657';
 export const ARC_COURT: Address = '0x33a4Af074b710F9BdCB73b0190e9Aa65f0A6cc90';
 /** The contract allows 40 unsponsored cases in all, so a caller cannot burn them quickly. */
 const PUBLISH_COOLDOWN_MS = 5 * 60 * 1000;

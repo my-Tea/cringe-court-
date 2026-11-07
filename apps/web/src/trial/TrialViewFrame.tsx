@@ -25,6 +25,8 @@ class RoamBoundary extends Component<{ fallback: (error: Error) => ReactNode; ch
 }
 
 export interface TrialViewFrameProps {
+  /** Hide the toolbar, for a recording. */
+  bare?: boolean;
   /** The mode's existing stage. */
   classic: ReactNode;
   /** The roaming courtroom for the same hearing. */
@@ -33,16 +35,18 @@ export interface TrialViewFrameProps {
   toolbar?: ReactNode;
 }
 
-export function TrialViewFrame({ classic, roam, toolbar }: TrialViewFrameProps) {
+export function TrialViewFrame({ classic, roam, toolbar, bare = false }: TrialViewFrameProps) {
   const { view, setView, available } = useTrialView();
   const showRoam = available && view === 'roam';
   return (
     <div className={styles.frame} data-view={showRoam ? 'roam' : 'classic'}>
-      <div className={styles.toolbar}>
-        <TrialViewToggle />
-        {!available && <p className={styles.note}>{t('trial.view.noWebgl')}</p>}
-        {toolbar}
-      </div>
+      {bare ? null : (
+        <div className={styles.toolbar}>
+          <TrialViewToggle />
+          {!available && <p className={styles.note}>{t('trial.view.noWebgl')}</p>}
+          {toolbar}
+        </div>
+      )}
       {showRoam ? (
         <RoamBoundary
           fallback={(error) => (

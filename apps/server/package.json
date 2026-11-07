@@ -13,6 +13,7 @@
     "@cringe-court/core": "*",
     "@cringe-court/engine": "*",
     "@cringe-court/modes-grand-jury": "*",
+    "@cringe-court/modes-solo": "*",
     "@cringe-court/modes-versus": "*",
     "@cringe-court/net": "*",
     "@cringe-court/world-id": "*",

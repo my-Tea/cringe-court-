@@ -205,7 +205,7 @@ export class RoamController implements BeatHost {
   #pace: HearingPace;
   #fast = false;
   readonly #specs: ReadonlyMap<string, NpcSpec>;
-  readonly #jurors: number;
+  #jurors: number;
 
   readonly id: string;
   #avatar: AvatarSpec;
@@ -301,6 +301,17 @@ export class RoamController implements BeatHost {
     if (n.role !== 'juror' || n.jurySlot === undefined) return false;
     // Slots fill front row first (0–2), then the raised back row (3–6).
     return n.jurySlot >= this.#jurors || (this.role === 'juror' && n.jurySlot === PLAYER_JURY_SLOT);
+  }
+
+  /** Fills the jury box as jurors arrive: seats past `count` stay empty. */
+  setJurors(count: number): void {
+    this.#jurors = Math.max(0, count);
+    for (const s of this.#npcs) {
+      const spec = this.#specs.get(s.id)!;
+      if (spec.role === 'juror') s.hidden = this.#absent(spec) || undefined;
+    }
+    this.#syncJuryBox();
+    this.#changed();
   }
 
   /** Whoever sits in the jury box's player seat takes it from the NPC juror there. */

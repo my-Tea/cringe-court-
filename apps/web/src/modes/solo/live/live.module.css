@@ -428,3 +428,122 @@
     animation: none;
   }
 }
+
+/* Solo's front door: two cards, one choice. */
+.doors {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--cc-space-4);
+  width: 100%;
+}
+
+.door {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-5) var(--cc-space-4);
+  border: 4px solid var(--cc-gold-700);
+  background: var(--cc-neutral-100);
+  color: var(--cc-royal-900);
+  text-decoration: none;
+  box-shadow: 0 4px 0 var(--cc-gold-900);
+  transition: transform var(--cc-duration-fast) var(--cc-ease-enter);
+}
+
+.door:hover,
+.door:focus-visible {
+  transform: translateY(-3px);
+  background: var(--cc-royal-900);
+  border-color: var(--cc-gold-300);
+  color: var(--cc-gold-100);
+}
+
+.door strong {
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xl);
+}
+
+.doorIcon {
+  font-size: 2.5rem;
+  color: var(--cc-gold-700);
+}
+
+/* The hearing's HUD: everything floats over the room, nothing leaves it. */
+.hud {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  justify-items: end;
+  align-items: start;
+  padding: var(--cc-space-5);
+  pointer-events: none;
+}
+
+.hud > * {
+  pointer-events: auto;
+}
+
+.seatHud,
+.voteHud,
+.verdictCard {
+  display: grid;
+  gap: var(--cc-space-2);
+  width: min(26rem, 100%);
+  padding: var(--cc-space-4);
+  border: 4px solid var(--cc-gold-500);
+  background: var(--cc-gold-100);
+  color: var(--cc-neutral-900);
+  box-shadow: 0 5px 0 var(--cc-gold-900);
+}
+
+.verdictCard {
+  justify-self: center;
+  align-self: center;
+  justify-items: center;
+  width: min(38rem, 100%);
+  text-align: center;
+}
+
+.hudTitle {
+  margin: 0;
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-2xl);
+  line-height: 1.1;
+  color: var(--cc-royal-900);
+}
+
+.hudLine {
+  margin: 0;
+}
+
+.seatList {
+  display: grid;
+  gap: var(--cc-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seatList li {
+  display: grid;
+  padding: var(--cc-space-2) var(--cc-space-3);
+  border: 2px dashed var(--cc-gold-700);
+  opacity: 0.65;
+}
+
+.seatList li[data-taken] {
+  border-style: solid;
+  background: var(--cc-neutral-100);
+  opacity: 1;
+}
+
+.seatList span {
+  font-size: var(--cc-text-sm);
+}
+
+.botNote {
+  margin: 0;
+  font-size: var(--cc-text-sm);
+  color: var(--cc-royal-900);
+}

@@ -28,8 +28,9 @@ import { FAUCET_MAX, GrandJuryHall, type GjCommand } from './gj/hall';
 import { RateLimiter } from './ratelimit';
 import { InviteSigner, SessionFull, Sessions, type Session } from './sessions';
 import { FileStorage, MemoryStorage, type Storage } from './store';
-import { ARC_COURT, ARC_RPC, arcHumanWriter, attestWallet, type HumanWriter } from './chain/attest';
+import { ARC_COURT, ARC_REGISTRY, ARC_RPC, arcHumanWriter, attestWallet, type HumanWriter } from './chain/attest';
 import { createRpcProxy, type RpcRequest } from './chain/rpcProxy';
+import { createDemoJury, juryBallots, type DemoJury } from './solo/demoJury';
 import { arcStakeReader, courtWriter, createSoloTrials, screenConfession } from './solo/trial';
 import { createWorldService, seatGate, type WorldService } from './world/routes';
 import { HumanStore } from './world/humans';
@@ -60,6 +61,7 @@ export interface ServerDeps {
   worldVerifier?: IdentityVerifier;
   /** Test stand-in. Production writes with the configured model after reading the stake from Arc. */
   soloTrials?: ReturnType<typeof createSoloTrials>;
+  demoJury?: DemoJury | null;
   /** Test stand-in. Production signs with ARC_RELAYER_KEY from the environment. */
   humanWriter?: HumanWriter | null;
 }
@@ -122,7 +124,23 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
     onChange: broadcastGj,
   });
 
-  const soloTrials = deps.soloTrials ?? createSoloTrials({ writer: courtWriter(process.env, log), stakes: arcStakeReader(process.env, (process.env.ARC_COURT?.trim() || ARC_COURT) as `0x${string}`) });
+  const writer = courtWriter(process.env, log);
+  const soloTrials = deps.soloTrials ?? createSoloTrials({ writer, stakes: arcStakeReader(process.env, (process.env.ARC_COURT?.trim() || ARC_COURT) as `0x${string}`) });
+  const demoJury: DemoJury | null =
+    deps.demoJury !== undefined
+      ? deps.demoJury
+      : createDemoJury({
+          env: process.env,
+          court: (process.env.ARC_COURT?.trim() || ARC_COURT) as `0x${string}`,
+          registry: (process.env.ARC_REGISTRY?.trim() || ARC_REGISTRY) as `0x${string}`,
+          rpc: process.env.ARC_RPC_URL?.trim() || ARC_RPC,
+          ai: {
+            commentary: writer ? writer.generateVerdictCommentary.bind(writer) : null,
+            ...(writer ? { ballots: juryBallots((messages) => writer.complete(messages)) } : {}),
+          },
+          log,
+        });
+  void demoJury?.prepare().catch((e: unknown) => log(`[demo-jury] not ready: ${e instanceof Error ? e.message : String(e)}`));
   const rpcProxy = createRpcProxy({ url: process.env.ARC_RPC_URL?.trim() || ARC_RPC });
   const humanWriter = deps.humanWriter !== undefined ? deps.humanWriter : arcHumanWriter(process.env, clockMs);
   const world: WorldService | null = config.world
@@ -308,6 +326,24 @@ export async function createCourtServer(config: ServerConfig, deps: ServerDeps =
       if (r.reason === 'bad-request') throw new HttpError(400, 'bad-request', r.message);
       if (r.reason === 'not-a-stake' || r.reason === 'wrong-confession') throw new HttpError(403, 'forbidden', r.message);
       throw new HttpError(503, 'disabled', r.message);
+    }
+    if (path === `${API}/solo/jury` && method === 'POST') {
+      limit(limits.reads, sid);
+      if (!demoJury) throw new HttpError(503, 'disabled', 'This server has no demo jury.');
+      const b = await body<{ step?: unknown; txHash?: unknown; title?: unknown; story?: unknown }>(req);
+      if (typeof b.txHash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(b.txHash) || typeof b.title !== 'string' || typeof b.story !== 'string') {
+        throw new HttpError(400, 'bad-request', 'Send {step, txHash, title, story}.');
+      }
+      const caseId = await soloTrials.caseOf(b.txHash as `0x${string}`, b.title, b.story);
+      if (caseId === null) throw new HttpError(403, 'forbidden', 'That is not a stake for this confession.');
+      const c = { caseId, title: b.title, story: b.story };
+      if (b.step === 'seat') return json(res, 200, demoJury.seat(c));
+      if (b.step === 'open') {
+        const t = await soloTrials.transcript(caseId);
+        return json(res, 200, t ? demoJury.open(c, t.contentHash as `0x${string}`) : demoJury.seat(c));
+      }
+      if (b.step === 'vote') return json(res, 200, demoJury.vote(c, await soloTrials.transcript(caseId)));
+      return json(res, 200, demoJury.status(caseId) ?? demoJury.seat(c));
     }
     if (path === `${API}/chain/grand-jury/publish` && method === 'POST') {
       limit(limits.world, sid, 'Too many requests. Wait a minute.');

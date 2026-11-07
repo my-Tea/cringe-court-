@@ -69,6 +69,44 @@ export async function screenConfession(c: Confession): Promise<{ ok: true } | { 
   return api.connection.post('/api/v1/solo/screen', c);
 }
 
+export type JuryChoice = 0 | 1;
+export interface JurorView {
+  seat: number;
+  name: string;
+  bio: string;
+  address: Hex;
+  seatTx: Hex | null;
+  committed: boolean;
+  choice: JuryChoice | null;
+  line: string | null;
+  revealTx: Hex | null;
+}
+export interface JuryStatus {
+  caseId: string;
+  stage: 'seating' | 'seated' | 'open' | 'deliberating' | 'sealing' | 'revealing' | 'finalizing' | 'final' | 'failed';
+  jurors: JurorView[];
+  openTx: Hex | null;
+  finalizeTx: Hex | null;
+  outcome: 'GUILTY' | 'NOT_COOKED' | 'NO_VERDICT' | null;
+  announcement: string | null;
+  quip: string | null;
+  source: 'model' | 'template' | null;
+  requestIds: string[];
+  error: string | null;
+}
+
+/** The demo jury's next step on Arc, or null when this server has none. */
+export async function juryStep(c: LiveCase, step: 'seat' | 'open' | 'vote' | 'status'): Promise<JuryStatus | null> {
+  try {
+    const api = client();
+    await api.connect();
+    return await api.connection.post<JuryStatus>('/api/v1/solo/jury', { step, txHash: c.txHash, title: c.title, story: c.story });
+  } catch (e) {
+    if ((e as { code?: string }).code === 'disabled' || !platformConfig.backend) return null;
+    throw e;
+  }
+}
+
 const POLL_MS = 2500;
 const GIVE_UP_MS = 3 * 60 * 1000;
 

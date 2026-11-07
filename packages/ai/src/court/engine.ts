@@ -260,6 +260,12 @@ export class CourtAI implements CourtAIProvider {
 
   /* ── Post-verdict ──────────────────────────────────────────────────────── */
 
+  /** One short free-form completion for a server-side helper, with the same retries and provider. */
+  async complete(messages: readonly PromptMessage[]): Promise<{ content: string; requestId: string | null }> {
+    const res = await this.#client.complete({ purpose: 'commentary', caseId: 'demo-jury', messages, maxTokens: 500, temperature: 0.9, json: true });
+    return { content: res.content, requestId: res.requestId };
+  }
+
   async generateVerdictCommentary(input: FinalizedCaseResult, transcript?: Transcript, signal?: AbortSignal): Promise<JudgeCommentary> {
     const r = FinalizedCaseResultSchema.parse(input);
     if (transcript && (transcript.caseId !== r.caseId || transcript.mode !== r.mode)) {

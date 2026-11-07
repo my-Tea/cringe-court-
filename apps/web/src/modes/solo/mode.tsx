@@ -11,7 +11,7 @@ const mode: WebModeModule = {
     get label() {
       return t('solo.mode.landing');
     },
-    to: '/solo/file',
+    to: '/solo/enter',
   },
   docket: {
     get label() {
@@ -20,6 +20,7 @@ const mode: WebModeModule = {
     to: '/solo/docket',
   },
   routes: [
+    { path: 'enter', lazy: async () => ({ Component: (await import('./live/EnterPage')).EnterPage }) },
     { path: 'file', lazy: async () => ({ Component: (await import('./file/FilePage')).FilePage }) },
     { path: 'stake', lazy: async () => ({ Component: (await import('./live/StakePage')).StakePage }) },
     { path: 'trial/:caseNumber', lazy: async () => ({ Component: (await import('./live/TrialPage')).TrialPage }) },

@@ -85,6 +85,15 @@ export function createSoloTrials(o: { writer: CourtAI | null; stakes: StakeReade
   };
 
   return {
+    /** The paid case behind a stake, once that stake is proven to be for this exact confession. */
+    async caseOf(txHash: Hex, title: string, story: string): Promise<bigint | null> {
+      const filing = filings.get(txHash) ?? (await o.stakes.filing(txHash));
+      if (!filing || filing.contentHash.toLowerCase() !== confessionHash(title, story)) return null;
+      filings.set(txHash, filing);
+      return filing.caseId;
+    },
+    /** The written trial, if the writer has finished it. */
+    transcript: (caseId: bigint): Promise<Transcript | null> => store.get(`arc-solo-${caseId}`).then((t) => t ?? null),
     async trial(txHash: unknown, title: unknown, story: unknown): Promise<TrialResult> {
       if (typeof txHash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(txHash) || typeof title !== 'string' || typeof story !== 'string') {
         return { ok: false, reason: 'bad-request', message: 'Send {txHash, title, story}.' };
