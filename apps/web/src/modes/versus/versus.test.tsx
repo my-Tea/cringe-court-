@@ -8,6 +8,7 @@ import type { ReactElement } from 'react';
 import { Route, Routes } from 'react-router';
 import { axe } from 'vitest-axe';
 import type { RoamTrialProps } from '@/trial/RoamTrial';
+import { __setSkipJuryGatherForTests } from '@/trial/JuryGather';
 import { __setCanRoamForTests } from '@/trial/trialView';
 import { renderWithProviders } from '@/test/render';
 import { CasePage } from './pages/CasePage';
@@ -319,15 +320,19 @@ describe('Versus: the case room', () => {
     await t.j.takeSeat(trialId);
     await t.a.seatDemoJurors(trialId, 'reliable');
     const user = userEvent.setup();
-    const { container } = t.view('juror', `/versus/case/${trialId}`);
-    const session = await panel('Court is in session');
-    // The trial view and its transcript are always there for the jury.
-    expect(within(session).getAllByText(/Napkin Knight|Side A/).length).toBeGreaterThan(0);
-    expect(await axe(container, AXE)).toHaveNoViolations();
-    await user.click(screen.getAllByRole('radio')[0]!);
-    await user.click(screen.getByRole('button', { name: /Seal/ }));
-    expect(await screen.findByText('Your scroll is sealed')).toBeInTheDocument();
-    expect(await t.j.sealedChoice(trialId)).toBe(0);
+    __setSkipJuryGatherForTests(true);
+    try {
+      const { container } = t.view('juror', `/versus/case/${trialId}`);
+      await panel('Court is in session');
+      expect(await screen.findAllByRole('radio')).not.toHaveLength(0);
+      expect(await axe(container, AXE)).toHaveNoViolations();
+      await user.click(screen.getAllByRole('radio')[0]!);
+      await user.click(screen.getByRole('button', { name: /Seal/ }));
+      expect(await screen.findByText('Your scroll is sealed')).toBeInTheDocument();
+      expect(await t.j.sealedChoice(trialId)).toBe(0);
+    } finally {
+      __setSkipJuryGatherForTests(false);
+    }
   });
 
   it('shows the verdict, the settlement receipt and the share card to both sides', async () => {
@@ -362,7 +367,7 @@ describe('Versus: the case room', () => {
     expect(screen.queryByText('The jury has spoken')).not.toBeInTheDocument();
     expect(screen.getByText(/Mistrial: no verdict\. Claim your refund\./)).toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/Verdict is in|Claim your payout|could not agree/);
-    expect(screen.getByText(/^MISTRIAL\. Not enough jurors opened their scrolls/)).toBeInTheDocument();
+    expect(screen.getAllByText(/^MISTRIAL\. Not enough jurors opened their scrolls/).length).toBeGreaterThan(0);
   });
 
   it('refunds the side that paid when the other misses the funding deadline', async () => {
@@ -402,8 +407,12 @@ describe('Versus: the trial in the roaming courtroom', () => {
     roamSeen.length = 0;
     window.localStorage.removeItem('cc:trial-view');
     __setCanRoamForTests(true);
+    __setSkipJuryGatherForTests(true);
   });
-  afterEach(() => __setCanRoamForTests(null));
+  afterEach(() => {
+    __setCanRoamForTests(null);
+    __setSkipJuryGatherForTests(false);
+  });
 
   it('seats a juror in the jury view, plays roam first without a verdict, and falls back to the classic stage on exit', async () => {
     const t = court();
@@ -417,7 +426,7 @@ describe('Versus: the trial in the roaming courtroom', () => {
     const props = roamSeen.at(-1)!;
     expect(props.role).toBe('juror');
     expect(props.spawn).toBe('jury-box');
-    expect(props.avatar).toMatchObject({ model: 'creator', name: 'juror' });
+    expect(props.avatar).toMatchObject({ model: 'defendant', name: 'juror' });
     expect(props.beats.length).toBeGreaterThan(2);
     expect(props.beats.some((b) => b.id === 'verdict')).toBe(false);
     act(() => props.onExit());

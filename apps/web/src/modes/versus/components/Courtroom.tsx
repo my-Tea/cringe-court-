@@ -13,6 +13,8 @@ export interface CourtroomSeat {
   seat: number;
   committed: boolean;
   revealed: boolean;
+  /** Present once the scroll is opened (D11). */
+  choice?: 0 | 1;
 }
 
 export interface CourtroomProps {
@@ -33,11 +35,13 @@ export interface CourtroomProps {
 const JUROR_TAG = { empty: 'versus.court.jury.empty', opened: 'versus.court.jury.opened', sealed: 'versus.court.jury.sealed', seated: 'versus.court.jury.seated' } as const;
 
 function calloutFor(line: CourtLine, index: number): ImpactKind | null {
-  if (index === 0) return 'order';
+  if (index === 0 || line.beat === 'gavel') return 'order';
+  if (line.beat === 'objection') return 'objection';
+  if (line.beat === 'desk-slam' || line.beat === 'point') return 'counter';
   const head = line.text.trimStart().toUpperCase();
   if (head.startsWith('OBJECTION')) return 'objection';
   if (head.startsWith('COUNTER')) return 'counter';
-  if (line.beat === 'laugh') return 'cook';
+  if (line.beat === 'laugh' || line.beat === 'smug') return 'cook';
   return null;
 }
 

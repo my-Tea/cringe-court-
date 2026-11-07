@@ -341,6 +341,7 @@ export const versus = {
   'trial.sealed': '{n} of {total} sealed',
   'trial.opened': '{n} of {total} opened',
   'trial.secret': 'Votes stay secret until the reveal window closes, so nobody can be swayed by a live tally.',
+  'trial.scrollLine': 'I vote {choice}.',
 
   // Persona bar
   'persona.aria': 'Your demo persona',

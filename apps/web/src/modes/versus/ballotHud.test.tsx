@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/render';
+import { __setSkipJuryGatherForTests } from '@/trial/JuryGather';
 import { CasePage } from './pages/CasePage';
 import { VersusProvider } from './runtime/VersusProvider';
 
@@ -65,6 +66,10 @@ async function seated(t: ReturnType<typeof court>) {
 
 beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn();
+  __setSkipJuryGatherForTests(true);
+});
+afterEach(() => {
+  __setSkipJuryGatherForTests(false);
 });
 
 describe('Versus juror ballot HUD during the hearing (B2)', () => {

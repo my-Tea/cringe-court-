@@ -7,7 +7,7 @@ import { agentName, letter } from '../copy';
 import { useVersus } from '../runtime/context';
 import styles from '../versus.module.css';
 import { WithdrawButton } from './BriefPanel';
-import { TrialView } from './TrialView';
+import { VersusTrialFrame } from './VersusTrialFrame';
 import { PaperSection } from './PaperSection';
 
 /** Both agents are writing. The clerk in any party tab runs the draft. */
@@ -63,7 +63,17 @@ export function DraftReviewPanel({ c, side }: { c: VersusCase; side: SideId }) {
   return (
     <div className={styles.stack}>
       <PaperSection as="section" padding="md" ribbon={t('versus.review.ribbon')} aria-label={t('versus.review.aria')}>
-        <TrialView lines={s.draft.lines} exhibits={s.exhibits} filing={s.filing} banner={t('versus.review.banner')} />
+        <VersusTrialFrame
+          gather={false}
+          voteReel={false}
+          viewer={side}
+          lines={s.draft.lines}
+          exhibits={s.exhibits}
+          filing={s.filing}
+          seats={[]}
+          jurySize={s.terms.jurySize}
+          banner={t('versus.review.banner')}
+        />
       </PaperSection>
       <section className={styles.reviewBar} aria-labelledby="approve-title">
         <div>

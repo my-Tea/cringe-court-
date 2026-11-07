@@ -180,6 +180,8 @@ export function VerdictPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
             seats={seats}
             jurySize={s.terms.jurySize}
             verdict={winner ?? 'none'}
+            gather={false}
+            voteReel={false}
           />
         )}
         <p className={styles.fine}>

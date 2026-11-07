@@ -309,10 +309,12 @@ export function TrialPanel({ c, viewer }: { c: VersusCase; viewer: Viewer }) {
   const revealed = seats.filter((x) => x.revealed).length;
   return (
     <div className={styles.stack}>
-      <PaperSection as="section" padding="md" ribbon={t('versus.trial.ribbon')} aria-label={t('versus.trial.aria')}>
+      {/* Full-bleed gather → roam → vote reel (Solo parity), not a card inset. */}
+      <section aria-label={t('versus.trial.aria')}>
+        <p className={styles.eyebrow}>{t('versus.trial.ribbon')}</p>
         {viewer === 'juror' && <BallotHud c={c} />}
         <VersusTrialFrame viewer={viewer} lines={s.transcript.lines} exhibits={s.exhibits} filing={s.filing} seats={seats} jurySize={s.terms.jurySize} />
-      </PaperSection>
+      </section>
       {viewer === 'juror' ? (
         <BallotPanel c={c} />
       ) : (
