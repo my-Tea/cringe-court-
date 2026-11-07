@@ -34,20 +34,16 @@ flowchart LR
 
 ## Look
 
-Papercraft UI + stylized low-poly roam cast. Town / courthouse captures from
-[`.bbshots/`](.bbshots/); product identity from [`docs/assets/`](docs/assets/)
-and [`cc-art/`](cc-art/).
+Voxel town → courthouse → the show. Live captures of the title screen, the
+walk up to the doors, and the plaza enter prompt:
 
-| Town square | Courthouse | Style guide |
+| Title | Approach | Courthouse plaza |
 |---|---|---|
-| ![Town square](.bbshots/town-app/square.png) | ![Courthouse](.bbshots/town-app/courthouse.png) | ![Style guide](docs/assets/style-guide.png) |
+| ![Title — Your honor, bro is cooked](docs/assets/readme/title.jpg) | ![Wardrobe path to the courthouse](docs/assets/readme/approach.jpg) | ![Enter the courthouse](docs/assets/readme/courthouse.jpg) |
 
-| Plaza grounds | Hero — Miss Ratio | Hero — Judge |
-|---|---|---|
-| ![Plaza](.bbshots/grounds/plaza.png) | ![Miss Ratio](.bbshots/heroes/miss-ratio-threequarter.png) | ![Judge](.bbshots/heroes/judge/threequarter.png) |
-
-Hero cast turnarounds and rebuild notes:
+More art review shots live under [`.bbshots/`](.bbshots/). Hero cast turnarounds:
 [`packages/scene/assets/roam/heroes/README.md`](packages/scene/assets/roam/heroes/README.md).
+Style guide still at [`docs/assets/style-guide.png`](docs/assets/style-guide.png).
 
 ---
 
