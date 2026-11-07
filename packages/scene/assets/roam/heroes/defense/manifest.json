@@ -1,0 +1,40 @@
+{
+  "id": "defense",
+  "name": "Counsel Chaos",
+  "revision": "v1-dense",
+  "clips": [
+    {
+      "id": "defense_idle",
+      "exportName": "animation.defense_idle",
+      "loop": true,
+      "seconds": 2.6
+    },
+    {
+      "id": "defense_talk",
+      "exportName": "animation.defense_talk",
+      "loop": true,
+      "seconds": 1.35
+    },
+    {
+      "id": "defense_point",
+      "exportName": "animation.defense_point",
+      "loop": false,
+      "seconds": 1.15
+    },
+    {
+      "id": "defense_objection",
+      "exportName": "animation.defense_objection",
+      "loop": false,
+      "seconds": 1.25
+    }
+  ],
+  "notes": [
+    "Forest jacket, gold tie, cheek bandage, wild quiff, case prop."
+  ],
+  "source": "Blockbench MCP free-format",
+  "files": {
+    "glb": "hero.glb",
+    "bbmodel": "hero.bbmodel"
+  },
+  "rebuild": "npx tsx tools/bbmcp/build-cast.ts"
+}

@@ -127,7 +127,7 @@ export function CasePage() {
               label: t('solo.courtroom.region', { title: tState.filing.title }),
               role: 'defendant',
               spawn: 'defendant',
-              avatar: { model: 'creator', name: t('solo.case.trial.you') },
+              avatar: { model: 'defendant', name: t('solo.case.trial.you') },
               onDone: () => setWatched(true),
             }}
             classic={

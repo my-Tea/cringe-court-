@@ -60,7 +60,7 @@ function RoamTrialRoom({
   role = 'defendant',
   spawn,
   jurors = 3,
-  avatar = { model: 'creator', name: t('trial.roam.you'), look: savedLook() },
+  avatar = { model: 'defendant', name: t('trial.roam.you'), ...(savedLook() ? { look: savedLook()! } : {}) },
   remotes,
   onExit,
   onBeat,

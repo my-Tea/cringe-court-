@@ -1,0 +1,40 @@
+{
+  "id": "juror-c",
+  "name": "Juror C",
+  "revision": "v1-dense",
+  "clips": [
+    {
+      "id": "juror_c_idle",
+      "exportName": "animation.juror_c_idle",
+      "loop": true,
+      "seconds": 2.6
+    },
+    {
+      "id": "juror_c_talk",
+      "exportName": "animation.juror_c_talk",
+      "loop": true,
+      "seconds": 1.35
+    },
+    {
+      "id": "juror_c_point",
+      "exportName": "animation.juror_c_point",
+      "loop": false,
+      "seconds": 1.15
+    },
+    {
+      "id": "juror_c_objection",
+      "exportName": "animation.juror_c_objection",
+      "loop": false,
+      "seconds": 1.25
+    }
+  ],
+  "notes": [
+    "Juror variant c — distinct palette, ballot card prop."
+  ],
+  "source": "Blockbench MCP free-format",
+  "files": {
+    "glb": "hero.glb",
+    "bbmodel": "hero.bbmodel"
+  },
+  "rebuild": "npx tsx tools/bbmcp/build-cast.ts"
+}

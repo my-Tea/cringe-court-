@@ -1,0 +1,46 @@
+{
+  "id": "judge",
+  "name": "Judge Gavel.exe",
+  "revision": "v1-dense",
+  "clips": [
+    {
+      "id": "judge_idle",
+      "exportName": "animation.judge_idle",
+      "loop": true,
+      "seconds": 2.6
+    },
+    {
+      "id": "judge_talk",
+      "exportName": "animation.judge_talk",
+      "loop": true,
+      "seconds": 1.35
+    },
+    {
+      "id": "judge_point",
+      "exportName": "animation.judge_point",
+      "loop": false,
+      "seconds": 1.15
+    },
+    {
+      "id": "judge_objection",
+      "exportName": "animation.judge_objection",
+      "loop": false,
+      "seconds": 1.25
+    },
+    {
+      "id": "judge_gavel",
+      "exportName": "animation.judge_gavel",
+      "loop": false,
+      "seconds": 1.2
+    }
+  ],
+  "notes": [
+    "Navy robe, ivory fur collar, silver hair/beard, oversized gavel."
+  ],
+  "source": "Blockbench MCP free-format",
+  "files": {
+    "glb": "hero.glb",
+    "bbmodel": "hero.bbmodel"
+  },
+  "rebuild": "npx tsx tools/bbmcp/build-cast.ts"
+}

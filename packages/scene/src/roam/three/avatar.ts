@@ -54,7 +54,16 @@ export interface AvatarPoseInput {
   speed?: number;
 }
 
-export class VoxelAvatar {
+/** Shared surface for voxel and stylized hero avatars. */
+export interface RoamAvatar {
+  readonly object: THREE.Object3D;
+  readonly model: string;
+  place(x: number, y: number, z: number, yaw: number): void;
+  update(dt: number, s: AvatarPoseInput, reducedMotion: boolean): void;
+  dispose(): void;
+}
+
+export class VoxelAvatar implements RoamAvatar {
   readonly object = new THREE.Group();
   readonly #rig = new THREE.Group();
   readonly #head = new THREE.Group();
@@ -154,25 +163,61 @@ export class VoxelAvatar {
       case 'point':
         rx = 1.5;
         break;
+      case 'objection': {
+        const k = Math.min(1, this.#poseAge / 0.18);
+        rx = 1.7 * k;
+        lx = 0.55 * k;
+        rz = -0.4 * k;
+        bodyY += Math.abs(Math.sin(Math.min(1, this.#poseAge * 7) * Math.PI)) * 1.6 * calm;
+        break;
+      }
+      case 'cross_arms':
+        rx = 1.1;
+        lx = 1.1;
+        rz = 0.45;
+        lz = -0.45;
+        break;
+      case 'lean':
+        rx = 0.55;
+        lx = 0.4;
+        break;
+      case 'explain':
+        rx = 0.65 + Math.sin(t * 3) * 0.3 * calm;
+        lx = 0.5 + Math.sin(t * 2.6 + 1) * 0.25 * calm;
+        break;
+      case 'thinking':
+        rx = 2.2;
+        rz = 0.35;
+        break;
+      case 'smug':
+        rx = 0.35;
+        this.#head.rotation.x -= 0.1;
+        break;
       case 'cheer':
+      case 'victory':
         rx = Math.PI - 0.2 + Math.sin(t * 9) * 0.25 * calm;
         lx = Math.PI - 0.2 - Math.sin(t * 9) * 0.25 * calm;
         bodyY += Math.abs(Math.sin(t * 6)) * 2 * calm;
         break;
       case 'shock':
-        rx = 0.6;
-        lx = 0.6;
-        rz = -0.5;
-        lz = 0.5;
+      case 'panic':
+        rx = 0.75;
+        lx = 0.75;
+        rz = -0.55;
+        lz = 0.55;
+        bodyY += (1.2 + Math.sin(Math.min(1, this.#poseAge * 9) * Math.PI) * 1.1) * calm;
+        this.#head.rotation.x -= 0.2;
         break;
       case 'facepalm':
-        rx = 2.5;
+      case 'defeat':
+        rx = s.pose === 'facepalm' ? 2.5 : 0.35;
         rz = 0.35;
+        this.#head.rotation.x += 0.35;
         break;
       default:
         break;
     }
-    if (s.talking && s.pose !== 'gavel' && s.pose !== 'cheer') {
+    if (s.talking && s.pose !== 'gavel' && s.pose !== 'cheer' && s.pose !== 'victory') {
       rx += (0.5 + Math.sin(t * 5.3) * 0.3) * (reducedMotion ? 0.6 : 1);
       this.#head.rotation.x += Math.sin(t * 11) * 0.05 * calm;
     }

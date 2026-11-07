@@ -1,0 +1,40 @@
+{
+  "id": "bailiff",
+  "name": "Officer Bonk",
+  "revision": "v1-dense",
+  "clips": [
+    {
+      "id": "bailiff_idle",
+      "exportName": "animation.bailiff_idle",
+      "loop": true,
+      "seconds": 2.6
+    },
+    {
+      "id": "bailiff_talk",
+      "exportName": "animation.bailiff_talk",
+      "loop": true,
+      "seconds": 1.35
+    },
+    {
+      "id": "bailiff_point",
+      "exportName": "animation.bailiff_point",
+      "loop": false,
+      "seconds": 1.15
+    },
+    {
+      "id": "bailiff_objection",
+      "exportName": "animation.bailiff_objection",
+      "loop": false,
+      "seconds": 1.25
+    }
+  ],
+  "notes": [
+    "Navy uniform, peaked cap, gold badge, baton."
+  ],
+  "source": "Blockbench MCP free-format",
+  "files": {
+    "glb": "hero.glb",
+    "bbmodel": "hero.bbmodel"
+  },
+  "rebuild": "npx tsx tools/bbmcp/build-cast.ts"
+}

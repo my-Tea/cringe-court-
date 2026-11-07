@@ -1,0 +1,40 @@
+{
+  "id": "clerk",
+  "name": "Clerk Ctrl+S",
+  "revision": "v1-dense",
+  "clips": [
+    {
+      "id": "clerk_idle",
+      "exportName": "animation.clerk_idle",
+      "loop": true,
+      "seconds": 2.6
+    },
+    {
+      "id": "clerk_talk",
+      "exportName": "animation.clerk_talk",
+      "loop": true,
+      "seconds": 1.35
+    },
+    {
+      "id": "clerk_point",
+      "exportName": "animation.clerk_point",
+      "loop": false,
+      "seconds": 1.15
+    },
+    {
+      "id": "clerk_objection",
+      "exportName": "animation.clerk_objection",
+      "loop": false,
+      "seconds": 1.25
+    }
+  ],
+  "notes": [
+    "Dusty-blue suit, neat bun, clipboard always in hand."
+  ],
+  "source": "Blockbench MCP free-format",
+  "files": {
+    "glb": "hero.glb",
+    "bbmodel": "hero.bbmodel"
+  },
+  "rebuild": "npx tsx tools/bbmcp/build-cast.ts"
+}

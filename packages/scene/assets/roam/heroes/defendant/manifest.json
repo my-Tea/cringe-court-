@@ -1,0 +1,40 @@
+{
+  "id": "defendant",
+  "name": "You (Defendant)",
+  "revision": "v1-dense",
+  "clips": [
+    {
+      "id": "defendant_idle",
+      "exportName": "animation.defendant_idle",
+      "loop": true,
+      "seconds": 2.6
+    },
+    {
+      "id": "defendant_talk",
+      "exportName": "animation.defendant_talk",
+      "loop": true,
+      "seconds": 1.35
+    },
+    {
+      "id": "defendant_point",
+      "exportName": "animation.defendant_point",
+      "loop": false,
+      "seconds": 1.15
+    },
+    {
+      "id": "defendant_objection",
+      "exportName": "animation.defendant_objection",
+      "loop": false,
+      "seconds": 1.25
+    }
+  ],
+  "notes": [
+    "Hoodie hero for the entering player — readable, modern, courtroom-ready."
+  ],
+  "source": "Blockbench MCP free-format",
+  "files": {
+    "glb": "hero.glb",
+    "bbmodel": "hero.bbmodel"
+  },
+  "rebuild": "npx tsx tools/bbmcp/build-cast.ts"
+}

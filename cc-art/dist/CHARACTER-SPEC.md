@@ -1,14 +1,17 @@
 # CringeCourt — Character Asset System
 
-**This is the authoritative spec for characters.** Read `SCENE-GUIDE.md` for the
-courtroom and `ASSET-GUIDE.md` for props. If anything conflicts, **this file wins
-for characters**.
+**Authoritative for layered sprites, jurors, gallery, bailiff, and player
+wardrobe.** For the four roam **heroes** (Judge, Miss Ratio, Counsel Chaos,
+Clerk), **`CHARACTER-DESIGN-BIBLE.md` wins** — burgundy / forest / navy-black /
+dusty-blue silhouettes, not the pink/purple chibi notes below.
 
-**Art direction:** anime-inspired chibi. Exaggerated, stupid, funny, chaotic.
-Every character should look entertaining with no dialogue. Warm palette — cream,
-burgundy, gold, red, navy, purple. Bold outlines, expressive faces, polished 2D
-sprites. **Not** generic fantasy RPG, **not** serious realistic anime. The goal is
-a courtroom where everyone looks slightly unhinged.
+Read `SCENE-GUIDE.md` for the courtroom and `ASSET-GUIDE.md` for props.
+
+**Art direction (sprites / background cast):** anime-inspired chibi. Exaggerated,
+stupid, funny, chaotic. Warm palette — cream, burgundy, gold, red, navy, purple.
+Bold outlines, expressive faces, polished 2D sprites. **Not** generic fantasy
+RPG, **not** serious realistic anime. The goal is a courtroom where everyone
+looks slightly unhinged.
 
 ---
 

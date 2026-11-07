@@ -6,11 +6,12 @@ Start here. Five guides, in the order a coding agent should read them.
 |---|---|---|
 | 1 | **`SCENE-GUIDE.md`** | What the courtroom is, where everything sits, how to load it |
 | 2 | **`ASSET-GUIDE.md`** | All 53 props, 13 block textures, palette, placement conventions |
-| 3 | **`CHARACTER-SPEC.md`** | Every character, the layer system, customization, manifests |
-| 4 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 106 character animations |
-| 5 | **`ASSET-COMPLETE.md`** | Final inventory + what remains (optional polish only) |
-| 6 | `GAP-ANALYSIS.md` | Historical: what the gaps were before they were filled |
-| 7 | `VILLAGE-DECISION.md` | Why the village set was cut, what stays, when to reopen |
+| 3 | **`CHARACTER-DESIGN-BIBLE.md`** | **Hero cast (Judge / Miss Ratio / Chaos / Clerk)** — roam 3D source of truth |
+| 4 | **`CHARACTER-SPEC.md`** | Layered sprites, jurors/gallery/player wardrobe (heroes defer to the bible) |
+| 5 | **`ANIMATION-GUIDE.md`** | Playback, state machine, all 106 character animations |
+| 6 | **`ASSET-COMPLETE.md`** | Final inventory + what remains (optional polish only) |
+| 7 | `GAP-ANALYSIS.md` | Historical: what the gaps were before they were filled |
+| 8 | `VILLAGE-DECISION.md` | Why the village set was cut, what stays, when to reopen |
 
 ## Machine-readable data
 

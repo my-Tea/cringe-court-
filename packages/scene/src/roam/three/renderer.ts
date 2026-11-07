@@ -22,7 +22,8 @@ import { ROOM_SCALE } from '../scale';
 import { castWithLook, lookKey } from '../look';
 import type { AvatarSpec, GateId, PlayerState } from '../types';
 import type { RoamBox } from '../world';
-import { VoxelAvatar } from './avatar';
+import { VoxelAvatar, type RoamAvatar } from './avatar';
+import { HeroAvatar, isHeroModel } from './heroAvatar';
 import { buildPlazaSky } from './sky';
 import { buildWorldMeshes, type WorldMeshes } from './worldMesh';
 import { C } from '../palette';
@@ -66,8 +67,8 @@ export class RoamRenderer {
   readonly #controller: RoamController;
   readonly #cast: CastFile;
   readonly #world: WorldMeshes;
-  readonly #npcs = new Map<string, VoxelAvatar>();
-  readonly #remotes = new Map<string, VoxelAvatar>();
+  readonly #npcs = new Map<string, RoamAvatar>();
+  readonly #remotes = new Map<string, RoamAvatar>();
   readonly #ambient = new THREE.AmbientLight(C.gold100, 0.5);
   readonly #hemi = new THREE.HemisphereLight(C.gold100, C.neutral700, 0.9);
   readonly #key = new THREE.DirectionalLight(C.royal100, 1.2);
@@ -87,8 +88,8 @@ export class RoamRenderer {
   #openSky = false;
   #perspective: PerspectiveChoice = 'first';
   readonly #sky = buildPlazaSky();
-  #player: VoxelAvatar | null = null;
-  #playerSeated: VoxelAvatar | null = null;
+  #player: RoamAvatar | null = null;
+  #playerSeated: RoamAvatar | null = null;
   /** The avatar spec the player's meshes were built from (rebuilt when the wardrobe changes it). */
   #playerSpec: AvatarSpec | null = null;
   readonly #gates = new Map<GateId, THREE.Group>();
@@ -142,8 +143,8 @@ export class RoamRenderer {
     }
 
     for (const n of world.npcs) {
-      if (!this.#cast.models[n.model]) continue;
-      const a = new VoxelAvatar(this.#cast, n.model, n.seated, n.id);
+      if (!this.#cast.models[n.model] && !isHeroModel(n.model)) continue;
+      const a = makeAvatar(this.#cast, n.model, n.seated, n.id);
       a.place(n.pos[0], n.pos[1], n.pos[2], n.yaw);
       this.#npcs.set(n.id, a);
       this.scene.add(a.object);
@@ -158,8 +159,37 @@ export class RoamRenderer {
 
     this.setQuality(this.preset.level);
     this.#unsub = options.controller.subscribe((e) => {
-      if (e.type === 'gavel' && !options.controller.reducedMotion) this.flash();
+      if (options.controller.reducedMotion) return;
+      if (e.type === 'gavel') this.flash(1.15);
+      if (
+        e.type === 'callout' &&
+        (e.style === 'objection' ||
+          e.style === 'order' ||
+          e.style === 'counter' ||
+          e.style === 'verdict' ||
+          e.style === 'jury-out' ||
+          e.style === 'let-bro-cook')
+      ) {
+        this.flash(e.style === 'objection' || e.style === 'jury-out' ? 1.35 : 1.1);
+      }
     });
+    void this.#upgradeHeroGlbs();
+  }
+
+  /** Swap procedural heroes for Blockbench GLBs when clips are present. */
+  async #upgradeHeroGlbs(): Promise<void> {
+    for (const [id, avatar] of [...this.#npcs.entries()]) {
+      if (!(avatar instanceof HeroAvatar)) continue;
+      const glb = await this.#upgradeOne(avatar, id);
+      if (!glb) continue;
+      const { x, y, z } = avatar.object.position;
+      const yaw = avatar.object.rotation.y;
+      this.scene.remove(avatar.object);
+      avatar.dispose();
+      glb.place(x, y, z, yaw);
+      this.#npcs.set(id, glb);
+      this.scene.add(glb.object);
+    }
   }
 
   get drawCalls(): number {
@@ -211,12 +241,18 @@ export class RoamRenderer {
     this.camera.rotation.set(pitch, yaw, 0, 'YXZ');
     if (c.avatar !== this.#playerSpec) this.#buildPlayer(c.avatar);
     const showcase = c.panel === 'wardrobe';
+    const subject = !this.#attract && !showcase && c.control === 'cinematic' ? view.subject : null;
     if (this.#attract) this.#placeAttract(dt);
-    else if (showcase) this.#placeShowcase(dt);
-    else if (third) this.#placeThird(view.eye, view.yaw, view.pitch, c.control === 'cinematic', dt);
+    else if (showcase) {
+      this.#framed = null;
+      this.#placeShowcase(dt);
+    } else if (third) this.#placeThird(view.eye, view.yaw, view.pitch, c.control === 'cinematic', dt);
     else this.camera.position.set(...view.eye);
+    if (subject) this.#placeCloseup(view.eye, subject, dt);
+    else if (this.#framed && !this.#attract && !showcase) this.#releaseCloseup(dt);
     if (!this.#attract) this.#easeFromAttract(dt);
-    this.#showPlayer(!this.#attract && (showcase || (third && this.#boom > THIRD_RIG.hideBelow)), dt);
+    const fromEye = this.camera.position.distanceToSquared(this.#closeWant.set(view.eye[0], view.eye[1], view.eye[2]));
+    this.#showPlayer(!this.#attract && (showcase || fromEye > THIRD_RIG.hideBelow * THIRD_RIG.hideBelow), dt);
     for (const [id, g] of this.#gates) {
       g.visible = !c.isGateOpen(id);
       if (g.visible && !c.reducedMotion) g.position.y = Math.sin(performance.now() / 500) * 0.6;
@@ -233,7 +269,7 @@ export class RoamRenderer {
       this.#blendLeft = Math.max(0, this.#blendLeft - dt);
       this.#mood = this.#blendLeft > 0 ? blendMood(this.#mood, target, 1 - Math.exp(-dt * 3)) : target;
       this.#flashOn = this.#flash > 0;
-      this.#flash = Math.max(0, this.#flash - dt * 3.5);
+      this.#flash = Math.max(0, this.#flash - dt * 2.6);
       this.#applyMood();
     }
 
@@ -268,6 +304,59 @@ export class RoamRenderer {
 
     this.#applyOutside(this.#attract ? 'outside' : c.zone);
     if (this.#sky.visible) this.#sky.position.copy(this.viewCamera.position);
+  }
+
+  /**
+   * Frame the person a beat is looking at. The defence lawyer already stands
+   * beside the chair, so turning toward him fills the frame. Everyone else is
+   * across the room: dolly in until they are the same size, then ease back
+   * when the beat lets go of the camera.
+   */
+  #placeCloseup(eye: readonly [number, number, number], subject: readonly [number, number, number], dt: number): void {
+    if (!this.#framed) this.#framed = { pos: this.camera.position.clone(), quat: this.camera.quaternion.clone() };
+    this.#closeupAt(eye, subject, this.#closeWant);
+    this.#closeLook.set(subject[0], subject[1], subject[2]);
+    this.camera.position.copy(this.#closeWant);
+    this.camera.lookAt(this.#closeLook);
+    const k = this.#controller.reducedMotion ? 1 : 1 - Math.exp(-4.5 * dt);
+    this.#framed.pos.lerp(this.camera.position, k);
+    this.#framed.quat.slerp(this.camera.quaternion, k);
+    this.camera.position.copy(this.#framed.pos);
+    this.camera.quaternion.copy(this.#framed.quat);
+    this.#boom = THIRD_RIG.cinematic;
+  }
+
+  /** Sit `closeup` units in front of the subject, on the player's side, short of any wall. */
+  #closeupAt(eye: readonly [number, number, number], subject: readonly [number, number, number], out: THREE.Vector3): void {
+    const dx = eye[0] - subject[0];
+    const dz = eye[2] - subject[2];
+    const len = Math.hypot(dx, dz) || 1;
+    const ux = dx / len;
+    const uz = dz / len;
+    const dist = Math.max(THIRD_RIG.closeupMin, Math.min(THIRD_RIG.closeup, len - 16));
+    const aside = Math.min(14, dist * 0.16);
+    const ox = ux * dist - uz * aside;
+    const oz = uz * dist + ux * aside;
+    const reach = Math.hypot(ox, oz) || 1;
+    const hit = this.#rayToBoxes(subject[0], subject[1] + 4, subject[2], ox / reach, 0, oz / reach, reach);
+    const pull = Math.max(THIRD_RIG.closeupMin * 0.65, Math.min(reach, hit - THIRD_RIG.margin));
+    const s = pull / reach;
+    out.set(subject[0] + ox * s, subject[1] + 4, subject[2] + oz * s);
+  }
+
+  /** Glide from a close-up back to the pose `update` just wrote. */
+  #releaseCloseup(dt: number): void {
+    const framed = this.#framed;
+    if (!framed) return;
+    const destPos = this.camera.position.clone();
+    const destQuat = this.camera.quaternion.clone();
+    const k = this.#controller.reducedMotion ? 1 : 1 - Math.exp(-4.5 * dt);
+    framed.pos.lerp(destPos, k);
+    framed.quat.slerp(destQuat, k);
+    const left = framed.pos.distanceTo(destPos);
+    this.camera.position.copy(framed.pos);
+    this.camera.quaternion.copy(framed.quat);
+    if (left < 1.2 || this.#controller.reducedMotion) this.#framed = null;
   }
 
   /**
@@ -339,6 +428,10 @@ export class RoamRenderer {
 
   #attract = false;
   #attractT = 0;
+  /** Close-up pose while a beat frames a speaker, eased back to the player's view. */
+  #framed: { pos: THREE.Vector3; quat: THREE.Quaternion } | null = null;
+  readonly #closeWant = new THREE.Vector3();
+  readonly #closeLook = new THREE.Vector3();
   /** Camera pose when the attract orbit ended, eased away from over ATTRACT.blend seconds. */
   #leave: { pos: THREE.Vector3; quat: THREE.Quaternion; t: number } | null = null;
 
@@ -386,14 +479,37 @@ export class RoamRenderer {
       a.dispose();
     }
     this.#playerSpec = spec;
+    // Prefer Blockbench hero GLB for the entering player when no custom wardrobe look is set.
+    const useHero = isHeroModel(spec.model) && !spec.look;
     const { cast, model, effect } = avatarSource(this.#cast, spec);
-    this.#player = cast.models[model] ? new VoxelAvatar(cast, model, false, 'you', effect) : null;
-    this.#playerSeated = cast.models[model]?.sit ? new VoxelAvatar(cast, model, true, 'you-seated') : null;
+    this.#player = useHero || cast.models[model] || isHeroModel(model) ? makeAvatar(cast, useHero ? spec.model : model, false, 'you', effect) : null;
+    this.#playerSeated = !useHero && cast.models[model]?.sit ? new VoxelAvatar(cast, model, true, 'you-seated', effect) : null;
+    if (useHero && this.#player instanceof HeroAvatar) {
+      void this.#upgradeOne(this.#player, 'you').then((a) => {
+        if (!a || this.#playerSpec !== spec) {
+          a?.dispose();
+          return;
+        }
+        const visible = this.#player?.object.visible ?? false;
+        if (this.#player) {
+          this.scene.remove(this.#player.object);
+          this.#player.dispose();
+        }
+        a.object.visible = visible;
+        this.#player = a;
+        this.scene.add(a.object);
+      });
+    }
     for (const a of [this.#player, this.#playerSeated]) {
       if (!a) continue;
       a.object.visible = false;
       this.scene.add(a.object);
     }
+  }
+
+  async #upgradeOne(avatar: HeroAvatar, name: string): Promise<RoamAvatar | null> {
+    const { loadGlbHero } = await import('./glbHero');
+    return loadGlbHero(avatar.model, name);
   }
 
   /** The player's own body: standing or seated, hidden in first person or with the camera in their face. */
@@ -411,15 +527,15 @@ export class RoamRenderer {
     a.update(dt, { pose: seated ? 'sit' : 'stand', headYaw: 0, headPitch: -p.pitch * 0.6, talking: false, speed: p.speed }, c.reducedMotion);
   }
 
-  /** The gavel's white pop. */
-  flash(): void {
-    this.#flash = 1;
+  /** White/ambient pop for gavels and drama callouts. */
+  flash(strength = 1): void {
+    this.#flash = Math.max(this.#flash, Math.min(1.6, strength));
   }
 
   #applyMood(): void {
     const m = this.#mood;
     this.#ambient.color.set(m.ambientColor);
-    this.#ambient.intensity = m.ambient + this.#flash * 1.6;
+    this.#ambient.intensity = m.ambient + this.#flash * 2.2;
     this.#hemi.color.set(m.hemiSky);
     this.#hemi.groundColor.set(m.hemiGround);
     this.#hemi.intensity = m.hemi;
@@ -443,7 +559,7 @@ export class RoamRenderer {
       if (!this.#openSky) this.#sunMode(true);
       this.scene.fog = this.#haze;
       this.#ambient.color.set(C.blue100);
-      this.#ambient.intensity = 0.62 + this.#flash * 1.6;
+      this.#ambient.intensity = 0.62 + this.#flash * 2.2;
       this.#hemi.color.set(C.blue100);
       this.#hemi.groundColor.set(C.green700);
       this.#hemi.intensity = 0.95;
@@ -510,8 +626,8 @@ export class RoamRenderer {
           a.dispose();
         }
         const src = avatarSource(this.#cast, p.avatar);
-        const model = src.cast.models[src.model] ? src.model : 'creator';
-        a = new VoxelAvatar(src.cast, model, false, p.id, src.effect);
+        const model = src.cast.models[src.model] || isHeroModel(src.model) ? src.model : 'creator';
+        a = makeAvatar(src.cast, model, false, p.id, src.effect);
         a.object.userData.key = key;
         this.#remotes.set(p.id, a);
         this.scene.add(a.object);
@@ -652,4 +768,10 @@ function blendMood(a: Mood, b: Mood, k: number): Mood {
     point: n(a.point, b.point),
     fog: c(a.fog, b.fog),
   };
+}
+
+/** Heroes use stylized meshes; everyone else stays on the voxel cast. */
+function makeAvatar(cast: CastFile, model: string, seated: boolean, name: string, effect = 'none'): RoamAvatar {
+  if (isHeroModel(model)) return new HeroAvatar(model, name);
+  return new VoxelAvatar(cast, model, seated, name, effect);
 }

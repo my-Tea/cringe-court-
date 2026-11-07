@@ -34,7 +34,8 @@ export function GameWorld({ view }: { view: GameView }) {
     spawn: currentStep(start) === 'enter' ? 'outside' : 'arrival',
     openGates: openGatesFor(start),
     stations: true,
-    avatar: { model: 'creator', name: t('trial.roam.you'), look: start.look },
+    // Blockbench defendant GLB until the wardrobe applies a custom look.
+    avatar: { model: 'defendant', name: t('trial.roam.you') },
   });
   const [perspective, setPerspective] = useState<PerspectiveChoice>(() => readPerspective());
   const strings = useMemo(() => ({ ...roamStrings(), pause: t('game.menu.open'), pauseTitle: t('game.menu.title') }), []);

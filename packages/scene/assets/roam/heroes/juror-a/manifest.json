@@ -1,0 +1,40 @@
+{
+  "id": "juror-a",
+  "name": "Juror A",
+  "revision": "v1-dense",
+  "clips": [
+    {
+      "id": "juror_a_idle",
+      "exportName": "animation.juror_a_idle",
+      "loop": true,
+      "seconds": 2.6
+    },
+    {
+      "id": "juror_a_talk",
+      "exportName": "animation.juror_a_talk",
+      "loop": true,
+      "seconds": 1.35
+    },
+    {
+      "id": "juror_a_point",
+      "exportName": "animation.juror_a_point",
+      "loop": false,
+      "seconds": 1.15
+    },
+    {
+      "id": "juror_a_objection",
+      "exportName": "animation.juror_a_objection",
+      "loop": false,
+      "seconds": 1.25
+    }
+  ],
+  "notes": [
+    "Juror variant a — distinct palette, ballot card prop."
+  ],
+  "source": "Blockbench MCP free-format",
+  "files": {
+    "glb": "hero.glb",
+    "bbmodel": "hero.bbmodel"
+  },
+  "rebuild": "npx tsx tools/bbmcp/build-cast.ts"
+}
