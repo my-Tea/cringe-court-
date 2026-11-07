@@ -4,8 +4,7 @@ import type { AudioCueId } from '@cringe-court/core';
  * Core cue ids → @cringe-court/audio cue ids (v3/audio `packages/audio/src/cues.ts`,
  * read at the time of writing; that package is not merged into this branch).
  * `null` = no one-shot equivalent: music beds and ambience are driven by the
- * audio package's phase ambience, and character babble has no recipe yet.
- * When v3/audio merges, its adapter plays `AUDIO_CUE_MAP[cue]` and skips nulls.
+ * audio package's phase ambience. Character babble maps to `voice_*` recipes.
  */
 export const AUDIO_CUE_MAP: Readonly<Record<AudioCueId, string | null>> = {
   'sfx.gavel': 'gavel_strike',
@@ -27,7 +26,7 @@ export const AUDIO_CUE_MAP: Readonly<Record<AudioCueId, string | null>> = {
   'sfx.typewriter': 'vote_tick',
   'stinger.objection': 'objection',
   'stinger.case-open': 'stamp',
-  'stinger.jury-out': 'timer_warning',
+  'stinger.jury-out': 'verdict_decided',
   'stinger.verdict-guilty': 'verdict_guilty',
   'stinger.verdict-not-cooked': 'verdict_not_cooked',
   'stinger.verdict-side': 'verdict_decided',
@@ -45,10 +44,11 @@ export const AUDIO_CUE_MAP: Readonly<Record<AudioCueId, string | null>> = {
   'ui.success': 'ui_confirm',
   'ui.error': 'ui_error',
   'ui.notify': 'ui_toast',
-  'voice.judge': null,
-  'voice.prosecutor': null,
-  'voice.defense': null,
-  'voice.side-a': null,
-  'voice.side-b': null,
-  'voice.narrator': null,
+  'voice.judge': 'voice_judge',
+  'voice.prosecutor': 'voice_prosecutor',
+  'voice.defense': 'voice_defense',
+  'voice.side-a': 'voice_side_a',
+  'voice.side-b': 'voice_side_b',
+  'voice.narrator': 'voice_narrator',
+  'voice.clerk': 'voice_clerk',
 };

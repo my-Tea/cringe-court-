@@ -43,11 +43,19 @@ export const CUE_IDS = [
   'ui_toast',
   'ui_confirm',
   'ui_error',
+  // Character babble under dialogue
+  'voice_judge',
+  'voice_prosecutor',
+  'voice_defense',
+  'voice_side_a',
+  'voice_side_b',
+  'voice_narrator',
+  'voice_clerk',
 ] as const;
 
 export type CueId = (typeof CUE_IDS)[number];
 
-export type CueCategory = 'gavel' | 'drama' | 'crowd' | 'verdict' | 'jury' | 'timer' | 'foley' | 'ui';
+export type CueCategory = 'gavel' | 'drama' | 'crowd' | 'verdict' | 'jury' | 'timer' | 'foley' | 'ui' | 'voice';
 
 /**
  * What a cue does when the player asks for less sound (the "Reduce sound"
@@ -115,13 +123,13 @@ export const CUES = spec({
     category: 'drama',
     label: 'Objection!',
     description: 'A whoosh into a brass stab and a body hit. Plays under the OBJECTION! callout.',
-    gainDb: -7,
-    wet: 0.22,
-    duration: 0.8,
+    gainDb: -5,
+    wet: 0.2,
+    duration: 0.85,
     maxVoices: 1,
-    minIntervalMs: 500,
+    minIntervalMs: 400,
     reduced: 'soften',
-    duck: { depthDb: -9, seconds: 1.0 },
+    duck: { depthDb: -10, seconds: 1.1 },
   },
   crowd_murmur: {
     category: 'crowd',
@@ -391,6 +399,83 @@ export const CUES = spec({
     minIntervalMs: 250,
     reduced: 'play',
   },
+  voice_judge: {
+    category: 'voice',
+    label: 'Judge babble',
+    description: 'Low wordless syllables under Judge Gavel.exe dialogue.',
+    gainDb: -1,
+    wet: 0.14,
+    duration: 1.35,
+    maxVoices: 1,
+    minIntervalMs: 900,
+    reduced: 'soften',
+  },
+  voice_prosecutor: {
+    category: 'voice',
+    label: 'Miss Ratio babble',
+    description: 'Sharp higher babble under Miss Ratio dialogue.',
+    gainDb: -1,
+    wet: 0.12,
+    duration: 1.2,
+    maxVoices: 1,
+    minIntervalMs: 850,
+    reduced: 'soften',
+  },
+  voice_defense: {
+    category: 'voice',
+    label: 'Counsel Chaos babble',
+    description: 'Warm mid babble under Counsel Chaos dialogue.',
+    gainDb: -1,
+    wet: 0.13,
+    duration: 1.25,
+    maxVoices: 1,
+    minIntervalMs: 850,
+    reduced: 'soften',
+  },
+  voice_side_a: {
+    category: 'voice',
+    label: 'Side A babble',
+    description: 'Wordless babble for Side A counsel.',
+    gainDb: -1,
+    wet: 0.12,
+    duration: 1.15,
+    maxVoices: 1,
+    minIntervalMs: 850,
+    reduced: 'soften',
+  },
+  voice_side_b: {
+    category: 'voice',
+    label: 'Side B babble',
+    description: 'Wordless babble for Side B counsel.',
+    gainDb: -1,
+    wet: 0.12,
+    duration: 1.15,
+    maxVoices: 1,
+    minIntervalMs: 850,
+    reduced: 'soften',
+  },
+  voice_narrator: {
+    category: 'voice',
+    label: 'Narrator babble',
+    description: 'Soft babble under narrator / clerk-style lines.',
+    gainDb: -2,
+    wet: 0.12,
+    duration: 1.1,
+    maxVoices: 1,
+    minIntervalMs: 900,
+    reduced: 'soften',
+  },
+  voice_clerk: {
+    category: 'voice',
+    label: 'Clerk babble',
+    description: 'Calm dusty-blue clerk syllables.',
+    gainDb: -1,
+    wet: 0.12,
+    duration: 1.05,
+    maxVoices: 1,
+    minIntervalMs: 900,
+    reduced: 'soften',
+  },
 });
 
 export const CUE_CATEGORIES: readonly { id: CueCategory; label: string }[] = [
@@ -402,6 +487,7 @@ export const CUE_CATEGORIES: readonly { id: CueCategory; label: string }[] = [
   { id: 'timer', label: 'Deadlines' },
   { id: 'foley', label: 'Foley' },
   { id: 'ui', label: 'Interface' },
+  { id: 'voice', label: 'Voices' },
 ];
 
 export function isCueId(value: unknown): value is CueId {

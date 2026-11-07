@@ -54,27 +54,38 @@ function setVowel(rig: VoiceRig, v: readonly [number, number, number], t: number
  * Schedules conversational syllables on a rig between t0 and t1. Used by the
  * murmur one-shot and, in chunks, by the ambience bed.
  */
-export function speak(s: Synth, rig: VoiceRig, t0: number, t1: number, f0: number, level: number, rate: number): void {
+export function speak(
+  s: Synth,
+  rig: VoiceRig,
+  t0: number,
+  t1: number,
+  f0: number,
+  level: number,
+  rate: number,
+  /** 0 = no phrase gaps (dialogue babble); ~0.18 = conversational walla. */
+  pauseChance = 0.18,
+): void {
   const shift = f0 > 160 ? 1.12 : 1; // shorter vocal tracts, higher formants
   let t = t0;
   rig.amp.gain.setValueAtTime(0, t0);
   while (t < t1 - 0.12) {
-    const len = (1 / rate) * s.rng.range(0.6, 1.5);
-    if (s.rng.chance(0.18)) {
+    const len = (1 / rate) * s.rng.range(0.55, 1.35);
+    if (pauseChance > 0 && s.rng.chance(pauseChance)) {
       // A pause between phrases.
-      t += len * s.rng.range(1, 2.5);
+      t += len * s.rng.range(0.8, 2.0);
       continue;
     }
     const v = s.rng.pick(VOWELS);
-    setVowel(rig, v, t, 0.025, shift);
-    rig.osc.frequency.setTargetAtTime(f0 * s.rng.jitter(0.14), t, 0.04);
-    const peak = level * s.rng.range(0.45, 1);
+    setVowel(rig, v, t, 0.02, shift);
+    rig.osc.frequency.setTargetAtTime(f0 * s.rng.jitter(0.12), t, 0.035);
+    const peak = level * s.rng.range(0.55, 1);
     const end = Math.min(t1, t + len);
+    const span = Math.max(0.02, end - t);
     rig.amp.gain.setValueAtTime(0, t);
-    rig.amp.gain.linearRampToValueAtTime(peak, t + Math.min(0.04, len * 0.3));
-    rig.amp.gain.linearRampToValueAtTime(peak * 0.6, t + len * 0.7);
+    rig.amp.gain.linearRampToValueAtTime(peak, t + Math.min(0.035, span * 0.28));
+    rig.amp.gain.linearRampToValueAtTime(peak * 0.65, t + span * 0.72);
     rig.amp.gain.linearRampToValueAtTime(0, end);
-    t = end + s.rng.range(0, 0.03);
+    t = end + s.rng.range(0, 0.025);
   }
   rig.amp.gain.setValueAtTime(0, t1);
 }

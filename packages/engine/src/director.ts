@@ -67,8 +67,7 @@ const VOICE: Readonly<Record<Speaker, AudioCueId>> = {
   'side-a': 'voice.side-a',
   'side-b': 'voice.side-b',
   narrator: 'voice.narrator',
-  // No dedicated clerk voice cue yet; the clerk borrows the narrator blip.
-  clerk: 'voice.narrator',
+  clerk: 'voice.clerk',
 };
 
 /**

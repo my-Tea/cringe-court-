@@ -2,7 +2,7 @@ import { soloMode, soloTerms } from '@cringe-court/modes-solo';
 import type { ChainCase, CourtLine } from '@cringe-court/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
-import { Alert, Icon, PaperButton, useReducedMotion } from '@/ds';
+import { Alert, Icon, PaperButton } from '@/ds';
 import { stagePose } from '@/art/art';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
 import { t, type MessageKey } from '@/i18n';
@@ -12,28 +12,22 @@ import { TrialViewFrame } from '@/trial/TrialViewFrame';
 import { soloPaths } from '../lib/paths';
 import { Courtroom } from '../court/Courtroom';
 import { soloAudioPort } from '../lib/sound';
-import { fetchTrial, readCase, titleFrom } from './liveCase';
+import { fetchTrial, readCase, titleFrom, type LiveCase } from './liveCase';
 import styles from './live.module.css';
 
 const SUMMON: readonly MessageKey[] = ['solo.live.trial.summon.0', 'solo.live.trial.summon.1', 'solo.live.trial.summon.2', 'solo.live.trial.summon.3'];
 const SUMMON_MS = 2400;
 const JURY_POLL_MS = 20000;
-/** How long each empty seat stays empty before the next juror sits. */
-export const JURY_SEAT_MS = 1100;
-/** Pause on a full bench before the trial starts. */
-export const JURY_SEATED_HOLD_MS = 800;
 
-/** Page three: the jury takes the seats the stake paid for, then the trial plays once. */
+/** Page three: the script is written now, after the stake, and played once. */
 export function TrialPage() {
   const { caseNumber = '' } = useParams();
   const [live] = useState(() => readCase(caseNumber));
   useDocumentTitle(live ? titleFrom(live.story) : t('solo.live.confess.title'));
   const [lines, setLines] = useState<readonly CourtLine[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [gathered, setGathered] = useState(false);
   const [finished, setFinished] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const beginTrial = useCallback(() => setGathered(true), []);
   const cast = useMemo(() => soloMode.staging(soloTerms()), []);
 
   useEffect(() => {
@@ -50,8 +44,7 @@ export function TrialPage() {
   }, [live, attempt]);
 
   if (!live) return <Navigate to={soloPaths.file} replace />;
-  if (!gathered) return <JuryGather jurors={live.jurors} onSeated={beginTrial} />;
-  if (finished) return <Adjourned caseNumber={caseNumber} explorerUrl={live.explorerUrl} />;
+  if (finished) return <JuryWait live={live} caseNumber={caseNumber} />;
   if (error) {
     return (
       <div className={styles.page}>
@@ -107,36 +100,7 @@ function Summoning() {
   );
 }
 
-/** The stake chose the jury size. Seats fill one by one, then the trial starts. */
-function JuryGather({ jurors, onSeated }: { jurors: number; onSeated: () => void }) {
-  const reduced = useReducedMotion();
-  const size = Math.max(1, jurors);
-  const [seated, setSeated] = useState(reduced ? size : 0);
-
-  useEffect(() => {
-    if (reduced || seated >= size) {
-      const id = window.setTimeout(onSeated, reduced ? 400 : JURY_SEATED_HOLD_MS);
-      return () => window.clearTimeout(id);
-    }
-    const id = window.setTimeout(() => setSeated((n) => n + 1), JURY_SEAT_MS);
-    return () => window.clearTimeout(id);
-  }, [reduced, seated, size, onSeated]);
-
-  return (
-    <div className={styles.page}>
-      <h1 className={styles.heading}>{t('solo.live.jury.waitTitle')}</h1>
-      <p className={styles.lede}>{t('solo.live.jury.waitBody', { jurors: size })}</p>
-      <div className={styles.bench} aria-hidden>
-        {Array.from({ length: size }, (_, i) => (
-          <span key={i} className={i < seated ? styles.benchFull : styles.benchEmpty} />
-        ))}
-      </div>
-      <p role="status">{seated >= size ? t('solo.live.jury.full') : t('solo.live.jury.seats', { seated, jurors: size })}</p>
-    </div>
-  );
-}
-
-function Adjourned({ caseNumber, explorerUrl }: { caseNumber: string; explorerUrl: string }) {
+function JuryWait({ live, caseNumber }: { live: LiveCase; caseNumber: string }) {
   const ledger = appLedger();
   const n = Number(caseNumber) as ChainCase['number'];
   const [chain, setChain] = useState<ChainCase | null>(null);
@@ -159,6 +123,7 @@ function Adjourned({ caseNumber, explorerUrl }: { caseNumber: string; explorerUr
   }, [load]);
 
   const deadline = chain?.deadlines.recruitment ?? null;
+  const seated = chain?.seats.length ?? 0;
 
   const refund = async () => {
     setBusy(true);
@@ -176,8 +141,14 @@ function Adjourned({ caseNumber, explorerUrl }: { caseNumber: string; explorerUr
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.heading}>{t('solo.live.trial.adjourned')}</h1>
-      <p className={styles.lede}>{t('solo.live.trial.adjournedBody')}</p>
+      <h1 className={styles.heading}>{t('solo.live.jury.title')}</h1>
+      <p className={styles.lede}>{t('solo.live.jury.body')}</p>
+      <div className={styles.bench} aria-hidden>
+        {Array.from({ length: live.jurors }, (_, i) => (
+          <span key={i} className={i < seated ? styles.benchFull : styles.benchEmpty} />
+        ))}
+      </div>
+      <p role="status">{t('solo.live.jury.seats', { seated, jurors: live.jurors })}</p>
       {deadline ? <p className={styles.hint}>{t('solo.live.jury.deadline', { time: new Date(deadline * 1000).toLocaleTimeString() })}</p> : null}
       {error ? (
         <Alert tone="danger" title={t('solo.live.stake.failed', { message: error })}>
@@ -191,7 +162,7 @@ function Adjourned({ caseNumber, explorerUrl }: { caseNumber: string; explorerUr
         </PaperButton>
       ) : null}
       <div className={styles.row}>
-        <a className={styles.textButton} href={explorerUrl} target="_blank" rel="noreferrer">
+        <a className={styles.textButton} href={live.explorerUrl} target="_blank" rel="noreferrer">
           {t('solo.live.jury.tx')}
         </a>
         <Link className={styles.textButton} to={soloPaths.file}>

@@ -6,6 +6,7 @@ const AUDIO_PACKAGE_CUES = new Set([
   'gavel_strike', 'gavel_triple', 'objection', 'crowd_murmur', 'crowd_laugh', 'crowd_gasp', 'crowd_applause', 'verdict_guilty',
   'verdict_not_cooked', 'verdict_decided', 'verdict_none', 'vote_tick', 'ballot_seal', 'ballot_unlock', 'timer_warning', 'timer_tick',
   'timer_expired', 'stamp', 'paper', 'coin', 'door_creak', 'ui_click', 'ui_hover', 'ui_toggle', 'ui_toast', 'ui_confirm', 'ui_error',
+  'voice_judge', 'voice_prosecutor', 'voice_defense', 'voice_side_a', 'voice_side_b', 'voice_narrator', 'voice_clerk',
 ]);
 
 describe('core → audio cue map', () => {

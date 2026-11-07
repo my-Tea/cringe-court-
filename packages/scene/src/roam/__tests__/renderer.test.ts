@@ -125,45 +125,6 @@ describe('roam renderer (no GL needed)', () => {
     r.dispose();
   });
 
-  it('a hearing close-up frames every speaker, not only the defence lawyer beside the chair', () => {
-    const controller = new RoamController(data.world, { spawn: 'lobby' });
-    const r = new RoamRenderer({ boxes: data.world.boxes, cast: data.cast, controller });
-    r.setPerspective('first');
-    void controller.runBeat('opening');
-    const forward = new THREE.Vector3();
-    const to = new THREE.Vector3();
-    const framing = (id: string) => {
-      for (let i = 0; i < 500 && controller.snapshot().dialogue?.speaker !== id; i++) {
-        controller.advanceDialogue();
-        controller.advanceDialogue();
-        controller.update(1 / 30);
-        r.update(1 / 30);
-      }
-      for (let i = 0; i < 90; i++) {
-        controller.update(1 / 60);
-        r.update(1 / 60);
-      }
-      const mark = data.world.marks[id]!;
-      const cam = r.camera.position.distanceTo(new THREE.Vector3(mark[0], mark[1], mark[2]));
-      const eye = controller.view().eye;
-      const fromEye = Math.hypot(eye[0] - mark[0], eye[1] - mark[1], eye[2] - mark[2]);
-      r.camera.getWorldDirection(forward);
-      to.set(mark[0], mark[1], mark[2]).sub(r.camera.position).normalize();
-      return { cam, fromEye, aim: forward.dot(to) };
-    };
-    // The judge and the prosecutor stand across the room. A seated look leaves
-    // them small; the close-up has to travel to them. The defence lawyer is
-    // already beside the chair, so he was filling the frame without one.
-    for (const id of ['judge', 'prosecutor', 'defense'] as const) {
-      const shot = framing(id);
-      expect(controller.snapshot().dialogue?.speaker, id).toBe(id);
-      expect(shot.aim, id).toBeGreaterThan(0.9);
-      expect(shot.cam, id).toBeLessThan(THIRD_RIG.closeup + 28);
-      if (id !== 'defense') expect(shot.cam, id).toBeLessThan(shot.fromEye * 0.72);
-    }
-    r.dispose();
-  });
-
   it('a wall behind the player pulls the third-person camera in', () => {
     // Stand a step in front of the lobby's back wall, facing into the room.
     const lobby = data.world.rooms.find((room) => room.id === 'lobby')!.bounds;

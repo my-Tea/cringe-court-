@@ -59,6 +59,7 @@ export const AUDIO_CUES = [
   'voice.side-a',
   'voice.side-b',
   'voice.narrator',
+  'voice.clerk',
 ] as const;
 
 export type AudioCueId = (typeof AUDIO_CUES)[number];

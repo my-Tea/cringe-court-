@@ -16,6 +16,7 @@ import {
 import { gavelHit } from './instruments.ts';
 import { objection, verdictDecided, verdictGuilty, verdictNone, verdictNotCooked } from './stings.ts';
 import { uiClick, uiConfirm, uiError, uiHover, uiToast, uiToggle } from './ui.ts';
+import { voiceClerk, voiceDefense, voiceJudge, voiceNarrator, voiceProsecutor, voiceSideA, voiceSideB } from './voice.ts';
 
 /**
  * A recipe draws one cue into `s.out`, starting at context time `t`.
@@ -57,4 +58,11 @@ export const RECIPES: Readonly<Record<CueId, Recipe>> = {
   ui_toast: uiToast,
   ui_confirm: uiConfirm,
   ui_error: uiError,
+  voice_judge: voiceJudge,
+  voice_prosecutor: voiceProsecutor,
+  voice_defense: voiceDefense,
+  voice_side_a: voiceSideA,
+  voice_side_b: voiceSideB,
+  voice_narrator: voiceNarrator,
+  voice_clerk: voiceClerk,
 };

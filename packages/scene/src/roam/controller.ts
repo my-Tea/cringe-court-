@@ -97,11 +97,6 @@ export interface CameraView {
   /** Screen-shake offsets in radians (0 with reduced motion). */
   shakeYaw: number;
   shakePitch: number;
-  /**
-   * Head the beat is framing, or null when the player owns the camera.
-   * The renderer dollies in on this point so every speaker reads the same size.
-   */
-  subject: Vec3 | null;
 }
 
 interface ExternalInput {
@@ -875,7 +870,6 @@ export class RoamController implements BeatHost {
       pitch: this.#pitch,
       shakeYaw: s * s * 0.03 * Math.sin(t * 71),
       shakePitch: s * s * 0.035 * Math.sin(t * 53 + 1.3),
-      subject: this.#look?.target ?? null,
     };
   }
 

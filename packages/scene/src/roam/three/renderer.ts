@@ -211,18 +211,12 @@ export class RoamRenderer {
     this.camera.rotation.set(pitch, yaw, 0, 'YXZ');
     if (c.avatar !== this.#playerSpec) this.#buildPlayer(c.avatar);
     const showcase = c.panel === 'wardrobe';
-    const subject = !this.#attract && !showcase && c.control === 'cinematic' ? view.subject : null;
     if (this.#attract) this.#placeAttract(dt);
-    else if (showcase) {
-      this.#framed = null;
-      this.#placeShowcase(dt);
-    } else if (third) this.#placeThird(view.eye, view.yaw, view.pitch, c.control === 'cinematic', dt);
+    else if (showcase) this.#placeShowcase(dt);
+    else if (third) this.#placeThird(view.eye, view.yaw, view.pitch, c.control === 'cinematic', dt);
     else this.camera.position.set(...view.eye);
-    if (subject) this.#placeCloseup(view.eye, subject, dt);
-    else if (this.#framed && !this.#attract && !showcase) this.#releaseCloseup(dt);
     if (!this.#attract) this.#easeFromAttract(dt);
-    const fromEye = this.camera.position.distanceToSquared(this.#closeWant.set(view.eye[0], view.eye[1], view.eye[2]));
-    this.#showPlayer(!this.#attract && (showcase || fromEye > THIRD_RIG.hideBelow * THIRD_RIG.hideBelow), dt);
+    this.#showPlayer(!this.#attract && (showcase || (third && this.#boom > THIRD_RIG.hideBelow)), dt);
     for (const [id, g] of this.#gates) {
       g.visible = !c.isGateOpen(id);
       if (g.visible && !c.reducedMotion) g.position.y = Math.sin(performance.now() / 500) * 0.6;
@@ -274,59 +268,6 @@ export class RoamRenderer {
 
     this.#applyOutside(this.#attract ? 'outside' : c.zone);
     if (this.#sky.visible) this.#sky.position.copy(this.viewCamera.position);
-  }
-
-  /**
-   * Frame the person a beat is looking at. The defence lawyer already stands
-   * beside the chair, so turning toward him fills the frame. Everyone else is
-   * across the room: dolly in until they are the same size, then ease back
-   * when the beat lets go of the camera.
-   */
-  #placeCloseup(eye: readonly [number, number, number], subject: readonly [number, number, number], dt: number): void {
-    if (!this.#framed) this.#framed = { pos: this.camera.position.clone(), quat: this.camera.quaternion.clone() };
-    this.#closeupAt(eye, subject, this.#closeWant);
-    this.#closeLook.set(subject[0], subject[1], subject[2]);
-    this.camera.position.copy(this.#closeWant);
-    this.camera.lookAt(this.#closeLook);
-    const k = this.#controller.reducedMotion ? 1 : 1 - Math.exp(-4.5 * dt);
-    this.#framed.pos.lerp(this.camera.position, k);
-    this.#framed.quat.slerp(this.camera.quaternion, k);
-    this.camera.position.copy(this.#framed.pos);
-    this.camera.quaternion.copy(this.#framed.quat);
-    this.#boom = THIRD_RIG.cinematic;
-  }
-
-  /** Sit `closeup` units in front of the subject, on the player's side, short of any wall. */
-  #closeupAt(eye: readonly [number, number, number], subject: readonly [number, number, number], out: THREE.Vector3): void {
-    const dx = eye[0] - subject[0];
-    const dz = eye[2] - subject[2];
-    const len = Math.hypot(dx, dz) || 1;
-    const ux = dx / len;
-    const uz = dz / len;
-    const dist = Math.max(THIRD_RIG.closeupMin, Math.min(THIRD_RIG.closeup, len - 16));
-    const aside = Math.min(14, dist * 0.16);
-    const ox = ux * dist - uz * aside;
-    const oz = uz * dist + ux * aside;
-    const reach = Math.hypot(ox, oz) || 1;
-    const hit = this.#rayToBoxes(subject[0], subject[1] + 4, subject[2], ox / reach, 0, oz / reach, reach);
-    const pull = Math.max(THIRD_RIG.closeupMin * 0.65, Math.min(reach, hit - THIRD_RIG.margin));
-    const s = pull / reach;
-    out.set(subject[0] + ox * s, subject[1] + 4, subject[2] + oz * s);
-  }
-
-  /** Glide from a close-up back to the pose `update` just wrote. */
-  #releaseCloseup(dt: number): void {
-    const framed = this.#framed;
-    if (!framed) return;
-    const destPos = this.camera.position.clone();
-    const destQuat = this.camera.quaternion.clone();
-    const k = this.#controller.reducedMotion ? 1 : 1 - Math.exp(-4.5 * dt);
-    framed.pos.lerp(destPos, k);
-    framed.quat.slerp(destQuat, k);
-    const left = framed.pos.distanceTo(destPos);
-    this.camera.position.copy(framed.pos);
-    this.camera.quaternion.copy(framed.quat);
-    if (left < 1.2 || this.#controller.reducedMotion) this.#framed = null;
   }
 
   /**
@@ -398,10 +339,6 @@ export class RoamRenderer {
 
   #attract = false;
   #attractT = 0;
-  /** Close-up pose while a beat frames a speaker, eased back to the player's view. */
-  #framed: { pos: THREE.Vector3; quat: THREE.Quaternion } | null = null;
-  readonly #closeWant = new THREE.Vector3();
-  readonly #closeLook = new THREE.Vector3();
   /** Camera pose when the attract orbit ended, eased away from over ATTRACT.blend seconds. */
   #leave: { pos: THREE.Vector3; quat: THREE.Quaternion; t: number } | null = null;
 
