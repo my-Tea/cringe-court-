@@ -22,13 +22,20 @@ export const ENGINE_CUES: Partial<Record<AudioCueId, string>> = {
   'sfx.door-creak': 'door_creak',
   'sfx.paper': 'paper',
   'sfx.unlock': 'ballot_unlock',
-  'stinger.jury-out': 'timer_warning',
+  'stinger.jury-out': 'verdict_decided',
   'stinger.verdict-guilty': 'verdict_guilty',
   'stinger.verdict-not-cooked': 'verdict_not_cooked',
   'stinger.verdict-side': 'verdict_decided',
   'stinger.mistrial': 'verdict_none',
   'ui.click': 'ui_click',
   'ui.notify': 'ui_toast',
+  'voice.judge': 'voice_judge',
+  'voice.prosecutor': 'voice_prosecutor',
+  'voice.defense': 'voice_defense',
+  'voice.side-a': 'voice_side_a',
+  'voice.side-b': 'voice_side_b',
+  'voice.narrator': 'voice_narrator',
+  'voice.clerk': 'voice_clerk',
 };
 
 interface EngineLike {

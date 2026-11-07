@@ -88,7 +88,49 @@ export function isParty(role: PlayerRole): boolean {
 /** Characters per second for the dialogue typewriter at full pace (see pace.ts for the others). */
 export const TYPE_SPEED = HEARING_PACE.full.typeSpeed;
 export const CALLOUT_SECONDS = 2.4;
+/** Punchier lifetimes for counsel / bench callouts. */
+const CALLOUT_LIFE: Readonly<Partial<Record<CalloutStyle, number>>> = {
+  objection: 2.6,
+  counter: 2.2,
+  order: 2.2,
+  verdict: CALLOUT_SECONDS * 2.5,
+  'jury-out': 2.8,
+  'let-bro-cook': 2.2,
+};
 const CAMERA_EASE = 5;
+
+/** Babble cue per dialogue speaker (jurors stay quiet). */
+const VOICE_CUE: Readonly<Record<string, AudioCueId>> = {
+  judge: 'voice.judge',
+  prosecutor: 'voice.prosecutor',
+  defense: 'voice.defense',
+  clerk: 'voice.clerk',
+  'side-a': 'voice.side-a',
+  'side-b': 'voice.side-b',
+  narrator: 'voice.narrator',
+  bailiff: 'voice.narrator',
+};
+
+const VOICE_PAN: Readonly<Record<string, number>> = {
+  prosecutor: -0.55,
+  defense: 0.55,
+  'side-a': -0.5,
+  'side-b': 0.5,
+  clerk: 0.2,
+  bailiff: -0.25,
+  judge: 0,
+  narrator: -0.1,
+};
+
+const SPEAKER_ROLE: Readonly<Record<string, string>> = {
+  judge: 'The Bench',
+  prosecutor: 'Prosecution',
+  defense: 'Defense',
+  clerk: 'Court Clerk',
+  bailiff: 'Bailiff',
+  narrator: 'Narrator',
+  player: 'You',
+};
 
 export interface CameraView {
   eye: Vec3;
@@ -97,6 +139,11 @@ export interface CameraView {
   /** Screen-shake offsets in radians (0 with reduced motion). */
   shakeYaw: number;
   shakePitch: number;
+  /**
+   * Head the beat is framing, or null when the player owns the camera.
+   * The renderer dollies in on this point so every speaker reads the same size.
+   */
+  subject: Vec3 | null;
 }
 
 interface ExternalInput {
@@ -136,7 +183,10 @@ export class RoamController implements BeatHost {
   #focus: InteractableSpec | null = null;
   #dialogue: (DialogueState & { npc: string | null }) | null = null;
   #exhibit: string | null = null;
-  #callout: { text: string; style: CalloutStyle; age: number } | null = null;
+  #callout: { text: string; style: CalloutStyle; age: number; id: number } | null = null;
+  #calloutSeq = 0;
+  /** Seconds until the next babble while a line is still typing out. */
+  #voiceCool = 0;
   #mood: LightingMood = 'house';
   #shake = 0;
   #bobPhase = 0;
@@ -175,7 +225,7 @@ export class RoamController implements BeatHost {
     this.#reduced = options.reducedMotion ?? false;
     this.#audio = detectAudio(options.audio);
     this.id = options.id ?? 'local';
-    this.#avatar = options.avatar ?? { model: 'creator', name: 'You' };
+    this.#avatar = options.avatar ?? { model: 'defendant', name: 'You' };
     this.role = options.role ?? 'defendant';
     this.#now = options.now;
     const spawn = typeof options.spawn === 'object' ? options.spawn : world.spawns[options.spawn ?? 'lobby'];
@@ -640,11 +690,16 @@ export class RoamController implements BeatHost {
         break;
       case 'say':
         this.#setDialogue({ speaker: step.speaker, text: step.text });
-        if (step.pose) this.#pose(step.speaker, step.pose);
+        if (step.pose) {
+          this.#pose(step.speaker, step.pose);
+          if (step.pose === 'objection') this.#shakeBy(0.7);
+        }
         if (step.speaker !== 'player' && this.#control === 'cinematic') this.#look = { target: this.#resolveTarget(step.speaker) };
         break;
       case 'pose':
         this.#pose(step.npc, step.pose);
+        if (step.pose === 'objection') this.#shakeBy(0.55);
+        if (step.pose === 'shock' || step.pose === 'panic') this.#shakeBy(0.2);
         break;
       case 'gavel':
         this.#gavel(1);
@@ -658,7 +713,12 @@ export class RoamController implements BeatHost {
         this.#changed();
         break;
       case 'callout':
-        this.#callout = { text: step.text, style: step.style, age: 0 };
+        this.#calloutSeq += 1;
+        this.#callout = { text: step.text, style: step.style, age: 0, id: this.#calloutSeq };
+        // Desk-slam feel under every drama card — objection / jury-out hit hardest.
+        if (step.style === 'objection' || step.style === 'jury-out') this.#shakeBy(0.55);
+        else if (step.style === 'order' || step.style === 'verdict') this.#shakeBy(0.45);
+        else if (step.style === 'counter' || step.style === 'let-bro-cook') this.#shakeBy(0.35);
         this.#emit({ type: 'callout', text: step.text, style: step.style });
         this.#changed();
         break;
@@ -698,7 +758,8 @@ export class RoamController implements BeatHost {
     const judge = this.#npcs.find((n) => n.id === 'judge');
     if (judge) judge.pose = 'gavel';
     this.#shakeBy(strength);
-    this.#cue('sfx.gavel');
+    // Soft tap = single strike; full ORDER slam = triple hit.
+    this.#cue(strength >= 0.9 ? 'sfx.desk-slam' : 'sfx.gavel');
     this.#emit({ type: 'gavel' });
   }
 
@@ -709,6 +770,7 @@ export class RoamController implements BeatHost {
   #setDialogue(line: DialogueLine | null): void {
     for (const n of this.#npcs) n.talking = false;
     if (!line) {
+      this.#voiceCool = 0;
       if (this.#dialogue) {
         this.#dialogue = null;
         this.#emit({ type: 'dialogue', line: null });
@@ -718,12 +780,36 @@ export class RoamController implements BeatHost {
     }
     const npc = this.#specs.get(line.speaker) ?? null;
     const name = npc?.name ?? (line.speaker === 'player' ? this.avatar.name : line.speaker === 'narrator' ? '' : line.speaker);
+    const role = SPEAKER_ROLE[line.speaker] ?? (line.speaker.startsWith('juror') ? 'Jury' : npc?.role ? String(npc.role) : '');
     const shown = this.#reduced ? line.text.length : 0;
-    this.#dialogue = { speaker: line.speaker, name, text: line.text, shown, hold: holdSeconds(line.text, this.paceSpec()), npc: npc?.id ?? null };
+    this.#dialogue = {
+      speaker: line.speaker,
+      name,
+      role,
+      text: line.text,
+      shown,
+      hold: holdSeconds(line.text, this.paceSpec()),
+      npc: npc?.id ?? null,
+    };
     const st = npc && this.#npcs.find((n) => n.id === npc.id);
     if (st) st.talking = true;
+    this.#babble(line.speaker);
+    // Match cue duration so maxVoices:1 does not chop mid-syllable.
+    this.#voiceCool = 1.2;
     this.#emit({ type: 'dialogue', line });
     this.#changed();
+  }
+
+  #babble(speaker: string): void {
+    const voice = VOICE_CUE[speaker] ?? (speaker.startsWith('juror') ? undefined : 'voice.narrator');
+    if (!voice) return;
+    const pan = VOICE_PAN[speaker] ?? 0;
+    this.#emit({ type: 'cue', cue: voice });
+    try {
+      this.#audio?.play(voice, { pan, volume: 1 });
+    } catch {
+      /* sound is decoration */
+    }
   }
 
   /* ── Simulation ────────────────────────────────────────────────────── */
@@ -789,6 +875,12 @@ export class RoamController implements BeatHost {
         d.shown = Math.min(d.text.length, d.shown + story * this.paceSpec().typeSpeed);
         if (Math.floor(d.shown) !== before && Math.floor(d.shown) % 6 === 0) this.#changed();
         if (d.shown >= d.text.length) this.#changed();
+        // Keep babble alive for the whole typewriter; interval ≥ cue length so speech isn't chopped.
+        this.#voiceCool -= story;
+        if (this.#voiceCool <= 0) {
+          this.#babble(d.speaker);
+          this.#voiceCool = 1.15;
+        }
       } else if (d.hold > 0) {
         d.hold -= story;
         // Barks outside beats fade on their own; beat lines wait for the runner.
@@ -797,7 +889,7 @@ export class RoamController implements BeatHost {
     }
     if (this.#callout) {
       this.#callout.age += real;
-      if (this.#callout.age > (this.#callout.style === 'verdict' ? CALLOUT_SECONDS * 2.5 : CALLOUT_SECONDS)) {
+      if (this.#callout.age > (CALLOUT_LIFE[this.#callout.style] ?? CALLOUT_SECONDS)) {
         this.#callout = null;
         this.#changed();
       }
@@ -870,6 +962,7 @@ export class RoamController implements BeatHost {
       pitch: this.#pitch,
       shakeYaw: s * s * 0.03 * Math.sin(t * 71),
       shakePitch: s * s * 0.035 * Math.sin(t * 53 + 1.3),
+      subject: this.#look?.target ?? null,
     };
   }
 
@@ -947,7 +1040,7 @@ export class RoamController implements BeatHost {
       paused: this.#paused,
       zone: this.#zone,
       focus,
-      dialogue: d ? { speaker: d.speaker, name: d.name, text: d.text, shown: Math.floor(d.shown), hold: d.hold } : null,
+      dialogue: d ? { speaker: d.speaker, name: d.name, role: d.role, text: d.text, shown: Math.floor(d.shown), hold: d.hold } : null,
       beat: b ? { id: b.runner.id, step: Math.min(b.runner.index, b.runner.steps.length), steps: b.runner.steps.length } : null,
       exhibit: this.#exhibit,
       panel: this.#panel,

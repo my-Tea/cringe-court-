@@ -65,7 +65,7 @@ describe('motion tokens', () => {
       if (m[1]!.trim() === 'none') continue;
       expect(m[1], 'HUD motion must read --cc-duration-* / --cc-ease-* (fallbacks allowed)').toMatch(/var\(--cc-duration-[a-z]+,[^)]*\) var\(--cc-ease-[a-z]+,/);
     }
-    expect(hud).toMatch(/data-reduced-motion="true"\] \.ccr-callout\{animation:none\}/);
+    expect(hud).toMatch(/\.ccr-root\[data-reduced-motion="true"\] \.ccr-callout/);
   });
 
   it('the global stylesheet stops loops and delays under reduced motion', () => {

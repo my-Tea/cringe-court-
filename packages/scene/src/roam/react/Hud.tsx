@@ -74,18 +74,42 @@ export function Prompt({ snap, touch }: { snap: RoamSnapshot; touch: boolean }) 
   );
 }
 
+/** Speaker plate colours from the character design bible. */
+const SPEAKER_TONE: Readonly<Record<string, string>> = {
+  prosecutor: 'prosecutor',
+  defense: 'defense',
+  judge: 'judge',
+  clerk: 'clerk',
+  bailiff: 'bailiff',
+  narrator: 'narrator',
+};
+
+function speakerTone(speaker: string): string {
+  if (SPEAKER_TONE[speaker]) return SPEAKER_TONE[speaker]!;
+  if (speaker.startsWith('juror')) return 'juror';
+  return 'narrator';
+}
+
 export function Dialogue({ snap, touch, tapToContinue = false, onAdvance }: { snap: RoamSnapshot; touch: boolean; tapToContinue?: boolean; onAdvance?: () => void }) {
   const S = useRoamStrings();
   const d = snap.dialogue;
   if (!d) return null;
   const done = d.shown >= d.text.length;
+  const tone = speakerTone(d.speaker);
   return (
     // A pointer shortcut only (finish the line / move on); keyboard players have E and X, so it is not a control.
-    <div className="ccr-panel ccr-dialogue" role="log" aria-live="polite" aria-atomic="true" onClick={onAdvance}>
-      {d.name ? <div className="ccr-name ccr-pixel">{d.name}</div> : null}
+    <div className="ccr-panel ccr-dialogue" data-speaker={tone} role="log" aria-live="polite" aria-atomic="true" onClick={onAdvance}>
+      <div className="ccr-dialogue-head">
+        <span className="ccr-portrait" data-speaker={tone} aria-hidden="true" />
+        <div className="ccr-dialogue-id">
+          {d.name ? <div className="ccr-name ccr-pixel">{d.name}</div> : null}
+          {d.role ? <div className="ccr-role ccr-pixel">{d.role}</div> : null}
+        </div>
+      </div>
       <p className="ccr-line">
         <span aria-hidden="true">{d.text.slice(0, d.shown)}</span>
         <span className="ccr-sr">{d.text}</span>
+        {!done ? <span className="ccr-caret" aria-hidden="true" /> : null}
       </p>
       <span className="ccr-more ccr-pixel" aria-hidden="true">
         {done ? (tapToContinue ? S.continueTap : touch ? S.continueTouch : S.continueKey) : '…'}
@@ -134,10 +158,21 @@ export function Onboarding({ onCapture, onKeyboard, onDismiss }: { onCapture: ()
 export function Callout({ snap }: { snap: RoamSnapshot }) {
   const c = snap.callout;
   if (!c) return null;
+  const impact =
+    c.style === 'objection' ||
+    c.style === 'order' ||
+    c.style === 'counter' ||
+    c.style === 'verdict' ||
+    c.style === 'jury-out' ||
+    c.style === 'let-bro-cook';
+  // `id` remounts slam + impact on every new callout, including repeats.
   return (
-    <div className={`ccr-callout ccr-pixel ccr-callout--${c.style}`} role="status" key={`${c.text}:${c.style}`}>
-      {c.text}
-    </div>
+    <>
+      {impact ? <div className={`ccr-impact ccr-impact--${c.style}`} aria-hidden key={`impact:${c.id}`} /> : null}
+      <div className={`ccr-callout ccr-pixel ccr-callout--${c.style}`} role="status" key={`callout:${c.id}`}>
+        {c.text}
+      </div>
+    </>
   );
 }
 

@@ -320,6 +320,7 @@ export function RoamCourtroom({
       aria-roledescription={S.roomRoleDescription}
       data-roam-zone={snap.zone ?? ''}
       data-roam-control={snap.control}
+      data-reduced-motion={snap.reducedMotion ? 'true' : 'false'}
       onPointerDown={(e) => {
         if (e.pointerType === 'touch') markTouch();
       }}

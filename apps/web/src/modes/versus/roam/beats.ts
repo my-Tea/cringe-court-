@@ -50,7 +50,7 @@ export function versusBeats(lines: readonly CourtLine[], verdict?: 'a' | 'b' | '
   for (const line of lines) {
     const id = BEAT_FOR[line.segment];
     if (id === 'verdict') continue;
-    const said: DialogueLine = { speaker: roamSpeaker(line), text: line.text };
+    const said: DialogueLine = { speaker: roamSpeaker(line), text: line.text, ...(line.beat ? { beat: line.beat } : {}) };
     const last = out[out.length - 1];
     if (last?.id === id) last.options = { lines: [...(last.options.lines ?? []), said] };
     else out.push({ id, options: { lines: [said] } });

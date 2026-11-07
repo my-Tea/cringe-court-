@@ -157,7 +157,11 @@ describe('RoamController', () => {
     expect(c.seat).toBe('defendant');
     expect(events.filter((e) => e.type === 'gavel')).toHaveLength(1);
     expect(events.some((e) => e.type === 'callout' && e.style === 'objection')).toBe(true);
-    expect(audio.play).toHaveBeenCalledWith('sfx.gavel', undefined);
+    expect(events.some((e) => e.type === 'callout' && e.style === 'counter')).toBe(true);
+    expect(audio.play).toHaveBeenCalledWith('sfx.desk-slam', undefined);
+    expect(audio.play).toHaveBeenCalledWith('voice.prosecutor', expect.objectContaining({ pan: expect.any(Number) }));
+    expect(audio.play).toHaveBeenCalledWith('voice.defense', expect.objectContaining({ pan: expect.any(Number) }));
+    expect(audio.play).toHaveBeenCalledWith('voice.judge', expect.any(Object));
     expect(events.find((e) => e.type === 'beat-end')).toMatchObject({ type: 'beat-end', beat: 'counsel-arguing', skipped: false });
   });
 

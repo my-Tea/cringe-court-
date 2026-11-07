@@ -69,6 +69,13 @@ describe('versusBeats', () => {
     expect(versusBeats(await transcript(), 'none').at(-1)!.options).toEqual({ verdict: 'mistrial', verdictText: 'NO VERDICT' });
     expect(versusBeats(await transcript()).some((b) => b.id === 'verdict')).toBe(false);
   });
+
+  it('keeps beat tags so OBJECTION callouts fire on Versus lines that never say the word', async () => {
+    const lines = await transcript();
+    const tagged = versusBeats(lines).flatMap((b) => b.options.lines ?? []).filter((l) => l.beat === 'objection');
+    expect(tagged.length).toBeGreaterThan(0);
+    expect(tagged.some((l) => !/\bobjection\b/i.test(l.text))).toBe(true);
+  });
 });
 
 describe('playVersusTrial', () => {

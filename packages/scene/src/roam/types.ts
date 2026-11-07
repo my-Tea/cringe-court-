@@ -110,7 +110,28 @@ export interface InteractableSpec {
   gate?: GateId;
 }
 
-export type NpcPose = 'stand' | 'sit' | 'talk' | 'gavel' | 'point' | 'cheer' | 'shock' | 'facepalm';
+/**
+ * Courtroom poses. Heroes (GLB / stylized meshes) and voxel background cast
+ * share this set. Juror vote-facing poses stay vote-agnostic (fairness).
+ */
+export type NpcPose =
+  | 'stand'
+  | 'sit'
+  | 'talk'
+  | 'gavel'
+  | 'point'
+  | 'cheer'
+  | 'shock'
+  | 'facepalm'
+  | 'objection'
+  | 'smug'
+  | 'lean'
+  | 'explain'
+  | 'panic'
+  | 'victory'
+  | 'defeat'
+  | 'cross_arms'
+  | 'thinking';
 
 export type NpcRole = 'judge' | 'prosecutor' | 'defense' | 'bailiff' | 'clerk' | 'juror' | 'gallery' | 'guard';
 
@@ -209,6 +230,12 @@ export interface DialogueLine {
   /** NPC id, or 'player'. */
   speaker: string;
   text: string;
+  /**
+   * Court-ai / fixture drama tag (`objection`, `gavel`, …). Roam callouts used
+   * to only regex spoken text; live Solo/Versus/GJ lines often tag the beat
+   * without saying the word, so this must travel with the line.
+   */
+  beat?: string;
 }
 
 export type BeatStep =
@@ -243,6 +270,8 @@ export interface BeatOptions {
 export interface DialogueState {
   speaker: string;
   name: string;
+  /** Short role line under the name (Prosecution, The Bench, …). */
+  role?: string;
   text: string;
   /** Characters revealed so far (typewriter; equals text.length with reduced motion). */
   shown: number;
@@ -277,7 +306,7 @@ export interface RoamSnapshot {
   panel: PanelId | null;
   /** Arrival-run seals that are open. */
   gates: readonly GateId[];
-  callout: { text: string; style: CalloutStyle; age: number } | null;
+  callout: { text: string; style: CalloutStyle; age: number; id: number } | null;
   mood: LightingMood;
   /** 0..1 screen-shake amount (always 0 with reduced motion). */
   shake: number;

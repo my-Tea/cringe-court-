@@ -1,7 +1,7 @@
 import type { AudioCueId } from '@cringe-court/core';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { audioFromEngine, detectAudio } from '../audio';
-import { BeatRunner, beatScript, type BeatHost } from '../beats';
+import { BeatRunner, beatScript, poseForLine, reactionSteps, stageLine, type BeatHost } from '../beats';
 import { BarkBook } from '../dialogue';
 import { DEFAULT_BINDINGS, gamepadInput, joystickIntent, joystickKnob, KeyState, lookDelta, mergeIntents, clampPitch, PITCH_LIMIT } from '../input';
 import { lookDir, rayAabb, selectFocus } from '../interact';
@@ -185,7 +185,34 @@ describe('beat runner', () => {
       expect(s.at(-1)).toEqual({ kind: 'control', mode: 'look' });
     }
     expect(beatScript('counsel-arguing').some((s) => s.kind === 'gavel')).toBe(true);
+    expect(beatScript('counsel-arguing').some((s) => s.kind === 'callout' && s.style === 'counter')).toBe(true);
     expect(beatScript('verdict', { verdictText: 'SIDE B WINS', verdict: 'side-b' })).toContainEqual({ kind: 'callout', text: 'SIDE B WINS', style: 'verdict' });
+  });
+
+  it('poseForLine picks signature counsel and bench actions', () => {
+    expect(poseForLine('defense', 'OBJECTION! Part nine had a meme.')).toBe('objection');
+    expect(poseForLine('prosecutor', 'We will prove they posted it.')).toBe('point');
+    expect(poseForLine('judge', 'Order! ORDER!')).toBe('gavel');
+    expect(poseForLine('judge', 'Overruled. Sit down.')).toBe('point');
+    expect(poseForLine('defense', 'Let bro cook — context matters.')).toBe('smug');
+  });
+
+  it('stageLine crash-outs wire callouts and cast reactions for AI lines too', () => {
+    const ratio = stageLine('prosecutor', 'OBJECTION! That meme is not evidence.');
+    expect(ratio.some((s) => s.kind === 'callout' && s.style === 'objection')).toBe(true);
+    expect(ratio.some((s) => s.kind === 'pose' && s.npc === 'prosecutor' && s.pose === 'objection')).toBe(true);
+    expect(ratio.some((s) => s.kind === 'pose' && s.npc === 'defense' && s.pose === 'shock')).toBe(true);
+    expect(ratio.some((s) => s.kind === 'pose' && s.npc === 'gallery' && s.pose === 'shock')).toBe(true);
+    expect(reactionSteps('defense', 'objection').some((s) => s.kind === 'pose' && s.npc === 'prosecutor')).toBe(true);
+  });
+
+  it('stageLine uses CourtLine beat tags when the spoken text never says the word', () => {
+    const tagged = stageLine('defense', 'Listen to that again. Side B knows it.', 'objection');
+    expect(poseForLine('defense', 'Listen to that again.', 'objection')).toBe('objection');
+    expect(tagged.some((s) => s.kind === 'callout' && s.style === 'objection')).toBe(true);
+    const order = stageLine('judge', 'Sit down, both of you.', 'gavel');
+    expect(order.some((s) => s.kind === 'callout' && s.style === 'order')).toBe(true);
+    expect(order.some((s) => s.kind === 'gavel')).toBe(true);
   });
 
   it('mode-supplied lines replace the built-ins, with a look at each new speaker', () => {
@@ -269,7 +296,8 @@ describe('dialogue and audio', () => {
     detectAudio(engine)!.play('sfx.gavel' as AudioCueId, { volume: 0.5 });
     expect(engine.play).toHaveBeenCalledWith('gavel_strike', { intensity: 0.5 });
     audioFromEngine(engine).play('voice.judge' as AudioCueId);
-    expect(engine.play).toHaveBeenCalledTimes(1);
+    expect(engine.play).toHaveBeenCalledWith('voice_judge', {});
+    expect(engine.play).toHaveBeenCalledTimes(2);
     expect(detectAudio(null)).toBeNull();
     expect(detectAudio({ play: 1 })).toBeNull();
   });

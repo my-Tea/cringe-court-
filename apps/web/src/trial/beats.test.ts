@@ -37,6 +37,14 @@ describe('beatsFromLines', () => {
     expect(roamSpeakerOf({ speaker: 'bailiff' as never })).toBe('bailiff');
     expect(roamSpeakerOf({ speaker: 'mystery' as never })).toBe('narrator');
   });
+
+  it('keeps CourtLine beat tags on dialogue so roam can slam OBJECTION without the word', () => {
+    const lines = [
+      { id: '1', speaker: 'side-a', bench: 0 as const, segment: 'rebuttal' as const, beat: 'objection' as const, text: 'Listen to that again.' },
+    ];
+    const beats = beatsFromLines(lines);
+    expect(beats[0]!.options.lines?.[0]).toEqual({ speaker: 'prosecutor', text: 'Listen to that again.', beat: 'objection' });
+  });
 });
 
 describe('playBeats', () => {

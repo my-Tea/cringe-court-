@@ -46,7 +46,7 @@ export function beatsFromLines(lines: readonly CourtLine[], verdict?: PlannedVer
   for (const line of lines) {
     const id = BEAT_FOR[line.segment] ?? 'counsel-arguing';
     if (id === 'verdict') continue;
-    const said: DialogueLine = { speaker: roamSpeakerOf(line), text: line.text };
+    const said: DialogueLine = { speaker: roamSpeakerOf(line), text: line.text, ...(line.beat ? { beat: line.beat } : {}) };
     const last = out[out.length - 1];
     if (last?.id === id) last.options = { lines: [...(last.options.lines ?? []), said] };
     else out.push({ id, options: { lines: [said] } });

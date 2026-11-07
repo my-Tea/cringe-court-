@@ -63,6 +63,9 @@ export function stepSeconds(step: BeatStep, pace: PaceSpec): number {
       return (step.seconds ?? 0.8) * pace.stepScale;
     case 'gavel':
       return 0.45 * pace.stepScale;
+    // Hold the comic burst on screen long enough to read (OBJECTION!, ORDER!, …).
+    case 'callout':
+      return 1.35 * pace.stepScale;
     default:
       return 0;
   }
