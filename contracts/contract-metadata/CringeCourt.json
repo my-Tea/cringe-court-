@@ -1,19 +1,19 @@
 {
-  "contractAddress": "0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
+  "contractAddress": "0xcb9698903ec8df227b3b0d488858629e1b2ea44b",
   "network": "ARC-TESTNET",
   "deployerWalletId": "3c2464b2-8369-52e2-a782-800bbeca5396",
   "contract_code_path": "/home/user/app/contracts/CringeCourt.sol",
   "contract_compiled_code_path": "/home/user/app/contracts/out/CringeCourt.sol/CringeCourt.json",
   "contract_network_and_links": {
-    "Arc Testnet": "https://explorer.testnet.arc.io/address/0x085aa1fbaba83c8b96edc81d5231321fe3f23032"
+    "Arc Testnet": "https://explorer.testnet.arc.io/address/0xcb9698903ec8df227b3b0d488858629e1b2ea44b"
   },
   "contract_deployments": [
     {
       "chain": "Arc Testnet",
-      "address": "0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
-      "explorerUrl": "https://explorer.testnet.arc.io/address/0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
-      "txHash": "0x5e8d95aca75b3a4493a3b48c9dc16fcb696cf1eae1e8af67c7859ae88ae46ec2",
-      "deployedAt": "2026-11-07T00:38:19.153Z"
+      "address": "0xcb9698903ec8df227b3b0d488858629e1b2ea44b",
+      "explorerUrl": "https://explorer.testnet.arc.io/address/0xcb9698903ec8df227b3b0d488858629e1b2ea44b",
+      "txHash": "0xd0371aefec593729a39ea935c8ac28aa865eab24087f64b72ace43f0cc6b5c63",
+      "deployedAt": "2026-11-07T02:14:38.857Z"
     }
   ],
   "abi": [

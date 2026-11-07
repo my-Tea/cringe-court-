@@ -2,16 +2,16 @@
   "chainId": 5042002,
   "network": "Arc Testnet",
   "usdc": "0x3600000000000000000000000000000000000000",
-  "registry": "0x650181d004e03760d364742a134e66bc477a9c62",
-  "court": "0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
+  "registry": "0x38140871bcee614a56c48682e899bdd300fccb71",
+  "court": "0xcb9698903ec8df227b3b0d488858629e1b2ea44b",
   "admin": "0x06E006977723eB6635bF2BE70D040c63030e23A4",
   "treasury": "0x06E006977723eB6635bF2BE70D040c63030e23A4",
   "aiTreasury": "0x06E006977723eB6635bF2BE70D040c63030e23A4",
   "attester": "0x06E006977723eB6635bF2BE70D040c63030e23A4",
   "multicall3": "0xcA11bde05977b3631167028862bE2a173976CA11",
   "deployer": "0x5B12Ce46C7194aD57d143bC22847224047b1Ef42",
-  "deployedAt": "2026-11-07T00:38:19Z",
-  "arcStudioSession": "https://studio.arc.io/app/7888d27d-dbaf-4a19-8cb1-548a9193b6b0",
+  "deployedAt": "2026-11-07T02:14:38Z",
+  "arcStudioSession": "https://studio.arc.io/app/4ec1b9a4-0a4e-4a3d-a5c2-c705f5b91378",
   "build": {
     "solc": "0.8.28",
     "evm": "cancun",
@@ -19,48 +19,29 @@
     "optimizerRuns": 1
   },
   "transactions": {
-    "registry": "0xec65cef032c39c04d26c5dde177ac3348e046a9b7b794bcbea9d054c5dfffc9b",
-    "court": "0x5e8d95aca75b3a4493a3b48c9dc16fcb696cf1eae1e8af67c7859ae88ae46ec2"
+    "registry": "0x6481ccae5cc8ae02706f5d9e5fcf55cc5c1d426e6a8b860601e29b31fbeaf1fb",
+    "court": "0xd0371aefec593729a39ea935c8ac28aa865eab24087f64b72ace43f0cc6b5c63"
   },
   "explorer": {
-    "registry": "https://explorer.testnet.arc.io/address/0x650181d004e03760d364742a134e66bc477a9c62",
-    "court": "https://explorer.testnet.arc.io/address/0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
-    "registryTx": "https://explorer.testnet.arc.io/tx/0xec65cef032c39c04d26c5dde177ac3348e046a9b7b794bcbea9d054c5dfffc9b",
-    "courtTx": "https://explorer.testnet.arc.io/tx/0x5e8d95aca75b3a4493a3b48c9dc16fcb696cf1eae1e8af67c7859ae88ae46ec2"
+    "registry": "https://explorer.testnet.arc.io/address/0x38140871bcee614a56c48682e899bdd300fccb71",
+    "court": "https://explorer.testnet.arc.io/address/0xcb9698903ec8df227b3b0d488858629e1b2ea44b",
+    "registryTx": "https://explorer.testnet.arc.io/tx/0x6481ccae5cc8ae02706f5d9e5fcf55cc5c1d426e6a8b860601e29b31fbeaf1fb",
+    "courtTx": "https://explorer.testnet.arc.io/tx/0xd0371aefec593729a39ea935c8ac28aa865eab24087f64b72ace43f0cc6b5c63"
   },
   "abis": {
     "registry": "deployments/HumanRegistry.abi.json",
     "court": "deployments/CringeCourt.abi.json"
   },
+  "adminSetupComplete": true,
   "pendingAdminSetup": [],
   "supersededDeployments": {
     "registry": [
+      "0x650181d004e03760d364742a134e66bc477a9c62",
       "0x5c0e30dbbcabbc8163b2ebcbaeaa0223cc344273"
     ],
-    "note": "Built with default optimizer settings; the court exceeded the size limit under them, so both contracts were redeployed with the IR build above. Do not use."
-  },
-  "adminSetupComplete": true,
-  "adminSetup": {
-    "rolesGranted": [
-      "OPERATOR_ROLE",
-      "ASSIGNER_ROLE",
-      "CURATOR_ROLE"
+    "court": [
+      "0x085aa1fbaba83c8b96edc81d5231321fe3f23032"
     ],
-    "termsSet": [
-      "Solo",
-      "Versus",
-      "GrandJury"
-    ],
-    "marketingCap": 40,
-    "transactions": {
-      "grantOperator": "0x67071fe46419708d86f2bfe4af74034212fff045338ea50e7bc0d2f80e32c857",
-      "grantAssigner": "0xa20d89c16d5911ba16f606a1f14fec43fc360c377332229178fc2d73d0acdb09",
-      "grantCurator": "0x708285d7ac476eb9bd6d8ecf932665d7fec0852697eda1050834d212eebcce7b",
-      "setTermsSolo": "0xa331ed45b590028e6a77d1f3b98cc2a5f4126db2c44b0eb2970cb96a57412f92",
-      "setTermsVersus": "0x4e8122d05ebd3799bd2ddd6e542176e2c7d0aac99b9ccc743cf237847b033f91",
-      "setTermsGrandJury": "0x4a5a24be86fa6336349764e91256b92f8f0fc3674e7b9e6e6bd6c64baf376e76",
-      "setMarketingCap": "0xf4494d8a140adf76433dd701b30080b713e2ed09fbe136fb8e3ace7f59cb6150"
-    },
-    "arcStudioSession": "https://studio.arc.io/app/7888d27d-dbaf-4a19-8cb1-548a9193b6b0"
+    "note": "Superseded by Arc Studio full-deploy session 4ec1b9a4"
   }
 }
