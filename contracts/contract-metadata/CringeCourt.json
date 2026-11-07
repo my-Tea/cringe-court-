@@ -1,0 +1,2620 @@
+{
+  "contractAddress": "0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
+  "network": "ARC-TESTNET",
+  "deployerWalletId": "3c2464b2-8369-52e2-a782-800bbeca5396",
+  "contract_code_path": "/home/user/app/contracts/CringeCourt.sol",
+  "contract_compiled_code_path": "/home/user/app/contracts/out/CringeCourt.sol/CringeCourt.json",
+  "contract_network_and_links": {
+    "Arc Testnet": "https://explorer.testnet.arc.io/address/0x085aa1fbaba83c8b96edc81d5231321fe3f23032"
+  },
+  "contract_deployments": [
+    {
+      "chain": "Arc Testnet",
+      "address": "0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
+      "explorerUrl": "https://explorer.testnet.arc.io/address/0x085aa1fbaba83c8b96edc81d5231321fe3f23032",
+      "txHash": "0x5e8d95aca75b3a4493a3b48c9dc16fcb696cf1eae1e8af67c7859ae88ae46ec2",
+      "deployedAt": "2026-11-07T00:38:19.153Z"
+    }
+  ],
+  "abi": [
+    {
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "usdc_",
+          "type": "address",
+          "internalType": "contract IERC20"
+        },
+        {
+          "name": "registry_",
+          "type": "address",
+          "internalType": "contract IHumanRegistry"
+        },
+        {
+          "name": "admin",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "treasury_",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "aiTreasury_",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "ASSIGNER_ROLE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "CURATOR_ROLE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "DEFAULT_ADMIN_ROLE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "OPERATOR_ROLE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "SEAT_OFFER_TYPEHASH",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "acceptSeat",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "signature",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "aiTreasury",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "cancelExpired",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "caseCount",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "caseTerms",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct ICringeCourtTypes.Terms",
+          "components": [
+            {
+              "name": "n",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minJurorLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minPartyLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "passEnabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "demoTiming",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "bond",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "successBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "failedTrialBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "protocolFee",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "aiFeePerAgent",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "incidentStipend",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "minContribution",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "sponsorFloor",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "pendingWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "recruitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "prepWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "commitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "revealWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "claimRefund",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "claimRefundFor",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "payer",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "claimable",
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "commitVote",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "commitment",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "commitmentOf",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "juror",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "choice",
+          "type": "uint8",
+          "internalType": "uint8"
+        },
+        {
+          "name": "salt",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "contribute",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "accepted",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "eip712Domain",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "fields",
+          "type": "bytes1",
+          "internalType": "bytes1"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "version",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "verifyingContract",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "salt",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "extensions",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "failPreparation",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "fileSolo",
+      "inputs": [
+        {
+          "name": "contentHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "usePass",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "fileSoloJury",
+      "inputs": [
+        {
+          "name": "contentHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "jurors",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "finalize",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "fundReserve",
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "getCase",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct ICringeCourtTypes.Case",
+          "components": [
+            {
+              "name": "mode",
+              "type": "uint8",
+              "internalType": "enum ICringeCourtTypes.Mode"
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "internalType": "enum ICringeCourtTypes.Status"
+            },
+            {
+              "name": "outcome",
+              "type": "uint8",
+              "internalType": "enum ICringeCourtTypes.Outcome"
+            },
+            {
+              "name": "cancelReason",
+              "type": "uint8",
+              "internalType": "enum ICringeCourtTypes.CancelReason"
+            },
+            {
+              "name": "jurySize",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "seated",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "committed",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "revealed",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "votes0",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "votes1",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "sponsored",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "creator",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "counterparty",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "sponsor",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "creatorHuman",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "counterpartyHuman",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "contentHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "transcriptHash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "createdAt",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "pendingDeadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "recruitDeadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "prepDeadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "commitDeadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "revealDeadline",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "target",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "raised",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "poolHeld",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "protocolFeeHeld",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "aiFeeHeld",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "sponsorDeposit",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "stipendLocked",
+              "type": "uint128",
+              "internalType": "uint128"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getRoleAdmin",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "grantRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "hasRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "isRefundable",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "joinVersus",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "usePass",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "jurorOf",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "juror",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct ICringeCourtTypes.Juror",
+          "components": [
+            {
+              "name": "seated",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "revealed",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "seat",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "choice",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "humanId",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "commitment",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "jurorsOf",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]",
+          "internalType": "address[]"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "marketingCap",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "marketingUsed",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "openCourt",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "transcriptHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "openVersus",
+      "inputs": [
+        {
+          "name": "sideB",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "contentHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "usePass",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "paidBy",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "payer",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "phaseOf",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8",
+          "internalType": "enum ICringeCourtTypes.Phase"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "protectiveCancel",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "publishGrandJury",
+      "inputs": [
+        {
+          "name": "contentHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "sponsor",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "sponsorAmount",
+          "type": "uint128",
+          "internalType": "uint128"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "quote",
+      "inputs": [
+        {
+          "name": "mode",
+          "type": "uint8",
+          "internalType": "enum ICringeCourtTypes.Mode"
+        },
+        {
+          "name": "sideA",
+          "type": "bool",
+          "internalType": "bool"
+        },
+        {
+          "name": "usePass",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "registry",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "contract IHumanRegistry"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "renounceRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "callerConfirmation",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "reserveBalance",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "reserveLocked",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "revealVote",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "choice",
+          "type": "uint8",
+          "internalType": "uint8"
+        },
+        {
+          "name": "salt",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "revokeRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "seatOfferDigest",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "juror",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "setMarketingCap",
+      "inputs": [
+        {
+          "name": "cap",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "setRegistry",
+      "inputs": [
+        {
+          "name": "registry_",
+          "type": "address",
+          "internalType": "contract IHumanRegistry"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "setTerms",
+      "inputs": [
+        {
+          "name": "mode",
+          "type": "uint8",
+          "internalType": "enum ICringeCourtTypes.Mode"
+        },
+        {
+          "name": "t",
+          "type": "tuple",
+          "internalType": "struct ICringeCourtTypes.Terms",
+          "components": [
+            {
+              "name": "n",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minJurorLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minPartyLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "passEnabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "demoTiming",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "bond",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "successBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "failedTrialBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "protocolFee",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "aiFeePerAgent",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "incidentStipend",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "minContribution",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "sponsorFloor",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "pendingWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "recruitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "prepWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "commitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "revealWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            }
+          ]
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "setTreasuries",
+      "inputs": [
+        {
+          "name": "treasury_",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "aiTreasury_",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "soloPrice",
+      "inputs": [
+        {
+          "name": "jurors",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "price",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "bond",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "successBonus",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "supportsInterface",
+      "inputs": [
+        {
+          "name": "interfaceId",
+          "type": "bytes4",
+          "internalType": "bytes4"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "termsOf",
+      "inputs": [
+        {
+          "name": "mode",
+          "type": "uint8",
+          "internalType": "enum ICringeCourtTypes.Mode"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct ICringeCourtTypes.Terms",
+          "components": [
+            {
+              "name": "n",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minJurorLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minPartyLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "passEnabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "demoTiming",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "bond",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "successBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "failedTrialBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "protocolFee",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "aiFeePerAgent",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "incidentStipend",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "minContribution",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "sponsorFloor",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "pendingWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "recruitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "prepWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "commitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "revealWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "treasury",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "usdc",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "contract IERC20"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "withdraw",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "withdrawInvite",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "withdrawReserve",
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "event",
+      "name": "CaseCancelled",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "reason",
+          "type": "uint8",
+          "indexed": false,
+          "internalType": "enum ICringeCourtTypes.CancelReason"
+        },
+        {
+          "name": "stipendsPaid",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "CaseCreated",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "mode",
+          "type": "uint8",
+          "indexed": true,
+          "internalType": "enum ICringeCourtTypes.Mode"
+        },
+        {
+          "name": "creator",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "counterparty",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "contentHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internalType": "bytes32"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "CaseFinalized",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "settlement",
+          "type": "tuple",
+          "indexed": false,
+          "internalType": "struct ICringeCourtTypes.Settlement",
+          "components": [
+            {
+              "name": "outcome",
+              "type": "uint8",
+              "internalType": "enum ICringeCourtTypes.Outcome"
+            },
+            {
+              "name": "timely",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "absent",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "payoutPerTimelyJuror",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "bonusPerTimelyJuror",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "forfeitedBonds",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "unearnedBonus",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "protocolFees",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "aiFees",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "sponsorFee",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "toTreasury",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "toAiTreasury",
+              "type": "uint128",
+              "internalType": "uint128"
+            },
+            {
+              "name": "refundableToPayers",
+              "type": "uint128",
+              "internalType": "uint128"
+            }
+          ]
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "CourtOpened",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "transcriptHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "commitDeadline",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "revealDeadline",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "EIP712DomainChanged",
+      "inputs": [],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "IncidentStipendPaid",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "juror",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "JuryFilled",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "prepDeadline",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "MarketingCapUpdated",
+      "inputs": [
+        {
+          "name": "cap",
+          "type": "uint32",
+          "indexed": false,
+          "internalType": "uint32"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "PaymentReceived",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "payer",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "passUsed",
+          "type": "bool",
+          "indexed": false,
+          "internalType": "bool"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RecruitmentOpened",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "recruitDeadline",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RefundClaimed",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "payer",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RegistryUpdated",
+      "inputs": [
+        {
+          "name": "registry",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "ReserveFunded",
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "ReserveWithdrawn",
+      "inputs": [
+        {
+          "name": "to",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RoleAdminChanged",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "previousAdminRole",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "newAdminRole",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RoleGranted",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RoleRevoked",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "SeatAccepted",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "juror",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "seat",
+          "type": "uint8",
+          "indexed": false,
+          "internalType": "uint8"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "SponsorDeposited",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "sponsor",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "sponsored",
+          "type": "bool",
+          "indexed": false,
+          "internalType": "bool"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "TermsUpdated",
+      "inputs": [
+        {
+          "name": "mode",
+          "type": "uint8",
+          "indexed": true,
+          "internalType": "enum ICringeCourtTypes.Mode"
+        },
+        {
+          "name": "terms",
+          "type": "tuple",
+          "indexed": false,
+          "internalType": "struct ICringeCourtTypes.Terms",
+          "components": [
+            {
+              "name": "n",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minJurorLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "minPartyLevel",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "passEnabled",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "demoTiming",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "bond",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "successBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "failedTrialBonus",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "protocolFee",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "aiFeePerAgent",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "incidentStipend",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "minContribution",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "sponsorFloor",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "pendingWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "recruitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "prepWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "commitWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            },
+            {
+              "name": "revealWindow",
+              "type": "uint32",
+              "internalType": "uint32"
+            }
+          ]
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "TreasuryUpdated",
+      "inputs": [
+        {
+          "name": "treasury",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        },
+        {
+          "name": "aiTreasury",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "VoteCommitted",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "juror",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "VoteRevealed",
+      "inputs": [
+        {
+          "name": "caseId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "juror",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "choice",
+          "type": "uint8",
+          "indexed": false,
+          "internalType": "uint8"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Withdrawn",
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "error",
+      "name": "AccessControlBadConfirmation",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "AccessControlUnauthorizedAccount",
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "neededRole",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "AlreadyRevealed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "AlreadySeated",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "BelowMinContribution",
+      "inputs": [
+        {
+          "name": "minimum",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "CommitClosed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "CommitmentMismatch",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "DeadlinePassed",
+      "inputs": [
+        {
+          "name": "deadline",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ECDSAInvalidSignature",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ECDSAInvalidSignatureLength",
+      "inputs": [
+        {
+          "name": "length",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ECDSAInvalidSignatureS",
+      "inputs": [
+        {
+          "name": "s",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "HumanAlreadySeated",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InsufficientReserve",
+      "inputs": [
+        {
+          "name": "needed",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "available",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "InvalidChoice",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidSeatOffer",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidShortString",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidTerms",
+      "inputs": [
+        {
+          "name": "why",
+          "type": "string",
+          "internalType": "string"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "JurorNotVerified",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "MarketingCapReached",
+      "inputs": [
+        {
+          "name": "cap",
+          "type": "uint32",
+          "internalType": "uint32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ModeDisabled",
+      "inputs": [
+        {
+          "name": "mode",
+          "type": "uint8",
+          "internalType": "enum ICringeCourtTypes.Mode"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NoCommitment",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotCounterparty",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotCreator",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotExpired",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotFinalizable",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotJuror",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotRefundable",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NothingToClaim",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "OfferExpired",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "PartyCannotServe",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "PartyNotVerified",
+      "inputs": [
+        {
+          "name": "party",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "PassDisabled",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ReentrancyGuardReentrantCall",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "RevealNotOpen",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "SafeERC20FailedOperation",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SamePerson",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "SponsorRequired",
+      "inputs": [
+        {
+          "name": "floor",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "StringTooLong",
+      "inputs": [
+        {
+          "name": "str",
+          "type": "string",
+          "internalType": "string"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "WrongMode",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "WrongStatus",
+      "inputs": [
+        {
+          "name": "status",
+          "type": "uint8",
+          "internalType": "enum ICringeCourtTypes.Status"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ZeroAddress",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ZeroValue",
+      "inputs": []
+    }
+  ]
+}
