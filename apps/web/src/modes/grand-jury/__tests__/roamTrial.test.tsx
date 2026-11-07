@@ -6,6 +6,7 @@ import { MotionProvider } from '@/ds/motion/MotionProvider';
 import { ToastProvider } from '@/ds/components/Toast/Toast';
 import { TooltipProvider } from '@/ds/components/Tooltip/Tooltip';
 import type { RoamTrialProps } from '@/trial/RoamTrial';
+import { __setSkipJuryGatherForTests } from '@/trial/JuryGather';
 import { __setCanRoamForTests } from '@/trial/trialView';
 import grandJury from '../mode';
 import { __setDemoCourtForTests } from '../state/context';
@@ -44,9 +45,11 @@ beforeEach(async () => {
   document.documentElement.setAttribute('data-reduced-motion', 'true');
   window.localStorage.removeItem('cc:trial-view');
   __setCanRoamForTests(true);
+  __setSkipJuryGatherForTests(true);
 });
 afterEach(() => {
   __setCanRoamForTests(null);
+  __setSkipJuryGatherForTests(false);
   demo.dispose();
   __setDemoCourtForTests(null);
 });
@@ -59,7 +62,7 @@ describe('Grand Jury hearing in the roaming courtroom', () => {
     const props = seen.at(-1)!;
     expect(props.role).toBe('spectator');
     expect(props.spawn).toBe('aisle');
-    expect(props.avatar?.model).toBe('creator');
+    expect(props.avatar?.model).toBe('defendant');
     expect(props.beats[0]!.id).toBe('all-rise');
     const verdict = props.beats.at(-1)!;
     expect(verdict.id).toBe('verdict');

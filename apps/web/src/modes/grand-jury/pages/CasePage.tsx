@@ -1,12 +1,15 @@
 import { ballotLabel, formatAmount } from '@/i18n/domain';
 import { parseCaseParam, type CaseDetail } from '@cringe-court/modes-grand-jury';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useDocumentTitle } from '@/app/useDocumentTitle';
-import { Countdown, EmptyState, ErrorState, Icon, PaperButtonLink, PaperPanel, PhaseStepper, Skeleton, SkeletonText, useReducedMotion } from '@/ds';
+import { Countdown, EmptyState, ErrorState, Icon, PaperButton, PaperButtonLink, PaperPanel, PhaseStepper, Skeleton, SkeletonText, useReducedMotion } from '@/ds';
 import { t } from '@/i18n';
 import { beatsFromLines, type PlannedVerdict } from '@/trial/beats';
+import hearingStyles from '@/trial/Hearing.module.css';
+import { __isJuryGatherSkippedForTests, JuryGather } from '@/trial/JuryGather';
 import { TrialViewFrame } from '@/trial/TrialViewFrame';
+import { VoteReveal, type VoteScroll } from '@/trial/VoteReveal';
 import { ArgumentFeed, CourtRecord } from '../components/ArgumentFeed';
 import { CaseSounds } from '../components/CaseSounds';
 import { DemoControls } from '../components/DemoControls';
@@ -146,26 +149,88 @@ function verdictOf(detail: CaseDetail): PlannedVerdict | undefined {
   return { kind: i === 0 ? 'side-a' : 'side-b', text: ballotLabel(detail.ballot[i]).toUpperCase() };
 }
 
-/** The hearing: the roaming courtroom from the public gallery (or the jury box for a seated juror), the spotlight stage as fallback. */
+/**
+ * Vote reel from this fetched case's verdict tally (appointed seats), not a
+ * Solo NPC demo cast — Grand Jury is about the case on the docket.
+ */
+function scrollsFromCase(detail: CaseDetail): VoteScroll[] | null {
+  const v = detail.verdict;
+  if (!v) return null;
+  const out: VoteScroll[] = [];
+  let n = 1;
+  for (let i = 0; i < v.tally[0]; i++) {
+    out.push({ seat: n, name: t('trial.vote.juror', { n }), choice: 0 });
+    n += 1;
+  }
+  for (let i = 0; i < v.tally[1]; i++) {
+    out.push({ seat: n, name: t('trial.vote.juror', { n }), choice: 1 });
+    n += 1;
+  }
+  while (out.length < v.appointed) {
+    out.push({ seat: n, name: t('trial.vote.juror', { n }), choice: null });
+    n += 1;
+  }
+  return out.length > 0 ? out : null;
+}
+
+type HearingPhase = 'gather' | 'trial' | 'voting' | 'done';
+
+/** Solo parity: gather → full-bleed roam → vote reel from the case → done. */
 function Hearing({ detail }: { detail: CaseDetail }) {
   const juror = detail.viewer.seat !== null;
+  const jurors = detail.seats.total || 7;
+  const [phase, setPhase] = useState<HearingPhase>(() => (__isJuryGatherSkippedForTests() ? 'trial' : 'gather'));
+  const onSeated = useCallback(() => setPhase('trial'), []);
+  const scrolls = useMemo(() => scrollsFromCase(detail), [detail]);
+  const ballot = useMemo(() => [ballotLabel(detail.ballot[0]), ballotLabel(detail.ballot[1])] as const, [detail.ballot]);
   const beats = useMemo(
     () => beatsFromLines(hearingLines(detail), verdictOf(detail)),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the hearing only changes with the transcript, sentence and verdict
     [detail.caseNumber, detail.transcript, detail.sentence, detail.verdict, detail.ballot],
   );
+
+  const afterTrial = useCallback(() => {
+    if (scrolls) setPhase('voting');
+    else setPhase('done');
+  }, [scrolls]);
+
+  if (phase === 'gather') {
+    return <JuryGather jurors={jurors} onSeated={onSeated} />;
+  }
+
+  if (phase === 'voting' && scrolls) {
+    const outcome = detail.verdict?.label ?? null;
+    return <VoteReveal votes={scrolls} ballot={ballot} onDone={() => setPhase('done')} outcomeLabel={outcome} />;
+  }
+
+  if (phase === 'done') {
+    return (
+      <p role="status" className={hearingStyles.lede}>
+        {t('trial.vote.done')}
+      </p>
+    );
+  }
+
   return (
-    <TrialViewFrame
-      classic={<TrialView detail={detail} />}
-      roam={{
-        beats,
-        label: t('grandJury.case.courtroom', { label: detail.label }),
-        role: juror ? 'juror' : 'spectator',
-        spawn: juror ? 'jury-box' : 'aisle',
-        jurors: 7,
-        avatar: { model: 'creator', name: t('grandJury.case.you') },
-      }}
-    />
+    <div className={hearingStyles.court}>
+      <TrialViewFrame
+        classic={<TrialView detail={detail} />}
+        roam={{
+          beats,
+          label: t('grandJury.case.courtroom', { label: detail.label }),
+          role: juror ? 'juror' : 'spectator',
+          spawn: juror ? 'jury-box' : 'aisle',
+          jurors,
+          avatar: { model: 'defendant', name: t('grandJury.case.you') },
+          onDone: afterTrial,
+        }}
+        toolbar={
+          <PaperButton size="sm" variant="maroon" onClick={afterTrial} iconEnd={<Icon name="arrow-right" />}>
+            {t('trial.vote.skip')}
+          </PaperButton>
+        }
+      />
+    </div>
   );
 }
 
