@@ -1,5 +1,24 @@
 /** English copy for the `trial` namespace. Keys are flat; dots only group related copy. */
 export const trial = {
+  // Jury gathers before every mode's hearing (Solo / Versus / Grand Jury)
+  'jury.waitTitle': 'Waiting for the jury',
+  'jury.waitBody': 'Waiting for {jurors} jurors to join.',
+  'jury.full': 'The jury is seated.',
+  'jury.seats': '{seated} of {jurors} seats filled',
+
+  // Vote / verdict ceremony (Solo / Versus / Grand Jury — not /court/walk)
+  'vote.title': 'The jury is voting',
+  'vote.body': '{jurors} jurors are sealing their scrolls. Watch the tally fill in.',
+  'vote.progress': '{sealed} of {jurors} scrolls opened',
+  'vote.list': 'Jury scrolls',
+  'vote.sealed': 'Scroll sealed…',
+  'vote.done': 'All scrolls are open. The judge will speak.',
+  'vote.absent': 'No reveal',
+  'vote.juror': 'Juror {n}',
+  'vote.skip': 'Skip to the jury',
+  'verdict.eyebrow': 'The verdict',
+  'verdict.continue': 'Back to the case',
+
   // Trial view frame and toggle
   'view.group': 'Trial view',
   'view.roam': 'First person',

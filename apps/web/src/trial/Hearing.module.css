@@ -1,0 +1,144 @@
+/* Shared hearing shell: full-bleed court + vote / verdict ceremony (Solo parity). */
+
+.page {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-4);
+  width: min(46rem, 100%);
+  margin-inline: auto;
+  padding-block: var(--cc-space-6);
+  text-align: center;
+  animation: arrive var(--cc-duration-slower) var(--cc-ease-enter) both;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--cc-font-display);
+  font-size: clamp(2.25rem, 7vw, 3.75rem);
+  line-height: 1.05;
+  color: var(--cc-royal-900);
+}
+
+.lede,
+.hint {
+  margin: 0;
+}
+
+.lede {
+  font-size: var(--cc-text-lg);
+  max-width: 34rem;
+}
+
+.hint {
+  color: var(--cc-color-text-muted);
+}
+
+.court {
+  --cc-courtroom-max: calc(52dvh * 1.6);
+  --cc-trial-room-height: calc(100svh - 12.5rem);
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cc-space-3);
+  min-width: 0;
+  width: 100%;
+}
+
+.tallyBoard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-3) var(--cc-space-4);
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xl);
+  color: var(--cc-royal-900);
+  background: var(--cc-gold-100);
+  border: 4px solid var(--cc-royal-900);
+  box-shadow: 6px 6px 0 var(--cc-gold-500);
+}
+
+.tallyBoard strong {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+.voteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--cc-space-2);
+  width: min(36rem, 100%);
+  text-align: start;
+}
+
+.voteSealed,
+.voteOpen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  gap: 2px var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border: 3px solid var(--cc-royal-900);
+  background: var(--cc-neutral-100);
+  animation: arrive var(--cc-duration-slow) var(--cc-ease-enter) both;
+}
+
+.voteSealed {
+  opacity: 0.65;
+}
+
+.voteOpen[data-choice='0'] {
+  background: color-mix(in srgb, var(--cc-color-guilty, #6b1c2e) 12%, var(--cc-neutral-100));
+}
+
+.voteOpen[data-choice='1'] {
+  background: color-mix(in srgb, var(--cc-color-not-cooked, #1f4d3a) 12%, var(--cc-neutral-100));
+}
+
+.voteSealed strong,
+.voteOpen strong {
+  grid-column: 1;
+  font-family: var(--cc-font-display);
+}
+
+.voteSealed span,
+.voteOpen span {
+  grid-column: 1;
+  color: var(--cc-color-text-muted);
+  font-size: var(--cc-text-sm);
+}
+
+.voteSealed em,
+.voteOpen em {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-family: var(--cc-font-display);
+  font-style: normal;
+  font-size: var(--cc-text-lg);
+}
+
+.judgeQuip {
+  margin: 0;
+  max-width: 34rem;
+  font-family: var(--cc-font-display);
+  font-size: var(--cc-text-xl);
+  color: var(--cc-royal-700);
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .voteSealed,
+  .voteOpen {
+    animation: none;
+  }
+}

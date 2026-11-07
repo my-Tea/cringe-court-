@@ -1,0 +1,77 @@
+/* Shared "jury takes its seats" beat before a hearing — Solo, Versus, Grand Jury. */
+
+.page {
+  display: grid;
+  justify-items: center;
+  gap: var(--cc-space-4);
+  width: min(46rem, 100%);
+  margin-inline: auto;
+  padding-block: var(--cc-space-6);
+  text-align: center;
+  animation: arrive var(--cc-duration-slower) var(--cc-ease-enter) both;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--cc-font-display);
+  font-size: clamp(2.25rem, 7vw, 3.75rem);
+  line-height: 1.05;
+  color: var(--cc-royal-900);
+}
+
+.lede {
+  margin: 0;
+  font-size: var(--cc-text-lg);
+  max-width: 34rem;
+}
+
+.bench {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--cc-space-2);
+}
+
+.benchEmpty,
+.benchFull {
+  width: 2.5rem;
+  height: 3.25rem;
+  border: 3px solid var(--cc-gold-700);
+}
+
+.benchEmpty {
+  animation: pulse var(--cc-duration-dramatic) var(--cc-ease-standard) infinite alternate;
+}
+
+.benchFull {
+  background: var(--cc-royal-700);
+  animation: seatIn var(--cc-duration-slow) var(--cc-ease-enter) both;
+}
+
+@keyframes seatIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.8);
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .benchEmpty,
+  .benchFull {
+    animation: none;
+  }
+}
